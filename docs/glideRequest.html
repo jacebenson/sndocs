@@ -1513,74 +1513,84 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/clientScript/angular/glideRequest.js */</span>
-angular.module(<span class="hljs-string">'sn.common.clientScript'</span>).factory(<span class="hljs-string">'glideRequest'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$q, $log, $http, $window, urlTools, xmlUtil</span>) </span>{
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/clientScript/glideRequest.js */</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">exports, undefined</span>) </span>{
 <span class="hljs-meta">    'use strict'</span>;
-    $<span class="hljs-built_in">window</span>.glideRequest = {
-        <span class="hljs-attr">getAngularURL</span>: urlTools.getURL,
-        <span class="hljs-attr">get</span>: $http.get,
+    <span class="hljs-keyword">var</span> glideRequest = {
+        <span class="hljs-attr">getAngularURL</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">path, parameters</span>) </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-string">'angular.do?sysparm_type='</span> + path + (parameters ? encodeURIParameters(parameters) : <span class="hljs-string">''</span>);
+        },
+        <span class="hljs-attr">get</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">url, options</span>) </span>{
+            <span class="hljs-keyword">if</span> (!url) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-string">'Must specify a URL'</span>;
+            }
+            <span class="hljs-keyword">var</span> fetchOptions = _applyOptions(<span class="hljs-string">'get'</span>, url, options);
+            <span class="hljs-keyword">return</span> exports.fetch(fetchOptions.url, fetchOptions);
+        },
         <span class="hljs-attr">post</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">url, options</span>) </span>{
-            options = options || {};
-            options.url = url;
-            options.method = <span class="hljs-string">'post'</span>;
-            <span class="hljs-keyword">if</span> (!options.headers) {
-                options.headers = {};
+            <span class="hljs-keyword">if</span> (!url) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-string">'Must specify a URL'</span>;
             }
-            <span class="hljs-keyword">var</span> getXml = <span class="hljs-literal">false</span>;
-            <span class="hljs-keyword">switch</span> (options.dataType) {
-                <span class="hljs-keyword">case</span> <span class="hljs-string">'json'</span>:
-                    <span class="hljs-keyword">break</span>;
-                <span class="hljs-keyword">case</span> <span class="hljs-string">'xml'</span>:
-                    options.headers[<span class="hljs-string">'Content-Type'</span>] = <span class="hljs-string">'application/x-www-form-urlencoded'</span>;
-                    <span class="hljs-keyword">var</span> data = options.data || {};
-                    options.data = urlTools.encodeURIParameters(data);
-                    getXml = <span class="hljs-literal">true</span>;
-                    options.responseType = <span class="hljs-string">'text'</span>;
-                    <span class="hljs-keyword">if</span> (!options.data) {
-                        options.data = <span class="hljs-string">''</span>;
-                    }
-                    options.headers[<span class="hljs-string">'Accept'</span>] = <span class="hljs-string">'application/xml, text/xml'</span>;
-                    <span class="hljs-keyword">break</span>;
-                <span class="hljs-keyword">default</span>:
-            }
-            <span class="hljs-keyword">return</span> $http(options).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">response</span>) </span>{
-                response.type = getXml ? <span class="hljs-string">'xml'</span> : <span class="hljs-string">'json'</span>;
-                response.responseText = response.data;
-                response.responseXML = getXml ? xmlUtil.xmlToElement(response.data) : <span class="hljs-literal">null</span>;
-                <span class="hljs-keyword">return</span> response;
-            }, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error</span>) </span>{
-                error.type = getXml ? <span class="hljs-string">'xml'</span> : <span class="hljs-string">'json'</span>;
-                error.responseText = error.data;
-                error.responseXML = getXml ? xmlUtil.xmlToElement(error.data) : <span class="hljs-literal">null</span>;
-                <span class="hljs-keyword">return</span> $q.reject(error);
-            });
+            <span class="hljs-keyword">var</span> fetchOptions = _applyOptions(<span class="hljs-string">'post'</span>, url, options);
+            <span class="hljs-keyword">return</span> exports.fetch(fetchOptions.url, fetchOptions);
         }
     };
-    <span class="hljs-keyword">return</span> $<span class="hljs-built_in">window</span>.glideRequest;
-});;
-e <span class="hljs-string">'xml'</span>:
-    fetchOptions.headers = {
-        <span class="hljs-string">'Accept'</span>: <span class="hljs-string">'application/xml'</span>,
-        <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/xml'</span>,
-        <span class="hljs-string">'X-UserToken'</span>: <span class="hljs-built_in">window</span>.g_ck
-    };
-<span class="hljs-keyword">break</span>;
-}
-<span class="hljs-keyword">return</span> fetchOptions;
-}
 
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encodeURIParameters</span>(<span class="hljs-params">parameters</span>) </span>{
-    <span class="hljs-keyword">var</span> s = [];
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> parameter <span class="hljs-keyword">in</span> parameters) {
-        <span class="hljs-keyword">if</span> (parameters.hasOwnProperty(parameter)) {
-            <span class="hljs-keyword">var</span> key = <span class="hljs-built_in">encodeURIComponent</span>(parameter);
-            <span class="hljs-keyword">var</span> value = parameters[parameter] ? <span class="hljs-built_in">encodeURIComponent</span>(parameters[parameter]) : <span class="hljs-string">''</span>;
-            s.push(key + <span class="hljs-string">"="</span> + value);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_applyOptions</span>(<span class="hljs-params">method, url, options</span>) </span>{
+        <span class="hljs-keyword">var</span> fetchOptions = {
+            <span class="hljs-attr">method</span>: method,
+            <span class="hljs-attr">url</span>: url
+        };
+        <span class="hljs-keyword">switch</span> (method) {
+            <span class="hljs-keyword">case</span> <span class="hljs-string">'get'</span>:
+                <span class="hljs-keyword">var</span> url = fetchOptions.url;
+                <span class="hljs-keyword">if</span> (options.data) {
+                    <span class="hljs-keyword">var</span> params = encodeURIParameters(options.data);
+                    <span class="hljs-keyword">if</span> (url.indexOf(<span class="hljs-string">'?'</span>) !== <span class="hljs-number">-1</span>) {
+                        url += <span class="hljs-string">'&amp;'</span> + params;
+                    } <span class="hljs-keyword">else</span> {
+                        url += <span class="hljs-string">'?'</span> + params;
+                    }
+                }
+                fetchOptions.url = url;
+                <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">case</span> <span class="hljs-string">'post'</span>:
+                fetchOptions.url = options.url;
+                fetchOptions.body = <span class="hljs-built_in">JSON</span>.stringify(options.data || {});
+                <span class="hljs-keyword">break</span>;
         }
+        <span class="hljs-keyword">switch</span> (options.dataType) {
+            <span class="hljs-attr">default</span>:
+                <span class="hljs-keyword">case</span> <span class="hljs-string">'json'</span>:
+                fetchOptions.headers = {
+                <span class="hljs-string">'Accept'</span>: <span class="hljs-string">'application/json'</span>,
+                <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
+                <span class="hljs-string">'X-UserToken'</span>: <span class="hljs-built_in">window</span>.g_ck
+            };
+            <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">case</span> <span class="hljs-string">'xml'</span>:
+                    fetchOptions.headers = {
+                    <span class="hljs-string">'Accept'</span>: <span class="hljs-string">'application/xml'</span>,
+                    <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/xml'</span>,
+                    <span class="hljs-string">'X-UserToken'</span>: <span class="hljs-built_in">window</span>.g_ck
+                };
+                <span class="hljs-keyword">break</span>;
+        }
+        <span class="hljs-keyword">return</span> fetchOptions;
     }
-    <span class="hljs-keyword">return</span> s.join(<span class="hljs-string">'&amp;'</span>);
-}
-exports.glideRequest = glideRequest;
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encodeURIParameters</span>(<span class="hljs-params">parameters</span>) </span>{
+        <span class="hljs-keyword">var</span> s = [];
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> parameter <span class="hljs-keyword">in</span> parameters) {
+            <span class="hljs-keyword">if</span> (parameters.hasOwnProperty(parameter)) {
+                <span class="hljs-keyword">var</span> key = <span class="hljs-built_in">encodeURIComponent</span>(parameter);
+                <span class="hljs-keyword">var</span> value = parameters[parameter] ? <span class="hljs-built_in">encodeURIComponent</span>(parameters[parameter]) : <span class="hljs-string">''</span>;
+                s.push(key + <span class="hljs-string">"="</span> + value);
+            }
+        }
+        <span class="hljs-keyword">return</span> s.join(<span class="hljs-string">'&amp;'</span>);
+    }
+    exports.glideRequest = glideRequest;
 })(<span class="hljs-built_in">window</span>);;</pre></div></div>
             
         </li>

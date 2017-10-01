@@ -1513,26 +1513,29 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/clientScript/angular/uiPolicyTypes.js */</span>
-angular.module(<span class="hljs-string">'sn.common.clientScript'</span>).factory(<span class="hljs-string">'uiPolicyTypes'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$window</span>) </span>{
-    <span class="hljs-keyword">var</span> factory = $<span class="hljs-built_in">window</span>.UI_POLICY_TYPES;
-    <span class="hljs-keyword">return</span> factory;
-});;
-<span class="hljs-string">"datetime"</span>,
-<span class="hljs-attr">due_date</span>: <span class="hljs-string">"datetime"</span>
-},
-<span class="hljs-attr">numberTypes</span>: {
-        <span class="hljs-attr">decimal</span>: <span class="hljs-string">"decimal"</span>,
-        <span class="hljs-attr">numeric</span>: <span class="hljs-string">"numeric"</span>,
-        <span class="hljs-attr">integer</span>: <span class="hljs-string">"integer"</span>,
-        <span class="hljs-attr">float</span>: <span class="hljs-string">"float"</span>
-    },
-    <span class="hljs-attr">currencyTypes</span>: {
-        <span class="hljs-attr">currency</span>: <span class="hljs-string">"currency"</span>,
-        <span class="hljs-attr">price</span>: <span class="hljs-string">"price"</span>
-    }
-};
-exports.UI_POLICY_TYPES = UI_POLICY_TYPES;
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/clientScript/uiPolicyTypes.js */</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">exports, undefined</span>) </span>{
+<span class="hljs-meta">    'use strict'</span>;
+    <span class="hljs-keyword">var</span> UI_POLICY_TYPES = {
+        <span class="hljs-attr">dateTypes</span>: {
+            <span class="hljs-attr">glide_date_time</span>: <span class="hljs-string">"datetime"</span>,
+            <span class="hljs-attr">glide_date</span>: <span class="hljs-string">"date"</span>,
+            <span class="hljs-attr">date</span>: <span class="hljs-string">"date"</span>,
+            <span class="hljs-attr">datetime</span>: <span class="hljs-string">"datetime"</span>,
+            <span class="hljs-attr">due_date</span>: <span class="hljs-string">"datetime"</span>
+        },
+        <span class="hljs-attr">numberTypes</span>: {
+            <span class="hljs-attr">decimal</span>: <span class="hljs-string">"decimal"</span>,
+            <span class="hljs-attr">numeric</span>: <span class="hljs-string">"numeric"</span>,
+            <span class="hljs-attr">integer</span>: <span class="hljs-string">"integer"</span>,
+            <span class="hljs-attr">float</span>: <span class="hljs-string">"float"</span>
+        },
+        <span class="hljs-attr">currencyTypes</span>: {
+            <span class="hljs-attr">currency</span>: <span class="hljs-string">"currency"</span>,
+            <span class="hljs-attr">price</span>: <span class="hljs-string">"price"</span>
+        }
+    };
+    exports.UI_POLICY_TYPES = UI_POLICY_TYPES;
 })(<span class="hljs-built_in">window</span>);;</pre></div></div>
             
         </li>

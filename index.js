@@ -24,18 +24,17 @@ try {
     download(url, out).then(() => {
       var urlArr = url.split("/");
       var domain = url.split(".com/")[0] + ".com";
-      console.log("Downloaded Successful");
-      console.log("urlArr" + urlArr[2]);
+      //console.log("Downloaded Successful");
       if (out.charAt(out.length != "/")) {
         out += "/";
       }
       var file = out + urlArr[urlArr.length - 1];
-      console.log("Opening file: " + file);
-      console.log("File Exists: " + fs.existsSync(file));
+      //console.log("Opening file: " + file);
+      //console.log("File Exists: " + fs.existsSync(file));
       fs.readFile(file, (err, data) => {
         if (data) {
           data = data.toString();
-          console.log("recieved data: " + data.length);
+          //console.log("recieved data: " + data.length);
           var regex = /(\/\*\! RESOURCE: )(.+)\*\//g;
           var found_resources = data.match(regex); //array of comments
           for (
@@ -46,12 +45,16 @@ try {
             var resource = found_resources[downloadIndex].toString();
             resource = resource.split("/*! RESOURCE: ")[1].split(" */")[0];
             resource = domain + resource;
-            console.log("Downloading: " + resource);
+            //console.log("Downloading: " + resource);
             download(resource, out);
           }
         }
       });
     });
+    console.log('Two things left to do;');
+    console.log('Make the code, pretty and make them HTML files, do that by running these');
+    console.log('js-beautify -q -r -f ./sn/*.js');
+    console.log('docco ./sn/*.js');
   } else if (!out) {
     console.log("--out not defined");
   } else if (!url) {

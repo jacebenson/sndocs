@@ -5,19 +5,14 @@ Downloads scripts and make HTML pages for them.
 ## Install
 
 ```
-$ npm install jsdocs -g
-$ npm install js-beautify -g
-$ npm install docco -g
+$ npm install
 ```
-
-*I tried to include the above globally installed npm packages but they aren't made to run in a js file I read.  Until someone else can help with that this is what it is.*
-
 
 ## Usage
 
 ```
-$ node index.js --url "https://hi.service-now.com/scripts/js_includes_sp.jsx" --out ./sn
-$ js-beautify -f ./sn/*.js -r
+$ npm install
+$ js-beautify -q -r -f ./sn/*.js
 $ docco ./sn/*.js
 ```
 

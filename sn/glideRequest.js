@@ -1,69 +1,79 @@
-/*! RESOURCE: /scripts/sn/common/clientScript/angular/glideRequest.js */
-angular.module('sn.common.clientScript').factory('glideRequest', function($q, $log, $http, $window, urlTools, xmlUtil) {
+/*! RESOURCE: /scripts/sn/common/clientScript/glideRequest.js */
+(function(exports, undefined) {
     'use strict';
-    $window.glideRequest = {
-        getAngularURL: urlTools.getURL,
-        get: $http.get,
+    var glideRequest = {
+        getAngularURL: function(path, parameters) {
+            return 'angular.do?sysparm_type=' + path + (parameters ? encodeURIParameters(parameters) : '');
+        },
+        get: function(url, options) {
+            if (!url) {
+                throw 'Must specify a URL';
+            }
+            var fetchOptions = _applyOptions('get', url, options);
+            return exports.fetch(fetchOptions.url, fetchOptions);
+        },
         post: function(url, options) {
-            options = options || {};
-            options.url = url;
-            options.method = 'post';
-            if (!options.headers) {
-                options.headers = {};
+            if (!url) {
+                throw 'Must specify a URL';
             }
-            var getXml = false;
-            switch (options.dataType) {
-                case 'json':
-                    break;
-                case 'xml':
-                    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-                    var data = options.data || {};
-                    options.data = urlTools.encodeURIParameters(data);
-                    getXml = true;
-                    options.responseType = 'text';
-                    if (!options.data) {
-                        options.data = '';
-                    }
-                    options.headers['Accept'] = 'application/xml, text/xml';
-                    break;
-                default:
-            }
-            return $http(options).then(function(response) {
-                response.type = getXml ? 'xml' : 'json';
-                response.responseText = response.data;
-                response.responseXML = getXml ? xmlUtil.xmlToElement(response.data) : null;
-                return response;
-            }, function(error) {
-                error.type = getXml ? 'xml' : 'json';
-                error.responseText = error.data;
-                error.responseXML = getXml ? xmlUtil.xmlToElement(error.data) : null;
-                return $q.reject(error);
-            });
+            var fetchOptions = _applyOptions('post', url, options);
+            return exports.fetch(fetchOptions.url, fetchOptions);
         }
     };
-    return $window.glideRequest;
-});;
-e 'xml':
-    fetchOptions.headers = {
-        'Accept': 'application/xml',
-        'Content-Type': 'application/xml',
-        'X-UserToken': window.g_ck
-    };
-break;
-}
-return fetchOptions;
-}
 
-function encodeURIParameters(parameters) {
-    var s = [];
-    for (var parameter in parameters) {
-        if (parameters.hasOwnProperty(parameter)) {
-            var key = encodeURIComponent(parameter);
-            var value = parameters[parameter] ? encodeURIComponent(parameters[parameter]) : '';
-            s.push(key + "=" + value);
+    function _applyOptions(method, url, options) {
+        var fetchOptions = {
+            method: method,
+            url: url
+        };
+        switch (method) {
+            case 'get':
+                var url = fetchOptions.url;
+                if (options.data) {
+                    var params = encodeURIParameters(options.data);
+                    if (url.indexOf('?') !== -1) {
+                        url += '&' + params;
+                    } else {
+                        url += '?' + params;
+                    }
+                }
+                fetchOptions.url = url;
+                break;
+            case 'post':
+                fetchOptions.url = options.url;
+                fetchOptions.body = JSON.stringify(options.data || {});
+                break;
         }
+        switch (options.dataType) {
+            default:
+                case 'json':
+                fetchOptions.headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-UserToken': window.g_ck
+            };
+            break;
+            case 'xml':
+                    fetchOptions.headers = {
+                    'Accept': 'application/xml',
+                    'Content-Type': 'application/xml',
+                    'X-UserToken': window.g_ck
+                };
+                break;
+        }
+        return fetchOptions;
     }
-    return s.join('&');
-}
-exports.glideRequest = glideRequest;
+
+    function encodeURIParameters(parameters) {
+        var s = [];
+        for (var parameter in parameters) {
+            if (parameters.hasOwnProperty(parameter)) {
+                var key = encodeURIComponent(parameter);
+                var value = parameters[parameter] ? encodeURIComponent(parameters[parameter]) : '';
+                s.push(key + "=" + value);
+            }
+        }
+        return s.join('&');
+    }
+    exports.glideRequest = glideRequest;
 })(window);;
