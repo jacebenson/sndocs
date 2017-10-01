@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>service.authInterceptor.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="service.AMB.html">
+                  service.AMB.js
+                </a>
+              
+                
+                <a class="source" href="service.authInterceptor.html">
+                  service.authInterceptor.js
+                </a>
+              
+                
+                <a class="source" href="service.avatarProfilePersister.html">
+                  service.avatarProfilePersister.js
+                </a>
+              
+                
+                <a class="source" href="service.i18n.html">
+                  service.i18n.js
+                </a>
+              
+                
+                <a class="source" href="service.progressDialog.html">
+                  service.progressDialog.js
+                </a>
+              
+                
+                <a class="source" href="service.snComplexPopoverService.html">
+                  service.snComplexPopoverService.js
+                </a>
+              
+                
+                <a class="source" href="service.snComposingPresence.html">
+                  service.snComposingPresence.js
+                </a>
+              
+                
+                <a class="source" href="service.snCustomEvent.html">
+                  service.snCustomEvent.js
+                </a>
+              
+                
+                <a class="source" href="service.snMention.html">
+                  service.snMention.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotification.html">
+                  service.snNotification.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotifier.html">
+                  service.snNotifier.js
+                </a>
+              
+                
+                <a class="source" href="service.spAnnouncement.html">
+                  service.spAnnouncement.js
+                </a>
+              
+                
+                <a class="source" href="service.spAria.html">
+                  service.spAria.js
+                </a>
+              
+                
+                <a class="source" href="service.spAriaFocusManager.html">
+                  service.spAriaFocusManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spCodeEditorAutocomplete.html">
+                  service.spCodeEditorAutocomplete.js
+                </a>
+              
+                
+                <a class="source" href="service.spIs.html">
+                  service.spIs.js
+                </a>
+              
+                
+                <a class="source" href="service.spMetatags.html">
+                  service.spMetatags.js
+                </a>
+              
+                
+                <a class="source" href="service.spModal.html">
+                  service.spModal.js
+                </a>
+              
+                
+                <a class="source" href="service.spNavStateManager.html">
+                  service.spNavStateManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spPreference.html">
+                  service.spPreference.js
+                </a>
+              
+                
+                <a class="source" href="service.spThrottle.html">
+                  service.spThrottle.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>service.authInterceptor.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/auth/service.authInterceptor.js */</span>
+angular.module(<span class="hljs-string">'sn.common.auth'</span>).config(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$httpProvider</span>) </span>{
+$httpProvider.interceptors.push(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$rootScope, $q, $injector, $window, $log</span>) </span>{
+<span class="hljs-keyword">var</span> LOG_PREFIX = <span class="hljs-string">'(authIntercepter) '</span>;
+<span class="hljs-comment">/**
+ * Description
+ * @method error
+ * @param {} response
+ * @return CallExpression
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">error</span>(<span class="hljs-params">response</span>) </span>{
+<span class="hljs-keyword">var</span> status = response.status;
+<span class="hljs-keyword">if</span> (status == <span class="hljs-number">401</span>) {
+<span class="hljs-keyword">var</span> newPromise = handle401(response);
+<span class="hljs-keyword">if</span> (newPromise)
+<span class="hljs-keyword">return</span> newPromise;
+}
+<span class="hljs-keyword">return</span> $q.reject(response);
+}
+<span class="hljs-comment">/**
+ * Description
+ * @method handle401
+ * @param {} response
+ * @return Literal
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle401</span>(<span class="hljs-params">response</span>) </span>{
+<span class="hljs-keyword">if</span> (canResendRequest(response)) {
+<span class="hljs-keyword">var</span> deferredAgain = $q.defer();
+<span class="hljs-keyword">var</span> $http = $injector.get(<span class="hljs-string">'$http'</span>);
+$http(response.config).then(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">success</span>(<span class="hljs-params">newResponse</span>) </span>{
+deferredAgain.resolve(newResponse);
+}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">error</span>(<span class="hljs-params">newResponse</span>) </span>{
+deferredAgain.reject(newResponse);
+});
+<span class="hljs-keyword">return</span> deferredAgain.promise;
+}
+$log.info(LOG_PREFIX + <span class="hljs-string">'User has been logged out'</span>);
+$rootScope.$broadcast(<span class="hljs-string">"@page.login"</span>);
+<span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}
+<span class="hljs-comment">/**
+ * Description
+ * @method canResendRequest
+ * @param {} response
+ * @return Literal
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">canResendRequest</span>(<span class="hljs-params">response</span>) </span>{
+<span class="hljs-keyword">var</span> headers = response.headers();
+<span class="hljs-keyword">var</span> requestToken = response.config.headers[<span class="hljs-string">'X-UserToken'</span>];
+<span class="hljs-keyword">if</span> (!requestToken) {
+requestToken = headers[<span class="hljs-string">'x-usertoken-request'</span>];
+}
+<span class="hljs-keyword">if</span> ($<span class="hljs-built_in">window</span>.g_ck &amp;&amp; (requestToken !== $<span class="hljs-built_in">window</span>.g_ck)) {
+$log.info(LOG_PREFIX + <span class="hljs-string">'Token refreshed since request -- retrying'</span>);
+response.config.headers[<span class="hljs-string">'X-UserToken'</span>] = $<span class="hljs-built_in">window</span>.g_ck;
+<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">if</span> (headers[<span class="hljs-string">'x-sessionloggedin'</span>] != <span class="hljs-string">'true'</span>)
+<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">if</span> (headers[<span class="hljs-string">'x-usertoken-allowresubmit'</span>] == <span class="hljs-string">'false'</span>)
+<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">var</span> token = headers[<span class="hljs-string">'x-usertoken-response'</span>];
+<span class="hljs-keyword">if</span> (token) {
+$log.info(LOG_PREFIX +  <span class="hljs-string">'Received new token -- retrying'</span>);
+response.config.headers[<span class="hljs-string">'X-UserToken'</span>] = token;
+setToken(token);
+<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+<span class="hljs-comment">/**
+ * Description
+ * @method setToken
+ * @param {} token
+ * @return 
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setToken</span>(<span class="hljs-params">token</span>) </span>{
+$<span class="hljs-built_in">window</span>.g_ck = token;
+<span class="hljs-keyword">if</span> (!token) {
+$httpProvider.defaults.headers.common[<span class="hljs-string">"X-UserToken"</span>] = <span class="hljs-string">'token_intentionally_left_blank'</span>;
+} <span class="hljs-keyword">else</span> {
+$httpProvider.defaults.headers.common[<span class="hljs-string">"X-UserToken"</span>] = token;
+}
+<span class="hljs-keyword">if</span> ($<span class="hljs-built_in">window</span>.jQuery) {
+jQuery.ajaxSetup({
+<span class="hljs-attr">headers</span>: {
+<span class="hljs-string">'X-UserToken'</span>: token
+}
+});
+}
+<span class="hljs-keyword">if</span> ($<span class="hljs-built_in">window</span>.Zepto) {
+<span class="hljs-keyword">if</span> (!Zepto.ajaxSettings.headers)
+Zepto.ajaxSettings.headers = {};
+Zepto.ajaxSettings.headers[<span class="hljs-string">'X-UserToken'</span>] = token;
+}
+}
+setToken($<span class="hljs-built_in">window</span>.g_ck);
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">responseError</span>: error
+}
+});
+});
+;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

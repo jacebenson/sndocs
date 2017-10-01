@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>service.snMention.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="service.AMB.html">
+                  service.AMB.js
+                </a>
+              
+                
+                <a class="source" href="service.authInterceptor.html">
+                  service.authInterceptor.js
+                </a>
+              
+                
+                <a class="source" href="service.avatarProfilePersister.html">
+                  service.avatarProfilePersister.js
+                </a>
+              
+                
+                <a class="source" href="service.i18n.html">
+                  service.i18n.js
+                </a>
+              
+                
+                <a class="source" href="service.progressDialog.html">
+                  service.progressDialog.js
+                </a>
+              
+                
+                <a class="source" href="service.snComplexPopoverService.html">
+                  service.snComplexPopoverService.js
+                </a>
+              
+                
+                <a class="source" href="service.snComposingPresence.html">
+                  service.snComposingPresence.js
+                </a>
+              
+                
+                <a class="source" href="service.snCustomEvent.html">
+                  service.snCustomEvent.js
+                </a>
+              
+                
+                <a class="source" href="service.snMention.html">
+                  service.snMention.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotification.html">
+                  service.snNotification.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotifier.html">
+                  service.snNotifier.js
+                </a>
+              
+                
+                <a class="source" href="service.spAnnouncement.html">
+                  service.spAnnouncement.js
+                </a>
+              
+                
+                <a class="source" href="service.spAria.html">
+                  service.spAria.js
+                </a>
+              
+                
+                <a class="source" href="service.spAriaFocusManager.html">
+                  service.spAriaFocusManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spCodeEditorAutocomplete.html">
+                  service.spCodeEditorAutocomplete.js
+                </a>
+              
+                
+                <a class="source" href="service.spIs.html">
+                  service.spIs.js
+                </a>
+              
+                
+                <a class="source" href="service.spMetatags.html">
+                  service.spMetatags.js
+                </a>
+              
+                
+                <a class="source" href="service.spModal.html">
+                  service.spModal.js
+                </a>
+              
+                
+                <a class="source" href="service.spNavStateManager.html">
+                  service.spNavStateManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spPreference.html">
+                  service.spPreference.js
+                </a>
+              
+                
+                <a class="source" href="service.spThrottle.html">
+                  service.spThrottle.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>service.snMention.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/sn/common/mention/service.snMention.js */</span>
+angular.module(<span class="hljs-string">"sn.common.mention"</span>).factory(<span class="hljs-string">"snMention"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">liveProfileID, $q, $http</span>) </span>{
+<span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> MENTION_PATH = <span class="hljs-string">"/api/now/form/mention/record"</span>;
+<span class="hljs-keyword">var</span> USER_PATH = <span class="hljs-string">'/api/now/ui/user/'</span>;
+<span class="hljs-keyword">var</span> avatarCache = {};
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">retrieveMembers</span>(<span class="hljs-params">table, document, term</span>) </span>{
+<span class="hljs-keyword">if</span>(!term || !<span class="hljs-built_in">document</span> || !table) {
+<span class="hljs-keyword">var</span> deferred = $q.defer();
+deferred.resolve([]);
+<span class="hljs-keyword">return</span> deferred.promise;
+}
+<span class="hljs-keyword">return</span> $http( {
+<span class="hljs-attr">url</span>: MENTION_PATH + <span class="hljs-string">"/"</span> + table + <span class="hljs-string">"/"</span> + <span class="hljs-built_in">document</span>,
+<span class="hljs-attr">method</span>: <span class="hljs-string">"GET"</span>,
+<span class="hljs-attr">params</span>: {
+<span class="hljs-attr">term</span>: term
+}
+}).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">response</span>) </span>{
+<span class="hljs-keyword">var</span> members = response.data.result;
+<span class="hljs-keyword">var</span> promises = [];
+angular.forEach(members, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">user</span>) </span>{
+<span class="hljs-keyword">if</span> (avatarCache[user.sys_id]) {
+user.initials = avatarCache[user.sys_id].initials;
+user.avatar = avatarCache[user.sys_id].avatar;
+} <span class="hljs-keyword">else</span> {
+<span class="hljs-keyword">var</span> promise = $http.get(USER_PATH + user.sys_id).success(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">response</span>) </span>{
+user.initials = response.result.user_initials;
+user.avatar = response.result.user_avatar;
+avatarCache[user.sys_id] = {<span class="hljs-attr">initials</span>: user.initials, <span class="hljs-attr">avatar</span>: user.avatar};
+});
+promises.push(promise);
+}
+});
+<span class="hljs-keyword">return</span> $q.all(promises).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> members;
+});
+})
+}
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">retrieveMembers</span>: retrieveMembers
+}
+});
+;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

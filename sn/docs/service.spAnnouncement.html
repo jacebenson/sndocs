@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>service.spAnnouncement.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="service.AMB.html">
+                  service.AMB.js
+                </a>
+              
+                
+                <a class="source" href="service.authInterceptor.html">
+                  service.authInterceptor.js
+                </a>
+              
+                
+                <a class="source" href="service.avatarProfilePersister.html">
+                  service.avatarProfilePersister.js
+                </a>
+              
+                
+                <a class="source" href="service.i18n.html">
+                  service.i18n.js
+                </a>
+              
+                
+                <a class="source" href="service.progressDialog.html">
+                  service.progressDialog.js
+                </a>
+              
+                
+                <a class="source" href="service.snComplexPopoverService.html">
+                  service.snComplexPopoverService.js
+                </a>
+              
+                
+                <a class="source" href="service.snComposingPresence.html">
+                  service.snComposingPresence.js
+                </a>
+              
+                
+                <a class="source" href="service.snCustomEvent.html">
+                  service.snCustomEvent.js
+                </a>
+              
+                
+                <a class="source" href="service.snMention.html">
+                  service.snMention.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotification.html">
+                  service.snNotification.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotifier.html">
+                  service.snNotifier.js
+                </a>
+              
+                
+                <a class="source" href="service.spAnnouncement.html">
+                  service.spAnnouncement.js
+                </a>
+              
+                
+                <a class="source" href="service.spAria.html">
+                  service.spAria.js
+                </a>
+              
+                
+                <a class="source" href="service.spAriaFocusManager.html">
+                  service.spAriaFocusManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spCodeEditorAutocomplete.html">
+                  service.spCodeEditorAutocomplete.js
+                </a>
+              
+                
+                <a class="source" href="service.spIs.html">
+                  service.spIs.js
+                </a>
+              
+                
+                <a class="source" href="service.spMetatags.html">
+                  service.spMetatags.js
+                </a>
+              
+                
+                <a class="source" href="service.spModal.html">
+                  service.spModal.js
+                </a>
+              
+                
+                <a class="source" href="service.spNavStateManager.html">
+                  service.spNavStateManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spPreference.html">
+                  service.spPreference.js
+                </a>
+              
+                
+                <a class="source" href="service.spThrottle.html">
+                  service.spThrottle.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>service.spAnnouncement.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/app.$sp/service.spAnnouncement.js */</span>
+angular.module(<span class="hljs-string">'sn.$sp'</span>).factory(<span class="hljs-string">'spAnnouncement'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$rootScope, $http, $window, $timeout, $q, spConf, spUtil</span>) </span>{
+<span class="hljs-meta">'use strict'</span>;
+<span class="hljs-keyword">var</span> _initialized = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">var</span> _initializing = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">var</span> _sessionId = $<span class="hljs-built_in">window</span>.NOW.session_id;
+<span class="hljs-keyword">var</span> _all = [];
+<span class="hljs-keyword">var</span> _list = [];
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_clone</span>(<span class="hljs-params">obj</span>) </span>{
+<span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(obj));
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_cleanupStorage</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> $<span class="hljs-built_in">window</span>.localStorage) {
+<span class="hljs-keyword">if</span> (!$<span class="hljs-built_in">window</span>.localStorage.hasOwnProperty(key)) {
+<span class="hljs-keyword">return</span>;
+}
+<span class="hljs-keyword">if</span> (key.indexOf(<span class="hljs-string">'dismissed_announcement_'</span>) === <span class="hljs-number">0</span> &amp;&amp; $<span class="hljs-built_in">window</span>.localStorage.getItem(key) !== _sessionId) {
+$<span class="hljs-built_in">window</span>.localStorage.removeItem(key)
+}
+}
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_handleHttpError</span>(<span class="hljs-params">res</span>) </span>{
+<span class="hljs-built_in">console</span>.log(spUtil.format(<span class="hljs-string">'*** [HTTP::{code}] Unable to retrieve announcement'</span>, {
+<span class="hljs-attr">code</span>: res.status
+}));
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_buildReq</span>(<span class="hljs-params">path, method</span>) </span>{
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">method</span>: method ? method : <span class="hljs-string">'GET'</span>,
+<span class="hljs-attr">url</span>: path ? spConf.announcementApi + <span class="hljs-string">'/'</span> + path : spConf.announcementApi,
+<span class="hljs-attr">headers</span>: {
+<span class="hljs-string">'X-PORTAL-ID'</span>: $rootScope.portal_id
+}
+};
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_filterType</span>(<span class="hljs-params">type</span>) </span>{
+<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">announcement</span>) </span>{
+<span class="hljs-keyword">if</span> (!type) {
+<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">var</span> filterTypes = type.trim().toLowerCase().split(<span class="hljs-string">','</span>);
+<span class="hljs-keyword">var</span> types = announcement.type.trim().toLowerCase().split(<span class="hljs-string">','</span>);
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; types.length; i++) {
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">0</span>; j &lt; filterTypes.length; j++) {
+<span class="hljs-keyword">if</span> (types[i].trim() === filterTypes[j].trim()) {
+<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+}
+}
+<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_filter</span>(<span class="hljs-params">list, query, limit, page</span>) </span>{
+<span class="hljs-keyword">var</span> result = [];
+<span class="hljs-keyword">if</span> (!query) {
+result = list;
+} <span class="hljs-keyword">else</span> {
+result = list.filter(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a</span>) </span>{
+<span class="hljs-keyword">var</span> include = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">try</span> {
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span>(query) === <span class="hljs-string">'function'</span>) {
+include = query(a);
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (query.key) {
+include = a[query.key] === query.value;
+}
+} <span class="hljs-keyword">catch</span> (e) {
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'*** spAnnouncement.service: unable to process filter'</span>, e);
+}
+<span class="hljs-keyword">return</span> include;
+});
+}
+<span class="hljs-keyword">if</span> (limit &amp;&amp; page) {
+<span class="hljs-keyword">if</span> (!result.length) {
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">data</span>: result,
+<span class="hljs-attr">page</span>: <span class="hljs-number">0</span>,
+<span class="hljs-attr">totalPages</span>: <span class="hljs-number">0</span>,
+<span class="hljs-attr">totalRecords</span>: <span class="hljs-number">0</span>
+};
+}
+limit = <span class="hljs-built_in">parseInt</span>(limit, <span class="hljs-number">10</span>);
+page = <span class="hljs-built_in">parseInt</span>(page + <span class="hljs-string">''</span>, <span class="hljs-number">10</span>);
+<span class="hljs-keyword">var</span> offset = (page - <span class="hljs-number">1</span>) * limit;
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">data</span>: result.slice(offset, offset + limit),
+<span class="hljs-attr">page</span>: page,
+<span class="hljs-attr">totalPages</span>: <span class="hljs-built_in">Math</span>.ceil(result.length / limit),
+<span class="hljs-attr">totalRecords</span>: result.length
+};
+}
+<span class="hljs-keyword">return</span> result;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_remove</span>(<span class="hljs-params">id, list</span>) </span>{
+<span class="hljs-keyword">return</span> list.filter(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a</span>) </span>{
+<span class="hljs-keyword">return</span> a.id !== id;
+});
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_sessionDismissed</span>(<span class="hljs-params">id</span>) </span>{
+<span class="hljs-keyword">return</span> $<span class="hljs-built_in">window</span>.localStorage.getItem(<span class="hljs-string">'dismissed_announcement_'</span> + id) === _sessionId;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_dismiss</span>(<span class="hljs-params">id</span>) </span>{
+<span class="hljs-keyword">var</span> announcement = _.find(_all, {
+<span class="hljs-attr">id</span>: id
+});
+<span class="hljs-keyword">if</span> (announcement.dismissOption === <span class="hljs-string">'SESSION_DISMISSIBLE'</span> || !$rootScope.user.logged_in) {
+<span class="hljs-keyword">try</span> {
+$<span class="hljs-built_in">window</span>.localStorage.setItem(<span class="hljs-string">'dismissed_announcement_'</span> + id, _sessionId);
+} <span class="hljs-keyword">catch</span> (e) {
+}
+} <span class="hljs-keyword">else</span> {
+$http(_buildReq(id + <span class="hljs-string">'/dismiss'</span>, <span class="hljs-string">'POST'</span>));
+}
+announcement.dismissed = <span class="hljs-literal">true</span>;
+_processAnnouncements();
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_processAnnouncements</span>(<span class="hljs-params"></span>) </span>{
+_list = [];
+_all.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a</span>) </span>{
+<span class="hljs-keyword">if</span> (a.dismissed || ((a.dismissOption === <span class="hljs-string">'SESSION_DISMISSIBLE'</span> || !$rootScope.user.logged_in)) &amp;&amp; _sessionDismissed(a.id)) {
+a.dismissed = <span class="hljs-literal">true</span>;
+}
+_list.push(a);
+});
+$rootScope.$broadcast(spConf.e.announcement);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_subscribe</span>(<span class="hljs-params">scope, callback</span>) </span>{
+<span class="hljs-keyword">var</span> handler = scope.$on(spConf.e.announcement, callback);
+scope.$on(<span class="hljs-string">'$destroy'</span>, handler);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_getAnnouncements</span>(<span class="hljs-params">announcements</span>) </span>{
+<span class="hljs-keyword">if</span> (announcements) {
+<span class="hljs-keyword">return</span> $q(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>) </span>{
+_all = announcements;
+resolve();
+});
+}
+<span class="hljs-keyword">return</span> $http(_buildReq()).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">res</span>) </span>{
+_all = res.data.result;
+}, _handleHttpError);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_init</span>(<span class="hljs-params">announcements</span>) </span>{
+<span class="hljs-keyword">if</span> (_initialized || _initializing) {
+<span class="hljs-keyword">return</span> $q(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>) </span>{
+<span class="hljs-built_in">console</span>.log(spUtil.format(<span class="hljs-string">'*** spAnnouncement.service is {state}'</span>, {
+<span class="hljs-attr">state</span>: _initialized ? <span class="hljs-string">'already initialized'</span> : <span class="hljs-string">'currently initializing'</span>
+}));
+resolve();
+});
+}
+_initializing = <span class="hljs-literal">true</span>;
+<span class="hljs-keyword">return</span> _getAnnouncements(announcements).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+_processAnnouncements();
+$rootScope.$evalAsync(_cleanupStorage);
+_initialized = <span class="hljs-literal">true</span>;
+_initializing = <span class="hljs-literal">false</span>;
+});
+}
+<span class="hljs-keyword">return</span> {
+<span class="hljs-attr">init</span>: _init,
+<span class="hljs-attr">subscribe</span>: _subscribe,
+<span class="hljs-attr">dismiss</span>: _dismiss,
+<span class="hljs-attr">filterOnType</span>: _filterType,
+<span class="hljs-attr">get</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">query, limit, page</span>) </span>{
+<span class="hljs-keyword">return</span> _clone(_filter(_list, query, limit, page));
+}
+};
+});
+;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

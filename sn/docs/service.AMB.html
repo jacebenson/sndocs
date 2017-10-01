@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>service.AMB.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="service.AMB.html">
+                  service.AMB.js
+                </a>
+              
+                
+                <a class="source" href="service.authInterceptor.html">
+                  service.authInterceptor.js
+                </a>
+              
+                
+                <a class="source" href="service.avatarProfilePersister.html">
+                  service.avatarProfilePersister.js
+                </a>
+              
+                
+                <a class="source" href="service.i18n.html">
+                  service.i18n.js
+                </a>
+              
+                
+                <a class="source" href="service.progressDialog.html">
+                  service.progressDialog.js
+                </a>
+              
+                
+                <a class="source" href="service.snComplexPopoverService.html">
+                  service.snComplexPopoverService.js
+                </a>
+              
+                
+                <a class="source" href="service.snComposingPresence.html">
+                  service.snComposingPresence.js
+                </a>
+              
+                
+                <a class="source" href="service.snCustomEvent.html">
+                  service.snCustomEvent.js
+                </a>
+              
+                
+                <a class="source" href="service.snMention.html">
+                  service.snMention.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotification.html">
+                  service.snNotification.js
+                </a>
+              
+                
+                <a class="source" href="service.snNotifier.html">
+                  service.snNotifier.js
+                </a>
+              
+                
+                <a class="source" href="service.spAnnouncement.html">
+                  service.spAnnouncement.js
+                </a>
+              
+                
+                <a class="source" href="service.spAria.html">
+                  service.spAria.js
+                </a>
+              
+                
+                <a class="source" href="service.spAriaFocusManager.html">
+                  service.spAriaFocusManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spCodeEditorAutocomplete.html">
+                  service.spCodeEditorAutocomplete.js
+                </a>
+              
+                
+                <a class="source" href="service.spIs.html">
+                  service.spIs.js
+                </a>
+              
+                
+                <a class="source" href="service.spMetatags.html">
+                  service.spMetatags.js
+                </a>
+              
+                
+                <a class="source" href="service.spModal.html">
+                  service.spModal.js
+                </a>
+              
+                
+                <a class="source" href="service.spNavStateManager.html">
+                  service.spNavStateManager.js
+                </a>
+              
+                
+                <a class="source" href="service.spPreference.html">
+                  service.spPreference.js
+                </a>
+              
+                
+                <a class="source" href="service.spThrottle.html">
+                  service.spThrottle.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>service.AMB.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*! RESOURCE: /scripts/app.ng.amb/service.AMB.js */</span>
+angular.module(<span class="hljs-string">"ng.amb"</span>).service(<span class="hljs-string">"amb"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">AMBOverlay, $window, $q, $log, $rootScope, $timeout</span>) </span>{
+<span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> ambClient = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">var</span> _window = $<span class="hljs-built_in">window</span>.self;
+<span class="hljs-keyword">var</span> loginWindow = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">var</span> sameScope = <span class="hljs-literal">false</span>;
+ambClient = amb.getClient();
+<span class="hljs-keyword">if</span> (_window.g_ambClient) {
+sameScope = <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">if</span> (sameScope) {
+<span class="hljs-keyword">var</span> serverConnection = ambClient.getServerConnection();
+<span class="hljs-comment">/**
+ * Description
+ * @method loginShow
+ * @return 
+ */</span>
+serverConnection.loginShow = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">if</span> (!serverConnection.isLoginWindowEnabled())
+<span class="hljs-keyword">return</span>;
+<span class="hljs-keyword">if</span> (loginWindow &amp;&amp; loginWindow.isVisible())
+<span class="hljs-keyword">return</span>;
+<span class="hljs-keyword">if</span> (serverConnection.isLoginWindowOverride())
+<span class="hljs-keyword">return</span>;
+loginWindow = <span class="hljs-keyword">new</span> AMBOverlay();
+loginWindow.render();
+loginWindow.show();
+};
+<span class="hljs-comment">/**
+ * Description
+ * @method loginHide
+ * @return 
+ */</span>
+serverConnection.loginHide = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">if</span> (!loginWindow)
+<span class="hljs-keyword">return</span>;
+loginWindow.hide();
+loginWindow.destroy();
+loginWindow = <span class="hljs-literal">null</span>;
+}
+}
+<span class="hljs-keyword">var</span> AUTO_CONNECT_TIMEOUT = <span class="hljs-number">20</span> * <span class="hljs-number">1000</span>;
+<span class="hljs-keyword">var</span> connected = $q.defer();
+<span class="hljs-keyword">var</span> connectionInterrupted = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">var</span> monitorAMB = <span class="hljs-literal">false</span>;
+$timeout(startMonitoringAMB, AUTO_CONNECT_TIMEOUT);
+connected.promise.then(startMonitoringAMB);
+<span class="hljs-comment">/**
+ * Description
+ * @method startMonitoringAMB
+ * @return 
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startMonitoringAMB</span>(<span class="hljs-params"></span>) </span>{
+monitorAMB = <span class="hljs-literal">true</span>;
+}
+<span class="hljs-comment">/**
+ * Description
+ * @method ambInterrupted
+ * @return LogicalExpression
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ambInterrupted</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">var</span> state = ambClient.getState();
+<span class="hljs-keyword">return</span> monitorAMB &amp;&amp; state !== <span class="hljs-string">"opened"</span> &amp;&amp; state !== <span class="hljs-string">"initialized"</span>
+}
+<span class="hljs-keyword">var</span> interruptionTimeout;
+<span class="hljs-keyword">var</span> extendedInterruption = <span class="hljs-literal">false</span>;
+<span class="hljs-comment">/**
+ * Description
+ * @method setInterrupted
+ * @param {} eventName
+ * @return 
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setInterrupted</span>(<span class="hljs-params">eventName</span>) </span>{
+connectionInterrupted = <span class="hljs-literal">true</span>;
+$rootScope.$broadcast(eventName);
+<span class="hljs-keyword">if</span> (!interruptionTimeout) {
+interruptionTimeout = $timeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+extendedInterruption = <span class="hljs-literal">true</span>;
+}, <span class="hljs-number">30</span> * <span class="hljs-number">1000</span>)
+}
+connected = $q.defer();
+}
+<span class="hljs-keyword">var</span> connectOpenedEventId = ambClient.subscribeToEvent(<span class="hljs-string">"connection.opened"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+$rootScope.$broadcast(<span class="hljs-string">"amb.connection.opened"</span>);
+<span class="hljs-keyword">if</span> (interruptionTimeout) {
+$timeout.cancel(interruptionTimeout);
+interruptionTimeout = <span class="hljs-literal">null</span>;
+}
+extendedInterruption = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">if</span>(connectionInterrupted) {
+connectionInterrupted = <span class="hljs-literal">false</span>;
+$rootScope.$broadcast(<span class="hljs-string">"amb.connection.recovered"</span>);
+}
+connected.resolve();
+});
+<span class="hljs-keyword">var</span> connectClosedEventId = ambClient.subscribeToEvent(<span class="hljs-string">"connection.closed"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+setInterrupted(<span class="hljs-string">"amb.connection.closed"</span>);
+});
+<span class="hljs-keyword">var</span> connectBrokenEventId = ambClient.subscribeToEvent(<span class="hljs-string">"connection.broken"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+setInterrupted(<span class="hljs-string">"amb.connection.broken"</span>);
+});
+<span class="hljs-comment">/**
+ * Description
+ * @method onUnloadWindow
+ * @return 
+ */</span>
+<span class="hljs-keyword">var</span> onUnloadWindow = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+ambClient.unsubscribeFromEvent(connectOpenedEventId);
+ambClient.unsubscribeFromEvent(connectClosedEventId);
+ambClient.unsubscribeFromEvent(connectBrokenEventId);
+angular.element($<span class="hljs-built_in">window</span>).off(<span class="hljs-string">'unload'</span>, onUnloadWindow);
+};
+angular.element($<span class="hljs-built_in">window</span>).on(<span class="hljs-string">'unload'</span>, onUnloadWindow);
+<span class="hljs-keyword">var</span> documentReadyState = $<span class="hljs-built_in">window</span>.document ? $<span class="hljs-built_in">window</span>.document.readyState : <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">if</span>(documentReadyState === <span class="hljs-string">'complete'</span>) {
+autoConnect();
+} <span class="hljs-keyword">else</span> {
+angular.element($<span class="hljs-built_in">window</span>).on(<span class="hljs-string">'load'</span>, autoConnect);
+}
+$timeout(autoConnect, <span class="hljs-number">10000</span>);
+<span class="hljs-keyword">var</span> initiatedConnection = <span class="hljs-literal">false</span>;
+<span class="hljs-comment">/**
+ * Description
+ * @method autoConnect
+ * @return 
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">autoConnect</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">if</span> (!initiatedConnection) {
+initiatedConnection = <span class="hljs-literal">true</span>;
+ambClient.connect();
+}
+}
+<span class="hljs-keyword">return</span> {
+<span class="hljs-comment">/**
+ * Description
+ * @method getServerConnection
+ * @return CallExpression
+ */</span>
+getServerConnection: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getServerConnection();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method connect
+ * @return MemberExpression
+ */</span>
+connect: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">if</span> (initiatedConnection) {
+ambClient.connect();
+}
+<span class="hljs-keyword">return</span> connected.promise;
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method interrupted
+ * @return CallExpression
+ */</span>
+get interrupted() {
+<span class="hljs-keyword">return</span> ambInterrupted();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method extendedInterruption
+ * @return extendedInterruption
+ */</span>
+get extendedInterruption() {
+<span class="hljs-keyword">return</span> extendedInterruption;
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method connected
+ * @return MemberExpression
+ */</span>
+get connected() {
+<span class="hljs-keyword">return</span> connected.promise;
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method abort
+ * @return 
+ */</span>
+abort: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+ambClient.abort();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method disconnect
+ * @return 
+ */</span>
+disconnect: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+ambClient.disconnect();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getConnectionState
+ * @return CallExpression
+ */</span>
+getConnectionState: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getConnectionState();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getClientId
+ * @return CallExpression
+ */</span>
+getClientId: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getClientId();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getChannel
+ * @param {} channelName
+ * @return CallExpression
+ */</span>
+getChannel: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">channelName</span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getChannel(channelName);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method registerExtension
+ * @param {} extensionName
+ * @param {} extension
+ * @return 
+ */</span>
+registerExtension: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">extensionName, extension</span>) </span>{
+ambClient.registerExtension(extensionName, extension);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method unregisterExtension
+ * @param {} extensionName
+ * @return 
+ */</span>
+unregisterExtension: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">extensionName</span>) </span>{
+ambClient.unregisterExtension(extensionName);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method batch
+ * @param {} batch
+ * @return 
+ */</span>
+batch: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">batch</span>) </span>{
+ambClient.batch(batch);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getState
+ * @return CallExpression
+ */</span>
+getState: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getState();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getFilterString
+ * @param {} filter
+ * @return CallExpression
+ */</span>
+getFilterString: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">filter</span>) </span>{
+filter = filter.
+replace(<span class="hljs-regexp">/\^EQ/g</span>, <span class="hljs-string">''</span>).
+replace(<span class="hljs-regexp">/\^ORDERBY(?:DESC)?[^^]*/g</span>, <span class="hljs-string">''</span>).
+replace(<span class="hljs-regexp">/^GOTO/</span>, <span class="hljs-string">''</span>);
+<span class="hljs-keyword">return</span> btoa(filter).replace(<span class="hljs-regexp">/=/g</span>, <span class="hljs-string">'-'</span>);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getChannelRW
+ * @param {} table
+ * @param {} filter
+ * @return CallExpression
+ */</span>
+getChannelRW: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">table, filter</span>) </span>{
+<span class="hljs-keyword">var</span> t = <span class="hljs-string">'/rw/default/'</span> + table + <span class="hljs-string">'/'</span> + <span class="hljs-keyword">this</span>.getFilterString(filter);
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.getChannel(t);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method isLoggedIn
+ * @return CallExpression
+ */</span>
+isLoggedIn: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.isLoggedIn();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method subscribeToEvent
+ * @param {} event
+ * @param {} callback
+ * @return CallExpression
+ */</span>
+subscribeToEvent: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event, callback</span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.subscribeToEvent(event, callback);
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getConnectionEvents
+ * @return CallExpression
+ */</span>
+getConnectionEvents: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getConnectionEvents();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method getEvents
+ * @return CallExpression
+ */</span>
+getEvents: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+<span class="hljs-keyword">return</span> ambClient.getConnectionEvents();
+},
+<span class="hljs-comment">/**
+ * Description
+ * @method loginComplete
+ * @return 
+ */</span>
+loginComplete: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+ambClient.loginComplete();
+}
+};
+});
+;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
