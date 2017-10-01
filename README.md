@@ -1,4 +1,4 @@
-# ![pageres](media/promo.png)
+# SNDocs
 
 Downloads scripts and make HTML pages for them.
 
