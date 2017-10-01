@@ -12,8 +12,8 @@ $ npm install
 
 ```
 $ npm install
-$ js-beautify -q -r -f ./sn/*.js
-$ docco ./sn/*.js
+$ js-beautify -q -r -f ./.sn/*.js
+$ docco ./.sn/*.js
 ```
 
 ## CLI
