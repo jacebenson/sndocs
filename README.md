@@ -20,12 +20,6 @@ $ docco ./sn/*.js
 
 ### options
  
-#### URL
-
-* -u 
-* --url 
-
-Purpose: for the thing you want to download
 #### OUT
 
 * -o
