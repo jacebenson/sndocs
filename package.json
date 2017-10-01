@@ -8,7 +8,7 @@
   },
   "scripts": {
     "install": "npm install docco -g && npm install jsbeautify -g",
-    "start": "node index.js --url \"https://hi.service-now.com/scripts/js_includes_sp.jsx\" --out ./sn"
+    "start": "node index.js --url \"https://hi.service-now.com/scripts/js_includes_sp.jsx\" --out ./.sn"
   },
   "repository": {
     "type": "git",

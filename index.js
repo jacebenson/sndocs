@@ -53,8 +53,8 @@ try {
     });
     console.log('Two things left to do;');
     console.log('Make the code, pretty and make them HTML files, do that by running these');
-    console.log('js-beautify -q -r -f ./sn/*.js');
-    console.log('docco ./sn/*.js');
+    console.log('js-beautify -q -r -f ./.sn/*.js');
+    console.log('docco ./.sn/*.js');
   } else if (!out) {
     console.log("--out not defined");
   } else if (!url) {

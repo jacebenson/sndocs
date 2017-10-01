@@ -1,3 +1,6 @@
+# downloaded files
+.sn/
+
 # Logs
 logs
 *.log
