@@ -14,7 +14,7 @@ $ npm install
 $ npm install #installs these globally "js-beautify" and "docco"
 $ npm start
 $ js-beautify -q -r -f ./.sn/*.js #indents files propery
-$ docco ./.sn/*.js -o aspen/patch2 #makes html for files
+$ docco ./.sn/*.js -o docs/aspen/patch2 #makes html for files
 ```
 
 ## CLI
