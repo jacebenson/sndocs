@@ -2,47 +2,42 @@ var fs = require("fs");
 var download = require("download");
 var wd = process.env.PWD;
 var arguments = process.argv;
-//var url = false;
+var instance = 'https://dev.service-now.com';
 var out = false;
-//console.log(arguments);
 for (var index = 0; index < arguments.length; index++) {
   var argument = arguments[index];
   if (argument === "-o" || argument === "--out") {
     out = arguments[index + 1];
   }
 }
-/*for(var f = 0;arrayOfFiles.length;f++){
-  var innerUrl = arrayOfFiles[f];
-  console.log(f + ': ' + innerUrl);
-}*/
 var arrayOfFiles = [
-  "https://hi.service-now.com/scripts/js_includes_sp.jsx",
-  "https://hi.service-now.com/sn.dragdrop.jsdbx",
-  //"https://hi.service-now.com/scripts/glide-highcharts-v5.js",
-  "https://hi.service-now.com/scripts/SLARepairClient.js",
-  "https://hi.service-now.com/scripts/app.guided_tours/js_guided_tours_includes.jsx",
-  "https://hi.service-now.com/scripts/classes/doctype/js_includes_listv2_doctype.jsx",
-  "https://hi.service-now.com/scripts/doctype/js_includes_doctype.jsx",
-  "https://hi.service-now.com/scripts/doctype/js_includes_last_doctype.jsx",
-  //"https://hi.service-now.com/scripts/doctype/z_last_include.js",
-  "https://hi.service-now.com/scripts/form_tags.jsx",
-  "https://hi.service-now.com/scripts/heisenberg/heisenberg_all.jsx",
-  "https://hi.service-now.com/scripts/js_includes_amb.jsx",
-  "https://hi.service-now.com/scripts/js_includes_customer.jsx",
-  "https://hi.service-now.com/scripts/js_includes_form_presence.jsx",
-  "https://hi.service-now.com/scripts/js_includes_list_edit_doctype.jsx",
-  "https://hi.service-now.com/scripts/js_includes_sorting_new.jsx",
-  "https://hi.service-now.com/scripts/js_includes_ui16_form.jsx",
-  "https://hi.service-now.com/scripts/lib/newtag-it.jsx",
-  "https://hi.service-now.com/scripts/magellan.CreateFavoriteModal.jsx",
-  "https://hi.service-now.com/scripts/transaction_scope_includes.jsx",
-  "https://hi.service-now.com/scripts/sn/concourse/js_includes_concourse.jsx",
-  "https://hi.service-now.com/scripts/ui_policy.jsx"
+  "/scripts/js_includes_sp.jsx",
+  "/sn.dragdrop.jsdbx",
+  "/scripts/glide-highcharts-v5.js",
+  "/scripts/SLARepairClient.js",
+  "/scripts/app.guided_tours/js_guided_tours_includes.jsx",
+  "/scripts/classes/doctype/js_includes_listv2_doctype.jsx",
+  "/scripts/doctype/js_includes_doctype.jsx",
+  "/scripts/doctype/js_includes_last_doctype.jsx",
+  "/scripts/doctype/z_last_include.js",
+  "/scripts/form_tags.jsx",
+  "/scripts/heisenberg/heisenberg_all.jsx",
+  "/scripts/js_includes_amb.jsx",
+  "/scripts/js_includes_customer.jsx",
+  "/scripts/js_includes_form_presence.jsx",
+  "/scripts/js_includes_list_edit_doctype.jsx",
+  "/scripts/js_includes_sorting_new.jsx",
+  "/scripts/js_includes_ui16_form.jsx",
+  "/scripts/lib/newtag-it.jsx",
+  "/scripts/magellan.CreateFavoriteModal.jsx",
+  "/scripts/transaction_scope_includes.jsx",
+  "/scripts/sn/concourse/js_includes_concourse.jsx",
+  "/scripts/ui_policy.jsx"
 ];
 console.log(arrayOfFiles);
 arrayOfFiles.map(function(x) {
   console.log(x);
-  getit(x, out);
+  getit(instance + x, out);
 });
 console.log("Two things left to do;");
 console.log(

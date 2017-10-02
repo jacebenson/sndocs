@@ -11,9 +11,10 @@ $ npm install
 ## Usage
 
 ```
-$ npm install
-$ js-beautify -q -r -f ./.sn/*.js
-$ docco ./.sn/*.js
+$ npm install #installs these globally "js-beautify" and "docco"
+$ npm start
+$ js-beautify -q -r -f ./.sn/*.js #indents files propery
+$ docco ./.sn/*.js -o aspen/patch2 #makes html for files
 ```
 
 ## CLI
