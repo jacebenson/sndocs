@@ -7,20 +7,20 @@
     "doc": "docs"
   },
   "scripts": {
-    "install": "npm install docco -g && npm install jsbeautify -g",
-    "start": "node index.js --out ./.sn"
+    "install": "npm install docco -g",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jacebenson/SNDocs.git"
+    "url": "git+https://gitlab.com/jacebenson/SNDocs.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jacebenson/SNDocs/issues"
+    "url": "https://gitlab.com/jacebenson/SNDocs/issues"
   },
-  "homepage": "https://github.com/jacebenson/SNDocs#readme",
+  "homepage": "https://gitlab.com/jacebenson/SNDocs#readme",
   "dependencies": {
-    "download": "^6.2.5"
+    "js-beautify": "^1.7.4"
   }
 }
