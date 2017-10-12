@@ -102,6 +102,7 @@ function downloadEndpoints(obj) {
         var justFile = file.split('/');
         justFile = justFile[justFile.length - 1];
         var url = obj.url + file;
+        try{
         https.get(url, (data) => {
             var body = '';
             data.on('data', (d) => {
@@ -127,7 +128,7 @@ function downloadEndpoints(obj) {
                                 if (jsFile.indexOf('.jsx') == -1 && jsFile.indexOf('min.js') == -1 && jsFile.indexOf('_min_') == -1 && jsFile.indexOf('.js') >= 0) {
                                     //if the file dose not include min.js in the name,
                                     var url = obj.url + jsFile
-                                    console.log('downloading ' + jsFile + ' from ' + url);
+                                    //console.log('downloading ' + jsFile + ' from ' + url);
                                     https.get(obj.url + jsFile, (data) => {
                                         var jsBody = '';
                                         data.on('data', (d) => {
@@ -158,5 +159,8 @@ function downloadEndpoints(obj) {
         }).on('error', (e) => {
             console.error(e);
         });
+    } catch(err){
+        console.log(err);
+    }
     });
 }

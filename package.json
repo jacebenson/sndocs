@@ -1,11 +1,8 @@
 {
   "name": "sndocs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Download scripts and make html pages for the,.",
   "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "install": "npm install docco -g",
     "start": "node index.js"
@@ -14,7 +11,7 @@
     "type": "git",
     "url": "git+https://gitlab.com/jacebenson/SNDocs.git"
   },
-  "author": "",
+  "author": "Jace Benson",
   "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/jacebenson/SNDocs/issues"
