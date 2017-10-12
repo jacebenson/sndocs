@@ -1,13 +1,28 @@
 # This file is a template, and might need editing before it works on your project.
-# Full project: https://gitlab.com/pages/plain-html
-pages:
-  stage: deploy
+# Official framework image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/node/tags/
+image: node:latest
+
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+cache:
+  paths:
+  - node_modules/
+
+create_assets:
   script:
-  - mkdir .public
-  - cp -r docs/* .public
-  - mv .public public
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
+  - npm install
+  - npm start
+  - docco ./sources/helsinki/11b/*.js -o ./docs/helsinki/11b #makes html for files
+  - docco ./sources/helsinki/12/*.js -o ./docs/helsinki/12 #makes html for files
+  - docco ./sources/helsinki/12a/*.js -o ./docs/helsinki/12a #makes html for files
+  - docco ./sources/instanbul/4/*.js -o ./docs/istanbul/4 #makes html for files
+  - docco ./sources/instanbul/5/*.js -o ./docs/istanbul/5 #makes html for files
+  - docco ./sources/instanbul/6/*.js -o ./docs/istanbul/6 #makes html for files
+  - docco ./sources/instanbul/6a/*.js -o ./docs/istanbul/6a #makes html for files
+  - docco ./sources/instanbul/7/*.js -o ./docs/istanbul/7 #makes html for files
+  - docco ./sources/instanbul/8/*.js -o ./docs/istanbul/8 #makes html for files
+  - docco ./sources/instanbul/9/*.js -o ./docs/istanbul/9 #makes html for files
+  - docco ./sources/jakarta/2/*.js -o ./docs/jakarta/2 #makes html for files
+  - docco ./sources/jakarta/3/*.js -o ./docs/jakarta/3 #makes html for files
+  - docco ./sources/jakarta/3a/*.js -o ./docs/jakarta/3a #makes html for files
