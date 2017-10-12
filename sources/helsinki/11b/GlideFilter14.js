@@ -990,712 +990,305 @@ GlideSubCondition.prototype = {
 };
 var GlideConditionRow = Class.create();
 GlideConditionRow.prototype = {
-  initialize: function(condition, queryID, wantOr, first) {
-    this.condition = condition;
-    this.filter = condition.getFilter();
-    this.first = first;
-    this.wantOr = wantOr;
-    this.tableName = this.condition.getName();
-    this.queryID = queryID;
-    this.currentText = [];
-    var tr = celQuery('tr', null, queryID);
-    tr.conditionObject = this.condition;
-    tr.rowObject = this;
-    tr.className = "filter_row_condition";
-    tr.style.display = "table";
-    this.row = tr;
-    tr.conditionRow = this;
-    this.addAndOrTextCell();
-    td = this.addTD(tr, queryID);
-    this.tdName = td;
-    td.id = "field";
-    tr.tdField = td;
-    td = this.addTD(tr, queryID);
-    this.tdOper = td;
-    td.id = "oper";
-    tr.tdOper = td;
-    if (!this.filter.getOpsWanted())
-      td.style.display = "none";
-    td.style.width = "auto";
-    td = this.addTD(tr, queryID);
-    this.tdValue = td;
-    td.id = "value";
-    td.noWrap = true;
-    tr.tdValue = td;
-    td.className = "form-inline";
-    if (this.filter.getTextAreasWanted())
-      td.style.width = "90%";
-    this.addPlusImageCell();
-    this.addRemoveButtonCell();
-    this.answer = getMessages(MESSAGES_FILTER_BUTTONS);
-  },
-  destroy: function() {
-    this.filter.clearFieldUsed(this.getField(), this.condition);
-    this.filter = null;
-    this.condition = null;
-    this.rowCondition = null;
-    if (this.row.handler)
-      this.row.handler.destroy();
-    this.row.tdOper = null;
-    this.row.tdValue = null;
-    this.row.tdField = null;
-    this.row.conditionObject = null;
-    this.row.rowObject = null;
-    this.row = null;
-    this.tdOper = null;
-    this.tdValue = null;
-    this.tdName = null;
-    if (this.fieldSelect) {
-      this.fieldSelect.onchange = null;
-      this.fieldSelect = null;
-    }
-    this.tdOrButton = null;
-    this.tdRemoveButton.conditionObject = null;
-    this.tdRemoveButton = null;
-    this.tdAndOrText = null;
-  },
-  setAsRunRow: function(field) {
-    this.build(field);
-    this.tdName.style.visibility = 'hidden';
-    this.tdOper.style.visibility = 'hidden';
-    this.tdAndOrText.style.visibility = 'hidden';
-    this.row.removeChild(this.tdValue);
-    this.row.removeChild(this.tdOrButton);
-    this.row.removeChild(this.tdRemoveButton);
-    clearNodes(this.tdValue);
-    clearNodes(this.tdOrButton);
-    clearNodes(this.tdRemoveButton);
-    var td = celQuery('td', this.row, this.queryID);
-    td.style.width = "100%";
-    td.style.paddingBottom = "4px";
-    td.filterObject = this.filter;
-    var runCode = "runThisFilter(this);";
-    if (this.filter.runCode)
-      runCode = this.filter.runCode;
-    td.innerHTML = this.buildRunButton(runCode);
-  },
-  addAndOrTextCell: function() {
-    var td = this.addTD(this.row, this.queryID);
-    this.tdAndOrText = td;
-    td.style.textAlign = "right";
-    if (!this.filter.getConditionsWanted())
-      td.style.display = "none";
-  },
-  addPlusImageCell: function() {
-    var td = this.addTD(this.row, this.queryID);
-    td.style.whiteSpace = "nowrap";
-    this.tdOrButton = td;
-    this.row.tdOrButton = td;
-    if (!this.filter.getConditionsWanted())
-      td.style.display = "none";
-  },
-  addRemoveButtonCell: function() {
-    var td = this.addTD(this.row, this.queryID);
-    this.tdRemoveButton = td;
-    this.row.tdRemoveButton = td;
-    td.conditionObject = this.condition;
-    if (this.wantOr)
-      td.hasOrButton = 'true';
-  },
-  addTD: function(row, queryID) {
-    var td = celQuery('td', row, queryID);
-    $j(td).addClass("sn-filter-top");
-    return td;
-  },
-  build: function(field, oper, value) {
-    this.field = field;
-    this.oper = oper;
-    this.value = value;
-    var tableName = this.getName();
-    var tds = this.row.getElementsByTagName("td");
-    this.fieldSelect = _createFilterSelect();
-    this.fieldSelect.onchange = this.fieldOnChange.bind(this);
-    var sname = tableName.split(".")[0];
-    if (this.field != null)
-      sname = sname + "." + field;
-    this.filter.setFieldUsed(field);
-    addFirstLevelFields(this.fieldSelect, sname, field, this.filter.filterFields.bind(this.filter), null, this.filter, this.filter.isTemplate);
-    if (!this.tdName) {
-      return [];
-    }
-    this.tdName.appendChild(this.fieldSelect);
-    updateFields(tableName, this.fieldSelect, oper, value, this.filter.getIncludeExtended(), this.filter.type, this.filter.isTemplate);
-    if (this.filter.isProtectedField(field))
-      this._setReadOnly();
-    if (this.filter.fieldName == "sys_template.template")
-      this.addHelpText();
-    currentTable = tableName;
-    this.addLeftButtons();
-    return tds;
-  },
-  _setReadOnly: function() {
-    this.filter._hideClass(this.row, "filerTableAction", true);
-    this.filter._disableClass(this.row, "filerTableSelect", true);
-    this.filter._disableClass(this.row, "filerTableInput", true);
-  },
-  fieldOnChange: function() {
-    this.filter.setFieldUsed(this.getField());
-    this.filter.clearFieldUsed(this.field, this.condition);
-    this.field = this.getField();
-    var b = this.condition.isPlaceHolder();
-    this.condition.setPlaceHolder(false);
-    updateFields(this.getName(), this.fieldSelect, null, null, this.filter.getIncludeExtended(), this.filter.type);
-    if (b) {
+    initialize: function(condition, queryID, wantOr, first) {
+      this.condition = condition;
+      this.filter = condition.getFilter();
+      this.first = first;
+      this.wantOr = wantOr;
+      this.tableName = this.condition.getName();
+      this.queryID = queryID;
+      this.currentText = [];
+      var tr = celQuery('tr', null, queryID);
+      tr.conditionObject = this.condition;
+      tr.rowObject = this;
+      tr.className = "filter_row_condition";
+      tr.style.display = "table";
+      this.row = tr;
+      tr.conditionRow = this;
+      this.addAndOrTextCell();
+      td = this.addTD(tr, queryID);
+      this.tdName = td;
+      td.id = "field";
+      tr.tdField = td;
+      td = this.addTD(tr, queryID);
+      this.tdOper = td;
+      td.id = "oper";
+      tr.tdOper = td;
+      if (!this.filter.getOpsWanted())
+        td.style.display = "none";
+      td.style.width = "auto";
+      td = this.addTD(tr, queryID);
+      this.tdValue = td;
+      td.id = "value";
+      td.noWrap = true;
+      tr.tdValue = td;
+      td.className = "form-inline";
+      if (this.filter.getTextAreasWanted())
+        td.style.width = "90%";
+      this.addPlusImageCell();
+      this.addRemoveButtonCell();
+      this.answer = getMessages(MESSAGES_FILTER_BUTTONS);
+    },
+    destroy: function() {
+      this.filter.clearFieldUsed(this.getField(), this.condition);
+      this.filter = null;
+      this.condition = null;
+      this.rowCondition = null;
+      if (this.row.handler)
+        this.row.handler.destroy();
+      this.row.tdOper = null;
+      this.row.tdValue = null;
+      this.row.tdField = null;
+      this.row.conditionObject = null;
+      this.row.rowObject = null;
+      this.row = null;
+      this.tdOper = null;
+      this.tdValue = null;
+      this.tdName = null;
+      if (this.fieldSelect) {
+        this.fieldSelect.onchange = null;
+        this.fieldSelect = null;
+      }
+      this.tdOrButton = null;
+      this.tdRemoveButton.conditionObject = null;
+      this.tdRemoveButton = null;
+      this.tdAndOrText = null;
+    },
+    setAsRunRow: function(field) {
+      this.build(field);
+      this.tdName.style.visibility = 'hidden';
+      this.tdOper.style.visibility = 'hidden';
+      this.tdAndOrText.style.visibility = 'hidden';
+      this.row.removeChild(this.tdValue);
+      this.row.removeChild(this.tdOrButton);
+      this.row.removeChild(this.tdRemoveButton);
+      clearNodes(this.tdValue);
+      clearNodes(this.tdOrButton);
+      clearNodes(this.tdRemoveButton);
+      var td = celQuery('td', this.row, this.queryID);
+      td.style.width = "100%";
+      td.style.paddingBottom = "4px";
+      td.filterObject = this.filter;
+      var runCode = "runThisFilter(this);";
+      if (this.filter.runCode)
+        runCode = this.filter.runCode;
+      td.innerHTML = this.buildRunButton(runCode);
+    },
+    addAndOrTextCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      this.tdAndOrText = td;
+      td.style.textAlign = "right";
+      if (!this.filter.getConditionsWanted())
+        td.style.display = "none";
+    },
+    addPlusImageCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      td.style.whiteSpace = "nowrap";
+      this.tdOrButton = td;
+      this.row.tdOrButton = td;
+      if (!this.filter.getConditionsWanted())
+        td.style.display = "none";
+    },
+    addRemoveButtonCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      this.tdRemoveButton = td;
+      this.row.tdRemoveButton = td;
+      td.conditionObject = this.condition;
+      if (this.wantOr)
+        td.hasOrButton = 'true';
+    },
+    addTD: function(row, queryID) {
+      var td = celQuery('td', row, queryID);
+      $j(td).addClass("sn-filter-top");
+      return td;
+    },
+    build: function(field, oper, value) {
+      this.field = field;
+      this.oper = oper;
+      this.value = value;
+      var tableName = this.getName();
+      var tds = this.row.getElementsByTagName("td");
+      this.fieldSelect = _createFilterSelect();
+      this.fieldSelect.onchange = this.fieldOnChange.bind(this);
+      var sname = tableName.split(".")[0];
+      if (this.field != null)
+        sname = sname + "." + field;
+      this.filter.setFieldUsed(field);
+      addFirstLevelFields(this.fieldSelect, sname, field, this.filter.filterFields.bind(this.filter), null, this.filter, this.filter.isTemplate);
+      if (!this.tdName) {
+        return [];
+      }
+      this.tdName.appendChild(this.fieldSelect);
+      updateFields(tableName, this.fieldSelect, oper, value, this.filter.getIncludeExtended(), this.filter.type, this.filter.isTemplate);
+      if (this.filter.isProtectedField(field))
+        this._setReadOnly();
+      if (this.filter.fieldName == "sys_template.template")
+        this.addHelpText();
+      currentTable = tableName;
+      this.addLeftButtons();
+      return tds;
+    },
+    _setReadOnly: function() {
+      this.filter._hideClass(this.row, "filerTableAction", true);
+      this.filter._disableClass(this.row, "filerTableSelect", true);
+      this.filter._disableClass(this.row, "filerTableInput", true);
+    },
+    fieldOnChange: function() {
+      this.filter.setFieldUsed(this.getField());
+      this.filter.clearFieldUsed(this.field, this.condition);
+      this.field = this.getField();
+      var b = this.condition.isPlaceHolder();
       this.condition.setPlaceHolder(false);
-      this.showFields();
-      this.condition.clearPlaceHolder();
-      if (this.condition.isFirst())
-        this.makeFirst();
-    }
-    this.filter.refreshSelectList();
-    if (this.filter.fieldName == "sys_template.template")
-      this.addHelpText();
-    var form = this.getFieldSelect().up('form');
-    if (form) {
-      var nameWithoutTablePrefix = this.getName().substring(this.getName().indexOf(".") + 1);
-      form.fire("glideform:onchange", {
-        id: nameWithoutTablePrefix,
-        value: unescape(getFilter(this.getName())),
-        modified: true
-      });
-    }
-  },
-  addHelpText: function() {
-    this.fieldElements = this.condition.actionRow.getAttribute("type");
-    if (this.fieldElements) {
-      switch (this.fieldElements) {
-        case "color":
-          this.helpText("Insert HTML color name or hex value");
-          break;
-        case "glide_list":
-        case "slushbucket":
-        case "user_roles":
-          this.helpText("Separate individual references with a comma");
-          break;
-        case "composite_name":
-          this.helpText("Use the following format: TableName.FieldName");
-          break;
-        case "days_of_week":
-          this.helpText("1 for Monday, 2 for Tuesday, etc. Multiple values can be entered, like '135' for Monday, Wednesday, and Friday");
-          break;
-        case "html":
-        case "translated_html":
-          this.helpText("Enter text in HTML format");
-          break;
-        default:
-          this.removeHelpText();
+      updateFields(this.getName(), this.fieldSelect, null, null, this.filter.getIncludeExtended(), this.filter.type);
+      if (b) {
+        this.condition.setPlaceHolder(false);
+        this.showFields();
+        this.condition.clearPlaceHolder();
+        if (this.condition.isFirst())
+          this.makeFirst();
       }
-    }
-  },
-  helpText: function(text) {
-    this.removeHelpText();
-    var newDiv = document.createElement("div");
-    var newContent = document.createTextNode(text);
-    newDiv.appendChild(newContent);
-    newDiv.id = this.fieldElements;
-    newDiv.className = 'fieldmsg';
-    var currentDiv = this.condition.tbody;
-    currentDiv.insertBefore(newDiv, null);
-    this.currentText.push(this.fieldElements);
-  },
-  removeHelpText: function() {
-    for (i = 0; i < this.currentText.length; i++) {
-      var parNode = gel(this.currentText[i]).parentElement;
-      var chilNode = parNode.childNodes;
-      chilNode[1].remove();
-      this.currentText.splice(i, 1);
-    }
-  },
-  getNameTD: function() {
-    return this.tdName;
-  },
-  getFieldSelect: function() {
-    return this.fieldSelect;
-  },
-  getField: function() {
-    var select = getSelectedOption(this.fieldSelect);
-    if (select != null)
-      return select.value;
-    return null;
-  },
-  getOper: function() {
-    var s = this.getOperSelect();
-    return getSelectedOption(s).value;
-  },
-  getOperSelect: function() {
-    return this.tdOper.getElementsByTagName("select")[0];
-  },
-  getValueInput: function() {
-    return this.tdValue.getElementsByTagName("input")[0];
-  },
-  getRow: function() {
-    return this.row;
-  },
-  getName: function() {
-    return this.tableName;
-  },
-  showFields: function() {
-    this.tdRemoveButton.style.visibility = 'visible';
-    this.tdOrButton.style.visibility = 'visible';
-    if (!this.first)
-      this.tdAndOrText.style.visibility = 'visible';
-    this.getOperSelect().disabled = false;
-    var cel = this.getValueInput();
-    if (cel)
-      cel.disabled = false;
-  },
-  addLeftButtons: function() {
-    if (this.wantOr) {
-      tdAddOr = this.tdOrButton;
-      var fDiv = this.filter.getDiv() || getThing(this.filter.tableName, this.filter.divName);
-      fDiv = fDiv.id.split("gcond_filters", 1);
-      var andOnClick = "addConditionSpec('" + this.tableName + "','" + this.queryID + "','','','','" + fDiv + "'); return false;";
-      var orOnClick = "newSubRow(this,'" + fDiv + "'); return false;";
-      tdAddOr.innerHTML = this.getAndButtonHTML(andOnClick) + this.getOrButtonHTML(orOnClick);
-      if (this.condition.isPlaceHolder())
-        tdAddOr.style.visibility = 'hidden';
-    }
-    var td = this.tdRemoveButton;
-    var tdMessage = this.tdAndOrText;
-    if (!this.wantOr) {
-      if (td.parentNode.sortSpec != true) {
-        var fieldTD = this.row.childNodes[1];
-        var orSpan = "<span class='sn-or-message'>" + this.answer['or'] + "</span>";
-        $(fieldTD).insert({
-          top: orSpan
+      this.filter.refreshSelectList();
+      if (this.filter.fieldName == "sys_template.template")
+        this.addHelpText();
+      var form = this.getFieldSelect().up('form');
+      if (form) {
+        var nameWithoutTablePrefix = this.getName().substring(this.getName().indexOf(".") + 1);
+        form.fire("glideform:onchange", {
+          id: nameWithoutTablePrefix,
+          value: unescape(getFilter(this.getName())),
+          modified: true
         });
-      } else {
-        tdMessage.innerHTML = '';
       }
-    }
-    tdMessage.style.width = DEFAULT_WIDTH;
-    var id = 'r' + guid();
-    td.id = id;
-    var deleteOnClick = "deleteFilterByID('" + this.getName() + "','" + id + "');";
-    td.innerHTML = this.getDeleteButtonHTML(id, deleteOnClick);
-    if (!this.condition.isPlaceHolder())
-      return;
-    if (!this.filter.defaultPlaceHolder)
-      return;
-    if (this.filter.getMaintainPlaceHolder() || this.filter.singleCondition())
-      td.style.visibility = 'hidden';
-  },
-  getAndButtonHTML: function(onClick) {
-    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add AND Condition'] + "' alt='" + this.answer['Add AND Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['and'].toUpperCase() + "</button>";
-  },
-  getOrButtonHTML: function(onClick) {
-    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add OR Condition'] + "' alt='" + this.answer['Add OR Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['or'].toUpperCase() + "</button>";
-  },
-  getDeleteButtonHTML: function(id, onClick) {
-    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Delete'] + "' type='button' class='filerTableAction btn btn-default deleteButton'><span class='icon-cross'></span><span class=\"sr-only\">'" + this.answer['Delete'] + "'</span></button>";
-  },
-  makeFirst: function() {
-    var tdMessage = this.tdAndOrText;
-    tdMessage.innerHTML = '';
-    tdMessage.style.color = tdMessage.style.backgroundColor;
-    tdMessage.style.visibility = 'hidden';
-    tdMessage.style.width = DEFAULT_WIDTH;
-  },
-  refreshSelectList: function() {
-    if (this.condition.isPlaceHolder())
-      return;
-    var tableName = this.getName();
-    var sname = tableName.split(".")[0];
-    if (this.field != null)
-      sname = sname + "." + this.field;
-    addFirstLevelFields(this.fieldSelect, sname, this.field, this.filter.filterFields.bind(this.filter), null, this.filter, this.filter.isTemplate);
-  },
-  buildRunButton: function(f) {
-    var m = new GwtMessage();
-    return '<button class="btn btn-default" tabindex="0" onclick="' + f + '" title="' + m.getMessage('Run Filter') + '">' + m.getMessage('Run') + '</button>';
-  },
-  z: null
-};
-var GlideSortSection = Class.create();
-GlideSortSection.prototype = {
-  initialize: function(filter) {
-    this.filter = filter;
-    this.locateSection();
-  },
-  destroy: function() {
-    this.filter = null;
-    this.section = null;
-    this.rowTable = null;
-  },
-  locateSection: function() {
-    this.section = null;
-    this.rowTable = null;
-    var divRows = this.filter.sortElement.getElementsByTagName("tr");
-    for (var i = 0; i < divRows.length; i++) {
-      var rowTR = divRows[i];
-      if (rowTR.sortRow == 'true') {
-        this.section = rowTR.rowObject;
-        this.rowTable = this.section.getFilterTable();
-        this.queryID = this.section.getQueryID();
-        break;
+    },
+    addHelpText: function() {
+      this.fieldElements = this.condition.actionRow.getAttribute("type");
+      if (this.fieldElements) {
+        switch (this.fieldElements) {
+          case "color":
+            this.helpText("Insert HTML color name or hex value");
+            break;
+          case "glide_list":
+          case "slushbucket":
+          case "user_roles":
+            this.helpText("Separate individual references with a comma");
+            break;
+          case "composite_name":
+            this.helpText("Use the following format: TableName.FieldName");
+            break;
+          case "days_of_week":
+            this.helpText("1 for Monday, 2 for Tuesday, etc. Multiple values can be entered, like '135' for Monday, Wednesday, and Friday");
+            break;
+          case "html":
+          case "translated_html":
+            this.helpText("Enter text in HTML format");
+            break;
+          default:
+            this.removeHelpText();
+        }
       }
-    }
-    if (!this.section) {
-      section = new GlideFilterSection(this.filter);
-      section.setSort(true);
-      this.queryID = section._setup(true);
-      this.section = section;
-      this.rowTable = section.getFilterTable();
-      this.section.getRow().sortRow = 'true';
-    }
-  },
-  addField: function(field, oper) {
-    this.locateSection();
-    if (!oper)
-      oper = "ascending";
-    var condition = this.section.addSortCondition(false);
-    var row = condition.getRow();
-    row.sortSpec = true;
-    row = condition.getActionRow();
-    row.sortSpec = true;
-    var fSelect = addFields(this.getName(), field, true, this.filter.getIncludeExtended());
-    var tdName = row.tdField;
-    tdName.appendChild(fSelect);
-    updateFields(this.getName(), fSelect, oper, null, this.filter.getIncludeExtended());
-    condition.addLeftButtons();
-  },
-  getSection: function() {
-    return this.section;
-  },
-  getName: function() {
-    return this.filter.getName();
-  },
-  getID: function() {
-    return this.queryID;
-  },
-  removeRunButton: function() {
-    this.section.removeRunButton();
-  },
-  addRunButton: function() {
-    this.section.addRunButton();
-  },
-  z: null
-};
-var GlideEncodedQuery = Class.create();
-GlideEncodedQuery.prototype = {
-  initialize: function(name, query, callback) {
-    this.init();
-    this.callback = callback;
-    this.name = name;
-    this.encodedQuery = query;
-  },
-  init: function() {
-    this.orderBy = [];
-    this.groupBy = [];
-    this.terms = [];
-  },
-  parse: function() {
-    this.reset(this.name, this.encodedQuery);
-  },
-  destroy: function() {
-    for (var i = 0; i < this.orderBy.length; i++)
-      this.orderBy[i].destroy();
-    for (var i = 0; i < this.groupBy.length; i++)
-      this.groupBy[i].destroy();
-  },
-  reset: function(name, query) {
-    this.init();
-    this.tableName = name;
-    this.encodedQuery = query;
-    this.decode();
-  },
-  decode: function() {
-    this.getEncodedParts();
-  },
-  getEncodedParts: function() {
-    if (typeof g_filter_description != 'undefined' && this.tableName == g_filter_description.getName() &&
-      this.encodedQuery == g_filter_description.getFilter()) {
-      this.partsXML = loadXML(g_filter_description.getParsedQuery());
-      this.parseXML();
-      return;
-    }
-    var ajax = new GlideAjax('QueryParseAjax');
-    ajax.addParam('sysparm_chars', this.encodedQuery);
-    ajax.addParam('sysparm_name', this.tableName);
-    if (this.callback)
-      ajax.getXML(this.getEncodedPartsResponse.bind(this));
-    else {
-      this.partsXML = ajax.getXMLWait();
-      this.parseXML();
-    }
-  },
-  getEncodedPartsResponse: function(response) {
-    if (!response || !response.responseXML)
-      this.callback();
-    this.partsXML = response.responseXML;
-    this.parseXML();
-  },
-  parseXML: function() {
-    var items = this.partsXML.getElementsByTagName("item");
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var qp = new GlideQueryPart(item);
-      if (qp.isGroupBy()) {
-        this.addGroupBy(qp.getValue())
-      } else if (qp.isOrderBy()) {
-        this.addOrderBy(qp.getValue(), qp.isAscending());
-      } else
-        this.terms[this.terms.length] = qp;
-    }
-    if (this.callback)
-      this.callback();
-  },
-  getXML: function() {
-    return this.partsXML;
-  },
-  addGroupBy: function(groupBy) {
-    this.groupBy[this.groupBy.length] = groupBy;
-  },
-  addOrderBy: function(orderBy, ascending) {
-    this.orderBy[this.orderBy.length] = new GlideSortSpec(orderBy, ascending);
-  },
-  getTerms: function() {
-    return this.terms;
-  },
-  getOrderBy: function() {
-    return this.orderBy;
-  },
-  getGroupBy: function() {
-    return this.groupBy;
-  },
-  z: null
-};
-var GlideQueryPart = Class.create();
-GlideQueryPart.prototype = {
-  initialize: function(item) {
-    this.item = item;
-    this.groupBy = false;
-    this.orderBy = false;
-    this.ascending = false;
-    this.Goto = item.getAttribute("goto");
-    this.EndQuery = item.getAttribute("endquery");
-    this.NewQuery = item.getAttribute("newquery");
-    this.OR = item.getAttribute("or");
-    this.displayValue = item.getAttribute("display_value");
-    this.valid = true;
-    this.extract();
-  },
-  destroy: function() {
-    this.item = null;
-  },
-  isOR: function() {
-    return this.OR == 'true';
-  },
-  isNewQuery: function() {
-    return this.NewQuery == 'true';
-  },
-  isGoTo: function() {
-    return this.Goto == 'true';
-  },
-  extract: function() {
-    if (this.EndQuery == 'true') {
-      this.valid = false;
-      return;
-    }
-    this.operator = this.item.getAttribute("operator");
-    this.value = this.item.getAttribute("value");
-    this.field = this.item.getAttribute("field");
-    if (this.operator == 'GROUPBY') {
-      this.groupBy = true;
-      return;
-    }
-    if (this.operator == 'ORDERBYDESC') {
-      this.orderBy = true;
-      this.ascending = false;
-      return;
-    }
-    if (this.operator == 'ORDERBY') {
-      this.orderBy = true;
-      this.ascending = true;
-      return;
-    }
-    for (i = 0; i < operators.length; i++) {
-      if (this.operator == operators[i])
-        break;
-    }
-    if (i == operators.length) {
-      this.valid = false;
-      return;
-    }
-    if (this.field.startsWith("variables.")) {
-      this.value = this.field.substring(10) + this.operator + this.value;
-      this.field = "variables";
-      this.operator = '=';
-    }
-    if (this.field.startsWith("sys_tags."))
-      this.field = "sys_tags";
-    if (this.operator == "HASVARIABLE" || this.operator == "HASITEMVARIABLE") {
-      this.operator = '=';
-      this.field = "variables";
-      this.value = this.value.substring(1);
-    }
-    if (this.operator == "HASQUESTION") {
-      this.operator = '=';
-      this.field = "variables";
-      this.value = this.value.substring(1);
-    }
-  },
-  getOperator: function() {
-    this.operator.title = "Operator";
-    return this.operator;
-  },
-  getField: function() {
-    this.field.title = "Field";
-    return this.field;
-  },
-  getValue: function() {
-    this.value.title = "Value";
-    return this.value;
-  },
-  isValid: function() {
-    return this.valid;
-  },
-  isGroupBy: function() {
-    return this.groupBy;
-  },
-  isOrderBy: function() {
-    return this.orderBy;
-  },
-  isAscending: function() {
-    return this.ascending;
-  },
-  z: null
-};
-var GlideSortSpec = Class.create();
-GlideSortSpec.prototype = {
-  initialize: function(name, ascending) {
-    this.field = name;
-    this.ascending = ascending;
-  },
-  getName: function() {
-    return this.field;
-  },
-  isAscending: function() {
-    return this.ascending;
-  },
-  z: null
-};
-
-function newSubRow(elBut, name) {
-  var fDiv = getThing(name, 'gcond_filters');
-  if (fDiv && !checkFilterSize(fDiv.filterObject))
-    return;
-  var butTD = elBut.parentNode;
-  var butTR = butTD.parentNode;
-  var butTable = butTR.parentNode;
-  butTable.conditionObject.addNewSubCondition();
-  _frameChanged();
-}
-
-function findInArray(a, searchID) {
-  for (var i = 0; i < a.length; i++) {
-    var condition = a[i];
-    if (condition.getID() == searchID)
-      return i;
-  }
-  return null;
-}
-
-function celQuery(name, parent, queryID) {
-  var e = cel(name);
-  if (parent)
-    parent.appendChild(e);
-  e.queryID = queryID;
-  return e;
-}
-
-function runThisFilter(atag) {
-  var filterObj = atag.parentNode.filterObject;
-  var tableName = filterObj.getName();
-  if (runFilterHandlers[tableName]) {
-    var filter = getFilter(tableName);
-    runFilterHandlers[tableName](tableName, filter);
-    return;
-  }
-  filterObj.runFilter();
-}
-
-function buildURL(tableName, query) {
-  var url = (tableName.split("."))[0] + "_list.do?sysparm_query=" + query;
-  var view = gel('sysparm_view');
-  if (view) {
-    view = view.value;
-    url += '&sysparm_view=' + view;
-  }
-  var refQuery = gel('sysparm_ref_list_query');
-  if (refQuery)
-    url += "&sysparm_ref_list_query=" + refQuery.value;
-  var target = gel('sysparm_target');
-  if (target) {
-    target = target.value;
-    url += '&sysparm_target=' + target;
-    url += '&sysparm_stack=no';
-    var e = gel("sysparm_reflist_pinned");
-    if (e)
-      url += '&sysparm_reflist_pinned=' + e.value;
-  }
-  return url;
-}
-
-function createCondFilter(tname, query, fieldName, elem) {
-  "use strict"
-  noOps = false;
-  noSort = false;
-  noConditionals = false;
-  useTextareas = false;
-  new GlideConditionsHandler(tname, function(filter) {
-    if (filter) {
-      var filterDiv = filter.getDiv() || getThing(filter.tableName, filter.divName);
-      if (filterDiv) {
-        filterDiv.initialQuery = query;
+    },
+    helpText: function(text) {
+      this.removeHelpText();
+      var newDiv = document.createElement("div");
+      var newContent = document.createTextNode(text);
+      newDiv.appendChild(newContent);
+      newDiv.id = this.fieldElements;
+      newDiv.className = 'fieldmsg';
+      var currentDiv = this.condition.tbody;
+      currentDiv.insertBefore(newDiv, null);
+      this.currentText.push(this.fieldElements);
+    },
+    removeHelpText: function() {
+      for (i = 0; i < this.currentText.length; i++) {
+        var parNode = gel(this.currentText[i]).parentElement;
+        var chilNode = parNode.childNodes;
+        chilNode[1].remove();
+        this.currentText.splice(i, 1);
       }
-      filter.setQuery(query);
-      g_form.registerHandler(fieldName, filter);
-      if (elem && elem.getAttribute("readonly") === "readonly") {
-        var formTable = g_form.getTableName();
-        var fieldNameWithoutPrefix = fieldName.replace(formTable + '.', '');
-        g_form.setReadOnly(fieldNameWithoutPrefix, true);
+    },
+    getNameTD: function() {
+      return this.tdName;
+    },
+    getFieldSelect: function() {
+      return this.fieldSelect;
+    },
+    getField: function() {
+      var select = getSelectedOption(this.fieldSelect);
+      if (select != null)
+        return select.value;
+      return null;
+    },
+    getOper: function() {
+      var s = this.getOperSelect();
+      return getSelectedOption(s).value;
+    },
+    getOperSelect: function() {
+      return this.tdOper.getElementsByTagName("select")[0];
+    },
+    getValueInput: function() {
+      return this.tdValue.getElementsByTagName("input")[0];
+    },
+    getRow: function() {
+      return this.row;
+    },
+    getName: function() {
+      return this.tableName;
+    },
+    showFields: function() {
+      this.tdRemoveButton.style.visibility = 'visible';
+      this.tdOrButton.style.visibility = 'visible';
+      if (!this.first)
+        this.tdAndOrText.style.visibility = 'visible';
+      this.getOperSelect().disabled = false;
+      var cel = this.getValueInput();
+      if (cel)
+        cel.disabled = false;
+    },
+    addLeftButtons: function() {
+      if (this.wantOr) {
+        tdAddOr = this.tdOrButton;
+        var fDiv = this.filter.getDiv() || getThing(this.filter.tableName, this.filter.divName);
+        fDiv = fDiv.id.split("gcond_filters", 1);
+        var andOnClick = "addConditionSpec('" + this.tableName + "','" + this.queryID + "','','','','" + fDiv + "'); return false;";
+        var orOnClick = "newSubRow(this,'" + fDiv + "'); return false;";
+        tdAddOr.innerHTML = this.getAndButtonHTML(andOnClick) + this.getOrButtonHTML(orOnClick);
+        if (this.condition.isPlaceHolder())
+          tdAddOr.style.visibility = 'hidden';
       }
-      $(filterDiv).fire('glide:filter.create.condition_filter', filter);
-    }
-  }, fieldName);
-}
-
-function checkFilterSize(filterObject) {
-  var validFilterSize = true;
-  var filterString = "";
-  if (isNaN(g_glide_list_filter_max_length) || g_glide_list_filter_max_length <= 0)
-    return validFilterSize;
-  if (filterObject === undefined || filterObject === null)
-    return validFilterSize;
-  if (typeof filterObject === "object" && filterObject["type"] === 'GlideFilter')
-    filterString = getFilter(filterObject.getDiv().id.split("gcond_filters", 1));
-  if (filterString && filterString.length > g_glide_list_filter_max_length) {
-    var dialog = new GlideDialogWindow('filter_limit_window', false);
-    dialog.setTitle(getMessage("Filter Limit Reached"));
-    dialog.setBody("<div style='padding: 10px'>" + getMessage("The filter you are using is too big. Remove some conditions to make it smaller.") + "</div>", false, false);
-    $("filter_limit_window").style.visibility = "visible";
-    validFilterSize = false;
-  }
-  return validFilterSize;
-}
-document.on('click', 'button.filter_add_sort', function(evt, element) {
-  var name = element.getAttribute('data-name');
-  addSortSpec(name);
-  evt.stopPropagation();
-});
-document.on('click', 'button.filter_add_filter', function(evt, element) {
-  var name = element.getAttribute('data-name');
-  addConditionSpec(name);
-  evt.stopPropagation();
-});
-document.on('click', 'button.filter_and_filter', function(evt, element) {
-  var name = element.getAttribute('data-name');
-  addCondition(name);
-  evt.stopPropagation();
-});;
+      var td = this.tdRemoveButton;
+      var tdMessage = this.tdAndOrText;
+      if (!this.wantOr) {
+        if (td.parentNode.sortSpec != true) {
+          var fieldTD = this.row.childNodes[1];
+          var orSpan = "<span class='sn-or-message'>" + this.answer['or'] + "</span>";
+          $(fieldTD).insert({
+            top: orSpan
+          });
+        } else {
+          tdMessage.innerHTML = '';
+        }
+      }
+      tdMessage.style.width = DEFAULT_WIDTH;
+      var id = 'r' + guid();
+      td.id = id;
+      var deleteOnClick = "deleteFilterByID('" + this.getName() + "','" + id + "');";
+      td.innerHTML = this.getDeleteButtonHTML(id, deleteOnClick);
+      if (!this.condition.isPlaceHolder())
+        return;
+      if (!this.filter.defaultPlaceHolder)
+        return;
+      if (this.filter.getMaintainPlaceHolder() || this.filter.singleCondition())
+        td.style.visibility = 'hidden';
+    },
+    getAndButtonHTML: function(onClick) {
+      return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add AND Condition'] + "' alt='" + this.answer['Add AND Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['and'].toUpperCase() + "</button>";
+    },
+    getOrButtonHTML: function(onClick) {
+      return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add OR Condition'] + "' alt='" + this.answer['Add OR Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['or'].toUpperCase() + "</button>";
+    },
+    getDeleteButtonHTML: function(id, onClick) {
+      return "<button onclick=\"" + onClick + "\" title='" + this.answer['Delete'] + "' type='button' class='filerTableAction btn btn-default deleteButton'><span class='icon-cross'></span><span class=\"sr-only\">'" + this.answer['Delete'] + "'</span></button>";
+    },
+    makeFirst: function() {
+        var tdMessage = this.tdAndOrText;
+        tdMessage

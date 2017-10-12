@@ -82953,1793 +82953,531 @@ angular.module('snm.serviceCatalog.data').factory('catalogItemFactory', function
         resolve: n
       }
     }), r(De, [I, T, y, Be, A, C, h, m, u, k], function(e, t, n, r, i, o, a, s, l, c) {
-      return function(u) {
-        function d(e, t) {
-          try {
-            u.getDoc().execCommand(e, !1, t)
-          } catch (n) {}
-        }
-
-        function f() {
-          var e = u.getDoc().documentMode;
-          return e ? e : 6
-        }
-
-        function h(e) {
-          return e.isDefaultPrevented()
-        }
-
-        function p(e) {
-          var t, n;
-          e.dataTransfer && (u.selection.isCollapsed() && "IMG" == e.target.tagName && Q.select(e.target), t = u.selection.getContent(), t.length > 0 && (n = oe + escape(u.id) + "," + escape(t), e.dataTransfer.setData(ae, n)))
-        }
-
-        function m(e) {
-          var t;
-          return e.dataTransfer && (t = e.dataTransfer.getData(ae), t && t.indexOf(oe) >= 0) ? (t = t.substr(oe.length).split(","), {
-            id: unescape(t[0]),
-            html: unescape(t[1])
-          }) : null
-        }
-
-        function g(e) {
-          u.queryCommandSupported("mceInsertClipboardContent") ? u.execCommand("mceInsertClipboardContent", !1, {
-            content: e
-          }) : u.execCommand("mceInsertContent", !1, e)
-        }
-
-        function v() {
-          function i(e) {
-            var t = C.schema.getBlockElements(),
-              n = u.getBody();
-            if ("BR" != e.nodeName) return !1;
-            for (e = e; e != n && !t[e.nodeName]; e = e.parentNode)
-              if (e.nextSibling) return !1;
-            return !0
-          }
-
-          function o(e, t) {
-            var n;
-            for (n = e.nextSibling; n && n != t; n = n.nextSibling)
-              if ((3 != n.nodeType || 0 !== X.trim(n.data).length) && n !== t) return !1;
-            return n === t
-          }
-
-          function a(e, t, r) {
-            var o, a, s;
-            for (s = C.schema.getNonEmptyElements(), o = new n(r || e, e); a = o[t ? "next" : "prev"]();) {
-              if (s[a.nodeName] && !i(a)) return a;
-              if (3 == a.nodeType && a.data.length > 0) return a
+        return function(u) {
+            function d(e, t) {
+              try {
+                u.getDoc().execCommand(e, !1, t)
+              } catch (n) {}
             }
-          }
 
-          function c(e) {
-            var n, r, i, o, s;
-            if (!e.collapsed && (n = C.getParent(t.getNode(e.startContainer, e.startOffset), C.isBlock), r = C.getParent(t.getNode(e.endContainer, e.endOffset), C.isBlock), s = u.schema.getTextBlockElements(), n != r && s[n.nodeName] && s[r.nodeName] && "false" !== C.getContentEditable(n) && "false" !== C.getContentEditable(r))) return e.deleteContents(), i = a(n, !1), o = a(r, !0), C.isEmpty(r) || X(n).append(r.childNodes), X(r).remove(), i ? 1 == i.nodeType ? "BR" == i.nodeName ? (e.setStartBefore(i), e.setEndBefore(i)) : (e.setStartAfter(i), e.setEndAfter(i)) : (e.setStart(i, i.data.length), e.setEnd(i, i.data.length)) : o && (1 == o.nodeType ? (e.setStartBefore(o), e.setEndBefore(o)) : (e.setStart(o, 0), e.setEnd(o, 0))), x.setRng(e), !0
-          }
+            function f() {
+              var e = u.getDoc().documentMode;
+              return e ? e : 6
+            }
 
-          function d(e, n) {
-            var r, i, s, l, c, d;
-            if (!e.collapsed) return e;
-            if (c = e.startContainer, d = e.startOffset, 3 == c.nodeType)
-              if (n) {
-                if (d < c.data.length) return e
-              } else if (d > 0) return e;
-            if (r = t.getNode(e.startContainer, e.startOffset), s = C.getParent(r, C.isBlock), i = a(u.getBody(), n, r), l = C.getParent(i, C.isBlock), !r || !i) return e;
-            if (l && s != l)
-              if (n) {
-                if (!o(s, l)) return e;
-                1 == r.nodeType ? "BR" == r.nodeName ? e.setStartBefore(r) : e.setStartAfter(r) : e.setStart(r, r.data.length), 1 == i.nodeType ? e.setEnd(i, 0) : e.setEndBefore(i)
-              } else {
-                if (!o(l, s)) return e;
-                1 == i.nodeType ? "BR" == i.nodeName ? e.setStartBefore(i) : e.setStartAfter(i) : e.setStart(i, i.data.length), 1 == r.nodeType ? e.setEnd(r, 0) : e.setEndBefore(r)
+            function h(e) {
+              return e.isDefaultPrevented()
+            }
+
+            function p(e) {
+              var t, n;
+              e.dataTransfer && (u.selection.isCollapsed() && "IMG" == e.target.tagName && Q.select(e.target), t = u.selection.getContent(), t.length > 0 && (n = oe + escape(u.id) + "," + escape(t), e.dataTransfer.setData(ae, n)))
+            }
+
+            function m(e) {
+              var t;
+              return e.dataTransfer && (t = e.dataTransfer.getData(ae), t && t.indexOf(oe) >= 0) ? (t = t.substr(oe.length).split(","), {
+                id: unescape(t[0]),
+                html: unescape(t[1])
+              }) : null
+            }
+
+            function g(e) {
+              u.queryCommandSupported("mceInsertClipboardContent") ? u.execCommand("mceInsertClipboardContent", !1, {
+                content: e
+              }) : u.execCommand("mceInsertContent", !1, e)
+            }
+
+            function v() {
+              function i(e) {
+                var t = C.schema.getBlockElements(),
+                  n = u.getBody();
+                if ("BR" != e.nodeName) return !1;
+                for (e = e; e != n && !t[e.nodeName]; e = e.parentNode)
+                  if (e.nextSibling) return !1;
+                return !0
               }
-            return e
-          }
 
-          function f(e) {
-            var t = x.getRng();
-            return t = d(t, e), c(t) ? !0 : void 0
-          }
-
-          function v(e, t) {
-            function n(e, n) {
-              return m = X(n).parents().filter(function(e, t) {
-                return !!u.schema.getTextInlineElements()[t.nodeName]
-              }), l = e.cloneNode(!1), m = s.map(m, function(e) {
-                return e = e.cloneNode(!1), l.hasChildNodes() ? (e.appendChild(l.firstChild), l.appendChild(e)) : l.appendChild(e), l.appendChild(e), e
-              }), m.length ? (p = C.create("br"), m[0].appendChild(p), C.replace(l, e), t.setStartBefore(p), t.setEndBefore(p), u.selection.setRng(t), p) : null
-            }
-
-            function i(e) {
-              return e && u.schema.getTextBlockElements()[e.tagName]
-            }
-            var o, a, l, c, d, f, h, p, m;
-            if (t.collapsed && (f = t.startContainer, h = t.startOffset, a = C.getParent(f, C.isBlock), i(a)))
-              if (1 == f.nodeType) {
-                if (f = f.childNodes[h], f && "BR" != f.tagName) return;
-                if (d = e ? a.nextSibling : a.previousSibling, C.isEmpty(a) && i(d) && C.isEmpty(d) && n(a, f)) return C.remove(d), !0
-              } else if (3 == f.nodeType) {
-              if (o = r.create(a, f), c = a.cloneNode(!0), f = r.resolve(c, o), e) {
-                if (h >= f.data.length) return;
-                f.deleteData(h, 1)
-              } else {
-                if (0 >= h) return;
-                f.deleteData(h - 1, 1)
+              function o(e, t) {
+                var n;
+                for (n = e.nextSibling; n && n != t; n = n.nextSibling)
+                  if ((3 != n.nodeType || 0 !== X.trim(n.data).length) && n !== t) return !1;
+                return n === t
               }
-              if (C.isEmpty(c)) return n(a, f)
-            }
-          }
 
-          function y(e) {
-            var t, n, r;
-            f(e) || (s.each(u.getBody().getElementsByTagName("*"), function(e) {
-              "SPAN" == e.tagName && e.setAttribute("mce-data-marked", 1), !e.hasAttribute("data-mce-style") && e.hasAttribute("style") && u.dom.setAttrib(e, "style", u.dom.getAttrib(e, "style"))
-            }), t = new w(function() {}), t.observe(u.getDoc(), {
-              childList: !0,
-              attributes: !0,
-              subtree: !0,
-              attributeFilter: ["style"]
-            }), u.getDoc().execCommand(e ? "ForwardDelete" : "Delete", !1, null), n = u.selection.getRng(), r = n.startContainer.parentNode, s.each(t.takeRecords(), function(e) {
-              if (C.isChildOf(e.target, u.getBody())) {
-                if ("style" == e.attributeName) {
-                  var t = e.target.getAttribute("data-mce-style");
-                  t ? e.target.setAttribute("style", t) : e.target.removeAttribute("style")
+              function a(e, t, r) {
+                var o, a, s;
+                for (s = C.schema.getNonEmptyElements(), o = new n(r || e, e); a = o[t ? "next" : "prev"]();) {
+                  if (s[a.nodeName] && !i(a)) return a;
+                  if (3 == a.nodeType && a.data.length > 0) return a
                 }
-                s.each(e.addedNodes, function(e) {
-                  if ("SPAN" == e.nodeName && !e.getAttribute("mce-data-marked")) {
-                    var t, i;
-                    e == r && (t = n.startOffset, i = e.firstChild), C.remove(e, !0), i && (n.setStart(i, t), n.setEnd(i, t), u.selection.setRng(n))
+              }
+
+              function c(e) {
+                var n, r, i, o, s;
+                if (!e.collapsed && (n = C.getParent(t.getNode(e.startContainer, e.startOffset), C.isBlock), r = C.getParent(t.getNode(e.endContainer, e.endOffset), C.isBlock), s = u.schema.getTextBlockElements(), n != r && s[n.nodeName] && s[r.nodeName] && "false" !== C.getContentEditable(n) && "false" !== C.getContentEditable(r))) return e.deleteContents(), i = a(n, !1), o = a(r, !0), C.isEmpty(r) || X(n).append(r.childNodes), X(r).remove(), i ? 1 == i.nodeType ? "BR" == i.nodeName ? (e.setStartBefore(i), e.setEndBefore(i)) : (e.setStartAfter(i), e.setEndAfter(i)) : (e.setStart(i, i.data.length), e.setEnd(i, i.data.length)) : o && (1 == o.nodeType ? (e.setStartBefore(o), e.setEndBefore(o)) : (e.setStart(o, 0), e.setEnd(o, 0))), x.setRng(e), !0
+              }
+
+              function d(e, n) {
+                var r, i, s, l, c, d;
+                if (!e.collapsed) return e;
+                if (c = e.startContainer, d = e.startOffset, 3 == c.nodeType)
+                  if (n) {
+                    if (d < c.data.length) return e
+                  } else if (d > 0) return e;
+                if (r = t.getNode(e.startContainer, e.startOffset), s = C.getParent(r, C.isBlock), i = a(u.getBody(), n, r), l = C.getParent(i, C.isBlock), !r || !i) return e;
+                if (l && s != l)
+                  if (n) {
+                    if (!o(s, l)) return e;
+                    1 == r.nodeType ? "BR" == r.nodeName ? e.setStartBefore(r) : e.setStartAfter(r) : e.setStart(r, r.data.length), 1 == i.nodeType ? e.setEnd(i, 0) : e.setEndBefore(i)
+                  } else {
+                    if (!o(l, s)) return e;
+                    1 == i.nodeType ? "BR" == i.nodeName ? e.setStartBefore(i) : e.setStartAfter(i) : e.setStart(i, i.data.length), 1 == r.nodeType ? e.setEnd(r, 0) : e.setEndBefore(r)
                   }
-                })
+                return e
               }
-            }), t.disconnect(), s.each(u.dom.select("span[mce-data-marked]"), function(e) {
-              e.removeAttribute("mce-data-marked")
-            }))
-          }
-          var b = u.getDoc(),
-            C = u.dom,
-            x = u.selection,
-            w = window.MutationObserver,
-            E, N;
-          w || (E = !0, w = function() {
-            function e(e) {
-              var t = e.relatedNode || e.target;
-              n.push({
-                target: t,
-                addedNodes: [t]
-              })
-            }
 
-            function t(e) {
-              var t = e.relatedNode || e.target;
-              n.push({
-                target: t,
-                attributeName: e.attrName
-              })
-            }
-            var n = [],
-              r;
-            this.observe = function(n) {
-              r = n, r.addEventListener("DOMSubtreeModified", e, !1), r.addEventListener("DOMNodeInsertedIntoDocument", e, !1), r.addEventListener("DOMNodeInserted", e, !1), r.addEventListener("DOMAttrModified", t, !1)
-            }, this.disconnect = function() {
-              r.removeEventListener("DOMSubtreeModified", e, !1), r.removeEventListener("DOMNodeInsertedIntoDocument", e, !1), r.removeEventListener("DOMNodeInserted", e, !1), r.removeEventListener("DOMAttrModified", t, !1)
-            }, this.takeRecords = function() {
-              return n
-            }
-          }), u.on("keydown", function(e) {
-            var t = e.keyCode == G,
-              n = e.ctrlKey || e.metaKey;
-            if (!h(e) && (t || e.keyCode == K)) {
-              var r = u.selection.getRng(),
-                i = r.startContainer,
-                o = r.startOffset;
-              if (t && e.shiftKey) return;
-              if (v(t, r)) return void e.preventDefault();
-              if (!n && r.collapsed && 3 == i.nodeType && (t ? o < i.data.length : o > 0)) return;
-              e.preventDefault(), n && u.selection.getSel().modify("extend", t ? "forward" : "backward", e.metaKey ? "lineboundary" : "word"), y(t)
-            }
-          }), u.on("keypress", function(t) {
-            if (!h(t) && !x.isCollapsed() && t.charCode > 31 && !e.metaKeyPressed(t)) {
-              var n, r, i, o, a, s;
-              n = u.selection.getRng(), s = String.fromCharCode(t.charCode), t.preventDefault(), r = X(n.startContainer).parents().filter(function(e, t) {
-                return !!u.schema.getTextInlineElements()[t.nodeName]
-              }), y(!0), r = r.filter(function(e, t) {
-                return !X.contains(u.getBody(), t)
-              }), r.length ? (i = C.createFragment(), r.each(function(e, t) {
-                t = t.cloneNode(!1), i.hasChildNodes() ? (t.appendChild(i.firstChild), i.appendChild(t)) : (a = t, i.appendChild(t)), i.appendChild(t)
-              }), a.appendChild(u.getDoc().createTextNode(s)), o = C.getParent(n.startContainer, C.isBlock), C.isEmpty(o) ? X(o).empty().append(i) : n.insertNode(i), n.setStart(a.firstChild, 1), n.setEnd(a.firstChild, 1), u.selection.setRng(n)) : u.selection.setContent(s)
-            }
-          }), u.addCommand("Delete", function() {
-            y()
-          }), u.addCommand("ForwardDelete", function() {
-            y(!0)
-          }), E || (u.on("dragstart", function(e) {
-            N = x.getRng(), p(e)
-          }), u.on("drop", function(e) {
-            if (!h(e)) {
-              var n = m(e);
-              n && (e.preventDefault(), l.setEditorTimeout(u, function() {
-                var r = t.getCaretRangeFromPoint(e.x, e.y, b);
-                N && (x.setRng(N), N = null), y(), x.setRng(r), g(n.html)
-              }))
-            }
-          }), u.on("cut", function(e) {
-            h(e) || !e.clipboardData || u.selection.isCollapsed() || (e.preventDefault(), e.clipboardData.clearData(), e.clipboardData.setData("text/html", u.selection.getContent()), e.clipboardData.setData("text/plain", u.selection.getContent({
-              format: "text"
-            })), l.setEditorTimeout(u, function() {
-              y(!0)
-            }))
-          }))
-        }
-
-        function y() {
-          function e(e) {
-            var t = J.create("body"),
-              n = e.cloneContents();
-            return t.appendChild(n), Q.serializer.serialize(t, {
-              format: "html"
-            })
-          }
-
-          function n(n) {
-            if (!n.setStart) {
-              if (n.item) return !1;
-              var r = n.duplicate();
-              return r.moveToElementText(u.getBody()), t.compareRanges(n, r)
-            }
-            var i = e(n),
-              o = J.createRng();
-            o.selectNode(u.getBody());
-            var a = e(o);
-            return i === a
-          }
-          u.on("keydown", function(e) {
-            var t = e.keyCode,
-              r, i;
-            if (!h(e) && (t == G || t == K)) {
-              if (r = u.selection.isCollapsed(), i = u.getBody(), r && !J.isEmpty(i)) return;
-              if (!r && !n(u.selection.getRng())) return;
-              e.preventDefault(), u.setContent(""), i.firstChild && J.isBlock(i.firstChild) ? u.selection.setCursorLocation(i.firstChild, 0) : u.selection.setCursorLocation(i, 0), u.nodeChanged()
-            }
-          })
-        }
-
-        function b() {
-          u.shortcuts.add("meta+a", null, "SelectAll")
-        }
-
-        function C() {
-          u.settings.content_editable || J.bind(u.getDoc(), "mousedown mouseup", function(e) {
-            var t;
-            if (e.target == u.getDoc().documentElement)
-              if (t = Q.getRng(), u.getBody().focus(), "mousedown" == e.type) {
-                if (c.isCaretContainer(t.startContainer)) return;
-                Q.placeCaretAt(e.clientX, e.clientY)
-              } else Q.setRng(t)
-          })
-        }
-
-        function x() {
-          u.on("keydown", function(e) {
-            if (!h(e) && e.keyCode === K) {
-              if (!u.getBody().getElementsByTagName("hr").length) return;
-              if (Q.isCollapsed() && 0 === Q.getRng(!0).startOffset) {
-                var t = Q.getNode(),
-                  n = t.previousSibling;
-                if ("HR" == t.nodeName) return J.remove(t), void e.preventDefault();
-                n && n.nodeName && "hr" === n.nodeName.toLowerCase() && (J.remove(n), e.preventDefault())
+              function f(e) {
+                var t = x.getRng();
+                return t = d(t, e), c(t) ? !0 : void 0
               }
-            }
-          })
-        }
 
-        function w() {
-          window.Range.prototype.getClientRects || u.on("mousedown", function(e) {
-            if (!h(e) && "HTML" === e.target.nodeName) {
-              var t = u.getBody();
-              t.blur(), l.setEditorTimeout(u, function() {
-                t.focus()
-              })
-            }
-          })
-        }
-
-        function E() {
-          u.on("click", function(e) {
-            var t = e.target;
-            /^(IMG|HR)$/.test(t.nodeName) && "false" !== J.getContentEditableParent(t) && (e.preventDefault(), Q.getSel().setBaseAndExtent(t, 0, t, 1), u.nodeChanged()), "A" == t.nodeName && J.hasClass(t, "mce-item-anchor") && (e.preventDefault(), Q.select(t))
-          })
-        }
-
-        function N() {
-          function e() {
-            var e = J.getAttribs(Q.getStart().cloneNode(!1));
-            return function() {
-              var t = Q.getStart();
-              t !== u.getBody() && (J.setAttrib(t, "style", null), Y(e, function(e) {
-                t.setAttributeNode(e.cloneNode(!0))
-              }))
-            }
-          }
-
-          function t() {
-            return !Q.isCollapsed() && J.getParent(Q.getStart(), J.isBlock) != J.getParent(Q.getEnd(), J.isBlock)
-          }
-          u.on("keypress", function(n) {
-            var r;
-            return h(n) || 8 != n.keyCode && 46 != n.keyCode || !t() ? void 0 : (r = e(), u.getDoc().execCommand("delete", !1, null), r(), n.preventDefault(), !1)
-          }), J.bind(u.getDoc(), "cut", function(n) {
-            var r;
-            !h(n) && t() && (r = e(), l.setEditorTimeout(u, function() {
-              r()
-            }))
-          })
-        }
-
-        function _() {
-          document.body.setAttribute("role", "application")
-        }
-
-        function S() {
-          u.on("keydown", function(e) {
-            if (!h(e) && e.keyCode === K && Q.isCollapsed() && 0 === Q.getRng(!0).startOffset) {
-              var t = Q.getNode().previousSibling;
-              if (t && t.nodeName && "table" === t.nodeName.toLowerCase()) return e.preventDefault(), !1
-            }
-          })
-        }
-
-        function k() {
-          f() > 7 || (d("RespectVisibilityInDesign", !0), u.contentStyles.push(".mceHideBrInPre pre br {display: none}"), J.addClass(u.getBody(), "mceHideBrInPre"), ee.addNodeFilter("pre", function(e) {
-            for (var t = e.length, n, r, o, a; t--;)
-              for (n = e[t].getAll("br"), r = n.length; r--;) o = n[r], a = o.prev, a && 3 === a.type && "\n" != a.value.charAt(a.value - 1) ? a.value += "\n" : o.parent.insert(new i("#text", 3), o, !0).value = "\n"
-          }), te.addNodeFilter("pre", function(e) {
-            for (var t = e.length, n, r, i, o; t--;)
-              for (n = e[t].getAll("br"), r = n.length; r--;) i = n[r], o = i.prev, o && 3 == o.type && (o.value = o.value.replace(/\r?\n$/, ""))
-          }))
-        }
-
-        function T() {
-          J.bind(u.getBody(), "mouseup", function() {
-            var e, t = Q.getNode();
-            "IMG" == t.nodeName && ((e = J.getStyle(t, "width")) && (J.setAttrib(t, "width", e.replace(/[^0-9%]+/g, "")), J.setStyle(t, "width", "")), (e = J.getStyle(t, "height")) && (J.setAttrib(t, "height", e.replace(/[^0-9%]+/g, "")), J.setStyle(t, "height", "")))
-          })
-        }
-
-        function R() {
-          u.on("keydown", function(t) {
-            var n, r, i, o, a;
-            if (!h(t) && t.keyCode == e.BACKSPACE && (n = Q.getRng(), r = n.startContainer, i = n.startOffset, o = J.getRoot(), a = r, n.collapsed && 0 === i)) {
-              for (; a && a.parentNode && a.parentNode.firstChild == a && a.parentNode != o;) a = a.parentNode;
-              "BLOCKQUOTE" === a.tagName && (u.formatter.toggle("blockquote", null, a), n = J.createRng(), n.setStart(r, 0), n.setEnd(r, 0), Q.setRng(n))
-            }
-          })
-        }
-
-        function A() {
-          function e() {
-            u._refreshContentEditable(), d("StyleWithCSS", !1), d("enableInlineTableEditing", !1), Z.object_resizing || d("enableObjectResizing", !1)
-          }
-          Z.readonly || u.on("BeforeExecCommand MouseDown", e)
-        }
-
-        function B() {
-          function e() {
-            Y(J.select("a"), function(e) {
-              var t = e.parentNode,
-                n = J.getRoot();
-              if (t.lastChild === e) {
-                for (; t && !J.isBlock(t);) {
-                  if (t.parentNode.lastChild !== t || t === n) return;
-                  t = t.parentNode
+              function v(e, t) {
+                function n(e, n) {
+                  return m = X(n).parents().filter(function(e, t) {
+                    return !!u.schema.getTextInlineElements()[t.nodeName]
+                  }), l = e.cloneNode(!1), m = s.map(m, function(e) {
+                    return e = e.cloneNode(!1), l.hasChildNodes() ? (e.appendChild(l.firstChild), l.appendChild(e)) : l.appendChild(e), l.appendChild(e), e
+                  }), m.length ? (p = C.create("br"), m[0].appendChild(p), C.replace(l, e), t.setStartBefore(p), t.setEndBefore(p), u.selection.setRng(t), p) : null
                 }
-                J.add(t, "br", {
-                  "data-mce-bogus": 1
+
+                function i(e) {
+                  return e && u.schema.getTextBlockElements()[e.tagName]
+                }
+                var o, a, l, c, d, f, h, p, m;
+                if (t.collapsed && (f = t.startContainer, h = t.startOffset, a = C.getParent(f, C.isBlock), i(a)))
+                  if (1 == f.nodeType) {
+                    if (f = f.childNodes[h], f && "BR" != f.tagName) return;
+                    if (d = e ? a.nextSibling : a.previousSibling, C.isEmpty(a) && i(d) && C.isEmpty(d) && n(a, f)) return C.remove(d), !0
+                  } else if (3 == f.nodeType) {
+                  if (o = r.create(a, f), c = a.cloneNode(!0), f = r.resolve(c, o), e) {
+                    if (h >= f.data.length) return;
+                    f.deleteData(h, 1)
+                  } else {
+                    if (0 >= h) return;
+                    f.deleteData(h - 1, 1)
+                  }
+                  if (C.isEmpty(c)) return n(a, f)
+                }
+              }
+
+              function y(e) {
+                var t, n, r;
+                f(e) || (s.each(u.getBody().getElementsByTagName("*"), function(e) {
+                  "SPAN" == e.tagName && e.setAttribute("mce-data-marked", 1), !e.hasAttribute("data-mce-style") && e.hasAttribute("style") && u.dom.setAttrib(e, "style", u.dom.getAttrib(e, "style"))
+                }), t = new w(function() {}), t.observe(u.getDoc(), {
+                  childList: !0,
+                  attributes: !0,
+                  subtree: !0,
+                  attributeFilter: ["style"]
+                }), u.getDoc().execCommand(e ? "ForwardDelete" : "Delete", !1, null), n = u.selection.getRng(), r = n.startContainer.parentNode, s.each(t.takeRecords(), function(e) {
+                  if (C.isChildOf(e.target, u.getBody())) {
+                    if ("style" == e.attributeName) {
+                      var t = e.target.getAttribute("data-mce-style");
+                      t ? e.target.setAttribute("style", t) : e.target.removeAttribute("style")
+                    }
+                    s.each(e.addedNodes, function(e) {
+                      if ("SPAN" == e.nodeName && !e.getAttribute("mce-data-marked")) {
+                        var t, i;
+                        e == r && (t = n.startOffset, i = e.firstChild), C.remove(e, !0), i && (n.setStart(i, t), n.setEnd(i, t), u.selection.setRng(n))
+                      }
+                    })
+                  }
+                }), t.disconnect(), s.each(u.dom.select("span[mce-data-marked]"), function(e) {
+                  e.removeAttribute("mce-data-marked")
+                }))
+              }
+              var b = u.getDoc(),
+                C = u.dom,
+                x = u.selection,
+                w = window.MutationObserver,
+                E, N;
+              w || (E = !0, w = function() {
+                function e(e) {
+                  var t = e.relatedNode || e.target;
+                  n.push({
+                    target: t,
+                    addedNodes: [t]
+                  })
+                }
+
+                function t(e) {
+                  var t = e.relatedNode || e.target;
+                  n.push({
+                    target: t,
+                    attributeName: e.attrName
+                  })
+                }
+                var n = [],
+                  r;
+                this.observe = function(n) {
+                  r = n, r.addEventListener("DOMSubtreeModified", e, !1), r.addEventListener("DOMNodeInsertedIntoDocument", e, !1), r.addEventListener("DOMNodeInserted", e, !1), r.addEventListener("DOMAttrModified", t, !1)
+                }, this.disconnect = function() {
+                  r.removeEventListener("DOMSubtreeModified", e, !1), r.removeEventListener("DOMNodeInsertedIntoDocument", e, !1), r.removeEventListener("DOMNodeInserted", e, !1), r.removeEventListener("DOMAttrModified", t, !1)
+                }, this.takeRecords = function() {
+                  return n
+                }
+              }), u.on("keydown", function(e) {
+                var t = e.keyCode == G,
+                  n = e.ctrlKey || e.metaKey;
+                if (!h(e) && (t || e.keyCode == K)) {
+                  var r = u.selection.getRng(),
+                    i = r.startContainer,
+                    o = r.startOffset;
+                  if (t && e.shiftKey) return;
+                  if (v(t, r)) return void e.preventDefault();
+                  if (!n && r.collapsed && 3 == i.nodeType && (t ? o < i.data.length : o > 0)) return;
+                  e.preventDefault(), n && u.selection.getSel().modify("extend", t ? "forward" : "backward", e.metaKey ? "lineboundary" : "word"), y(t)
+                }
+              }), u.on("keypress", function(t) {
+                if (!h(t) && !x.isCollapsed() && t.charCode > 31 && !e.metaKeyPressed(t)) {
+                  var n, r, i, o, a, s;
+                  n = u.selection.getRng(), s = String.fromCharCode(t.charCode), t.preventDefault(), r = X(n.startContainer).parents().filter(function(e, t) {
+                    return !!u.schema.getTextInlineElements()[t.nodeName]
+                  }), y(!0), r = r.filter(function(e, t) {
+                    return !X.contains(u.getBody(), t)
+                  }), r.length ? (i = C.createFragment(), r.each(function(e, t) {
+                    t = t.cloneNode(!1), i.hasChildNodes() ? (t.appendChild(i.firstChild), i.appendChild(t)) : (a = t, i.appendChild(t)), i.appendChild(t)
+                  }), a.appendChild(u.getDoc().createTextNode(s)), o = C.getParent(n.startContainer, C.isBlock), C.isEmpty(o) ? X(o).empty().append(i) : n.insertNode(i), n.setStart(a.firstChild, 1), n.setEnd(a.firstChild, 1), u.selection.setRng(n)) : u.selection.setContent(s)
+                }
+              }), u.addCommand("Delete", function() {
+                y()
+              }), u.addCommand("ForwardDelete", function() {
+                y(!0)
+              }), E || (u.on("dragstart", function(e) {
+                N = x.getRng(), p(e)
+              }), u.on("drop", function(e) {
+                if (!h(e)) {
+                  var n = m(e);
+                  n && (e.preventDefault(), l.setEditorTimeout(u, function() {
+                    var r = t.getCaretRangeFromPoint(e.x, e.y, b);
+                    N && (x.setRng(N), N = null), y(), x.setRng(r), g(n.html)
+                  }))
+                }
+              }), u.on("cut", function(e) {
+                h(e) || !e.clipboardData || u.selection.isCollapsed() || (e.preventDefault(), e.clipboardData.clearData(), e.clipboardData.setData("text/html", u.selection.getContent()), e.clipboardData.setData("text/plain", u.selection.getContent({
+                  format: "text"
+                })), l.setEditorTimeout(u, function() {
+                  y(!0)
+                }))
+              }))
+            }
+
+            function y() {
+              function e(e) {
+                var t = J.create("body"),
+                  n = e.cloneContents();
+                return t.appendChild(n), Q.serializer.serialize(t, {
+                  format: "html"
                 })
               }
-            })
-          }
-          u.on("SetContent ExecCommand", function(t) {
-            ("setcontent" == t.type || "mceInsertLink" === t.command) && e()
-          })
-        }
 
-        function D() {
-          Z.forced_root_block && u.on("init", function() {
-            d("DefaultParagraphSeparator", Z.forced_root_block)
-          })
-        }
-
-        function M() {
-          u.on("keydown", function(e) {
-            var t;
-            h(e) || e.keyCode != K || (t = u.getDoc().selection.createRange(), t && t.item && (e.preventDefault(), u.undoManager.beforeChange(), J.remove(t.item(0)), u.undoManager.add()))
-          })
-        }
-
-        function L() {
-          var e;
-          f() >= 10 && (e = "", Y("p div h1 h2 h3 h4 h5 h6".split(" "), function(t, n) {
-            e += (n > 0 ? "," : "") + t + ":empty"
-          }), u.contentStyles.push(e + "{padding-right: 1px !important}"))
-        }
-
-        function P() {
-          f() < 9 && (ee.addNodeFilter("noscript", function(e) {
-            for (var t = e.length, n, r; t--;) n = e[t], r = n.firstChild, r && n.attr("data-mce-innertext", r.value)
-          }), te.addNodeFilter("noscript", function(e) {
-            for (var t = e.length, n, r, a; t--;) n = e[t], r = e[t].firstChild, r ? r.value = o.decode(r.value) : (a = n.attributes.map["data-mce-innertext"], a && (n.attr("data-mce-innertext", null), r = new i("#text", 3), r.value = a, r.raw = !0, n.append(r)))
-          }))
-        }
-
-        function H() {
-          function e(e, t) {
-            var n = i.createTextRange();
-            try {
-              n.moveToPoint(e, t)
-            } catch (r) {
-              n = null
-            }
-            return n
-          }
-
-          function t(t) {
-            var r;
-            t.button ? (r = e(t.x, t.y), r && (r.compareEndPoints("StartToStart", a) > 0 ? r.setEndPoint("StartToStart", a) : r.setEndPoint("EndToEnd", a), r.select())) : n()
-          }
-
-          function n() {
-            var e = r.selection.createRange();
-            a && !e.item && 0 === e.compareEndPoints("StartToEnd", e) && a.select(), J.unbind(r, "mouseup", n), J.unbind(r, "mousemove", t), a = o = 0
-          }
-          var r = J.doc,
-            i = r.body,
-            o, a, s;
-          r.documentElement.unselectable = !0, J.bind(r, "mousedown contextmenu", function(i) {
-            if ("HTML" === i.target.nodeName) {
-              if (o && n(), s = r.documentElement, s.scrollHeight > s.clientHeight) return;
-              o = 1, a = e(i.x, i.y), a && (J.bind(r, "mouseup", n), J.bind(r, "mousemove", t), J.getRoot().focus(), a.select())
-            }
-          })
-        }
-
-        function O() {
-          u.on("keyup focusin mouseup", function(t) {
-            65 == t.keyCode && e.metaKeyPressed(t) || Q.normalize()
-          }, !0)
-        }
-
-        function I() {
-          u.contentStyles.push("img:-moz-broken {-moz-force-broken-image-icon:1;min-width:24px;min-height:24px}")
-        }
-
-        function F() {
-          u.inline || u.on("keydown", function() {
-            document.activeElement == document.body && u.getWin().focus()
-          })
-        }
-
-        function z() {
-          u.inline || (u.contentStyles.push("body {min-height: 150px}"), u.on("click", function(e) {
-            var t;
-            if ("HTML" == e.target.nodeName) {
-              if (a.ie > 11) return void u.getBody().focus();
-              t = u.selection.getRng(), u.getBody().focus(), u.selection.setRng(t), u.selection.normalize(), u.nodeChanged()
-            }
-          }))
-        }
-
-        function W() {
-          a.mac && u.on("keydown", function(t) {
-            !e.metaKeyPressed(t) || t.shiftKey || 37 != t.keyCode && 39 != t.keyCode || (t.preventDefault(), u.selection.getSel().modify("move", 37 == t.keyCode ? "backward" : "forward", "lineboundary"))
-          })
-        }
-
-        function V() {
-          d("AutoUrlDetect", !1)
-        }
-
-        function U() {
-          u.on("click", function(e) {
-            var t = e.target;
-            do
-              if ("A" === t.tagName) return void e.preventDefault(); while (t = t.parentNode)
-          }), u.contentStyles.push(".mce-content-body {-webkit-touch-callout: none}")
-        }
-
-        function $() {
-          u.on("init", function() {
-            u.dom.bind(u.getBody(), "submit", function(e) {
-              e.preventDefault()
-            })
-          })
-        }
-
-        function q() {
-          ee.addNodeFilter("br", function(e) {
-            for (var t = e.length; t--;) "Apple-interchange-newline" == e[t].attr("class") && e[t].remove()
-          })
-        }
-
-        function j() {
-          u.on("dragstart", function(e) {
-            p(e)
-          }), u.on("drop", function(e) {
-            if (!h(e)) {
-              var n = m(e);
-              if (n && n.id != u.id) {
-                e.preventDefault();
-                var r = t.getCaretRangeFromPoint(e.x, e.y, u.getDoc());
-                Q.setRng(r), g(n.html)
+              function n(n) {
+                if (!n.setStart) {
+                  if (n.item) return !1;
+                  var r = n.duplicate();
+                  return r.moveToElementText(u.getBody()), t.compareRanges(n, r)
+                }
+                var i = e(n),
+                  o = J.createRng();
+                o.selectNode(u.getBody());
+                var a = e(o);
+                return i === a
               }
+              u.on("keydown", function(e) {
+                var t = e.keyCode,
+                  r, i;
+                if (!h(e) && (t == G || t == K)) {
+                  if (r = u.selection.isCollapsed(), i = u.getBody(), r && !J.isEmpty(i)) return;
+                  if (!r && !n(u.selection.getRng())) return;
+                  e.preventDefault(), u.setContent(""), i.firstChild && J.isBlock(i.firstChild) ? u.selection.setCursorLocation(i.firstChild, 0) : u.selection.setCursorLocation(i, 0), u.nodeChanged()
+                }
+              })
             }
-          })
-        }
-        var Y = s.each,
-          X = u.$,
-          K = e.BACKSPACE,
-          G = e.DELETE,
-          J = u.dom,
-          Q = u.selection,
-          Z = u.settings,
-          ee = u.parser,
-          te = u.serializer,
-          ne = a.gecko,
-          re = a.ie,
-          ie = a.webkit,
-          oe = "data:text/mce-internal,",
-          ae = re ? "Text" : "URL";
-        R(), y(), O(), ie && (v(), C(), E(), D(), $(), S(), q(), a.iOS ? (F(), z(), U()) : b()), re && a.ie < 11 && (x(), _(), k(), T(), M(), L(), P(), H()), a.ie >= 11 && (z(), S()), a.ie && (b(), V(), j()), ne && (x(), w(), N(), A(), B(), I(), W(), S())
-      }
-    }), r(Me, [oe, w, m], function(e, t, n) {
-      function r(e, t) {
-        return "selectionchange" == t ? e.getDoc() : !e.inline && /^mouse|click|contextmenu|drop|dragover|dragend/.test(t) ? e.getDoc().documentElement : e.settings.event_root ? (e.eventRoot || (e.eventRoot = o.select(e.settings.event_root)[0]), e.eventRoot) : e.getBody()
-      }
 
-      function i(e, t) {
-        function n(e) {
-          return !e.hidden && !e.readonly
-        }
-        var i = r(e, t),
-          s;
-        if (e.delegates || (e.delegates = {}), !e.delegates[t])
-          if (e.settings.event_root) {
-            if (a || (a = {}, e.editorManager.on("removeEditor", function() {
+            function b() {
+              u.shortcuts.add("meta+a", null, "SelectAll")
+            }
+
+            function C() {
+              u.settings.content_editable || J.bind(u.getDoc(), "mousedown mouseup", function(e) {
                 var t;
-                if (!e.editorManager.activeEditor && a) {
-                  for (t in a) e.dom.unbind(r(e, t));
-                  a = null
-                }
-              })), a[t]) return;
-            s = function(r) {
-              for (var i = r.target, a = e.editorManager.editors, s = a.length; s--;) {
-                var l = a[s].getBody();
-                (l === i || o.isChildOf(i, l)) && n(a[s]) && a[s].fire(t, r)
-              }
-            }, a[t] = s, o.bind(i, t, s)
-          } else s = function(r) {
-            n(e) && e.fire(t, r)
-          }, o.bind(i, t, s), e.delegates[t] = s
-      }
-      var o = t.DOM,
-        a, s = {
-          bindPendingEventDelegates: function() {
-            var e = this;
-            n.each(e._pendingNativeEvents, function(t) {
-              i(e, t)
-            })
-          },
-          toggleNativeEvent: function(e, t) {
-            var n = this;
-            "focus" != e && "blur" != e && (t ? n.initialized ? i(n, e) : n._pendingNativeEvents ? n._pendingNativeEvents.push(e) : n._pendingNativeEvents = [e] : n.initialized && (n.dom.unbind(r(n, e), e, n.delegates[e]), delete n.delegates[e]))
-          },
-          unbindAllNativeEvents: function() {
-            var e = this,
-              t;
-            if (e.delegates) {
-              for (t in e.delegates) e.dom.unbind(r(e, t), t, e.delegates[t]);
-              delete e.delegates
-            }
-            e.inline || (e.getBody().onload = null, e.dom.unbind(e.getWin()), e.dom.unbind(e.getDoc())), e.dom.unbind(e.getBody()), e.dom.unbind(e.getContainer())
-          }
-        };
-      return s = n.extend({}, e, s)
-    }), r(Le, [], function() {
-      function e(e, t, n) {
-        try {
-          e.getDoc().execCommand(t, !1, n)
-        } catch (r) {}
-      }
-
-      function t(t, n) {
-        var r = t.readonly ? "readonly" : "design";
-        n != r && ("readonly" == n ? (t.selection.controlSelection.hideResizeRect(), t.readonly = !0, t.getBody().contentEditable = !1) : (t.readonly = !1, t.getBody().contentEditable = !0, e(t, "StyleWithCSS", !1), e(t, "enableInlineTableEditing", !1), e(t, "enableObjectResizing", !1), t.focus(), t.nodeChanged()), t.fire("SwitchMode", {
-          mode: n
-        }))
-      }
-      return {
-        setMode: t
-      }
-    }), r(Pe, [m, h], function(e, t) {
-      var n = e.each,
-        r = e.explode,
-        i = {
-          f9: 120,
-          f10: 121,
-          f11: 122
-        },
-        o = e.makeMap("alt,ctrl,shift,meta,access");
-      return function(a) {
-        function s(e, s, l, c) {
-          var u, d, f;
-          f = {
-            func: l,
-            scope: c || a,
-            desc: a.translate(s)
-          }, n(r(e, "+"), function(e) {
-            e in o ? f[e] = !0 : /^[0-9]{2,}$/.test(e) ? f.keyCode = parseInt(e, 10) : (f.charCode = e.charCodeAt(0), f.keyCode = i[e] || e.toUpperCase().charCodeAt(0))
-          }), u = [f.keyCode];
-          for (d in o) f[d] ? u.push(d) : f[d] = !1;
-          return f.id = u.join(","), f.access && (f.alt = !0, t.mac ? f.ctrl = !0 : f.shift = !0), f.meta && (t.mac ? f.meta = !0 : (f.ctrl = !0, f.meta = !1)), f
-        }
-        var l = this,
-          c = {};
-        a.on("keyup keypress keydown", function(e) {
-          (e.altKey || e.ctrlKey || e.metaKey) && !e.isDefaultPrevented() && n(c, function(t) {
-            return t.ctrl == e.ctrlKey && t.meta == e.metaKey && t.alt == e.altKey && t.shift == e.shiftKey && (e.keyCode == t.keyCode || e.charCode && e.charCode == t.charCode) ? (e.preventDefault(), "keydown" == e.type && t.func.call(t.scope), !0) : void 0
-          })
-        }), l.add = function(t, i, o, l) {
-          var u;
-          return u = o, "string" == typeof o ? o = function() {
-            a.execCommand(u, !1, null)
-          } : e.isArray(u) && (o = function() {
-            a.execCommand(u[0], u[1], u[2])
-          }), n(r(t.toLowerCase()), function(e) {
-            var t = s(e, i, o, l);
-            c[t.id] = t
-          }), !0
-        }, l.remove = function(e) {
-          var t = s(e);
-          return c[t.id] ? (delete c[t.id], !0) : !1
-        }
-      }
-    }), r(He, [c, m, z], function(e, t, n) {
-      return function(r) {
-        function i(e) {
-          var t, n;
-          return n = {
-            "image/jpeg": "jpg",
-            "image/jpg": "jpg",
-            "image/gif": "gif",
-            "image/png": "png"
-          }, t = n[e.blob().type.toLowerCase()] || "dat", e.id() + "." + t
-        }
-
-        function o(e, t) {
-          return e ? e.replace(/\/$/, "") + "/" + t.replace(/^\//, "") : t
-        }
-
-        function a(e) {
-          return {
-            id: e.id,
-            blob: e.blob,
-            base64: e.base64,
-            filename: n.constant(i(e))
-          }
-        }
-
-        function s(e, t, n, a) {
-          var s, l, c;
-          s = new XMLHttpRequest, s.open("POST", r.url), s.withCredentials = r.credentials, c = a(), s.upload.onprogress = function(e) {
-            var t = Math.round(e.loaded / e.total * 100);
-            c.progressBar.value(t)
-          }, s.onload = function() {
-            var e;
-            return c.close(), 200 != s.status ? void n("HTTP Error: " + s.status) : (e = JSON.parse(s.responseText), e && "string" == typeof e.location ? void t(o(r.basePath, e.location)) : void n("Invalid JSON: " + s.responseText))
-          }, l = new FormData, l.append("file", e.blob(), i(e)), s.send(l)
-        }
-
-        function l() {
-          return new e(function(e) {
-            e([])
-          })
-        }
-
-        function c(e) {
-          return e.then(function(e) {
-            return e
-          })["catch"](function(e) {
-            return e
-          })
-        }
-
-        function u(e, t, n) {
-          var r = e(n),
-            i = c(r);
-          return delete p[t], p[t] = i, i
-        }
-
-        function d(e, n) {
-          return t.map(e, function(e) {
-            var t = e.id();
-            return p[t] ? p[t] : u(n, t, e)
-          })
-        }
-
-        function f(t, n) {
-          function i(t) {
-            return new e(function(e) {
-              var i = r.handler;
-              i(a(t), function(n) {
-                e({
-                  url: n,
-                  blobInfo: t,
-                  status: !0
-                })
-              }, function(n) {
-                e({
-                  url: "",
-                  blobInfo: t,
-                  status: !1,
-                  error: n
-                })
-              }, n)
-            })
-          }
-          var o = d(t, i);
-          return e.all(o)
-        }
-
-        function h(e, t) {
-          return r.url || r.handler !== s ? f(e, t) : l()
-        }
-        var p = {};
-        return r = t.extend({
-          credentials: !1,
-          handler: s
-        }, r), {
-          upload: h
-        }
-      }
-    }), r(Oe, [c], function(e) {
-      function t(t) {
-        return new e(function(e) {
-          var n = new XMLHttpRequest;
-          n.open("GET", t, !0), n.responseType = "blob", n.onload = function() {
-            200 == this.status && e(this.response)
-          }, n.send()
-        })
-      }
-
-      function n(e) {
-        var t, n;
-        return e = decodeURIComponent(e).split(","), n = /data:([^;]+)/.exec(e[0]), n && (t = n[1]), {
-          type: t,
-          data: e[1]
-        }
-      }
-
-      function r(t) {
-        return new e(function(e) {
-          var r, i, o;
-          t = n(t);
-          try {
-            r = atob(t.data)
-          } catch (a) {
-            return void e(new Blob([]))
-          }
-          for (i = new Uint8Array(r.length), o = 0; o < i.length; o++) i[o] = r.charCodeAt(o);
-          e(new Blob([i], {
-            type: t.type
-          }))
-        })
-      }
-
-      function i(e) {
-        return 0 === e.indexOf("blob:") ? t(e) : 0 === e.indexOf("data:") ? r(e) : null
-      }
-
-      function o(t) {
-        return new e(function(e) {
-          var n = new FileReader;
-          n.onloadend = function() {
-            e(n.result)
-          }, n.readAsDataURL(t)
-        })
-      }
-      return {
-        uriToBlob: i,
-        blobToDataUri: o,
-        parseDataUri: n
-      }
-    }), r(Ie, [c, p, z, Oe, h], function(e, t, n, r, i) {
-      var o = 0;
-      return function(a) {
-        function s(s, c) {
-          function u(e, t) {
-            var n, i;
-            return 0 === e.src.indexOf("blob:") ? (i = a.getByUri(e.src), void(i && t({
-              image: e,
-              blobInfo: i
-            }))) : (n = r.parseDataUri(e.src).data, i = a.findFirst(function(e) {
-              return e.base64() === n
-            }), void(i ? t({
-              image: e,
-              blobInfo: i
-            }) : r.uriToBlob(e.src).then(function(r) {
-              var i = "blobid" + o++,
-                s = a.create(i, r, n);
-              a.add(s), t({
-                image: e,
-                blobInfo: s
+                if (e.target == u.getDoc().documentElement)
+                  if (t = Q.getRng(), u.getBody().focus(), "mousedown" == e.type) {
+                    if (c.isCaretContainer(t.startContainer)) return;
+                    Q.placeCaretAt(e.clientX, e.clientY)
+                  } else Q.setRng(t)
               })
-            })))
-          }
-          var d, f;
-          return c || (c = n.constant(!0)), d = t.filter(s.getElementsByTagName("img"), function(e) {
-            var t = e.src;
-            return i.fileApi ? e.hasAttribute("data-mce-bogus") ? !1 : e.hasAttribute("data-mce-placeholder") ? !1 : t && t != i.transparentSrc ? 0 === t.indexOf("blob:") ? !0 : 0 === t.indexOf("data:") ? c(e) : !1 : !1 : !1
-          }), f = t.map(d, function(t) {
-            var n;
-            return l[t.src] ? new e(function(e) {
-              l[t.src].then(function(n) {
-                e({
-                  image: t,
-                  blobInfo: n.blobInfo
-                })
-              })
-            }) : (n = new e(function(e) {
-              u(t, e)
-            }).then(function(e) {
-              return delete l[e.image.src], e
-            })["catch"](function(e) {
-              return delete l[t.src], e
-            }), l[t.src] = n, n)
-          }), e.all(f)
-        }
-        var l = {};
-        return {
-          findAll: s
-        }
-      }
-    }), r(Fe, [p, z], function(e, t) {
-      return function() {
-        function n(e, t, n) {
-          return {
-            id: c(e),
-            blob: c(t),
-            base64: c(n),
-            blobUri: c(URL.createObjectURL(t))
-          }
-        }
-
-        function r(e) {
-          i(e.id()) || l.push(e)
-        }
-
-        function i(e) {
-          return o(function(t) {
-            return t.id() === e
-          })
-        }
-
-        function o(t) {
-          return e.filter(l, t)[0]
-        }
-
-        function a(e) {
-          return o(function(t) {
-            return t.blobUri() == e
-          })
-        }
-
-        function s() {
-          e.each(l, function(e) {
-            URL.revokeObjectURL(e.blobUri())
-          }), l = []
-        }
-        var l = [],
-          c = t.constant;
-        return {
-          create: n,
-          add: r,
-          get: i,
-          getByUri: a,
-          findFirst: o,
-          destroy: s
-        }
-      }
-    }), r(ze, [p, He, Ie, Fe], function(e, t, n, r) {
-      return function(i) {
-        function o(e) {
-          return function(t) {
-            return i.selection ? e(t) : []
-          }
-        }
-
-        function a(e, t, n) {
-          var r = 0;
-          do r = e.indexOf(t, r), -1 !== r && (e = e.substring(0, r) + n + e.substr(r + t.length), r += n.length - t.length + 1); while (-1 !== r);
-          return e
-        }
-
-        function s(e, t, n) {
-          return e = a(e, 'src="' + t + '"', 'src="' + n + '"'), e = a(e, 'data-mce-src="' + t + '"', 'data-mce-src="' + n + '"')
-        }
-
-        function l(t, n) {
-          e.each(i.undoManager.data, function(e) {
-            e.content = s(e.content, t, n)
-          })
-        }
-
-        function c() {
-          return i.notificationManager.open({
-            text: i.translate("Image uploading..."),
-            type: "info",
-            timeout: -1,
-            progressBar: !0
-          })
-        }
-
-        function u(n) {
-          return g || (g = new t({
-            url: y.images_upload_url,
-            basePath: y.images_upload_base_path,
-            credentials: y.images_upload_credentials,
-            handler: y.images_upload_handler
-          })), f().then(o(function(t) {
-            var r;
-            return r = e.map(t, function(e) {
-              return e.blobInfo
-            }), g.upload(r, c).then(o(function(r) {
-              return r = e.map(r, function(e, n) {
-                var r = t[n].image;
-                return l(r.src, e.url), i.$(r).attr({
-                  src: e.url,
-                  "data-mce-src": i.convertURL(e.url, "src")
-                }), {
-                  element: r,
-                  status: e.status
-                }
-              }), n && n(r), r
-            }))
-          }))
-        }
-
-        function d(e) {
-          return y.automatic_uploads !== !1 ? u(e) : void 0
-        }
-
-        function f() {
-          return v || (v = new n(m)), v.findAll(i.getBody(), y.images_dataimg_filter).then(o(function(t) {
-            return e.each(t, function(e) {
-              l(e.image.src, e.blobInfo.blobUri()), e.image.src = e.blobInfo.blobUri()
-            }), t
-          }))
-        }
-
-        function h() {
-          m.destroy(), v = g = null
-        }
-
-        function p(t) {
-          return t.replace(/src="(blob:[^"]+)"/g, function(t, n) {
-            var r = m.getByUri(n);
-            return r || (r = e.reduce(i.editorManager.editors, function(e, t) {
-              return e || t.editorUpload.blobCache.getByUri(n)
-            }, null)), r ? 'src="data:' + r.blob().type + ";base64," + r.base64() + '"' : t
-          })
-        }
-        var m = new r,
-          g, v, y = i.settings;
-        return i.on("setContent", function() {
-          i.settings.automatic_uploads !== !1 ? d() : f()
-        }), i.on("RawSaveContent", function(e) {
-          e.content = p(e.content)
-        }), i.on("getContent", function(e) {
-          e.source_view || "raw" == e.format || (e.content = p(e.content))
-        }), {
-          blobCache: m,
-          uploadImages: u,
-          uploadImagesAuto: d,
-          scanForImages: f,
-          destroy: h
-        }
-      }
-    }), r(We, [z, y, _, $, k, W], function(e, t, n, r, i, o) {
-      function a(e) {
-        return e > 0
-      }
-
-      function s(e) {
-        return 0 > e
-      }
-
-      function l(e, n, r, i, o) {
-        var l = new t(e, i);
-        if (s(n)) {
-          if (C(e) && (e = l.prev(!0), r(e))) return e;
-          for (; e = l.prev(o);)
-            if (r(e)) return e
-        }
-        if (a(n)) {
-          if (C(e) && (e = l.next(!0), r(e))) return e;
-          for (; e = l.next(o);)
-            if (r(e)) return e
-        }
-        return null
-      }
-
-      function c(e, t) {
-        for (e = e.parentNode; e && e != t; e = e.parentNode)
-          if (b(e)) return e;
-        return t
-      }
-
-      function u(e, t) {
-        for (; e && e != t;) {
-          if (x(e)) return e;
-          e = e.parentNode
-        }
-        return null
-      }
-
-      function d(e, t, n) {
-        return u(e.container(), n) == u(t.container(), n)
-      }
-
-      function f(e, t, n) {
-        return c(e.container(), n) == c(t.container(), n)
-      }
-
-      function h(e, t) {
-        var n, r;
-        return t ? (n = t.container(), r = t.offset(), N(n) ? n.childNodes[r + e] : null) : null
-      }
-
-      function p(e, t) {
-        var n = t.ownerDocument.createRange();
-        return e ? (n.setStartBefore(t), n.setEndBefore(t)) : (n.setStartAfter(t), n.setEndAfter(t)), n
-      }
-
-      function m(e, t, n) {
-        return u(t, e) == u(n, e)
-      }
-
-      function g(e, t, n) {
-        var r, i;
-        for (i = e ? "previousSibling" : "nextSibling"; n && n != t;) {
-          if (r = n[i], w(r) && (r = r[i]), C(r)) {
-            if (m(t, r, n)) return r;
-            break
-          }
-          if (_(r)) break;
-          n = n.parentNode
-        }
-        return null
-      }
-
-      function v(e, t, r) {
-        var o, a, s, l, c = E(g, !0, t),
-          u = E(g, !1, t);
-        if (a = r.startContainer, s = r.startOffset, i.isCaretContainerBlock(a)) {
-          if (N(a) || (a = a.parentNode), l = a.getAttribute("data-mce-caret"), "before" == l && (o = a.nextSibling, C(o))) return S(o);
-          if ("after" == l && (o = a.previousSibling, C(o))) return k(o)
-        }
-        if (!r.collapsed) return r;
-        if (n.isText(a)) {
-          if (w(a)) {
-            if (1 === e) {
-              if (o = u(a)) return S(o);
-              if (o = c(a)) return k(o)
             }
-            if (-1 === e) {
-              if (o = c(a)) return k(o);
-              if (o = u(a)) return S(o)
-            }
-            return r
-          }
-          if (i.endsWithCaretContainer(a) && s >= a.data.length - 1) return 1 === e && (o = u(a)) ? S(o) : r;
-          if (i.startsWithCaretContainer(a) && 1 >= s) return -1 === e && (o = c(a)) ? k(o) : r;
-          if (s === a.data.length) return o = u(a), o ? S(o) : r;
-          if (0 === s) return o = c(a), o ? k(o) : r
-        }
-        return r
-      }
 
-      function y(e, t) {
-        return C(h(e, t))
-      }
-      var b = n.isContentEditableTrue,
-        C = n.isContentEditableFalse,
-        x = n.matchStyleValues("display", "block table table-cell table-caption"),
-        w = i.isCaretContainer,
-        E = e.curry,
-        N = n.isElement,
-        _ = o.isCaretCandidate,
-        S = E(p, !0),
-        k = E(p, !1);
-      return {
-        isForwards: a,
-        isBackwards: s,
-        findNode: l,
-        getEditingHost: c,
-        getParentBlock: u,
-        isInSameBlock: d,
-        isInSameEditingHost: f,
-        isBeforeContentEditableFalse: E(y, 0),
-        isAfterContentEditableFalse: E(y, -1),
-        normalizeRange: v
-      }
-    }), r(Ve, [_, W, $, We, p, z], function(e, t, n, r, i, o) {
-      function a(e, t) {
-        for (var n = []; e && e != t;) n.push(e), e = e.parentNode;
-        return n
-      }
-
-      function s(e, t) {
-        return e.hasChildNodes() && t < e.childNodes.length ? e.childNodes[t] : null
-      }
-
-      function l(e, t) {
-        if (h(e)) {
-          if (m(t.previousSibling) && !d(t.previousSibling)) return n.before(t);
-          if (d(t)) return n(t, 0)
-        }
-        if (p(e)) {
-          if (m(t.nextSibling) && !d(t.nextSibling)) return n.after(t);
-          if (d(t)) return n(t, t.data.length)
-        }
-        return p(e) ? n.after(t) : n.before(t)
-      }
-
-      function c(e, t, c) {
-        var y, b, C, x, w, E, N;
-        if (!f(c) || !t) return null;
-        if (N = t, y = N.container(), b = N.offset(), d(y)) {
-          if (p(e) && b > 0) return n(y, --b);
-          if (h(e) && b < y.length) return n(y, ++b);
-          C = y
-        } else {
-          if (p(e) && b > 0 && (x = s(y, b - 1), m(x))) return !g(x) && (w = r.findNode(x, e, v, x)) ? d(w) ? n(w, w.data.length) : n.after(w) : d(x) ? n(x, x.data.length) : n.before(x);
-          if (h(e) && b < y.childNodes.length && (x = s(y, b), m(x))) return !g(x) && (w = r.findNode(x, e, v, x)) ? d(w) ? n(w, 0) : n.before(w) : d(x) ? n(x, 0) : n.after(x);
-          C = N.getNode()
-        }
-        return (h(e) && N.isAtEnd() || p(e) && N.isAtStart()) && (C = r.findNode(C, e, o.constant(!0), c, !0), v(C)) ? l(e, C) : (x = r.findNode(C, e, v, c), E = i.last(i.filter(a(y, c), u)), !E || x && E.contains(x) ? x ? l(e, x) : null : N = h(e) ? n.after(E) : n.before(E))
-      }
-      var u = e.isContentEditableFalse,
-        d = e.isText,
-        f = e.isElement,
-        h = r.isForwards,
-        p = r.isBackwards,
-        m = t.isCaretCandidate,
-        g = t.isAtomic,
-        v = t.isEditableCaretCandidate;
-      return function(e) {
-        return {
-          next: function(t) {
-            return c(1, t, e)
-          },
-          prev: function(t) {
-            return c(-1, t, e)
-          }
-        }
-      }
-    }), r(Ue, [k, $, _, T, g, V, u], function(e, t, n, r, i, o, a) {
-      var s = n.isContentEditableFalse;
-      return function(t, n) {
-        function r(e, n) {
-          var r = o.collapse(e.getBoundingClientRect(), n),
-            i, a, s, l, c;
-          return "BODY" == t.tagName ? (i = t.ownerDocument.documentElement, a = t.scrollLeft || i.scrollLeft, s = t.scrollTop || i.scrollTop) : (c = t.getBoundingClientRect(), a = t.scrollLeft - c.left, s = t.scrollTop - c.top), r.left += a, r.right += a, r.top += s, r.bottom += s, r.width = 1, l = e.offsetWidth - e.clientWidth, l > 0 && (n && (l *= -1), r.left += l, r.right += l), r
-        }
-
-        function l() {
-          var n, r, o, a, s;
-          for (n = i("*[contentEditable=false]", t), a = 0; a < n.length; a++) r = n[a], o = r.previousSibling, e.endsWithCaretContainer(o) && (s = o.data, 1 == s.length ? o.parentNode.removeChild(o) : o.deleteData(s.length - 1, 1)), o = r.nextSibling, e.startsWithCaretContainer(o) && (s = o.data, 1 == s.length ? o.parentNode.removeChild(o) : o.deleteData(0, 1));
-          return null
-        }
-
-        function c(o, a) {
-          var l, c, f;
-          return u(), n(a) ? (g = e.insertBlock("p", a, o), l = r(a, o), i(g).css("top", l.top), m = i('<div class="mce-visual-caret" data-mce-bogus="all"></div>').css(l).appendTo(t), o && m.addClass("mce-visual-caret-before"), d(), c = a.ownerDocument.createRange(), f = g.firstChild, c.setStart(f, 0), c.setEnd(f, 1), c) : (g = e.insertInline(a, o), c = a.ownerDocument.createRange(), s(g.nextSibling) ? (c.setStart(g, 0), c.setEnd(g, 0)) : (c.setStart(g, 1), c.setEnd(g, 1)), c)
-        }
-
-        function u() {
-          l(), g && (e.remove(g), g = null), m && (m.remove(), m = null), clearInterval(p)
-        }
-
-        function d() {
-          p = a.setInterval(function() {
-            i("div.mce-visual-caret", t).toggleClass("mce-visual-caret-hidden")
-          }, 500)
-        }
-
-        function f() {
-          a.clearInterval(p)
-        }
-
-        function h() {
-          return ".mce-visual-caret {position: absolute;background-color: black;background-color: currentcolor;}.mce-visual-caret-hidden {display: none;}*[data-mce-caret] {position: absolute;left: -1000px;right: auto;top: 0;margin: 0;padding: 0;}"
-        }
-        var p, m, g;
-        return {
-          show: c,
-          hide: u,
-          getCss: h,
-          destroy: f
-        }
-      }
-    }), r($e, [p, _, V], function(e, t, n) {
-      function r(i) {
-        function o(t) {
-          return e.map(t, function(e) {
-            return e = n.clone(e), e.node = i, e
-          })
-        }
-        if (e.isArray(i)) return e.reduce(i, function(e, t) {
-          return e.concat(r(t))
-        }, []);
-        if (t.isElement(i)) return o(i.getClientRects());
-        if (t.isText(i)) {
-          var a = i.ownerDocument.createRange();
-          return a.setStart(i, 0), a.setEnd(i, i.data.length), o(a.getClientRects())
-        }
-      }
-      return {
-        getClientRects: r
-      }
-    }), r(qe, [z, p, $e, W, We, Ve, $, V], function(e, t, n, r, i, o, a, s) {
-      function l(e, t, n, o) {
-        for (; o = i.findNode(o, e, r.isEditableCaretCandidate, t);)
-          if (n(o)) return
-      }
-
-      function c(e, r, i, o, a, s) {
-        function c(o) {
-          var s, l, c;
-          for (c = n.getClientRects(o), -1 == e && (c = c.reverse()), s = 0; s < c.length; s++)
-            if (l = c[s], !i(l, h)) {
-              if (f.length > 0 && r(l, t.last(f)) && u++, l.line = u, a(l)) return !0;
-              f.push(l)
-            }
-        }
-        var u = 0,
-          d, f = [],
-          h;
-        return (h = t.last(s.getClientRects())) ? (d = s.getNode(), c(d), l(e, o, c, d), f) : f
-      }
-
-      function u(e, t) {
-        return t.line > e
-      }
-
-      function d(e, t) {
-        return t.line === e
-      }
-
-      function f(e, n, r, i) {
-        function l(n) {
-          return 1 == e ? t.last(n.getClientRects()) : t.last(n.getClientRects())
-        }
-        var c = new o(n),
-          u, d, f, h, p = [],
-          m = 0,
-          g, v;
-        1 == e ? (u = c.next, d = s.isBelow, f = s.isAbove, h = a.after(i)) : (u = c.prev, d = s.isAbove, f = s.isBelow, h = a.before(i)), v = l(h);
-        do
-          if (h.isVisible() && (g = l(h), !f(g, v))) {
-            if (p.length > 0 && d(g, t.last(p)) && m++, g = s.clone(g), g.position = h, g.line = m, r(g)) return p;
-            p.push(g)
-          }
-        while (h = u(h));
-        return p
-      }
-      var h = e.curry,
-        p = h(c, -1, s.isAbove, s.isBelow),
-        m = h(c, 1, s.isBelow, s.isAbove);
-      return {
-        upUntil: p,
-        downUntil: m,
-        positionsUntil: f,
-        isAboveLine: h(u),
-        isLine: h(d)
-      }
-    }), r(je, [z, p, _, $e, V, We, W], function(e, t, n, r, i, o, a) {
-      function s(e, t) {
-        return Math.abs(e.left - t)
-      }
-
-      function l(e, t) {
-        return Math.abs(e.right - t)
-      }
-
-      function c(e, n) {
-        function r(e, t) {
-          return e >= t.left && e <= t.right
-        }
-        return t.reduce(e, function(e, t) {
-          var i, o;
-          return i = Math.min(s(e, n), l(e, n)), o = Math.min(s(t, n), l(t, n)), r(n, t) ? t : r(n, e) ? e : o == i && m(t.node) ? t : i > o ? t : e
-        })
-      }
-
-      function u(e, t, n, r) {
-        for (; r = g(r, e, a.isEditableCaretCandidate, t);)
-          if (n(r)) return
-      }
-
-      function d(e, n) {
-        function o(e, i) {
-          var o;
-          return o = t.filter(r.getClientRects(i), function(t) {
-            return !e(t, n)
-          }), a = a.concat(o), 0 === o.length
-        }
-        var a = [];
-        return a.push(n), u(-1, e, v(o, i.isAbove), n.node), u(1, e, v(o, i.isBelow), n.node), a
-      }
-
-      function f(e) {
-        return t.filter(t.toArray(e.getElementsByTagName("*")), m)
-      }
-
-      function h(e, t) {
-        return {
-          node: e.node,
-          before: s(e, t) < l(e, t)
-        }
-      }
-
-      function p(e, n, i) {
-        var o, a;
-        return o = r.getClientRects(f(e)), o = t.filter(o, function(e) {
-          return i >= e.top && i <= e.bottom
-        }), a = c(o, n), a && (a = c(d(e, a), n), a && m(a.node)) ? h(a, n) : null
-      }
-      var m = n.isContentEditableFalse,
-        g = o.findNode,
-        v = e.curry;
-      return {
-        findClosestClientRect: c,
-        findLineNodeRects: d,
-        closestCaret: p
-      }
-    }), r(Ye, [_], function(e) {
-      function t(e) {
-        function t(e) {
-          return n(e)
-        }
-
-        function r(t) {
-          c(e.getBody()).css("cursor", t)
-        }
-
-        function i(t) {
-          return t == h.element || e.dom.isChildOf(t, h.element) ? !1 : n(t) ? !1 : !0
-        }
-
-        function o(t) {
-          var n, i, o, a, s = 0,
-            l = 0,
-            u, d, p, m;
-          0 === t.button && (n = t.screenX - h.screenX, i = t.screenY - h.screenY, u = Math.max(Math.abs(n), Math.abs(i)), !h.dragging && u > 10 && (h.dragging = !0, r("default"), h.clone = h.element.cloneNode(!0), o = f.getPos(h.element), h.relX = h.clientX - o.x, h.relY = h.clientY - o.y, h.width = h.element.offsetWidth, h.height = h.element.offsetHeight, c(h.clone).css({
-            width: h.width,
-            height: h.height
-          }).removeAttr("data-mce-selected"), h.ghost = c("<div>").css({
-            position: "absolute",
-            opacity: .5,
-            overflow: "hidden",
-            width: h.width,
-            height: h.height
-          }).attr({
-            "data-mce-bogus": "all",
-            unselectable: "on",
-            contenteditable: "false"
-          }).addClass("mce-drag-container mce-reset").append(h.clone).appendTo(e.getBody())[0], a = e.dom.getViewPort(e.getWin()), h.maxX = a.w, h.maxY = a.h), h.dragging && (e.selection.placeCaretAt(t.clientX, t.clientY), d = h.clientX + n - h.relX, p = h.clientY + i + 5, d + h.width > h.maxX && (s = d + h.width - h.maxX), p + h.height > h.maxY && (l = p + h.height - h.maxY), m = "BODY" != e.getBody().nodeName ? e.getBody().getBoundingClientRect() : {
-            left: 0,
-            top: 0
-          }, c(h.ghost).css({
-            left: d - m.left,
-            top: p - m.top,
-            width: h.width - s,
-            height: h.height - l
-          })))
-        }
-
-        function a() {
-          h.dragging && (e.selection.setRng(e.selection.getSel().getRangeAt(0)), i(e.selection.getNode()) && e.undoManager.transact(function() {
-            e.insertContent(f.getOuterHTML(h.element)), c(h.element).remove()
-          })), l()
-        }
-
-        function s(n) {
-          if (l(), t(n.target)) {
-            if (e.fire("dragstart", {
-                target: n.target
-              }).isDefaultPrevented()) return;
-            e.on("mousemove", o), e.on("mouseup", a), u != d && (f.bind(u, "mousemove", o), f.bind(u, "mouseup", a)), h = {
-              screenX: n.screenX,
-              screenY: n.screenY,
-              clientX: n.clientX,
-              clientY: n.clientY,
-              element: n.target
-            }
-          }
-        }
-
-        function l() {
-          c(h.ghost).remove(), r(null), e.off("mousemove", o), e.off("mouseup", l), u != d && (f.unbind(u, "mousemove", o), f.unbind(u, "mouseup", l)), h = {}
-        }
-        var c = e.$,
-          u = document,
-          d = e.getDoc(),
-          f = e.dom,
-          h = {};
-        e.on("mousedown", s), e.on("drop", function(t) {
-          var r = e.getDoc().elementFromPoint(t.clientX, t.clientY);
-          (n(r) || n(e.dom.getContentEditableParent(r))) && t.preventDefault()
-        })
-      }
-      var n = e.isContentEditableFalse;
-      return {
-        init: t
-      }
-    }), r(Xe, [h, Ve, $, k, We, Ue, qe, je, _, T, I, z, p, u, Ye], function(e, t, n, r, i, o, a, s, l, c, u, d, f, h, p) {
-      function m(e, t) {
-        for (; t = e(t);)
-          if (t.isVisible()) return t;
-        return t
-      }
-
-      function g(c) {
-        function d(e) {
-          return c.dom.isBlock(e)
-        }
-
-        function g(e) {
-          e && c.selection.setRng(e)
-        }
-
-        function N() {
-          return c.selection.getRng()
-        }
-
-        function _(e, t) {
-          c.selection.scrollIntoView(e, t)
-        }
-
-        function S(e, t, n) {
-          var r;
-          return r = c.fire("ShowCaret", {
-            target: t,
-            direction: e,
-            before: n
-          }), r.isDefaultPrevented() ? null : (_(t, -1 === e), Z.show(n, t))
-        }
-
-        function k(e) {
-          var t;
-          return t = c.fire("ObjectSelected", {
-            target: e
-          }), t.isDefaultPrevented() ? null : (Z.hide(), T(e))
-        }
-
-        function T(e) {
-          var t = e.ownerDocument.createRange();
-          return t.selectNode(e), t
-        }
-
-        function R(e, t) {
-          var n = i.isInSameBlock(e, t);
-          return !n && l.isBr(e.getNode()) ? !0 : n
-        }
-
-        function A(e, t) {
-          return t = i.normalizeRange(e, K, t), -1 == e ? n.fromRangeStart(t) : n.fromRangeEnd(t)
-        }
-
-        function B(e) {
-          return r.isCaretContainerBlock(e.startContainer)
-        }
-
-        function D(e, t, n, r) {
-          var i, o, a, s;
-          return !r.collapsed && (i = E(r), b(i)) ? S(e, i, -1 == e) : (s = B(r), o = A(e, r), n(o) ? k(o.getNode(-1 == e)) : (o = t(o)) ? n(o) ? S(e, o.getNode(-1 == e), 1 == e) : (a = t(o), n(a) && R(o, a) ? S(e, a.getNode(-1 == e), 1 == e) : s ? z(o.toRange()) : null) : s ? r : null)
-        }
-
-        function M(e, t, n) {
-          var r, i, o, l, c, u, d, h, p;
-          if (p = E(n), r = A(e, n), i = t(K, a.isAboveLine(1), r), o = f.filter(i, a.isLine(1)), c = f.last(r.getClientRects()), w(r) && (p = r.getNode()), x(r) && (p = r.getNode(!0)), !c) return null;
-          if (u = c.left, l = s.findClosestClientRect(o, u), l && b(l.node)) return d = Math.abs(u - l.left), h = Math.abs(u - l.right), S(e, l.node, h > d);
-          if (p) {
-            var m = a.positionsUntil(e, K, a.isAboveLine(1), p);
-            if (l = s.findClosestClientRect(f.filter(m, a.isLine(1)), u)) return z(l.position.toRange());
-            if (l = f.last(f.filter(m, a.isLine(0)))) return z(l.position.toRange())
-          }
-        }
-
-        function L(t, r) {
-          function i() {
-            var t = c.dom.create(c.settings.forced_root_block);
-            return (!e.ie || e.ie >= 11) && (t.innerHTML = '<br data-mce-bogus="1">'), t
-          }
-          var o, a, s;
-          if (r.collapsed && c.settings.forced_root_block) {
-            if (o = c.dom.getParent(r.startContainer, "PRE"), !o) return;
-            a = 1 == t ? J(n.fromRangeStart(r)) : Q(n.fromRangeStart(r)), a || (s = i(), 1 == t ? c.$(o).after(s) : c.$(o).before(s), c.selection.select(s, !0), c.selection.collapse())
-          }
-        }
-
-        function P(e, t, n, r) {
-          var i;
-          return (i = D(e, t, n, r)) ? i : (i = L(e, r), i ? i : null)
-        }
-
-        function H(e, t, n) {
-          var r;
-          return (r = M(e, t, n)) ? r : (r = L(e, n), r ? r : null)
-        }
-
-        function O() {
-          return ne("*[data-mce-caret]")[0]
-        }
-
-        function I(e) {
-          e = ne(e), e.attr("data-mce-caret") && (Z.hide(), e.removeAttr("data-mce-caret"), e.removeAttr("data-mce-bogus"), e.removeAttr("style"), g(N()), _(e[0]))
-        }
-
-        function F(e) {
-          var t;
-          return e = i.normalizeRange(1, K, e), t = n.fromRangeStart(e), b(t.getNode()) ? S(1, t.getNode(), !t.isAtEnd()) : b(t.getNode(!0)) ? S(1, t.getNode(!0), !1) : (Z.hide(), null)
-        }
-
-        function z(e) {
-          var t;
-          return e && e.collapsed ? (t = F(e), t ? t : e) : e
-        }
-
-        function W(e) {
-          var t, i, o, a;
-          return b(e) ? (b(e.previousSibling) && (o = e.previousSibling), i = Q(n.before(e)), i || (t = J(n.after(e))), t && C(t.getNode()) && (a = t.getNode()), r.remove(e.previousSibling), r.remove(e.nextSibling), c.dom.remove(e), Y(), c.dom.isEmpty(c.getBody()) ? (c.setContent(""), void c.focus()) : o ? n.after(o).toRange() : a ? n.before(a).toRange() : i ? i.toRange() : t ? t.toRange() : null) : null
-        }
-
-        function V(e, t, n) {
-          var r, i;
-          return !n.collapsed && (r = E(n), b(r)) ? z(W(r)) : (i = A(e, n), t(i) ? z(W(i.getNode(-1 == e))) : void 0)
-        }
-
-        function U() {
-          function e(e) {
-            var t = e(N());
-            return t ? (g(t), !0) : !1
-          }
-
-          function t(e) {
-            for (var t = c.getBody(); e && e != t;) {
-              if (y(e) || b(e)) return e;
-              e = e.parentNode
-            }
-            return null
-          }
-
-          function r() {
-            var e, r = t(c.selection.getNode());
-            y(r) && d(r) && c.dom.isEmpty(r) && (e = c.dom.create("br", {
-              "data-mce-bogus": "1"
-            }), c.$(r).empty().append(e), c.selection.setRng(n.before(e).toRange()))
-          }
-
-          function i(e) {
-            var t = O();
-            if (t) return "compositionstart" == e.type ? (e.preventDefault(), e.stopPropagation(), void I(t)) : void("&nbsp;" != t.innerHTML && I(t))
-          }
-
-          function o(e) {
-            var t;
-            switch (e.keyCode) {
-              case u.DELETE:
-                t = r();
-                break;
-              case u.BACKSPACE:
-                t = r()
-            }
-            t && e.preventDefault()
-          }
-          var l = v(P, 1, J, w),
-            f = v(P, -1, Q, x),
-            m = v(V, 1, w),
-            C = v(V, -1, x),
-            E = v(H, -1, a.upUntil),
-            _ = v(H, 1, a.downUntil);
-          c.on("mouseup", function() {
-            var e = N();
-            e.collapsed && g(F(e))
-          }), c.on("mousedown", function(e) {
-            var n;
-            if (n = t(e.target)) b(n) ? (e.preventDefault(), j(k(n), !1)) : c.selection.placeCaretAt(e.clientX, e.clientY);
-            else {
-              Y(), Z.hide();
-              var r = s.closestCaret(K, e.clientX, e.clientY);
-              r && (e.preventDefault(), c.getBody().focus(), g(S(1, r.node, r.before)))
-            }
-          }), c.on("keydown", function(t) {
-            var n;
-            if (!u.modifierPressed(t)) {
-              switch (t.keyCode) {
-                case u.RIGHT:
-                  n = e(l);
-                  break;
-                case u.DOWN:
-                  n = e(_);
-                  break;
-                case u.LEFT:
-                  n = e(f);
-                  break;
-                case u.UP:
-                  n = e(E);
-                  break;
-                case u.DELETE:
-                  n = e(m);
-                  break;
-                case u.BACKSPACE:
-                  n = e(C);
-                  break;
-                default:
-                  n = b(c.selection.getNode())
-              }
-              n && t.preventDefault()
-            }
-          }), c.on("keyup compositionstart", function(e) {
-            i(e), o(e)
-          }, !0), c.on("cut", function() {
-            var e = c.selection.getNode();
-            b(e) && h.setEditorTimeout(c, function() {
-              g(z(W(e)))
-            })
-          }), c.on("getSelectionRange", function(e) {
-            var t = e.range;
-            if (te) {
-              if (!te.parentNode) return void(te = null);
-              t = t.cloneRange(), t.selectNode(te), e.range = t
-            }
-          }), c.on("setSelectionRange", function(e) {
-            var t;
-            t = j(e.range), t && (e.range = t)
-          }), c.on("focus", function() {
-            h.setEditorTimeout(c, function() {
-              c.selection.setRng(z(c.selection.getRng()))
-            })
-          }), p.init(c)
-        }
-
-        function $() {
-          var e = c.contentStyles,
-            t = ".mce-content-body";
-          e.push(Z.getCss()), e.push(t + " .mce-offscreen-selection {position: absolute;left: -9999999999px;width: 100pxheight: 100px}" + t + " *[contentEditable=false] {cursor: default;}" + t + " *[contentEditable=true] {cursor: text;}")
-        }
-
-        function q(e) {
-          return r.isCaretContainer(e.startContainer) || r.isCaretContainer(e.endContainer)
-        }
-
-        function j(e, t) {
-          var n, r = c.$,
-            i = c.dom,
-            o, a, s, l, u, d, f;
-          if (!e) return Y(), null;
-          if (e.collapsed) {
-            if (Y(), !q(e)) {
-              if (f = A(1, e), b(f.getNode())) return S(1, f.getNode(), !f.isAtEnd());
-              if (b(f.getNode(!0))) return S(1, f.getNode(!0), !1)
-            }
-            return null
-          }
-          return s = e.startContainer, l = e.startOffset, u = e.endOffset, 3 == s.nodeType && 0 == l && b(s.parentNode) && (s = s.parentNode, l = i.nodeIndex(s), s = s.parentNode), 1 != s.nodeType ? (Y(), null) : (u == l + 1 && (n = s.childNodes[l]), b(n) ? t !== !1 && (d = c.fire("ObjectSelected", {
-            target: n
-          }), d.isDefaultPrevented()) ? (Y(), null) : (o = r("#" + ee), 0 === o.length && (o = r('<div data-mce-bogus="all" class="mce-offscreen-selection"></div>').attr("id", ee), o.appendTo(c.getBody())), o.empty().append("\xa0").append(n.cloneNode(!0)).append("\xa0").css({
-            top: i.getPos(n, c.getBody()).y
-          }), e = c.dom.createRng(), e.setStart(o[0].firstChild, 1), e.setEnd(o[0].lastChild, 0), c.getBody().focus(), o[0].focus(), a = c.selection.getSel(), a.removeAllRanges(), a.addRange(e), c.$("*[data-mce-selected]").removeAttr("data-mce-selected"), n.setAttribute("data-mce-selected", 1), te = n, e) : (Y(), null))
-        }
-
-        function Y() {
-          te && (te.removeAttribute("data-mce-selected"), c.$("#" + ee).remove(), te = null)
-        }
-
-        function X() {
-          Z.destroy(), te = null
-        }
-        var K = c.getBody(),
-          G = new t(K),
-          J = v(m, G.next),
-          Q = v(m, G.prev),
-          Z = new o(c.getBody(), d),
-          ee = "sel-" + c.dom.uniqueId(),
-          te, ne = c.$;
-        return e.ceFalse && (U(), $()), {
-          showBlockCaretContainer: I,
-          destroy: X
-        }
-      }
-      var v = d.curry,
-        y = l.isContentEditableTrue,
-        b = l.isContentEditableFalse,
-        C = l.isElement,
-        x = i.isAfterContentEditableFalse,
-        w = i.isBeforeContentEditableFalse,
-        E = c.getSelectedNode;
-      return g
-    }), r(Ke, [w, g, N, R, A, H, P, Y, G, J, Q, Z, ee, te, E, d, _e, Ae, B, M, De, h, m, u, Me, Le, Pe, ze, Xe], function(e, n, r, i, o, a, s, l, c, u, d, f, h, p, m, g, v, y, b, C, x, w, E, N, _, S, k, T, R) {
-        function A(e, t, i) {
-          var o = this,
-            a, s;
-          a = o.documentBaseUrl = i.documentBaseURL, s = i.baseURI, o.settings = t = L({
-            id: e,
-            theme: "modern",
-            delta_width: 0,
-            delta_height: 0,
-            popup_css: "",
-            plugins: "",
-            document_base_url: a,
-            add_form_submit_trigger: !0,
-            submit_patch: !0,
-            add_unload_trigger: !0,
-            convert_urls: !0,
-            relative_urls: !0,
-            remove_script_host: !0,
-            object_resizing: !0,
-            doctype: "<!DOCTYPE html>",
-            visual: !0,
-            font_size_style_values: "xx-small,x-small,small,medium,large,x-large,xx-large",
-            font_size_legacy_values: "xx-small,small,medium,large,x-large,xx-large,300%",
-            forced_root_block: "p",
-            hidden_input: !0,
-            padd_empty_editor: !0,
-            render_ui: !0,
-            indentation: "30px",
-            inline_styles: !0,
-            convert_fonts_to_spans: !0,
-            indent: "simple",
-            indent_before: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
-            indent_after: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
-            validate: !0,
-            entity_encoding: "named",
-            url_converter: o.convertURL,
-            url_converter_scope: o,
-            ie7_compat: !0
-          }, t), r.language = t.language || "en", r.languageLoad = t.language_load, r.baseURL = i.baseURL, o.id = t.id = e, o.setDirty(!1), o.plugins = {}, o.documentBaseURI = new p(t.document_base_url || a, {
-            base_uri: s
-          }), o.baseURI = s, o.contentCSS = [], o.contentStyles = [], o.shortcuts = new k(o), o.loadedCSS = {}, o.editorCommands = new h(o), t.target && (o.targetElm = t.target), o.suffix = i.suffix, o.editorManager = i, o.inline = t.inline, t.cache_suffix && (w.cacheSuffix = t.cache_suffix.replace(/^[\?\&]+/, "")), t.override_viewport === !1 && (w.overrideViewPort = !1), i.fire("SetupEditor", o), o.execCallback("setup", o), o.$ = n.overrideDefaults(function() {
-            return {
-              context: o.inline ? o.getBody() : o.getDoc(),
-              element: o.getBody()
-            }
-          })
-        }
-        var B = e.DOM,
-          D = r.ThemeManager,
-          M = r.PluginManager,
-          L = E.extend,
-          P = E.each,
-          H = E.explode,
-          O = E.inArray,
-          I = E.trim,
-          F = E.resolve,
-          z = g.Event,
-          W = w.gecko,
-          V = w.ie;
-        return A.prototype = {
-            render: function() {
-                function e() {
-                  B.unbind(window, "ready", e), n.render()
-                }
-
-                function t() {
-                  var e = m.ScriptLoader;
-                  if (r.language && "en" != r.language && !r.language_url && (r.language_url = n.editorManager.baseURL + "/langs/" + r.language + ".js"), r.language_url && e.add(r.language_url), r.theme && "function" != typeof r.theme && "-" != r.theme.charAt(0) && !D.urls[r.theme]) {
-                    var t = r.theme_url;
-                    t = t ? n.documentBaseURI.toAbsolute(t) : "themes/" + r.theme + "/theme" + o + ".js", D.load(r.theme, t)
+            function x() {
+              u.on("keydown", function(e) {
+                if (!h(e) && e.keyCode === K) {
+                  if (!u.getBody().getElementsByTagName("hr").length) return;
+                  if (Q.isCollapsed() && 0 === Q.getRng(!0).startOffset) {
+                    var t = Q.getNode(),
+                      n = t.previousSibling;
+                    if ("HR" == t.nodeName) return J.remove(t), void e.preventDefault();
+                    n && n.nodeName && "hr" === n.nodeName.toLowerCase() && (J.remove(n), e.preventDefault())
                   }
-                  E.isArray(r.plugins) && (r.pl
+                }
+              })
+            }
+
+            function w() {
+              window.Range.prototype.getClientRects || u.on("mousedown", function(e) {
+                if (!h(e) && "HTML" === e.target.nodeName) {
+                  var t = u.getBody();
+                  t.blur(), l.setEditorTimeout(u, function() {
+                    t.focus()
+                  })
+                }
+              })
+            }
+
+            function E() {
+              u.on("click", function(e) {
+                var t = e.target;
+                /^(IMG|HR)$/.test(t.nodeName) && "false" !== J.getContentEditableParent(t) && (e.preventDefault(), Q.getSel().setBaseAndExtent(t, 0, t, 1), u.nodeChanged()), "A" == t.nodeName && J.hasClass(t, "mce-item-anchor") && (e.preventDefault(), Q.select(t))
+              })
+            }
+
+            function N() {
+              function e() {
+                var e = J.getAttribs(Q.getStart().cloneNode(!1));
+                return function() {
+                  var t = Q.getStart();
+                  t !== u.getBody() && (J.setAttrib(t, "style", null), Y(e, function(e) {
+                    t.setAttributeNode(e.cloneNode(!0))
+                  }))
+                }
+              }
+
+              function t() {
+                return !Q.isCollapsed() && J.getParent(Q.getStart(), J.isBlock) != J.getParent(Q.getEnd(), J.isBlock)
+              }
+              u.on("keypress", function(n) {
+                var r;
+                return h(n) || 8 != n.keyCode && 46 != n.keyCode || !t() ? void 0 : (r = e(), u.getDoc().execCommand("delete", !1, null), r(), n.preventDefault(), !1)
+              }), J.bind(u.getDoc(), "cut", function(n) {
+                var r;
+                !h(n) && t() && (r = e(), l.setEditorTimeout(u, function() {
+                  r()
+                }))
+              })
+            }
+
+            function _() {
+              document.body.setAttribute("role", "application")
+            }
+
+            function S() {
+              u.on("keydown", function(e) {
+                if (!h(e) && e.keyCode === K && Q.isCollapsed() && 0 === Q.getRng(!0).startOffset) {
+                  var t = Q.getNode().previousSibling;
+                  if (t && t.nodeName && "table" === t.nodeName.toLowerCase()) return e.preventDefault(), !1
+                }
+              })
+            }
+
+            function k() {
+              f() > 7 || (d("RespectVisibilityInDesign", !0), u.contentStyles.push(".mceHideBrInPre pre br {display: none}"), J.addClass(u.getBody(), "mceHideBrInPre"), ee.addNodeFilter("pre", function(e) {
+                for (var t = e.length, n, r, o, a; t--;)
+                  for (n = e[t].getAll("br"), r = n.length; r--;) o = n[r], a = o.prev, a && 3 === a.type && "\n" != a.value.charAt(a.value - 1) ? a.value += "\n" : o.parent.insert(new i("#text", 3), o, !0).value = "\n"
+              }), te.addNodeFilter("pre", function(e) {
+                for (var t = e.length, n, r, i, o; t--;)
+                  for (n = e[t].getAll("br"), r = n.length; r--;) i = n[r], o = i.prev, o && 3 == o.type && (o.value = o.value.replace(/\r?\n$/, ""))
+              }))
+            }
+
+            function T() {
+              J.bind(u.getBody(), "mouseup", function() {
+                var e, t = Q.getNode();
+                "IMG" == t.nodeName && ((e = J.getStyle(t, "width")) && (J.setAttrib(t, "width", e.replace(/[^0-9%]+/g, "")), J.setStyle(t, "width", "")), (e = J.getStyle(t, "height")) && (J.setAttrib(t, "height", e.replace(/[^0-9%]+/g, "")), J.setStyle(t, "height", "")))
+              })
+            }
+
+            function R() {
+              u.on("keydown", function(t) {
+                var n, r, i, o, a;
+                if (!h(t) && t.keyCode == e.BACKSPACE && (n = Q.getRng(), r = n.startContainer, i = n.startOffset, o = J.getRoot(), a = r, n.collapsed && 0 === i)) {
+                  for (; a && a.parentNode && a.parentNode.firstChild == a && a.parentNode != o;) a = a.parentNode;
+                  "BLOCKQUOTE" === a.tagName && (u.formatter.toggle("blockquote", null, a), n = J.createRng(), n.setStart(r, 0), n.setEnd(r, 0), Q.setRng(n))
+                }
+              })
+            }
+
+            function A() {
+              function e() {
+                u._refreshContentEditable(), d("StyleWithCSS", !1), d("enableInlineTableEditing", !1), Z.object_resizing || d("enableObjectResizing", !1)
+              }
+              Z.readonly || u.on("BeforeExecCommand MouseDown", e)
+            }
+
+            function B() {
+              function e() {
+                Y(J.select("a"), function(e) {
+                  var t = e.parentNode,
+                    n = J.getRoot();
+                  if (t.lastChild === e) {
+                    for (; t && !J.isBlock(t);) {
+                      if (t.parentNode.lastChild !== t || t === n) return;
+                      t = t.parentNode
+                    }
+                    J.add(t, "br", {
+                      "data-mce-bogus": 1
+                    })
+                  }
+                })
+              }
+              u.on("SetContent ExecCommand", function(t) {
+                ("setcontent" == t.type || "mceInsertLink" === t.command) && e()
+              })
+            }
+
+            function D() {
+              Z.forced_root_block && u.on("init", function() {
+                d("DefaultParagraphSeparator", Z.forced_root_block)
+              })
+            }
+
+            function M() {
+              u.on("keydown", function(e) {
+                var t;
+                h(e) || e.keyCode != K || (t = u.getDoc().selection.createRange(), t && t.item && (e.preventDefault(), u.undoManager.beforeChange(), J.remove(t.item(0)), u.undoManager.add()))
+              })
+            }
+
+            function L() {
+              var e;
+              f() >= 10 && (e = "", Y("p div h1 h2 h3 h4 h5 h6".split(" "), function(t, n) {
+                e += (n > 0 ? "," : "") + t + ":empty"
+              }), u.contentStyles.push(e + "{padding-right: 1px !important}"))
+            }
+
+            function P() {
+              f() < 9 && (ee.addNodeFilter("noscript", function(e) {
+                for (var t = e.length, n, r; t--;) n = e[t], r = n.firstChild, r && n.attr("data-mce-innertext", r.value)
+              }), te.addNodeFilter("noscript", function(e) {
+                for (var t = e.length, n, r, a; t--;) n = e[t], r = e[t].firstChild, r ? r.value = o.decode(r.value) : (a = n.attributes.map["data-mce-innertext"], a && (n.attr("data-mce-innertext", null), r = new i("#text", 3), r.value = a, r.raw = !0, n.append(r)))
+              }))
+            }
+
+            function H() {
+              function e(e, t) {
+                var n = i.createTextRange();
+                try {
+                  n.moveToPoint(e, t)
+                } catch (r) {
+                  n = null
+                }
+                return n
+              }
+
+              function t(t) {
+                var r;
+                t.button ? (r = e(t.x, t.y), r && (r.compareEndPoints("StartToStart", a) > 0 ? r.setEndPoint("StartToStart", a) : r.setEndPoint("EndToEnd", a), r.select())) : n()
+              }
+
+              function n() {
+                var e = r.selection.createRange();
+                a && !e.item && 0 === e.compareEndPoints("StartToEnd", e) && a.select(), J.unbind(r, "mouseup", n), J.unbind(r, "mousemove", t), a = o = 0
+              }
+              var r = J.doc,
+                i = r.body,
+                o, a, s;
+              r.documentElement.unselectable = !0, J.bind(r, "mousedown contextmenu", function(i) {
+                if ("HTML" === i.target.nodeName) {
+                  if (o && n(), s = r.documentElement, s.scrollHeight > s.clientHeight) return;
+                  o = 1, a = e(i.x, i.y), a && (J.bind(r, "mouseup", n), J.bind(r, "mousemove", t), J.getRoot().focus(), a.select())
+                }
+              })
+            }
+
+            function O() {
+              u.on("keyup focusin mouseup", function(t) {
+                65 == t.keyCode && e.metaKeyPressed(t) || Q.normalize()
+              }, !0)
+            }
+
+            function I() {
+              u.contentStyles.push("img:-moz-broken {-moz-force-broken-image-icon:1;min-width:24px;min-height:24px}")
+            }
+
+            function F() {
+              u.inline || u.on("keydown", function() {
+                document.activeElement == document.body && u.getWin().focus()
+              })
+            }
+
+            function z() {
+              u.inline || (u.contentStyles.push("body {min-height: 150px}"), u.on("click", function(e) {
+                var t;
+                if ("HTML" == e.target.nodeName) {
+                  if (a.ie > 11) return void u.getBody().focus();
+                  t = u.selection.getRng(), u.getBody().focus(), u.selection.setRng(t), u.selection.normalize(), u.nodeChanged()
+                }
+              }))
+            }
+
+            function W() {
+              a.mac && u.on("keydown", function(t) {
+                !e.metaKeyPressed(t) || t.shiftKey || 37 != t.keyCode && 39 != t.keyCode || (t.preventDefault(), u.selection.getSel().modify("move", 37 == t.keyCode ? "backward" : "forward", "lineboundary"))
+              })
+            }
+
+            function V() {
+              d("AutoUrlDetect", !1)
+            }
+
+            function U() {
+              u.on("click", function(e) {
+                var t = e.target;
+                do
+                  if ("A" === t.tagName) return void e.preventDefault(); while (t = t.parentNode)
+              }), u.contentStyles.push(".mce-content-body {-webkit-touch-callout: none}")
+            }
+
+            function $() {
+              u.on("init", function() {
+                u.dom.bind(u.getBody(), "submit", function(e) {
+                  e.preventDefault()
+                })
+              })
+            }
+
+            function q() {
+              ee.addNodeFilter("br", function(e) {
+                for (var t = e.length; t--;) "Apple-interchange-newline" == e[t].attr("class") && e[t].remove()
+              })
+            }
+
+            function j() {
+              u.on("dragstart", function(e) {
+                p(e)
+              }), u.on("drop", function(e) {
+                if (!h(e)) {
+                  var n = m(e);
+                  if (n && n.id != u.id) {
+                    e.preventDefault();
+                    var r = t.getCaretRangeFromPoint(e.x, e.y, u.getDoc());
+                    Q.setRng(r), g(n.html)
+                  }
+                }
+              })
+            }
+            var Y = s.each,
+              X = u.$,
+              K = e.BACKSPACE,
+              G = e.DELETE,
+              J = u.d

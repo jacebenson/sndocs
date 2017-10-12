@@ -606,404 +606,114 @@ angular.module('sn.common.ui').directive('contextMenu', function($document, $win
 });;
 /*! RESOURCE: /scripts/sn/common/ui/directive.snDialog.js */
 angular.module("sn.common.ui").directive("snDialog", function($timeout, $rootScope, $document) {
-  "use strict";
-  return {
-    restrict: "AE",
-    transclude: true,
-    scope: {
-      modal: "=?",
-      disableAutoFocus: "=?",
-      classCheck: "="
-    },
-    replace: true,
-    template: '<dialog ng-keyup="escape($event)"><div ng-click="onClickClose()" title="Close" class="close-button icon-button icon-cross"></div></dialog>',
-    link: function(scope, element, attrs, ctrl, transcludeFn) {
-      var transcludeScope = {};
-      scope.isOpen = function() {
-        return element[0].open;
-      };
-      transcludeFn(element.scope().$new(), function(a, b) {
-        element.append(a);
-        transcludeScope = b;
-      });
-      element.click(function(event) {
-        event.stopPropagation();
-        if (event.offsetX < 0 || event.offsetX > element[0].offsetWidth || event.offsetY < 0 || event.offsetY > element[0].offsetHeight)
-          if (!scope.classCheck)
-            scope.onClickClose();
-          else {
-            var classes = scope.classCheck.split(",");
-            var found = false;
-            for (var i = 0; i < classes.length; i++)
-              if (angular.element(event.srcElement).closest(classes[i]).length > 0)
-                found = true;
-            if (!found)
-              scope.onClickClose();
-          }
-      });
-      scope.show = function() {
-        var d = element[0];
-        if (!d.showModal || true) {
-          dialogPolyfill.registerDialog(d);
-          d.setDisableAutoFocus(scope.disableAutoFocus);
-        }
-        if (scope.modal)
-          d.showModal();
-        else
-          d.show();
-        if (!angular.element(d).hasClass('sn-alert')) {
-          $timeout(function() {
-            if (d.dialogPolyfillInfo && d.dialogPolyfillInfo.backdrop) {
-              angular.element(d.dialogPolyfillInfo.backdrop).one('click', function(event) {
-                if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
-                  scope.onClickClose();
-              })
-            } else {
-              $document.on('click', function(event) {
-                if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
-                  scope.onClickClose();
-              })
-            }
-          });
-        }
-        element.find('.btn-primary').eq(0).focus();
-      };
-      scope.setPosition = function(data) {
-        var contextData = scope.getContextData(data);
-        if (contextData && element && element[0]) {
-          if (contextData.position) {
-            element[0].style.top = contextData.position.top + "px";
-            element[0].style.left = contextData.position.left + "px";
-            element[0].style.margin = "0px";
-          }
-          if (contextData.dimensions) {
-            element[0].style.width = contextData.dimensions.width + "px";
-            element[0].style.height = contextData.dimensions.height + "px";
-          }
-        }
-      }
-      scope.$on("dialog." + attrs.name + ".move", function(event, data) {
-        scope.setPosition(data);
-      })
-      scope.$on("dialog." + attrs.name + ".show", function(event, data) {
-        scope.setPosition(data);
-        scope.setKeyEvents(data);
-        if (scope.isOpen() === true)
-          scope.close();
-        else
-          scope.show();
-        angular.element(".sn-dialog-menu").each(function(index, value) {
-          var name = angular.element(this).attr('name');
-          if (name != attrs.name && !angular.element(this).attr('open')) {
-            return true;
-          }
-          if (name != attrs.name && angular.element(this).attr('open')) {
-            $rootScope.$broadcast("dialog." + name + ".close");
-          }
-        });
-      })
-      scope.onClickClose = function() {
-        if (scope.isOpen())
-          $rootScope.$broadcast("dialog." + attrs.name + ".close");
-      }
-      scope.close = function() {
-        var d = element[0];
-        d.close();
-        scope.removeListeners();
-      }
-      scope.ok = function(contextData) {
-        contextData.ok();
-        scope.removeListeners();
-      }
-      scope.cancel = function(contextData) {
-        contextData.cancel();
-        scope.removeListeners();
-      }
-      scope.removeListeners = function() {
-        element[0].removeEventListener("ok", scope.handleContextOk, false);
-        element[0].removeEventListener("cancel", scope.handleContextCancel, false);
-      }
-      scope.setKeyEvents = function(data) {
-        var contextData = scope.getContextData(data);
-        if (contextData && contextData.cancel) {
-          scope.handleContextOk = function() {
-            scope.ok(contextData);
-          }
-          scope.handleContextCancel = function() {
-            scope.cancel(contextData);
-          }
-          element[0].addEventListener("ok", scope.handleContextOk, false);
-          element[0].addEventListener("cancel", scope.handleContextCancel, false);
-        }
-      }
-      scope.getContextData = function(data) {
-        var context = attrs.context;
-        var contextData = null;
-        if (context && data && context in data) {
-          contextData = data[context];
-          transcludeScope[context] = contextData;
-        }
-        return contextData;
-      }
-      scope.$on("dialog." + attrs.name + ".close", scope.close);
-    }
-  }
-});;
-/*! RESOURCE: /scripts/sn/common/ui/directive.snFlyout.js */
-angular.module('sn.common.ui').directive('snFlyout', function(getTemplateUrl) {
-  'use strict';
-  return {
-    restrict: 'E',
-    transclude: true,
-    replace: 'true',
-    templateUrl: getTemplateUrl('sn_flyout.xml'),
-    scope: true,
-    link: function($scope, element, attrs) {
-      $scope.open = false;
-      $scope.more = false;
-      $scope.position = attrs.position || 'left';
-      $scope.flyoutControl = attrs.control;
-      $scope.register = attrs.register;
-      var body = angular.element('.flyout-body', element);
-      var header = angular.element('.flyout-header', element);
-      var tabs = angular.element('.flyout-tabs', element);
-      var distance = 0;
-      var position = $scope.position;
-      var options = {
-        duration: 800,
-        easing: 'easeOutBounce'
-      }
-      var animation = {};
-      if ($scope.flyoutControl) {
-        $('.flyout-handle', element).hide();
-        var controls = angular.element('#' + $scope.flyoutControl);
-        controls.click(function() {
-          angular.element(this).trigger("snFlyout.open");
-        });
-        controls.on('snFlyout.open', function() {
-          $scope.$apply(function() {
-            $scope.open = !$scope.open;
-          });
-        });
-      }
-      var animate = function() {
-        element.velocity(animation, options);
-      }
-      var setup = function() {
-        animation[position] = -distance;
-        if ($scope.open)
-          element.css(position, 0);
-        else
-          element.css(position, -distance);
-      }
-      var calculatePosition = function() {
-        if ($scope.open) {
-          animation[position] = 0;
-        } else {
-          if ($scope.position === 'left' || $scope.position === 'right')
-            animation[position] = -body.outerWidth();
-          else
-            animation[position] = -body.outerHeight();
-        }
-      }
-      $scope.$watch('open', function(newValue, oldValue) {
-        if (newValue === oldValue)
-          return;
-        calculatePosition();
-        animate();
-      });
-      $scope.$watch('more', function(newValue, oldValue) {
-        if (newValue === oldValue)
-          return;
-        var moreAnimation = {};
-        if ($scope.more) {
-          element.addClass('fly-double');
-          moreAnimation = {
-            width: body.outerWidth() * 2
-          };
-        } else {
-          element.removeClass('fly-double');
-          moreAnimation = {
-            width: body.outerWidth() / 2
-          };
-        }
-        body.velocity(moreAnimation, options);
-        header.velocity(moreAnimation, options);
-      });
-      if ($scope.position === 'left' || $scope.position === 'right') {
-        $scope.$watch(element[0].offsetWidth, function() {
-          element.addClass('fly-from-' + $scope.position);
-          distance = body.outerWidth();
-          setup();
-        });
-      } else if ($scope.position === 'top' || $scope.position === 'bottom') {
-        $scope.$watch(element[0].offsetWidth, function() {
-          element.addClass('fly-from-' + $scope.position);
-          distance = body.outerHeight() + header.outerHeight();
-          setup();
-        });
-      }
-      $scope.$on($scope.register + ".bounceTabByIndex", function(event, index) {
-        $scope.bounceTab(index);
-      });
-      $scope.$on($scope.register + ".bounceTab", function(event, tab) {
-        $scope.bounceTab($scope.tabs.indexOf(tab));
-      });
-      $scope.$on($scope.register + ".selectTabByIndex", function(event, index) {
-        $scope.selectTab($scope.tabs[index]);
-      });
-      $scope.$on($scope.register + ".selectTab", function(event, tab) {
-        $scope.selectTab(tab);
-      });
-    },
-    controller: function($scope, $element) {
-      $scope.tabs = [];
-      var baseColor, highLightColor;
-      $scope.selectTab = function(tab) {
-        if ($scope.selectedTab)
-          $scope.selectedTab.selected = false;
-        tab.selected = true;
-        $scope.selectedTab = tab;
-        normalizeTab($scope.tabs.indexOf(tab));
-      }
-
-      function expandTab(tabElem) {
-        tabElem.queue("tabBounce", function(next) {
-          tabElem.velocity({
-            width: ["2.5rem", "2.125rem"],
-            backgroundColorRed: [highLightColor[0], baseColor[0]],
-            backgroundColorGreen: [highLightColor[1], baseColor[1]],
-            backgroundColorBlue: [highLightColor[2], baseColor[2]]
-          }, {
-            easing: "easeInExpo",
-            duration: 250
-          });
-          next();
-        });
-      }
-
-      function contractTab(tabElem) {
-        tabElem.queue("tabBounce", function(next) {
-          tabElem.velocity({
-            width: ["2.125rem", "2.5rem"],
-            backgroundColorRed: [baseColor[0], highLightColor[0]],
-            backgroundColorGreen: [baseColor[1], highLightColor[1]],
-            backgroundColorBlue: [baseColor[2], highLightColor[2]]
-          }, {
-            easing: "easeInExpo",
-            duration: 250
-          });
-          next();
-        });
-      }
-      $scope.bounceTab = function(index) {
-        if (index >= $scope.tabs.length || index < 0)
-          return;
-        var tabScope = $scope.tabs[index];
-        if (!tabScope.selected) {
-          var tabElem = $element.find('.flyout-tab').eq(index);
-          if (!baseColor) {
-            baseColor = tabElem.css('backgroundColor').match(/[0-9]+/g);
-            for (var i = 0; i < baseColor.length; i++)
-              baseColor[i] = parseInt(baseColor[i], 10);
-          }
-          if (!highLightColor)
-            highLightColor = invertColor(baseColor);
-          if (tabScope.highlighted)
-            contractTab(tabElem);
-          for (var i = 0; i < 2; i++) {
-            expandTab(tabElem);
-            contractTab(tabElem);
-          }
-          expandTab(tabElem);
-          tabElem.dequeue("tabBounce");
-          tabScope.highlighted = true;
-        }
-      }
-      $scope.toggleOpen = function() {
-        $scope.open = !$scope.open;
-      }
-      this.addTab = function(tab) {
-        $scope.tabs.push(tab);
-        if ($scope.tabs.length === 1)
-          $scope.selectTab(tab)
-      }
-
-      function normalizeTab(index) {
-        if (index < 0 || index >= $scope.tabs.length || !$scope.tabs[index].highlighted)
-          return;
-        var tabElem = $element.find('.flyout-tab').eq(index);
-        tabElem.velocity({
-          width: ["2.125rem", "2.5rem"]
-        }, {
-          easing: "easeInExpo",
-          duration: 250
-        });
-        tabElem.css('backgroundColor', '');
-        $scope.tabs[index].highlighted = false;
-      }
-
-      function invertColor(rgb) {
-        if (typeof rgb === "string")
-          var color = rgb.match(/[0-9]+/g);
-        else
-          var color = rgb.slice(0);
-        for (var i = 0; i < color.length; i++)
-          color[i] = 255 - parseInt(color[i], 10);
-        return color;
-      }
-    }
-  }
-}).directive("snFlyoutTab", function() {
-  "use strict";
-  return {
-    restrict: "E",
-    require: "^snFlyout",
-    replace: true,
-    scope: true,
-    transclude: true,
-    template: "<div ng-show='selected' ng-transclude='' style='height: 100%'></div>",
-    link: function(scope, element, attrs, flyoutCtrl) {
-      flyoutCtrl.addTab(scope);
-    }
-  }
-});
-/*! RESOURCE: /scripts/sn/common/ui/directive.snModal.js */
-angular.module("sn.common.ui").directive("snModal", function($timeout, $rootScope) {
       "use strict";
       return {
         restrict: "AE",
         transclude: true,
-        scope: {},
+        scope: {
+          modal: "=?",
+          disableAutoFocus: "=?",
+          classCheck: "="
+        },
         replace: true,
-        template: '<div tabindex="-1" aria-hidden="true" class="modal" role="dialog"></div>',
+        template: '<dialog ng-keyup="escape($event)"><div ng-click="onClickClose()" title="Close" class="close-button icon-button icon-cross"></div></dialog>',
         link: function(scope, element, attrs, ctrl, transcludeFn) {
             var transcludeScope = {};
+            scope.isOpen = function() {
+              return element[0].open;
+            };
             transcludeFn(element.scope().$new(), function(a, b) {
               element.append(a);
               transcludeScope = b;
             });
-            scope.$on("dialog." + attrs.name + ".show", function(event, data) {
-              if (!isOpen())
-                show(data);
+            element.click(function(event) {
+              event.stopPropagation();
+              if (event.offsetX < 0 || event.offsetX > element[0].offsetWidth || event.offsetY < 0 || event.offsetY > element[0].offsetHeight)
+                if (!scope.classCheck)
+                  scope.onClickClose();
+                else {
+                  var classes = scope.classCheck.split(",");
+                  var found = false;
+                  for (var i = 0; i < classes.length; i++)
+                    if (angular.element(event.srcElement).closest(classes[i]).length > 0)
+                      found = true;
+                  if (!found)
+                    scope.onClickClose();
+                }
             });
-            scope.$on("dialog." + attrs.name + ".close", function() {
-              if (isOpen())
-                close();
-            });
-
-            function eventFn(eventName) {
-              return function(e) {
-                $rootScope.$broadcast("dialog." + attrs.name + "." + eventName, e);
+            scope.show = function() {
+              var d = element[0];
+              if (!d.showModal || true) {
+                dialogPolyfill.registerDialog(d);
+                d.setDisableAutoFocus(scope.disableAutoFocus);
+              }
+              if (scope.modal)
+                d.showModal();
+              else
+                d.show();
+              if (!angular.element(d).hasClass('sn-alert')) {
+                $timeout(function() {
+                  if (d.dialogPolyfillInfo && d.dialogPolyfillInfo.backdrop) {
+                    angular.element(d.dialogPolyfillInfo.backdrop).one('click', function(event) {
+                      if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
+                        scope.onClickClose();
+                    })
+                  } else {
+                    $document.on('click', function(event) {
+                      if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
+                        scope.onClickClose();
+                    })
+                  }
+                });
+              }
+              element.find('.btn-primary').eq(0).focus();
+            };
+            scope.setPosition = function(data) {
+              var contextData = scope.getContextData(data);
+              if (contextData && element && element[0]) {
+                if (contextData.position) {
+                  element[0].style.top = contextData.position.top + "px";
+                  element[0].style.left = contextData.position.left + "px";
+                  element[0].style.margin = "0px";
+                }
+                if (contextData.dimensions) {
+                  element[0].style.width = contextData.dimensions.width + "px";
+                  element[0].style.height = contextData.dimensions.height + "px";
+                }
               }
             }
-            var events = {
-              'shown.bs.modal': eventFn("opened"),
-              'hide.bs.modal': eventFn("hide"),
-              'hidden.bs.modal': eventFn("closed")
-            };
-
-            function show(data) {
-              var context = attrs.context;
-              var contextData = null;
-              if (context && data && contex
+            scope.$on("dialog." + attrs.name + ".move", function(event, data) {
+              scope.setPosition(data);
+            })
+            scope.$on("dialog." + attrs.name + ".show", function(event, data) {
+              scope.setPosition(data);
+              scope.setKeyEvents(data);
+              if (scope.isOpen() === true)
+                scope.close();
+              else
+                scope.show();
+              angular.element(".sn-dialog-menu").each(function(index, value) {
+                var name = angular.element(this).attr('name');
+                if (name != attrs.name && !angular.element(this).attr('open')) {
+                  return true;
+                }
+                if (name != attrs.name && angular.element(this).attr('open')) {
+                  $rootScope.$broadcast("dialog." + name + ".close");
+                }
+              });
+            })
+            scope.onClickClose = function() {
+              if (scope.isOpen())
+                $rootScope.$broadcast("dialog." + attrs.name + ".close");
+            }
+            scope.close = function() {
+              var d = element[0];
+              d.close();
+              scope.removeListeners();
+            }
+            scope.ok = function(contextData) {
+              contextData.ok();
+              scope.removeListeners();
+            }
+            scope.cancel = function(contextData) {
+                contextData.cance

@@ -1353,16 +1353,1186 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
 });
 /*! RESOURCE: AddTeamMembers */
 var AddTeamMembers = Class.create(GlideDialogWindow, {
-      initialize: function() {
-        this.setUpFacade();
-      },
-      setUpFacade: function() {
-        GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-        this.setTitle(getMessage("Add Team Members"));
-        this.setBody(this.getMarkUp(), false, false);
-      },
-      setUpEvents: function() {
-          var dialog = this;
-          var okButton = $("ok");
-          if (okButton) {
-            okButt
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
+    this.setTitle(getMessage("Add Team Members"));
+    this.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (dialog.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          dialog.showStatus(getMessage("Adding team members..."));
+          processor.getXML(function() {
+            dialog.refresh();
+            dialog._onCloseClicked();
+          });
+        } else {
+          dialog._onCloseClicked();
+        }
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      teamCombo.on("change", function() {
+        dialog.updateMembers();
+      });
+    }
+  },
+  updateMembers: function() {
+    var arrMemberInfo = [];
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      var strTeamSysId = teamCombo.value;
+      var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+      recTeamMember.addQuery("team", strTeamSysId);
+      recTeamMember.query();
+      while (recTeamMember.next()) {
+        var recSysUser = new GlideRecord("sys_user");
+        recSysUser.addQuery("sys_id", recTeamMember.name);
+        recSysUser.query();
+        var strName = recSysUser.next() ? recSysUser.name : "";
+        var strPoints = recTeamMember.default_sprint_points + "";
+        arrMemberInfo.push({
+          name: strName,
+          points: strPoints
+        });
+      }
+    }
+    if (arrMemberInfo.length > 0) {
+      var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
+        "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
+      for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
+        var strMemberName = arrMemberInfo[nSlot].name + "";
+        var strMemberPoints = arrMemberInfo[nSlot].points + "";
+        strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
+          "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
+      }
+      $("memberId").update(strHtml);
+    } else {
+      $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenTeamSysIds: function() {
+    return $F('teamId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getTeamInfo');
+    groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapTeamInfo = {};
+    var teamData = response.responseXML.getElementsByTagName("team");
+    var strName, strSysId;
+    for (var i = 0; i < teamData.length; i++) {
+      strName = teamData[i].getAttribute("name");
+      strSysId = teamData[i].getAttribute("sysid");
+      mapTeamInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrTeamNames = [];
+    for (var strTeamName in mapTeamInfo) {
+      arrTeamNames.push(strTeamName + "");
+    }
+    arrTeamNames.sort();
+    var strMarkUp = "";
+    if (arrTeamNames.length > 0) {
+      var strTable = "<table><tr><td><label for='teamId'>" + getMessage("Team") + "</label>&nbsp;<select id='teamId'>";
+      for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
+        strName = arrTeamNames[nSlot];
+        strSysId = mapTeamInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></label></td></tr></table>";
+      var strTable2 = "<table style='width: 100%;'><tr><td style='width: 50%;'></td><td><table id='memberId'></table></td><td style='width: 50%;'></td></tr></table>";
+      strMarkUp = "<div id='task_controls' style='overflow: auto;>" + strTable + strTable2 +
+        "</div><table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='ok' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></td></tr></table>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No release teams found</p>" +
+        "<table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancelNG' type='button'>" + getMessage("Cancel") + "</button></td></tr></table></div>";
+    }
+    this.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+    this.setWidth(280);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenTeamSysId = this.getUserChosenTeamSysIds();
+    if (strChosenTeamSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_teams = strChosenTeamSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+/*! RESOURCE: ScrumAddSprints */
+var ScrumAddSprints = Class.create({
+  initialize: function(gr) {
+    this._gr = gr;
+    this._prmNms = ["spName", "spDuration", "spStartDate", "spStartNum", "spNum", "_tn", "_sys_id"];
+    this._dateFN = ["spStartDate"];
+    this._refObs = [];
+    this._prmVls = [];
+    for (var i = 0; i < this._prmNms.length; i++) {
+      this._prmVls[this._prmNms[i]] = "";
+    }
+    this._prmErr = [];
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._crtDlg = new dialogClass("scrum_add_sprints_dialog");
+    this._crtDlg.setTitle("Add Sprints");
+    this._crtDlg.setPreference("_tn", this._gr.getTableName());
+    this._crtDlg.setPreference("_sys_id", (this._gr.getUniqueValue()));
+    this._crtDlg.setPreference("handler", this);
+  },
+  showDialog: function() {
+    this._crtDlg.render();
+  },
+  onSubmit: function() {
+    this._readFormValues();
+    if (!this._validate()) {
+      var errMsg = "Before you submit:";
+      for (var i = 0; i < this._prmErr.length; i++) {
+        errMsg += "\n * " + this._prmErr[i];
+      }
+      alert(errMsg);
+      return false;
+    }
+    this._crtDlg.destroy();
+    var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+    ga.addParam("sysparm_name", "checkDuration");
+    for (var i = 0; i < this._prmNms.length; i++) {
+      ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+    }
+    ga.getXML(this.checkComplete.bind(this));
+    return false;
+  },
+  checkComplete: function(response) {
+    var resp = response.responseXML.getElementsByTagName("item");
+    if (resp[0].getAttribute("result") == "success") {
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._plsWtDlg = new dialogClass("scrum_please_wait");
+      this._plsWtDlg.setTitle("Working.  Please wait.");
+      this._plsWtDlg.render();
+      var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+      ga.addParam("sysparm_name", "addSprints");
+      for (var i = 0; i < this._prmNms.length; i++) {
+        ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+      }
+      ga.getXML(this.createComplete.bind(this));
+      return false;
+    }
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._rlsPshDlg = new dialogClass("scrum_release_push_confirm_dialog");
+    this._rlsPshDlg.setTitle("Modify Release Dates");
+    this._rlsPshDlg.setPreference("handler", this);
+    this._rlsPshDlg.render();
+  },
+  confirmReleasePush: function() {
+    this._rlsPshDlg.destroy();
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._plsWtDlg = new dialogClass("scrum_please_wait");
+    this._plsWtDlg.setTitle("Working.  Please wait.");
+    this._plsWtDlg.render();
+    var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+    ga.addParam("sysparm_name", "addSprints");
+    for (var i = 0; i < this._prmNms.length; i++) {
+      ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+    }
+    ga.getXML(this.createComplete.bind(this));
+    return false;
+  },
+  cancelReleasePush: function(response) {
+    this._rlsPshDlg.destroy();
+    window.location.reload();
+    return false;
+  },
+  createComplete: function(response) {
+    this._plsWtDlg.destroy();
+    var resp = response.responseXML.getElementsByTagName("item");
+    if (resp[0].getAttribute("result") == "success") {
+      this._sprints = response.responseXML.documentElement.getAttribute("answer");
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._viewConfirm = new dialogClass("scrum_sprints_view_confirm_dialog");
+      this._viewConfirm.setTitle("Sprints Created");
+      this._viewConfirm.setPreference("handler", this);
+      this._viewConfirm.render();
+    } else {
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._createError = new dialogClass("scrum_error");
+      this._createError.setTitle("Error Creating Sprints");
+      this._createError.setPreference("handler", this);
+      this._createError.render();
+    }
+  },
+  viewConfirmed: function() {
+    this._viewConfirm.destroy();
+    window.location = "rm_sprint_list.do?sysparm_query=numberIN" + this._sprints + "&sysparm_view=scrum";
+    return false;
+  },
+  viewCancelled: function() {
+    this._viewConfirm.destroy();
+    window.location.reload();
+    return false;
+  },
+  popCal: function(dateFieldId) {
+    return new GwtDateTimePicker(dateFieldId, g_user_date_time_format, true);
+  },
+  _validate: function() {
+    var valid = true;
+    this._prmErr = [];
+    if (this._prmVls["spName"] == "") {
+      this._prmErr.push("You must supply a Name");
+      valid = false;
+    }
+    if (this._prmVls["spDuration"] == "" || isNaN(this._prmVls['spDuration'])) {
+      this._prmErr.push("You must supply a valid numeric duration");
+      valid = false;
+    }
+    if (this._prmVls["spStartDate"] == "") {
+      this._prmErr.push("You must supply a Start Date");
+      valid = false;
+    }
+    if (this._prmVls["spNum"] == "" || isNaN(this._prmVls['spNum'])) {
+      this._prmErr.push("You must supply a valid Number of Sprints to create");
+      valid = false;
+    }
+    if (this._prmVls["spStartNum"] == "" || isNaN(this._prmVls['spStartNum'])) {
+      this._prmErr.push("You must supply a valid starting number");
+      valid = false;
+    }
+    return valid;
+  },
+  _readFormValues: function() {
+    for (var i = 0; i < this._prmNms.length; i++) {
+      var frmVl = this._getValue(this._prmNms[i]);
+      if ((typeof frmVl === "undefined") || frmVl == "undefined" || frmVl == null || frmVl == "null") {
+        frmVl = "";
+      }
+      this._prmVls[this._prmNms[i]] = frmVl;
+    }
+  },
+  _getValue: function(inptNm) {
+    return gel(inptNm).value;
+  },
+  type: "ScrumAddSprints"
+});
+/*! RESOURCE: image_gallery */
+(function($) {
+  $.fn.piroBox_ext = function(opt) {
+    opt = jQuery.extend({
+      piro_speed: 700,
+      bg_alpha: 0.9,
+      piro_scroll: true
+    }, opt);
+    $.fn.piroFadeIn = function(speed, callback) {
+      $(this).fadeIn(speed, function() {
+        if (jQuery.browser.msie)
+          $(this).get(0).style.removeAttribute('filter');
+        if (callback != undefined)
+          callback();
+      });
+    };
+    $.fn.piroFadeOut = function(speed, callback) {
+      $(this).fadeOut(speed, function() {
+        if (jQuery.browser.msie)
+          $(this).get(0).style.removeAttribute('filter');
+        if (callback != undefined)
+          callback();
+      });
+    };
+    var my_gall_obj = $('a[class*="pirobox"]');
+    var map = new Object();
+    for (var i = 0; i < my_gall_obj.length; i++) {
+      var it = $(my_gall_obj[i]);
+      map['a.' + it.attr('class').match(/^pirobox_gall\w*/)] = 0;
+    }
+    var gall_settings = new Array();
+    for (var key in map) {
+      gall_settings.push(key);
+    }
+    for (var i = 0; i < gall_settings.length; i++) {
+      $(gall_settings[i] + ':first').addClass('first');
+      $(gall_settings[i] + ':last').addClass('last');
+    }
+    var piro_gallery = $(my_gall_obj);
+    $('a[class*="pirobox_gall"]').each(function(rev) {
+      this.rev = rev + 0
+    });
+    var struct = (
+      '<div class="piro_overlay"></div>' +
+      '<table class="piro_html"  cellpadding="0" cellspacing="0">' +
+      '<tr>' +
+      '<td class="h_t_l"></td>' +
+      '<td class="h_t_c" title="drag me!!"></td>' +
+      '<td class="h_t_r"></td>' +
+      '</tr>' +
+      '<tr>' +
+      '<td class="h_c_l"></td>' +
+      '<td class="h_c_c">' +
+      '<div class="piro_loader" title="close"><span></span></div>' +
+      '<div class="resize">' +
+      '<div class="nav_container">' +
+      '<a href="#prev" class="piro_prev" title="previous"></a>' +
+      '<a href="#next" class="piro_next" title="next"></a>' +
+      '<div class="piro_prev_fake">prev</div>' +
+      '<div class="piro_next_fake">next</div>' +
+      '<div class="piro_close" title="close"></div>' +
+      '</div>' +
+      '<div class="caption"></div>' +
+      '<div class="div_reg"></div>' +
+      '</div>' +
+      '</td>' +
+      '<td class="h_c_r"></td>' +
+      '</tr>' +
+      '<tr>' +
+      '<td class="h_b_l"></td>' +
+      '<td class="h_b_c"></td>' +
+      '<td class="h_b_r"></td>' +
+      '</tr>' +
+      '</table>'
+    );
+    $('body').append(struct);
+    var wrapper = $('.piro_html'),
+      piro_capt = $('.caption'),
+      piro_bg = $('.piro_overlay'),
+      piro_next = $('.piro_next'),
+      piro_prev = $('.piro_prev'),
+      piro_next_fake = $('.piro_next_fake'),
+      piro_prev_fake = $('.piro_prev_fake'),
+      piro_close = $('.piro_close'),
+      div_reg = $('.div_reg'),
+      piro_loader = $('.piro_loader'),
+      resize = $('.resize'),
+      btn_info = $('.btn_info');
+    var rz_img = 0.95;
+    if ($.browser.msie) {
+      wrapper.draggable({
+        handle: '.h_t_c,.h_b_c,.div_reg img'
+      });
+    } else {
+      wrapper.draggable({
+        handle: '.h_t_c,.h_b_c,.div_reg img',
+        opacity: 0.80
+      });
+    }
+    var y = $(window).height();
+    var x = $(window).width();
+    $('.nav_container').hide();
+    wrapper.css({
+      left: ((x / 2) - (250)) + 'px',
+      top: parseInt($(document).scrollTop()) + (100)
+    });
+    $(wrapper).add(piro_capt).add(piro_bg).hide();
+    piro_bg.css({
+      'opacity': opt.bg_alpha
+    });
+    $(piro_prev).add(piro_next).bind('click', function(c) {
+      $('.nav_container').hide();
+      c.preventDefault();
+      piro_next.add(piro_prev).hide();
+      var obj_count = parseInt($('a[class*="pirobox_gall"]').filter('.item').attr('rev'));
+      var start = $(this).is('.piro_prev') ? $('a[class*="pirobox_gall"]').eq(obj_count - 1) : $('a[class*="pirobox_gall"]').eq(obj_count + 1);
+      start.click();
+    });
+    $('html').bind('keyup', function(c) {
+      if (c.keyCode == 27) {
+        c.preventDefault();
+        if ($(piro_close).is(':visible')) {
+          close_all();
+        }
+      }
+    });
+    $('html').bind('keyup', function(e) {
+      if ($('.item').is('.first')) {} else if (e.keyCode == 37) {
+        e.preventDefault();
+        if ($(piro_close).is(':visible')) {
+          piro_prev.click();
+        }
+      }
+    });
+    $('html').bind('keyup', function(z) {
+      if ($('.item').is('.last')) {} else if (z.keyCode == 39) {
+        z.preventDefault();
+        if ($(piro_close).is(':visible')) {
+          piro_next.click();
+        }
+      }
+    });
+    $(window).resize(function() {
+      var new_y = $(window).height();
+      var new_x = $(window).width();
+      var new_h = wrapper.height();
+      var new_w = wrapper.width();
+      wrapper.css({
+        left: ((new_x / 2) - (new_w / 2)) + 'px',
+        top: parseInt($(document).scrollTop()) + (new_y - new_h) / 2
+      });
+    });
+
+    function scrollIt() {
+      $(window).scroll(function() {
+        var new_y = $(window).height();
+        var new_x = $(window).width();
+        var new_h = wrapper.height();
+        var new_w = wrapper.width();
+        wrapper.css({
+          left: ((new_x / 2) - (new_w / 2)) + 'px',
+          top: parseInt($(document).scrollTop()) + (new_y - new_h) / 2
+        });
+      });
+    }
+    if (opt.piro_scroll == true) {
+      scrollIt()
+    }
+    $(piro_gallery).each(function() {
+      var descr = $(this).attr('title');
+      var params = $(this).attr('rel').split('-');
+      var p_link = $(this).attr('href');
+      $(this).unbind();
+      $(this).bind('click', function(e) {
+        piro_bg.css({
+          'opacity': opt.bg_alpha
+        });
+        e.preventDefault();
+        piro_next.add(piro_prev).hide().css('visibility', 'hidden');
+        $(piro_gallery).filter('.item').removeClass('item');
+        $(this).addClass('item');
+        open_all();
+        if ($(this).is('.first')) {
+          piro_prev.hide();
+          piro_next.show();
+          piro_prev_fake.show().css({
+            'opacity': 0.5,
+            'visibility': 'hidden'
+          });
+        } else {
+          piro_next.add(piro_prev).show();
+          piro_next_fake.add(piro_prev_fake).hide();
+        }
+        if ($(this).is('.last')) {
+          piro_prev.show();
+          piro_next_fake.show().css({
+            'opacity': 0.5,
+            'visibility': 'hidden'
+          });
+          piro_next.hide();
+        }
+        if ($(this).is('.pirobox')) {
+          piro_next.add(piro_prev).hide();
+        }
+      });
+
+      function open_all() {
+        wrapper.add(piro_bg).add(div_reg).add(piro_loader).show();
+
+        function animate_html() {
+          if (params[1] == 'full' && params[2] == 'full') {
+            params[2] = $(window).height() - 70;
+            params[1] = $(window).width() - 55;
+          }
+          var y = $(window).height();
+          var x = $(window).width();
+          piro_close.hide();
+          div_reg.add(resize).animate({
+            'height': +(params[2]) + 'px',
+            'width': +(params[1]) + 'px'
+          }, opt.piro_speed).css('visibility', 'visible');
+          wrapper.animate({
+            height: +(params[2]) + 20 + 'px',
+            width: +(params[1]) + 20 + 'px',
+            left: ((x / 2) - ((params[1]) / 2 + 10)) + 'px',
+            top: parseInt($(document).scrollTop()) + (y - params[2]) / 2 - 10
+          }, opt.piro_speed, function() {
+            piro_next.add(piro_prev).css({
+              'height': '20px',
+              'width': '20px'
+            });
+            piro_next.add(piro_prev).add(piro_prev_fake).add(piro_next_fake).css('visibility', 'visible');
+            $('.nav_container').show();
+            piro_close.show();
+          });
+        }
+
+        function animate_image() {
+          var img = new Image();
+          img.onerror = function() {
+            piro_capt.html('');
+            img.src = "http://www.pirolab.it/pirobox/js/error.jpg";
+          }
+          img.onload = function() {
+            piro_capt.add(btn_info).hide();
+            var y = $(window).height();
+            var x = $(window).width();
+            var imgH = img.height;
+            var imgW = img.width;
+            if (imgH + 20 > y || imgW + 20 > x) {
+              var _x = (imgW + 20) / x;
+              var _y = (imgH + 20) / y;
+              if (_y > _x) {
+                imgW = Math.round(img.width * (rz_img / _y));
+                imgH = Math.round(img.height * (rz_img / _y));
+              } else {
+                imgW = Math.round(img.width * (rz_img / _x));
+                imgH = Math.round(img.height * (rz_img / _x));
+              }
+            } else {
+              imgH = img.height;
+              imgW = img.width;
+            }
+            var y = $(window).height();
+            var x = $(window).width();
+            $(img).height(imgH).width(imgW).hide();
+            $(img).fadeOut(300, function() {});
+            $('.div_reg img').remove();
+            $('.div_reg').html('');
+            div_reg.append(img).show();
+            $(img).addClass('immagine');
+            div_reg.add(resize).animate({
+              height: imgH + 'px',
+              width: imgW + 'px'
+            }, opt.piro_speed);
+            wrapper.animate({
+              height: (imgH + 20) + 'px',
+              width: (imgW + 20) + 'px',
+              left: ((x / 2) - ((imgW + 20) / 2)) + 'px',
+              top: parseInt($(document).scrollTop()) + (y - imgH) / 2 - 20
+            }, opt.piro_speed, function() {
+              var cap_w = resize.width();
+              piro_capt.css({
+                width: cap_w + 'px'
+              });
+              piro_loader.hide();
+              $(img).fadeIn(300, function() {
+                piro_close.add(btn_info).show();
+                piro_capt.slideDown(200);
+                piro_next.add(piro_prev).css({
+                  'height': '20px',
+                  'width': '20px'
+                });
+                piro_next.add(piro_prev).add(piro_prev_fake).add(piro_next_fake).css('visibility', 'visible');
+                $('.nav_container').show();
+                resize.resize(function() {
+                  NimgW = img.width;
+                  NimgH = img.heigh;
+                  piro_capt.css({
+                    width: (NimgW) + 'px'
+                  });
+                });
+              });
+            });
+          }
+          img.src = p_link;
+          piro_loader.click(function() {
+            img.src = 'about:blank';
+          });
+        }
+        switch (params[0]) {
+          case 'iframe':
+            div_reg.html('').css('overflow', 'hidden');
+            resize.css('overflow', 'hidden');
+            piro_close.add(btn_info).add(piro_capt).hide();
+            animate_html();
+            div_reg.piroFadeIn(300, function() {
+              div_reg.append(
+                '<iframe id="my_frame" class="my_frame" src="' + p_link + '" frameborder="0" allowtransparency="true" scrolling="auto" align="top"></iframe>'
+              );
+              $('.my_frame').css({
+                'height': +(params[2]) + 'px',
+                'width': +(params[1]) + 'px'
+              });
+              piro_loader.hide();
+            });
+            break;
+          case 'content':
+            div_reg.html('').css('overflow', 'auto');
+            resize.css('overflow', 'auto');
+            $('.my_frame').remove();
+            piro_close.add(btn_info).add(piro_capt).hide();
+            animate_html()
+            div_reg.piroFadeIn(300, function() {
+              div_reg.load(p_link);
+              piro_loader.hide();
+            });
+            break;
+          case 'inline':
+            div_reg.html('').css('overflow', 'auto');
+            resize.css('overflow', 'auto');
+            $('.my_frame').remove();
+            piro_close.add(btn_info).add(piro_capt).hide();
+            animate_html()
+            div_reg.piroFadeIn(300, function() {
+              $(p_link).clone(true).appendTo(div_reg).piroFadeIn(300);
+              piro_loader.hide();
+            });
+            break
+          case 'gallery':
+            div_reg.css('overflow', 'hidden');
+            resize.css('overflow', 'hidden');
+            $('.my_frame').remove();
+            piro_close.add(btn_info).add(piro_capt).hide();
+            if (descr == "") {
+              piro_capt.html('');
+            } else {
+              piro_capt.html('<p>' + descr + '</p>');
+            }
+            animate_image();
+            break;
+          case 'single':
+            piro_close.add(btn_info).add(piro_capt).hide();
+            div_reg.html('').css('overflow', 'hidden');
+            resize.css('overflow', 'hidden');
+            $('.my_frame').remove();
+            if (descr == "") {
+              piro_capt.html('');
+            } else {
+              piro_capt.html('<p>' + descr + '</p>');
+            }
+            animate_image();
+            break
+        }
+      }
+    });
+    $('.immagine').live('click', function() {
+      piro_capt.slideToggle(200);
+    });
+
+    function close_all() {
+      if ($('.piro_close').is(':visible')) {
+        $('.my_frame').remove();
+        wrapper.add(div_reg).add(resize).stop();
+        var ie_sucks = wrapper;
+        if ($.browser.msie) {
+          ie_sucks = div_reg.add(piro_bg);
+          $('.div_reg img').remove();
+        } else {
+          ie_sucks = wrapper.add(piro_bg);
+        }
+        ie_sucks.piroFadeOut(200, function() {
+          div_reg.html('');
+          piro_loader.add(piro_capt).add(btn_info).hide();
+          $('.nav_container').hide();
+          piro_bg.add(wrapper).hide().css('visibility', 'visible');
+        });
+      }
+    }
+    piro_close.add(piro_loader).add(piro_bg).bind('click', function(y) {
+      y.preventDefault();
+      close_all();
+    });
+  }
+})(jQuery);
+/*! RESOURCE: lightbox */
+(function() {
+  var b, d, c;
+  b = jQuery;
+  c = (function() {
+    function b() {
+      this.fadeDuration = 500;
+      this.fitImagesInViewport = true;
+      this.resizeDuration = 700;
+      this.showImageNumberLabel = true;
+      this.wrapAround = false
+    }
+    b.prototype.albumLabel = function(b, c) {
+      return "Image " + b + " of " + c
+    };
+    return b
+  })();
+  d = (function() {
+    function c(b) {
+      this.options = b;
+      this.album = [];
+      this.currentImageIndex = void 0;
+      this.init()
+    }
+    c.prototype.init = function() {
+      this.enable();
+      return this.build()
+    };
+    c.prototype.enable = function() {
+      var c = this;
+      return b('body').on('click', 'a[rel^=lightbox], area[rel^=lightbox], a[data-lightbox], area[data-lightbox]', function(d) {
+        c.start(b(d.currentTarget));
+        return false
+      })
+    };
+    c.prototype.build = function() {
+      var c = this;
+      b("<div id='lightboxOverlay' class='lightboxOverlay'></div><div id='lightbox' class='lightbox'><div class='lb-outerContainer'><div class='lb-container'><img class='lb-image' src='' /><div class='lb-nav'><a class='lb-prev' href='' ></a><a class='lb-next' href='' ></a></div><div class='lb-loader'><a class='lb-cancel'></a></div></div></div><div class='lb-dataContainer'><div class='lb-data'><div class='lb-details'><span class='lb-caption'></span><span class='lb-number'></span></div><div class='lb-closeContainer'><a class='lb-close'></a></div></div></div></div>").appendTo(b('body'));
+      this.$lightbox = b('#lightbox');
+      this.$overlay = b('#lightboxOverlay');
+      this.$outerContainer = this.$lightbox.find('.lb-outerContainer');
+      this.$container = this.$lightbox.find('.lb-container');
+      this.containerTopPadding = parseInt(this.$container.css('padding-top'), 10);
+      this.containerRightPadding = parseInt(this.$container.css('padding-right'), 10);
+      this.containerBottomPadding = parseInt(this.$container.css('padding-bottom'), 10);
+      this.containerLeftPadding = parseInt(this.$container.css('padding-left'), 10);
+      this.$overlay.hide().on('click', function() {
+        c.end();
+        return false
+      });
+      this.$lightbox.hide().on('click', function(d) {
+        if (b(d.target).attr('id') === 'lightbox') {
+          c.end()
+        }
+        return false
+      });
+      this.$outerContainer.on('click', function(d) {
+        if (b(d.target).attr('id') === 'lightbox') {
+          c.end()
+        }
+        return false
+      });
+      this.$lightbox.find('.lb-prev').on('click', function() {
+        if (c.currentImageIndex === 0) {
+          c.changeImage(c.album.length - 1)
+        } else {
+          c.changeImage(c.currentImageIndex - 1)
+        }
+        return false
+      });
+      this.$lightbox.find('.lb-next').on('click', function() {
+        if (c.currentImageIndex === c.album.length - 1) {
+          c.changeImage(0)
+        } else {
+          c.changeImage(c.currentImageIndex + 1)
+        }
+        return false
+      });
+      return this.$lightbox.find('.lb-loader, .lb-close').on('click', function() {
+        c.end();
+        return false
+      })
+    };
+    c.prototype.start = function(c) {
+      var f, e, j, d, g, n, o, k, l, m, p, h, i;
+      b(window).on("resize", this.sizeOverlay);
+      b('select, object, embed').css({
+        visibility: "hidden"
+      });
+      this.$overlay.width(b(document).width()).height(b(document).height()).fadeIn(this.options.fadeDuration);
+      this.album = [];
+      g = 0;
+      j = c.attr('data-lightbox');
+      if (j) {
+        h = b(c.prop("tagName") + '[data-lightbox="' + j + '"]');
+        for (d = k = 0, m = h.length; k < m; d = ++k) {
+          e = h[d];
+          this.album.push({
+            link: b(e).attr('href'),
+            title: b(e).attr('title')
+          });
+          if (b(e).attr('href') === c.attr('href')) {
+            g = d
+          }
+        }
+      } else {
+        if (c.attr('rel') === 'lightbox') {
+          this.album.push({
+            link: c.attr('href'),
+            title: c.attr('title')
+          })
+        } else {
+          i = b(c.prop("tagName") + '[rel="' + c.attr('rel') + '"]');
+          for (d = l = 0, p = i.length; l < p; d = ++l) {
+            e = i[d];
+            this.album.push({
+              link: b(e).attr('href'),
+              title: b(e).attr('title')
+            });
+            if (b(e).attr('href') === c.attr('href')) {
+              g = d
+            }
+          }
+        }
+      }
+      f = b(window);
+      o = f.scrollTop() + f.height() / 10;
+      n = f.scrollLeft();
+      this.$lightbox.css({
+        top: o + 'px',
+        left: n + 'px'
+      }).fadeIn(this.options.fadeDuration);
+      this.changeImage(g)
+    };
+    c.prototype.changeImage = function(f) {
+      var d, c, e = this;
+      this.disableKeyboardNav();
+      d = this.$lightbox.find('.lb-image');
+      this.sizeOverlay();
+      this.$overlay.fadeIn(this.options.fadeDuration);
+      b('.lb-loader').fadeIn('slow');
+      this.$lightbox.find('.lb-image, .lb-nav, .lb-prev, .lb-next, .lb-dataContainer, .lb-numbers, .lb-caption').hide();
+      this.$outerContainer.addClass('animating');
+      c = new Image();
+      c.onload = function() {
+        var m, g, h, i, j, k, l;
+        d.attr('src', e.album[f].link);
+        m = b(c);
+        d.width(c.width);
+        d.height(c.height);
+        if (e.options.fitImagesInViewport) {
+          l = b(window).width();
+          k = b(window).height();
+          j = l - e.containerLeftPadding - e.containerRightPadding - 20;
+          i = k - e.containerTopPadding - e.containerBottomPadding - 110;
+          if ((c.width > j) || (c.height > i)) {
+            if ((c.width / j) > (c.height / i)) {
+              h = j;
+              g = parseInt(c.height / (c.width / h), 10);
+              d.width(h);
+              d.height(g)
+            } else {
+              g = i;
+              h = parseInt(c.width / (c.height / g), 10);
+              d.width(h);
+              d.height(g)
+            }
+          }
+        }
+        return e.sizeContainer(d.width(), d.height())
+      };
+      c.src = this.album[f].link;
+      this.currentImageIndex = f
+    };
+    c.prototype.sizeOverlay = function() {
+      return b('#lightboxOverlay').width(b(document).width()).height(b(document).height())
+    };
+    c.prototype.sizeContainer = function(f, g) {
+      var b, d, e, h, c = this;
+      h = this.$outerContainer.outerWidth();
+      e = this.$outerContainer.outerHeight();
+      d = f + this.containerLeftPadding + this.containerRightPadding;
+      b = g + this.containerTopPadding + this.containerBottomPadding;
+      this.$outerContainer.animate({
+        width: d,
+        height: b
+      }, this.options.resizeDuration, 'swing');
+      setTimeout(function() {
+        c.$lightbox.find('.lb-dataContainer').width(d);
+        c.$lightbox.find('.lb-prevLink').height(b);
+        c.$lightbox.find('.lb-nextLink').height(b);
+        c.showImage()
+      }, this.options.resizeDuration)
+    };
+    c.prototype.showImage = function() {
+      this.$lightbox.find('.lb-loader').hide();
+      this.$lightbox.find('.lb-image').fadeIn('slow');
+      this.updateNav();
+      this.updateDetails();
+      this.preloadNeighboringImages();
+      this.enableKeyboardNav()
+    };
+    c.prototype.updateNav = function() {
+      this.$lightbox.find('.lb-nav').show();
+      if (this.album.length > 1) {
+        if (this.options.wrapAround) {
+          this.$lightbox.find('.lb-prev, .lb-next').show()
+        } else {
+          if (this.currentImageIndex > 0) {
+            this.$lightbox.find('.lb-prev').show()
+          }
+          if (this.currentImageIndex < this.album.length - 1) {
+            this.$lightbox.find('.lb-next').show()
+          }
+        }
+      }
+    };
+    c.prototype.updateDetails = function() {
+      var b = this;
+      if (typeof this.album[this.currentImageIndex].title !== 'undefined' && this.album[this.currentImageIndex].title !== "") {
+        this.$lightbox.find('.lb-caption').html(this.album[this.currentImageIndex].title).fadeIn('fast')
+      }
+      if (this.album.length > 1 && this.options.showImageNumberLabel) {
+        this.$lightbox.find('.lb-number').text(this.options.albumLabel(this.currentImageIndex + 1, this.album.length)).fadeIn('fast')
+      } else {
+        this.$lightbox.find('.lb-number').hide()
+      }
+      this.$outerContainer.removeClass('animating');
+      this.$lightbox.find('.lb-dataContainer').fadeIn(this.resizeDuration, function() {
+        return b.sizeOverlay()
+      })
+    };
+    c.prototype.preloadNeighboringImages = function() {
+      var c, b;
+      if (this.album.length > this.currentImageIndex + 1) {
+        c = new Image();
+        c.src = this.album[this.currentImageIndex + 1].link
+      }
+      if (this.currentImageIndex > 0) {
+        b = new Image();
+        b.src = this.album[this.currentImageIndex - 1].link
+      }
+    };
+    c.prototype.enableKeyboardNav = function() {
+      b(document).on('keyup.keyboard', b.proxy(this.keyboardAction, this))
+    };
+    c.prototype.disableKeyboardNav = function() {
+      b(document).off('.keyboard')
+    };
+    c.prototype.keyboardAction = function(g) {
+      var d, e, f, c, b;
+      d = 27;
+      e = 37;
+      f = 39;
+      b = g.keyCode;
+      c = String.fromCharCode(b).toLowerCase();
+      if (b === d || c.match(/x|o|c/)) {
+        this.end()
+      } else if (c === 'p' || b === e) {
+        if (this.currentImageIndex !== 0) {
+          this.changeImage(this.currentImageIndex - 1)
+        }
+      } else if (c === 'n' || b === f) {
+        if (this.currentImageIndex !== this.album.length - 1) {
+          this.changeImage(this.currentImageIndex + 1)
+        }
+      }
+    };
+    c.prototype.end = function() {
+      this.disableKeyboardNav();
+      b(window).off("resize", this.sizeOverlay);
+      this.$lightbox.fadeOut(this.options.fadeDuration);
+      this.$overlay.fadeOut(this.options.fadeDuration);
+      return b('select, object, embed').css({
+        visibility: "visible"
+      })
+    };
+    return c
+  })();
+  b(function() {
+    var e, b;
+    b = new c();
+    return e = new d(b)
+  })
+}).call(this);
+/*! RESOURCE: ScrumCloneReleaseTeamDialog */
+var ScrumCloneReleaseTeamDialog = Class.create();
+ScrumCloneReleaseTeamDialog.prototype = {
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._mstrDlg = new dialogClass("task_window");
+    this._mstrDlg.setTitle(getMessage("Add Team Members"));
+    this._mstrDlg.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this._mstrDlg;
+    var _this = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (_this.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          _this.showStatus(getMessage("Adding team members..."));
+          processor.getXML(function() {
+            _this.refresh();
+            dialog.destroy();
+          });
+        } else {
+          dialog.destroy();
+        }
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog.destroy();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog.destroy();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog.destroy();
+      });
+    }
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      teamCombo.on("change", function() {
+        _this.updateMembers();
+      });
+    }
+  },
+  updateMembers: function() {
+    var arrMemberInfo = [];
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      var strTeamSysId = teamCombo.value;
+      var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+      recTeamMember.addQuery("team", strTeamSysId);
+      recTeamMember.query();
+      while (recTeamMember.next()) {
+        var recSysUser = new GlideRecord("sys_user");
+        recSysUser.addQuery("sys_id", recTeamMember.name);
+        recSysUser.query();
+        var strName = recSysUser.next() ? recSysUser.name : "";
+        var strPoints = recTeamMember.default_sprint_points + "";
+        arrMemberInfo.push({
+          name: strName,
+          points: strPoints
+        });
+      }
+    }
+    if (arrMemberInfo.length > 0) {
+      var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
+        "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
+      for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
+        var strMemberName = arrMemberInfo[nSlot].name + "";
+        var strMemberPoints = arrMemberInfo[nSlot].points + "";
+        strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
+          "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
+      }
+      $("memberId").update(strHtml);
+    } else {
+      $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenTeamSysIds: function() {
+    return $F('teamId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getTeamInfo');
+    groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapTeamInfo = {};
+    var teamData = response.responseXML.getElementsByTagName("team");
+    var strName, strSysId;
+    for (var i = 0; i < teamData.length; i++) {
+      strName = teamData[i].getAttribute("name");
+      strSysId = teamData[i].getAttribute("sysid");
+      mapTeamInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrTeamNames = [];
+    for (var strTeamName in mapTeamInfo) {
+      arrTeamNames.push(strTeamName + "");
+    }
+    arrTeamNames.sort();
+    var strMarkUp = "";
+    if (arrTeamNames.length > 0) {
+      var strTable = "<div class='row'><div class='form-group'><label class='col-sm-3 control-label' for='teamId'>" + getMessage("Team") + "</label><span class='col-sm-9'><select class='form-control' id='teamId'>";
+      for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
+        strName = arrTeamNames[nSlot];
+        strSysId = mapTeamInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></span></div></div>";
+      var strTable2 = "<div class='row' style='padding-top:10px;'><div id='memberId' class='col-sm-12'></div></div>";
+      strMarkUp = "<div id='task_controls'>" + strTable + strTable2 +
+        "<div style='text-align:right;padding-top:20px;'>" +
+        "<button id='cancel' class='btn btn-default' type='button'>" + getMessage("Cancel") + "</button>" +
+        "&nbsp;&nbsp;<button id='ok' class='btn btn-primary' type='button'>" + getMessage("OK") + "</button>" +
+        "</div></div>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No release teams found</p>" +
+        "<div style='padding-top:20px;text-align:right;'>" +
+        "<button id='cancelNG' class='btn btn-default' type='button'>" + getMessage("Cancel") + "</button>" +
+        "&nbsp;&nbsp;<button id='okNG' class='btn btn-primary' type='button'>" + getMessage("OK") + "</button>" +
+        "</div></div>";
+    }
+    this._mstrDlg.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenTeamSysId = this.getUserChosenTeamSysIds();
+    if (strChosenTeamSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_teams = strChosenTeamSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+/*! RESOURCE: /scripts/lib/jquery/jquery_clean.js */
+(function() {
+  if (!window.jQuery)
+    return;
+  if (!window.$j_glide)
+    window.$j = jQuery.noConflict();
+  if (window.$j_glide && jQuery != window.$j_glide) {
+    if (window.$j_glide)
+      jQuery.noConflict(true);
+    window.$j = window.$j_glide;
+  }
+})();;;

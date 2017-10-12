@@ -1192,45 +1192,130 @@ var AddTeamMembers = Class.create(GlideDialogWindow, {
         this.setBody(this.getMarkUp(), false, false);
       },
       setUpEvents: function() {
-          var dialog = this;
-          var okButton = $("ok");
-          if (okButton) {
-            okButton.on("click", function() {
-              var mapData = {};
-              if (dialog.fillDataMap(mapData)) {
-                var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
-                for (var strKey in mapData) {
-                  processor.addParam(strKey, mapData[strKey]);
-                }
-                dialog.showStatus(getMessage("Adding team members..."));
-                processor.getXML(function() {
-                  dialog.refresh();
-                  dialog._onCloseClicked();
-                });
-              } else {
-                dialog._onCloseClicked();
+        var dialog = this;
+        var okButton = $("ok");
+        if (okButton) {
+          okButton.on("click", function() {
+            var mapData = {};
+            if (dialog.fillDataMap(mapData)) {
+              var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
+              for (var strKey in mapData) {
+                processor.addParam(strKey, mapData[strKey]);
               }
-            });
-          }
-          var cancelButton = $("cancel");
-          if (cancelButton) {
-            cancelButton.on("click", function() {
+              dialog.showStatus(getMessage("Adding team members..."));
+              processor.getXML(function() {
+                dialog.refresh();
+                dialog._onCloseClicked();
+              });
+            } else {
               dialog._onCloseClicked();
+            }
+          });
+        }
+        var cancelButton = $("cancel");
+        if (cancelButton) {
+          cancelButton.on("click", function() {
+            dialog._onCloseClicked();
+          });
+        }
+        var okNGButton = $("okNG");
+        if (okNGButton) {
+          okNGButton.on("click", function() {
+            dialog._onCloseClicked();
+          });
+        }
+        var cancelNGButton = $("cancelNG");
+        if (cancelNGButton) {
+          cancelNGButton.on("click", function() {
+            dialog._onCloseClicked();
+          });
+        }
+        var teamCombo = $("teamId");
+        if (teamCombo) {
+          teamCombo.on("change", function() {
+            dialog.updateMembers();
+          });
+        }
+      },
+      updateMembers: function() {
+        var arrMemberInfo = [];
+        var teamCombo = $("teamId");
+        if (teamCombo) {
+          var strTeamSysId = teamCombo.value;
+          var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+          recTeamMember.addQuery("team", strTeamSysId);
+          recTeamMember.query();
+          while (recTeamMember.next()) {
+            var recSysUser = new GlideRecord("sys_user");
+            recSysUser.addQuery("sys_id", recTeamMember.name);
+            recSysUser.query();
+            var strName = recSysUser.next() ? recSysUser.name : "";
+            var strPoints = recTeamMember.default_sprint_points + "";
+            arrMemberInfo.push({
+              name: strName,
+              points: strPoints
             });
           }
-          var okNGButton = $("okNG");
-          if (okNGButton) {
-            okNGButton.on("click", function() {
-              dialog._onCloseClicked();
-            });
+        }
+        if (arrMemberInfo.length > 0) {
+          var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
+            "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
+          for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
+            var strMemberName = arrMemberInfo[nSlot].name + "";
+            var strMemberPoints = arrMemberInfo[nSlot].points + "";
+            strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
+              "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
           }
-          var cancelNGButton = $("cancelNG");
-          if (cancelNGButton) {
-            cancelNGButton.on("click", function() {
-              dialog._onCloseClicked();
-            });
+          $("memberId").update(strHtml);
+        } else {
+          $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
+        }
+      },
+      refresh: function() {
+        GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+      },
+      getScrumReleaseTeamSysId: function() {
+        return g_form.getUniqueValue() + "";
+      },
+      getUserChosenTeamSysIds: function() {
+        return $F('teamId') + "";
+      },
+      showStatus: function(strMessage) {
+        $("task_controls").update(strMessage);
+      },
+      display: function(bIsVisible) {
+        $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+      },
+      getMarkUp: function() {
+        var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+        groupAjax.addParam('sysparm_name', 'getTeamInfo');
+        groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
+        groupAjax.getXML(this.generateMarkUp.bind(this));
+      },
+      generateMarkUp: function(response) {
+          var mapTeamInfo = {};
+          var teamData = response.responseXML.getElementsByTagName("team");
+          var strName, strSysId;
+          for (var i = 0; i < teamData.length; i++) {
+            strName = teamData[i].getAttribute("name");
+            strSysId = teamData[i].getAttribute("sysid");
+            mapTeamInfo[strName] = {
+              name: strName,
+              sysid: strSysId
+            };
           }
-          var teamCombo = $("teamId");
-          if (teamCombo) {
-            teamCombo.on("change", function() {
-                  dialog.updateMe
+          var arrTeamNames = [];
+          for (var strTeamName in mapTeamInfo) {
+            arrTeamNames.push(strTeamName + "");
+          }
+          arrTeamNames.sort();
+          var strMarkUp = "";
+          if (arrTeamNames.length > 0) {
+            var strTable = "<table><tr><td><label for='teamId'>" + getMessage("Team") + "</label>&nbsp;<select id='teamId'>";
+            for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
+              strName = arrTeamNames[nSlot];
+              strSysId = mapTeamInfo[strName].sysid;
+              strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+            }
+            strTable += "</select></label></td></tr></table>";
+            var strTable2 = "<tab

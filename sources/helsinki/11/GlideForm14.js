@@ -1408,4 +1408,86 @@ var GlideForm = Class.create({
         return this.tableName;
       },
       getSections: function() {
-          return $$('form span.tabs2_section span[data-header-only="false"]'
+        return $$('form span.tabs2_section span[data-header-only="false"]');
+      },
+      serialize: function(filterFunc) {
+        var formName = this.tableName + '.do';
+        if (!filterFunc)
+          return Form.serialize(gel(formName)) + this._serializeDisabled();
+        var elements = Form.getElements(gel(formName));
+        var queryComponents = new Array();
+        for (var i = 0; i < elements.length; i++) {
+          if (filterFunc(elements[i])) {
+            var queryComponent;
+            if (elements[i].disabled)
+              queryComponent = elements[i].id + '=' + encodeURIComponent(elements[i].value);
+            else
+              queryComponent = Form.Element.serialize(elements[i]);
+            if (queryComponent)
+              queryComponents.push(queryComponent);
+          }
+        }
+        return queryComponents.join('&');
+      },
+      _serializeDisabled: function() {
+        var n = this.disabledFields.length;
+        var dfa = [];
+        for (var i = 0; i < n; i++) {
+          var e = this.disabledFields[i];
+          if (!e.value || !e.id)
+            continue;
+          dfa.push(e.id + '=' + encodeURIComponent(e.value));
+        }
+        if (dfa.length)
+          return '&' + dfa.join('&');
+        return '';
+      },
+      serializeChanged: function() {
+        var s = this.serializeTargetFields();
+        var f = this.serialize(this.changedFieldsFilter.bind(this));
+        if (f)
+          f = "&" + f;
+        return s + f;
+      },
+      serializeChangedAll: function() {
+        var s = this.serializeTargetFields();
+        var f = this.serialize(this.allChangedFieldsFilter.bind(this));
+        if (f)
+          f = "&" + f;
+        return s + f;
+      },
+      serializeTargetFields: function() {
+        var s = this._serializeElement("sys_target");
+        s += this._serializeElement("sys_uniqueValue");
+        s += this._serializeElement("sys_row");
+        s += this._serializeElement("sysparm_encoded_record");
+        return s;
+      },
+      _serializeElement: function(id) {
+        var e = gel(id);
+        if (e) {
+          var queryComponent = Form.Element.serialize(e);
+          if (queryComponent)
+            return "&" + queryComponent;
+        }
+        return "";
+      },
+      changedFieldsFilter: function(element) {
+        if (element.changed &&
+          element.id.startsWith(this.getTableName() + ".") &&
+          (element.tagName.toUpperCase() != "TEXTAREA"))
+          return true;
+        if (element.id.startsWith("ni.VE"))
+          return true;
+        if (element.name.startsWith("ni.WATERMARK"))
+          return true;
+        return false;
+      },
+      allChangedFieldsFilter: function(element) {
+        if (element.changed && element.id.startsWith(this.getTableName() + "."))
+          return true;
+        return false;
+      },
+      flash: function(widgetName, color, count) {
+          var row = null;
+          var labels = new A

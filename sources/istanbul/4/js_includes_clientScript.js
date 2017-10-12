@@ -1620,4 +1620,116 @@
       }
 
       function _getSection(sectionName) {
-        if (!
+        if (!_options.sections) {
+          return null;
+        }
+        var foundSection = null;
+        _options.sections.forEach(function(section) {
+          if (foundSection) {
+            return;
+          }
+          var name = _getSectionName(section);
+          if (name === sectionName) {
+            foundSection = section;
+            return;
+          }
+        });
+        return foundSection;
+      }
+
+      function _getSectionName(section) {
+        var sectionName = section.caption;
+        if (!sectionName) {
+          return null;
+        }
+        return sectionName.toLowerCase().replace(" ", "_").replace(/[^0-9a-z_]/gi, "");
+      }
+
+      function _fireValueChange(field, oldValue, value) {
+        if (_onChangeHandlers.length > 0) {
+          _valueCalls++;
+          _onChangeHandlers.forEach(function(fn) {
+            fn.call(fn, field.name, oldValue, value);
+          });
+          _valueCalls--;
+        }
+        if (_options.getMappedFieldName) {
+          var mappedName = _options.getMappedFieldName(field.name);
+          _valueCalls++;
+          _onChangeHandlers.forEach(function(fn) {
+            fn.call(fn, mappedName, oldValue, value);
+          });
+          _valueCalls--;
+        }
+        if ((_valueCalls == 0) && _onChangedHandlers.length > 0) {
+          _onChangedHandlers.forEach(function(fn) {
+            fn.call(fn);
+          });
+        }
+      }
+
+      function _updateDerivedFields(g_form, originatingField) {
+        var derivedFields = _getDerivedFields(originatingField.name);
+        if (!glideFormFieldFactory.hasValue(originatingField)) {
+          derivedFields.forEach(function(field) {
+            _setValue(g_form, field, '', null, true);
+          });
+          return;
+        }
+        var relativeFieldNames = [];
+        var fieldsByRelativeFieldName = {};
+        derivedFields.forEach(function(field) {
+          var relativeField = _relativeDerivedFieldName(field.name, originatingField.name);
+          fieldsByRelativeFieldName[relativeField] = field;
+          relativeFieldNames.push(relativeField);
+        });
+        if (relativeFieldNames.length == 0) {
+          return;
+        }
+        var glideRequest = glideFormFactory.glideRequest;
+        var referenceTable = _getReferenceTable(originatingField);
+        var referenceKey = originatingField.reference_key ? originatingField.reference_key : 'sys_id';
+        var requestUri = '/api/now/v1/table/' + referenceTable;
+        var requestParams = {
+          sysparm_display_value: 'all',
+          sysparm_fields: relativeFieldNames.join(','),
+          sysparm_query: referenceKey + '=' + originatingField.value,
+          sysparm_limit: 1
+        };
+        glideRequest.get(requestUri, {
+          params: requestParams
+        }).then(function(response) {
+          var result = response && response.data ? response.data.result : null;
+          if (result.length > 0) {
+            result = result[0];
+            var keys = Object.keys(result);
+            keys.forEach(function(fieldName) {
+              var field = fieldsByRelativeFieldName[fieldName];
+              var newFieldValues = result[fieldName];
+              _setValue(g_form, field, newFieldValues.value, newFieldValues.display_value, true);
+            });
+          }
+        });
+      }
+
+      function _getField(fieldName) {
+        for (var i = 0, iM = _fields.length; i < iM; i++) {
+          var field = _fields[i];
+          if (field.variable_name === fieldName || field.name === fieldName) {
+            return field;
+          }
+        }
+        if (_options.getMappedField) {
+          var mapped = _options.getMappedField(fieldName);
+          if (mapped) {
+            return mapped;
+          }
+        }
+        return null;
+      }
+
+      function _getDependentFields(fieldName) {
+        var fields = [];
+        for (var i = 0, iM = _fields.length; i < iM; i++) {
+          var field = _fields[i];
+          if (fiel

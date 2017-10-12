@@ -1479,37 +1479,4 @@
 
           function isAllowed(ruleType, element, currentAnimation, previousAnimation) {
             return rules[ruleType].some(function(fn) {
-              return fn(element, currentAnimation, previousAnimation);
-            });
-          }
-
-          function hasAnimationClasses(animation, and) {
-            var a = (animation.addClass || '').length > 0;
-            var b = (animation.removeClass || '').length > 0;
-            return and ? a && b : a || b;
-          }
-          rules.join.push(function(element, newAnimation, currentAnimation) {
-            return !newAnimation.structural && hasAnimationClasses(newAnimation);
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return !newAnimation.structural && !hasAnimationClasses(newAnimation);
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.event == 'leave' && newAnimation.structural;
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.structural && currentAnimation.state === RUNNING_STATE && !newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.structural && newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.state === RUNNING_STATE && newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-                if (currentAnimation.structural) return false;
-                var nA = newAnimation.addClass;
-                var nR = newAnimation.removeClass;
-                var cA = currentAnimation.addClass;
-                var cR = currentAnimation.removeClass;
-                if ((isUndefined(nA) && isUndefined(nR)) || (isUndefined(cA) && isUndefin
+                  return fn(elemen

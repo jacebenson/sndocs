@@ -10015,4 +10015,1026 @@
     }
 
     function timeZoneGetter(date, formats, offset) {
-      var
+      var zone = -1 * offset;
+      var paddedZone = (zone >= 0) ? "+" : "";
+      paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
+        padNumber(Math.abs(zone % 60), 2);
+      return paddedZone;
+    }
+
+    function getFirstThursdayOfYear(year) {
+      var dayOfWeekOnFirst = (new Date(year, 0, 1)).getDay();
+      return new Date(year, 0, ((dayOfWeekOnFirst <= 4) ? 5 : 12) - dayOfWeekOnFirst);
+    }
+
+    function getThursdayThisWeek(datetime) {
+      return new Date(datetime.getFullYear(), datetime.getMonth(),
+        datetime.getDate() + (4 - datetime.getDay()));
+    }
+
+    function weekGetter(size) {
+      return function(date) {
+        var firstThurs = getFirstThursdayOfYear(date.getFullYear()),
+          thisThurs = getThursdayThisWeek(date);
+        var diff = +thisThurs - +firstThurs,
+          result = 1 + Math.round(diff / 6.048e8);
+        return padNumber(result, size);
+      };
+    }
+
+    function ampmGetter(date, formats) {
+      return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
+    }
+
+    function eraGetter(date, formats) {
+      return date.getFullYear() <= 0 ? formats.ERAS[0] : formats.ERAS[1];
+    }
+
+    function longEraGetter(date, formats) {
+      return date.getFullYear() <= 0 ? formats.ERANAMES[0] : formats.ERANAMES[1];
+    }
+    var DATE_FORMATS = {
+      yyyy: dateGetter('FullYear', 4, 0, false, true),
+      yy: dateGetter('FullYear', 2, 0, true, true),
+      y: dateGetter('FullYear', 1, 0, false, true),
+      MMMM: dateStrGetter('Month'),
+      MMM: dateStrGetter('Month', true),
+      MM: dateGetter('Month', 2, 1),
+      M: dateGetter('Month', 1, 1),
+      LLLL: dateStrGetter('Month', false, true),
+      dd: dateGetter('Date', 2),
+      d: dateGetter('Date', 1),
+      HH: dateGetter('Hours', 2),
+      H: dateGetter('Hours', 1),
+      hh: dateGetter('Hours', 2, -12),
+      h: dateGetter('Hours', 1, -12),
+      mm: dateGetter('Minutes', 2),
+      m: dateGetter('Minutes', 1),
+      ss: dateGetter('Seconds', 2),
+      s: dateGetter('Seconds', 1),
+      sss: dateGetter('Milliseconds', 3),
+      EEEE: dateStrGetter('Day'),
+      EEE: dateStrGetter('Day', true),
+      a: ampmGetter,
+      Z: timeZoneGetter,
+      ww: weekGetter(2),
+      w: weekGetter(1),
+      G: eraGetter,
+      GG: eraGetter,
+      GGG: eraGetter,
+      GGGG: longEraGetter
+    };
+    var DATE_FORMATS_SPLIT = /((?:[^yMLdHhmsaZEwG']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|L+|d+|H+|h+|m+|s+|a|Z|G+|w+))(.*)/,
+      NUMBER_STRING = /^\-?\d+$/;
+    dateFilter.$inject = ['$locale'];
+
+    function dateFilter($locale) {
+      var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
+
+      function jsonStringToDate(string) {
+        var match;
+        if (match = string.match(R_ISO8601_STR)) {
+          var date = new Date(0),
+            tzHour = 0,
+            tzMin = 0,
+            dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
+            timeSetter = match[8] ? date.setUTCHours : date.setHours;
+          if (match[9]) {
+            tzHour = toInt(match[9] + match[10]);
+            tzMin = toInt(match[9] + match[11]);
+          }
+          dateSetter.call(date, toInt(match[1]), toInt(match[2]) - 1, toInt(match[3]));
+          var h = toInt(match[4] || 0) - tzHour;
+          var m = toInt(match[5] || 0) - tzMin;
+          var s = toInt(match[6] || 0);
+          var ms = Math.round(parseFloat('0.' + (match[7] || 0)) * 1000);
+          timeSetter.call(date, h, m, s, ms);
+          return date;
+        }
+        return string;
+      }
+      return function(date, format, timezone) {
+        var text = '',
+          parts = [],
+          fn, match;
+        format = format || 'mediumDate';
+        format = $locale.DATETIME_FORMATS[format] || format;
+        if (isString(date)) {
+          date = NUMBER_STRING.test(date) ? toInt(date) : jsonStringToDate(date);
+        }
+        if (isNumber(date)) {
+          date = new Date(date);
+        }
+        if (!isDate(date) || !isFinite(date.getTime())) {
+          return date;
+        }
+        while (format) {
+          match = DATE_FORMATS_SPLIT.exec(format);
+          if (match) {
+            parts = concat(parts, match, 1);
+            format = parts.pop();
+          } else {
+            parts.push(format);
+            format = null;
+          }
+        }
+        var dateTimezoneOffset = date.getTimezoneOffset();
+        if (timezone) {
+          dateTimezoneOffset = timezoneToOffset(timezone, dateTimezoneOffset);
+          date = convertTimezoneToLocal(date, timezone, true);
+        }
+        forEach(parts, function(value) {
+          fn = DATE_FORMATS[value];
+          text += fn ? fn(date, $locale.DATETIME_FORMATS, dateTimezoneOffset) :
+            value === "''" ? "'" : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
+        });
+        return text;
+      };
+    }
+
+    function jsonFilter() {
+      return function(object, spacing) {
+        if (isUndefined(spacing)) {
+          spacing = 2;
+        }
+        return toJson(object, spacing);
+      };
+    }
+    var lowercaseFilter = valueFn(lowercase);
+    var uppercaseFilter = valueFn(uppercase);
+
+    function limitToFilter() {
+      return function(input, limit, begin) {
+        if (Math.abs(Number(limit)) === Infinity) {
+          limit = Number(limit);
+        } else {
+          limit = toInt(limit);
+        }
+        if (isNaN(limit)) return input;
+        if (isNumber(input)) input = input.toString();
+        if (!isArrayLike(input)) return input;
+        begin = (!begin || isNaN(begin)) ? 0 : toInt(begin);
+        begin = (begin < 0) ? Math.max(0, input.length + begin) : begin;
+        if (limit >= 0) {
+          return sliceFn(input, begin, begin + limit);
+        } else {
+          if (begin === 0) {
+            return sliceFn(input, limit, input.length);
+          } else {
+            return sliceFn(input, Math.max(0, begin + limit), begin);
+          }
+        }
+      };
+    }
+
+    function sliceFn(input, begin, end) {
+      if (isString(input)) return input.slice(begin, end);
+      return slice.call(input, begin, end);
+    }
+    orderByFilter.$inject = ['$parse'];
+
+    function orderByFilter($parse) {
+      return function(array, sortPredicate, reverseOrder, compareFn) {
+        if (array == null) return array;
+        if (!isArrayLike(array)) {
+          throw minErr('orderBy')('notarray', 'Expected array but received: {0}', array);
+        }
+        if (!isArray(sortPredicate)) {
+          sortPredicate = [sortPredicate];
+        }
+        if (sortPredicate.length === 0) {
+          sortPredicate = ['+'];
+        }
+        var predicates = processPredicates(sortPredicate);
+        var descending = reverseOrder ? -1 : 1;
+        var compare = isFunction(compareFn) ? compareFn : defaultCompare;
+        var compareValues = Array.prototype.map.call(array, getComparisonObject);
+        compareValues.sort(doComparison);
+        array = compareValues.map(function(item) {
+          return item.value;
+        });
+        return array;
+
+        function getComparisonObject(value, index) {
+          return {
+            value: value,
+            tieBreaker: {
+              value: index,
+              type: 'number',
+              index: index
+            },
+            predicateValues: predicates.map(function(predicate) {
+              return getPredicateValue(predicate.get(value), index);
+            })
+          };
+        }
+
+        function doComparison(v1, v2) {
+          for (var i = 0, ii = predicates.length; i < ii; i++) {
+            var result = compare(v1.predicateValues[i], v2.predicateValues[i]);
+            if (result) {
+              return result * predicates[i].descending * descending;
+            }
+          }
+          return compare(v1.tieBreaker, v2.tieBreaker) * descending;
+        }
+      };
+
+      function processPredicates(sortPredicates) {
+        return sortPredicates.map(function(predicate) {
+          var descending = 1,
+            get = identity;
+          if (isFunction(predicate)) {
+            get = predicate;
+          } else if (isString(predicate)) {
+            if ((predicate.charAt(0) == '+' || predicate.charAt(0) == '-')) {
+              descending = predicate.charAt(0) == '-' ? -1 : 1;
+              predicate = predicate.substring(1);
+            }
+            if (predicate !== '') {
+              get = $parse(predicate);
+              if (get.constant) {
+                var key = get();
+                get = function(value) {
+                  return value[key];
+                };
+              }
+            }
+          }
+          return {
+            get: get,
+            descending: descending
+          };
+        });
+      }
+
+      function isPrimitive(value) {
+        switch (typeof value) {
+          case 'number':
+          case 'boolean':
+          case 'string':
+            return true;
+          default:
+            return false;
+        }
+      }
+
+      function objectValue(value) {
+        if (isFunction(value.valueOf)) {
+          value = value.valueOf();
+          if (isPrimitive(value)) return value;
+        }
+        if (hasCustomToString(value)) {
+          value = value.toString();
+          if (isPrimitive(value)) return value;
+        }
+        return value;
+      }
+
+      function getPredicateValue(value, index) {
+        var type = typeof value;
+        if (value === null) {
+          type = 'string';
+          value = 'null';
+        } else if (type === 'object') {
+          value = objectValue(value);
+        }
+        return {
+          value: value,
+          type: type,
+          index: index
+        };
+      }
+
+      function defaultCompare(v1, v2) {
+        var result = 0;
+        var type1 = v1.type;
+        var type2 = v2.type;
+        if (type1 === type2) {
+          var value1 = v1.value;
+          var value2 = v2.value;
+          if (type1 === 'string') {
+            value1 = value1.toLowerCase();
+            value2 = value2.toLowerCase();
+          } else if (type1 === 'object') {
+            if (isObject(value1)) value1 = v1.index;
+            if (isObject(value2)) value2 = v2.index;
+          }
+          if (value1 !== value2) {
+            result = value1 < value2 ? -1 : 1;
+          }
+        } else {
+          result = type1 < type2 ? -1 : 1;
+        }
+        return result;
+      }
+    }
+
+    function ngDirective(directive) {
+      if (isFunction(directive)) {
+        directive = {
+          link: directive
+        };
+      }
+      directive.restrict = directive.restrict || 'AC';
+      return valueFn(directive);
+    }
+    var htmlAnchorDirective = valueFn({
+      restrict: 'E',
+      compile: function(element, attr) {
+        if (!attr.href && !attr.xlinkHref) {
+          return function(scope, element) {
+            if (element[0].nodeName.toLowerCase() !== 'a') return;
+            var href = toString.call(element.prop('href')) === '[object SVGAnimatedString]' ?
+              'xlink:href' : 'href';
+            element.on('click', function(event) {
+              if (!element.attr(href)) {
+                event.preventDefault();
+              }
+            });
+          };
+        }
+      }
+    });
+    var ngAttributeAliasDirectives = {};
+    forEach(BOOLEAN_ATTR, function(propName, attrName) {
+      if (propName == "multiple") return;
+
+      function defaultLinkFn(scope, element, attr) {
+        scope.$watch(attr[normalized], function ngBooleanAttrWatchAction(value) {
+          attr.$set(attrName, !!value);
+        });
+      }
+      var normalized = directiveNormalize('ng-' + attrName);
+      var linkFn = defaultLinkFn;
+      if (propName === 'checked') {
+        linkFn = function(scope, element, attr) {
+          if (attr.ngModel !== attr[normalized]) {
+            defaultLinkFn(scope, element, attr);
+          }
+        };
+      }
+      ngAttributeAliasDirectives[normalized] = function() {
+        return {
+          restrict: 'A',
+          priority: 100,
+          link: linkFn
+        };
+      };
+    });
+    forEach(ALIASED_ATTR, function(htmlAttr, ngAttr) {
+      ngAttributeAliasDirectives[ngAttr] = function() {
+        return {
+          priority: 100,
+          link: function(scope, element, attr) {
+            if (ngAttr === "ngPattern" && attr.ngPattern.charAt(0) == "/") {
+              var match = attr.ngPattern.match(REGEX_STRING_REGEXP);
+              if (match) {
+                attr.$set("ngPattern", new RegExp(match[1], match[2]));
+                return;
+              }
+            }
+            scope.$watch(attr[ngAttr], function ngAttrAliasWatchAction(value) {
+              attr.$set(ngAttr, value);
+            });
+          }
+        };
+      };
+    });
+    forEach(['src', 'srcset', 'href'], function(attrName) {
+      var normalized = directiveNormalize('ng-' + attrName);
+      ngAttributeAliasDirectives[normalized] = function() {
+        return {
+          priority: 99,
+          link: function(scope, element, attr) {
+            var propName = attrName,
+              name = attrName;
+            if (attrName === 'href' &&
+              toString.call(element.prop('href')) === '[object SVGAnimatedString]') {
+              name = 'xlinkHref';
+              attr.$attr[name] = 'xlink:href';
+              propName = null;
+            }
+            attr.$observe(normalized, function(value) {
+              if (!value) {
+                if (attrName === 'href') {
+                  attr.$set(name, null);
+                }
+                return;
+              }
+              attr.$set(name, value);
+              if (msie && propName) element.prop(propName, attr[name]);
+            });
+          }
+        };
+      };
+    });
+    var nullFormCtrl = {
+        $addControl: noop,
+        $$renameControl: nullFormRenameControl,
+        $removeControl: noop,
+        $setValidity: noop,
+        $setDirty: noop,
+        $setPristine: noop,
+        $setSubmitted: noop
+      },
+      SUBMITTED_CLASS = 'ng-submitted';
+
+    function nullFormRenameControl(control, name) {
+      control.$name = name;
+    }
+    FormController.$inject = ['$element', '$attrs', '$scope', '$animate', '$interpolate'];
+
+    function FormController(element, attrs, $scope, $animate, $interpolate) {
+      var form = this,
+        controls = [];
+      form.$error = {};
+      form.$$success = {};
+      form.$pending = undefined;
+      form.$name = $interpolate(attrs.name || attrs.ngForm || '')($scope);
+      form.$dirty = false;
+      form.$pristine = true;
+      form.$valid = true;
+      form.$invalid = false;
+      form.$submitted = false;
+      form.$$parentForm = nullFormCtrl;
+      form.$rollbackViewValue = function() {
+        forEach(controls, function(control) {
+          control.$rollbackViewValue();
+        });
+      };
+      form.$commitViewValue = function() {
+        forEach(controls, function(control) {
+          control.$commitViewValue();
+        });
+      };
+      form.$addControl = function(control) {
+        assertNotHasOwnProperty(control.$name, 'input');
+        controls.push(control);
+        if (control.$name) {
+          form[control.$name] = control;
+        }
+        control.$$parentForm = form;
+      };
+      form.$$renameControl = function(control, newName) {
+        var oldName = control.$name;
+        if (form[oldName] === control) {
+          delete form[oldName];
+        }
+        form[newName] = control;
+        control.$name = newName;
+      };
+      form.$removeControl = function(control) {
+        if (control.$name && form[control.$name] === control) {
+          delete form[control.$name];
+        }
+        forEach(form.$pending, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        forEach(form.$error, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        forEach(form.$$success, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        arrayRemove(controls, control);
+        control.$$parentForm = nullFormCtrl;
+      };
+      addSetValidityMethod({
+        ctrl: this,
+        $element: element,
+        set: function(object, property, controller) {
+          var list = object[property];
+          if (!list) {
+            object[property] = [controller];
+          } else {
+            var index = list.indexOf(controller);
+            if (index === -1) {
+              list.push(controller);
+            }
+          }
+        },
+        unset: function(object, property, controller) {
+          var list = object[property];
+          if (!list) {
+            return;
+          }
+          arrayRemove(list, controller);
+          if (list.length === 0) {
+            delete object[property];
+          }
+        },
+        $animate: $animate
+      });
+      form.$setDirty = function() {
+        $animate.removeClass(element, PRISTINE_CLASS);
+        $animate.addClass(element, DIRTY_CLASS);
+        form.$dirty = true;
+        form.$pristine = false;
+        form.$$parentForm.$setDirty();
+      };
+      form.$setPristine = function() {
+        $animate.setClass(element, PRISTINE_CLASS, DIRTY_CLASS + ' ' + SUBMITTED_CLASS);
+        form.$dirty = false;
+        form.$pristine = true;
+        form.$submitted = false;
+        forEach(controls, function(control) {
+          control.$setPristine();
+        });
+      };
+      form.$setUntouched = function() {
+        forEach(controls, function(control) {
+          control.$setUntouched();
+        });
+      };
+      form.$setSubmitted = function() {
+        $animate.addClass(element, SUBMITTED_CLASS);
+        form.$submitted = true;
+        form.$$parentForm.$setSubmitted();
+      };
+    }
+    var formDirectiveFactory = function(isNgForm) {
+      return ['$timeout', '$parse', function($timeout, $parse) {
+        var formDirective = {
+          name: 'form',
+          restrict: isNgForm ? 'EAC' : 'E',
+          require: ['form', '^^?form'],
+          controller: FormController,
+          compile: function ngFormCompile(formElement, attr) {
+            formElement.addClass(PRISTINE_CLASS).addClass(VALID_CLASS);
+            var nameAttr = attr.name ? 'name' : (isNgForm && attr.ngForm ? 'ngForm' : false);
+            return {
+              pre: function ngFormPreLink(scope, formElement, attr, ctrls) {
+                var controller = ctrls[0];
+                if (!('action' in attr)) {
+                  var handleFormSubmission = function(event) {
+                    scope.$apply(function() {
+                      controller.$commitViewValue();
+                      controller.$setSubmitted();
+                    });
+                    event.preventDefault();
+                  };
+                  addEventListenerFn(formElement[0], 'submit', handleFormSubmission);
+                  formElement.on('$destroy', function() {
+                    $timeout(function() {
+                      removeEventListenerFn(formElement[0], 'submit', handleFormSubmission);
+                    }, 0, false);
+                  });
+                }
+                var parentFormCtrl = ctrls[1] || controller.$$parentForm;
+                parentFormCtrl.$addControl(controller);
+                var setter = nameAttr ? getSetter(controller.$name) : noop;
+                if (nameAttr) {
+                  setter(scope, controller);
+                  attr.$observe(nameAttr, function(newValue) {
+                    if (controller.$name === newValue) return;
+                    setter(scope, undefined);
+                    controller.$$parentForm.$$renameControl(controller, newValue);
+                    setter = getSetter(controller.$name);
+                    setter(scope, controller);
+                  });
+                }
+                formElement.on('$destroy', function() {
+                  controller.$$parentForm.$removeControl(controller);
+                  setter(scope, undefined);
+                  extend(controller, nullFormCtrl);
+                });
+              }
+            };
+          }
+        };
+        return formDirective;
+
+        function getSetter(expression) {
+          if (expression === '') {
+            return $parse('this[""]').assign;
+          }
+          return $parse(expression).assign || noop;
+        }
+      }];
+    };
+    var formDirective = formDirectiveFactory();
+    var ngFormDirective = formDirectiveFactory(true);
+    var ISO_DATE_REGEXP = /^\d{4,}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+(?:[+-][0-2]\d:[0-5]\d|Z)$/;
+    var URL_REGEXP = /^[a-z][a-z\d.+-]*:\/*(?:[^:@]+(?::[^@]+)?@)?(?:[^\s:/?#]+|\[[a-f\d:]+\])(?::\d+)?(?:\/[^?#]*)?(?:\?[^#]*)?(?:#.*)?$/i;
+    var EMAIL_REGEXP = /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+\/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+\/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/;
+    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))([eE][+-]?\d+)?\s*$/;
+    var DATE_REGEXP = /^(\d{4,})-(\d{2})-(\d{2})$/;
+    var DATETIMELOCAL_REGEXP = /^(\d{4,})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d)(\.\d{1,3})?)?$/;
+    var WEEK_REGEXP = /^(\d{4,})-W(\d\d)$/;
+    var MONTH_REGEXP = /^(\d{4,})-(\d\d)$/;
+    var TIME_REGEXP = /^(\d\d):(\d\d)(?::(\d\d)(\.\d{1,3})?)?$/;
+    var PARTIAL_VALIDATION_EVENTS = 'keydown wheel mousedown';
+    var PARTIAL_VALIDATION_TYPES = createMap();
+    forEach('date,datetime-local,month,time,week'.split(','), function(type) {
+      PARTIAL_VALIDATION_TYPES[type] = true;
+    });
+    var inputType = {
+      'text': textInputType,
+      'date': createDateInputType('date', DATE_REGEXP,
+        createDateParser(DATE_REGEXP, ['yyyy', 'MM', 'dd']),
+        'yyyy-MM-dd'),
+      'datetime-local': createDateInputType('datetimelocal', DATETIMELOCAL_REGEXP,
+        createDateParser(DATETIMELOCAL_REGEXP, ['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss', 'sss']),
+        'yyyy-MM-ddTHH:mm:ss.sss'),
+      'time': createDateInputType('time', TIME_REGEXP,
+        createDateParser(TIME_REGEXP, ['HH', 'mm', 'ss', 'sss']),
+        'HH:mm:ss.sss'),
+      'week': createDateInputType('week', WEEK_REGEXP, weekParser, 'yyyy-Www'),
+      'month': createDateInputType('month', MONTH_REGEXP,
+        createDateParser(MONTH_REGEXP, ['yyyy', 'MM']),
+        'yyyy-MM'),
+      'number': numberInputType,
+      'url': urlInputType,
+      'email': emailInputType,
+      'radio': radioInputType,
+      'checkbox': checkboxInputType,
+      'hidden': noop,
+      'button': noop,
+      'submit': noop,
+      'reset': noop,
+      'file': noop
+    };
+
+    function stringBasedInputType(ctrl) {
+      ctrl.$formatters.push(function(value) {
+        return ctrl.$isEmpty(value) ? value : value.toString();
+      });
+    }
+
+    function textInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+      baseInputType(scope, element, attr, ctrl, $sniffer, $browser);
+      stringBasedInputType(ctrl);
+    }
+
+    function baseInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+      var type = lowercase(element[0].type);
+      if (!$sniffer.android) {
+        var composing = false;
+        element.on('compositionstart', function() {
+          composing = true;
+        });
+        element.on('compositionend', function() {
+          composing = false;
+          listener();
+        });
+      }
+      var timeout;
+      var listener = function(ev) {
+        if (timeout) {
+          $browser.defer.cancel(timeout);
+          timeout = null;
+        }
+        if (composing) return;
+        var value = element.val(),
+          event = ev && ev.type;
+        if (type !== 'password' && (!attr.ngTrim || attr.ngTrim !== 'false')) {
+          value = trim(value);
+        }
+        if (ctrl.$viewValue !== value || (value === '' && ctrl.$$hasNativeValidators)) {
+          ctrl.$setViewValue(value, event);
+        }
+      };
+      if ($sniffer.hasEvent('input')) {
+        element.on('input', listener);
+      } else {
+        var deferListener = function(ev, input, origValue) {
+          if (!timeout) {
+            timeout = $browser.defer(function() {
+              timeout = null;
+              if (!input || input.value !== origValue) {
+                listener(ev);
+              }
+            });
+          }
+        };
+        element.on('keydown', function(event) {
+          var key = event.keyCode;
+          if (key === 91 || (15 < key && key < 19) || (37 <= key && key <= 40)) return;
+          deferListener(event, this, this.value);
+        });
+        if ($sniffer.hasEvent('paste')) {
+          element.on('paste cut', deferListener);
+        }
+      }
+      element.on('change', listener);
+      if (PARTIAL_VALIDATION_TYPES[type] && ctrl.$$hasNativeValidators && type === attr.type) {
+        element.on(PARTIAL_VALIDATION_EVENTS, function(ev) {
+          if (!timeout) {
+            var validity = this[VALIDITY_STATE_PROPERTY];
+            var origBadInput = validity.badInput;
+            var origTypeMismatch = validity.typeMismatch;
+            timeout = $browser.defer(function() {
+              timeout = null;
+              if (validity.badInput !== origBadInput || validity.typeMismatch !== origTypeMismatch) {
+                listener(ev);
+              }
+            });
+          }
+        });
+      }
+      ctrl.$render = function() {
+        var value = ctrl.$isEmpty(ctrl.$viewValue) ? '' : ctrl.$viewValue;
+        if (element.val() !== value) {
+          element.val(value);
+        }
+      };
+    }
+
+    function weekParser(isoWeek, existingDate) {
+      if (isDate(isoWeek)) {
+        return isoWeek;
+      }
+      if (isString(isoWeek)) {
+        WEEK_REGEXP.lastIndex = 0;
+        var parts = WEEK_REGEXP.exec(isoWeek);
+        if (parts) {
+          var year = +parts[1],
+            week = +parts[2],
+            hours = 0,
+            minutes = 0,
+            seconds = 0,
+            milliseconds = 0,
+            firstThurs = getFirstThursdayOfYear(year),
+            addDays = (week - 1) * 7;
+          if (existingDate) {
+            hours = existingDate.getHours();
+            minutes = existingDate.getMinutes();
+            seconds = existingDate.getSeconds();
+            milliseconds = existingDate.getMilliseconds();
+          }
+          return new Date(year, 0, firstThurs.getDate() + addDays, hours, minutes, seconds, milliseconds);
+        }
+      }
+      return NaN;
+    }
+
+    function createDateParser(regexp, mapping) {
+      return function(iso, date) {
+        var parts, map;
+        if (isDate(iso)) {
+          return iso;
+        }
+        if (isString(iso)) {
+          if (iso.charAt(0) == '"' && iso.charAt(iso.length - 1) == '"') {
+            iso = iso.substring(1, iso.length - 1);
+          }
+          if (ISO_DATE_REGEXP.test(iso)) {
+            return new Date(iso);
+          }
+          regexp.lastIndex = 0;
+          parts = regexp.exec(iso);
+          if (parts) {
+            parts.shift();
+            if (date) {
+              map = {
+                yyyy: date.getFullYear(),
+                MM: date.getMonth() + 1,
+                dd: date.getDate(),
+                HH: date.getHours(),
+                mm: date.getMinutes(),
+                ss: date.getSeconds(),
+                sss: date.getMilliseconds() / 1000
+              };
+            } else {
+              map = {
+                yyyy: 1970,
+                MM: 1,
+                dd: 1,
+                HH: 0,
+                mm: 0,
+                ss: 0,
+                sss: 0
+              };
+            }
+            forEach(parts, function(part, index) {
+              if (index < mapping.length) {
+                map[mapping[index]] = +part;
+              }
+            });
+            return new Date(map.yyyy, map.MM - 1, map.dd, map.HH, map.mm, map.ss || 0, map.sss * 1000 || 0);
+          }
+        }
+        return NaN;
+      };
+    }
+
+    function createDateInputType(type, regexp, parseDate, format) {
+      return function dynamicDateInputType(scope, element, attr, ctrl, $sniffer, $browser, $filter) {
+        badInputChecker(scope, element, attr, ctrl);
+        baseInputType(scope, element, attr, ctrl, $sniffer, $browser);
+        var timezone = ctrl && ctrl.$options && ctrl.$options.timezone;
+        var previousDate;
+        ctrl.$$parserName = type;
+        ctrl.$parsers.push(function(value) {
+          if (ctrl.$isEmpty(value)) return null;
+          if (regexp.test(value)) {
+            var parsedDate = parseDate(value, previousDate);
+            if (timezone) {
+              parsedDate = convertTimezoneToLocal(parsedDate, timezone);
+            }
+            return parsedDate;
+          }
+          return undefined;
+        });
+        ctrl.$formatters.push(function(value) {
+          if (value && !isDate(value)) {
+            throw ngModelMinErr('datefmt', 'Expected `{0}` to be a date', value);
+          }
+          if (isValidDate(value)) {
+            previousDate = value;
+            if (previousDate && timezone) {
+              previousDate = convertTimezoneToLocal(previousDate, timezone, true);
+            }
+            return $filter('date')(value, format, timezone);
+          } else {
+            previousDate = null;
+            return '';
+          }
+        });
+        if (isDefined(attr.min) || attr.ngMin) {
+          var minVal;
+          ctrl.$validators.min = function(value) {
+            return !isValidDate(value) || isUndefined(minVal) || parseDate(value) >= minVal;
+          };
+          attr.$observe('min', function(val) {
+            minVal = parseObservedDateValue(val);
+            ctrl.$validate();
+          });
+        }
+        if (isDefined(attr.max) || attr.ngMax) {
+          var maxVal;
+          ctrl.$validators.max = function(value) {
+            return !isValidDate(value) || isUndefined(maxVal) || parseDate(value) <= maxVal;
+          };
+          attr.$observe('max', function(val) {
+            maxVal = parseObservedDateValue(val);
+            ctrl.$validate();
+          });
+        }
+
+        function isValidDate(value) {
+          return value && !(value.getTime && value.getTime() !== value.getTime());
+        }
+
+        function parseObservedDateValue(val) {
+          return isDefined(val) && !isDate(val) ? parseDate(val) || undefined : val;
+        }
+      };
+    }
+
+    function badInputChecker(scope, element, attr, ctrl) {
+      var node = element[0];
+      var nativeValidation = ctrl.$$hasNativeValidators = isObject(node.validity);
+      if (nativeValidation) {
+        ctrl.$parsers.push(function(value) {
+          var validity = element.prop(VALIDITY_STATE_PROPERTY) || {};
+          return validity.badInput || validity.typeMismatch ? undefined : value;
+        });
+      }
+    }
+
+    function numberInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+      badInputChecker(scope, element, attr, ctrl);
+      baseInputType(scope, element, attr, ctrl, $sniffer, $browser);
+      ctrl.$$parserName = 'number';
+      ctrl.$parsers.push(function(value) {
+        if (ctrl.$isEmpty(value)) return null;
+        if (NUMBER_REGEXP.test(value)) return parseFloat(value);
+        return undefined;
+      });
+      ctrl.$formatters.push(function(value) {
+        if (!ctrl.$isEmpty(value)) {
+          if (!isNumber(value)) {
+            throw ngModelMinErr('numfmt', 'Expected `{0}` to be a number', value);
+          }
+          value = value.toString();
+        }
+        return value;
+      });
+      if (isDefined(attr.min) || attr.ngMin) {
+        var minVal;
+        ctrl.$validators.min = function(value) {
+          return ctrl.$isEmpty(value) || isUndefined(minVal) || value >= minVal;
+        };
+        attr.$observe('min', function(val) {
+          if (isDefined(val) && !isNumber(val)) {
+            val = parseFloat(val);
+          }
+          minVal = isNumber(val) && !isNaN(val) ? val : undefined;
+          ctrl.$validate();
+        });
+      }
+      if (isDefined(attr.max) || attr.ngMax) {
+        var maxVal;
+        ctrl.$validators.max = function(value) {
+          return ctrl.$isEmpty(value) || isUndefined(maxVal) || value <= maxVal;
+        };
+        attr.$observe('max', function(val) {
+          if (isDefined(val) && !isNumber(val)) {
+            val = parseFloat(val);
+          }
+          maxVal = isNumber(val) && !isNaN(val) ? val : undefined;
+          ctrl.$validate();
+        });
+      }
+    }
+
+    function urlInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+      baseInputType(scope, element, attr, ctrl, $sniffer, $browser);
+      stringBasedInputType(ctrl);
+      ctrl.$$parserName = 'url';
+      ctrl.$validators.url = function(modelValue, viewValue) {
+        var value = modelValue || viewValue;
+        return ctrl.$isEmpty(value) || URL_REGEXP.test(value);
+      };
+    }
+
+    function emailInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+      baseInputType(scope, element, attr, ctrl, $sniffer, $browser);
+      stringBasedInputType(ctrl);
+      ctrl.$$parserName = 'email';
+      ctrl.$validators.email = function(modelValue, viewValue) {
+        var value = modelValue || viewValue;
+        return ctrl.$isEmpty(value) || EMAIL_REGEXP.test(value);
+      };
+    }
+
+    function radioInputType(scope, element, attr, ctrl) {
+      if (isUndefined(attr.name)) {
+        element.attr('name', nextUid());
+      }
+      var listener = function(ev) {
+        if (element[0].checked) {
+          ctrl.$setViewValue(attr.value, ev && ev.type);
+        }
+      };
+      element.on('click', listener);
+      ctrl.$render = function() {
+        var value = attr.value;
+        element[0].checked = (value == ctrl.$viewValue);
+      };
+      attr.$observe('value', ctrl.$render);
+    }
+
+    function parseConstantExpr($parse, context, name, expression, fallback) {
+      var parseFn;
+      if (isDefined(expression)) {
+        parseFn = $parse(expression);
+        if (!parseFn.constant) {
+          throw ngModelMinErr('constexpr', 'Expected constant expression for `{0}`, but saw ' +
+            '`{1}`.', name, expression);
+        }
+        return parseFn(context);
+      }
+      return fallback;
+    }
+
+    function checkboxInputType(scope, element, attr, ctrl, $sniffer, $browser, $filter, $parse) {
+      var trueValue = parseConstantExpr($parse, scope, 'ngTrueValue', attr.ngTrueValue, true);
+      var falseValue = parseConstantExpr($parse, scope, 'ngFalseValue', attr.ngFalseValue, false);
+      var listener = function(ev) {
+        ctrl.$setViewValue(element[0].checked, ev && ev.type);
+      };
+      element.on('click', listener);
+      ctrl.$render = function() {
+        element[0].checked = ctrl.$viewValue;
+      };
+      ctrl.$isEmpty = function(value) {
+        return value === false;
+      };
+      ctrl.$formatters.push(function(value) {
+        return equals(value, trueValue);
+      });
+      ctrl.$parsers.push(function(value) {
+        return value ? trueValue : falseValue;
+      });
+    }
+    var inputDirective = ['$browser', '$sniffer', '$filter', '$parse',
+      function($browser, $sniffer, $filter, $parse) {
+        return {
+          restrict: 'E',
+          require: ['?ngModel'],
+          link: {
+            pre: function(scope, element, attr, ctrls) {
+              if (ctrls[0]) {
+                (inputType[lowercase(attr.type)] || inputType.text)(scope, element, attr, ctrls[0], $sniffer,
+                  $browser, $filter, $parse);
+              }
+            }
+          }
+        };
+      }
+    ];
+    var CONSTANT_VALUE_REGEXP = /^(true|false|\d+)$/;
+    var ngValueDirective = function() {
+        return {
+          restrict: 'A',
+          priority: 100,
+          compile: function(tpl, tplAttr) {
+              if (CONSTANT_VALUE_REGEXP.test(tplAttr.ngValue)) {
+                return function ngValueConstantLink(scope, elm, attr) {
+                  attr.$set('value', scope.$eval(attr.ngValue));
+                };
+              } else {
+                return function ngValueLink(scope, elm, attr) {

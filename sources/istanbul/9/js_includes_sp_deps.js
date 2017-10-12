@@ -84702,364 +84702,820 @@ angular.module('snm.serviceCatalog.data').factory('catalogItemFactory', function
         E = c.getSelectedNode;
       return g
     }), r(Ke, [w, g, N, R, A, H, P, Y, G, J, Q, Z, ee, te, E, d, _e, Ae, B, M, De, h, m, u, Me, Le, Pe, ze, Xe], function(e, n, r, i, o, a, s, l, c, u, d, f, h, p, m, g, v, y, b, C, x, w, E, N, _, S, k, T, R) {
-        function A(e, t, i) {
-          var o = this,
-            a, s;
-          a = o.documentBaseUrl = i.documentBaseURL, s = i.baseURI, o.settings = t = L({
-            id: e,
-            theme: "modern",
-            delta_width: 0,
-            delta_height: 0,
-            popup_css: "",
-            plugins: "",
-            document_base_url: a,
-            add_form_submit_trigger: !0,
-            submit_patch: !0,
-            add_unload_trigger: !0,
-            convert_urls: !0,
-            relative_urls: !0,
-            remove_script_host: !0,
-            object_resizing: !0,
-            doctype: "<!DOCTYPE html>",
-            visual: !0,
-            font_size_style_values: "xx-small,x-small,small,medium,large,x-large,xx-large",
-            font_size_legacy_values: "xx-small,small,medium,large,x-large,xx-large,300%",
-            forced_root_block: "p",
-            hidden_input: !0,
-            padd_empty_editor: !0,
-            render_ui: !0,
-            indentation: "30px",
-            inline_styles: !0,
-            convert_fonts_to_spans: !0,
-            indent: "simple",
-            indent_before: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
-            indent_after: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
-            validate: !0,
-            entity_encoding: "named",
-            url_converter: o.convertURL,
-            url_converter_scope: o,
-            ie7_compat: !0
-          }, t), r.language = t.language || "en", r.languageLoad = t.language_load, r.baseURL = i.baseURL, o.id = t.id = e, o.setDirty(!1), o.plugins = {}, o.documentBaseURI = new p(t.document_base_url || a, {
-            base_uri: s
-          }), o.baseURI = s, o.contentCSS = [], o.contentStyles = [], o.shortcuts = new k(o), o.loadedCSS = {}, o.editorCommands = new h(o), t.target && (o.targetElm = t.target), o.suffix = i.suffix, o.editorManager = i, o.inline = t.inline, t.cache_suffix && (w.cacheSuffix = t.cache_suffix.replace(/^[\?\&]+/, "")), t.override_viewport === !1 && (w.overrideViewPort = !1), i.fire("SetupEditor", o), o.execCallback("setup", o), o.$ = n.overrideDefaults(function() {
-            return {
-              context: o.inline ? o.getBody() : o.getDoc(),
-              element: o.getBody()
-            }
-          })
-        }
-        var B = e.DOM,
-          D = r.ThemeManager,
-          M = r.PluginManager,
-          L = E.extend,
-          P = E.each,
-          H = E.explode,
-          O = E.inArray,
-          I = E.trim,
-          F = E.resolve,
-          z = g.Event,
-          W = w.gecko,
-          V = w.ie;
-        return A.prototype = {
-            render: function() {
-              function e() {
-                B.unbind(window, "ready", e), n.render()
-              }
+      function A(e, t, i) {
+        var o = this,
+          a, s;
+        a = o.documentBaseUrl = i.documentBaseURL, s = i.baseURI, o.settings = t = L({
+          id: e,
+          theme: "modern",
+          delta_width: 0,
+          delta_height: 0,
+          popup_css: "",
+          plugins: "",
+          document_base_url: a,
+          add_form_submit_trigger: !0,
+          submit_patch: !0,
+          add_unload_trigger: !0,
+          convert_urls: !0,
+          relative_urls: !0,
+          remove_script_host: !0,
+          object_resizing: !0,
+          doctype: "<!DOCTYPE html>",
+          visual: !0,
+          font_size_style_values: "xx-small,x-small,small,medium,large,x-large,xx-large",
+          font_size_legacy_values: "xx-small,small,medium,large,x-large,xx-large,300%",
+          forced_root_block: "p",
+          hidden_input: !0,
+          padd_empty_editor: !0,
+          render_ui: !0,
+          indentation: "30px",
+          inline_styles: !0,
+          convert_fonts_to_spans: !0,
+          indent: "simple",
+          indent_before: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
+          indent_after: "p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,figcaption,option,optgroup,datalist",
+          validate: !0,
+          entity_encoding: "named",
+          url_converter: o.convertURL,
+          url_converter_scope: o,
+          ie7_compat: !0
+        }, t), r.language = t.language || "en", r.languageLoad = t.language_load, r.baseURL = i.baseURL, o.id = t.id = e, o.setDirty(!1), o.plugins = {}, o.documentBaseURI = new p(t.document_base_url || a, {
+          base_uri: s
+        }), o.baseURI = s, o.contentCSS = [], o.contentStyles = [], o.shortcuts = new k(o), o.loadedCSS = {}, o.editorCommands = new h(o), t.target && (o.targetElm = t.target), o.suffix = i.suffix, o.editorManager = i, o.inline = t.inline, t.cache_suffix && (w.cacheSuffix = t.cache_suffix.replace(/^[\?\&]+/, "")), t.override_viewport === !1 && (w.overrideViewPort = !1), i.fire("SetupEditor", o), o.execCallback("setup", o), o.$ = n.overrideDefaults(function() {
+          return {
+            context: o.inline ? o.getBody() : o.getDoc(),
+            element: o.getBody()
+          }
+        })
+      }
+      var B = e.DOM,
+        D = r.ThemeManager,
+        M = r.PluginManager,
+        L = E.extend,
+        P = E.each,
+        H = E.explode,
+        O = E.inArray,
+        I = E.trim,
+        F = E.resolve,
+        z = g.Event,
+        W = w.gecko,
+        V = w.ie;
+      return A.prototype = {
+        render: function() {
+          function e() {
+            B.unbind(window, "ready", e), n.render()
+          }
 
-              function t() {
-                var e = m.ScriptLoader;
-                if (r.language && "en" != r.language && !r.language_url && (r.language_url = n.editorManager.baseURL + "/langs/" + r.language + ".js"), r.language_url && e.add(r.language_url), r.theme && "function" != typeof r.theme && "-" != r.theme.charAt(0) && !D.urls[r.theme]) {
-                  var t = r.theme_url;
-                  t = t ? n.documentBaseURI.toAbsolute(t) : "themes/" + r.theme + "/theme" + o + ".js", D.load(r.theme, t)
-                }
-                E.isArray(r.plugins) && (r.plugins = r.plugins.join(" ")), P(r.external_plugins, function(e, t) {
-                  M.load(t, e), r.plugins += " " + t
-                }), P(r.plugins.split(/[ ,]/), function(e) {
-                  if (e = I(e), e && !M.urls[e])
-                    if ("-" == e.charAt(0)) {
-                      e = e.substr(1, e.length);
-                      var t = M.dependencies(e);
-                      P(t, function(e) {
-                        var t = {
-                          prefix: "plugins/",
-                          resource: e,
-                          suffix: "/plugin" + o + ".js"
-                        };
-                        e = M.createUrl(t, e), M.load(e.resource, e)
-                      })
-                    } else M.load(e, {
+          function t() {
+            var e = m.ScriptLoader;
+            if (r.language && "en" != r.language && !r.language_url && (r.language_url = n.editorManager.baseURL + "/langs/" + r.language + ".js"), r.language_url && e.add(r.language_url), r.theme && "function" != typeof r.theme && "-" != r.theme.charAt(0) && !D.urls[r.theme]) {
+              var t = r.theme_url;
+              t = t ? n.documentBaseURI.toAbsolute(t) : "themes/" + r.theme + "/theme" + o + ".js", D.load(r.theme, t)
+            }
+            E.isArray(r.plugins) && (r.plugins = r.plugins.join(" ")), P(r.external_plugins, function(e, t) {
+              M.load(t, e), r.plugins += " " + t
+            }), P(r.plugins.split(/[ ,]/), function(e) {
+              if (e = I(e), e && !M.urls[e])
+                if ("-" == e.charAt(0)) {
+                  e = e.substr(1, e.length);
+                  var t = M.dependencies(e);
+                  P(t, function(e) {
+                    var t = {
                       prefix: "plugins/",
                       resource: e,
                       suffix: "/plugin" + o + ".js"
-                    })
-                }), e.loadQueue(function() {
-                  n.removed || n.init()
+                    };
+                    e = M.createUrl(t, e), M.load(e.resource, e)
+                  })
+                } else M.load(e, {
+                  prefix: "plugins/",
+                  resource: e,
+                  suffix: "/plugin" + o + ".js"
                 })
-              }
-              var n = this,
-                r = n.settings,
-                i = n.id,
-                o = n.suffix;
-              if (!z.domLoaded) return void B.bind(window, "ready", e);
-              if (n.getElement() && w.contentEditable) {
-                r.inline ? n.inline = !0 : (n.orgVisibility = n.getElement().style.visibility, n.getElement().style.visibility = "hidden");
-                var a = n.getElement().form || B.getParent(i, "form");
-                a && (n.formElement = a, r.hidden_input && !/TEXTAREA|INPUT/i.test(n.getElement().nodeName) && (B.insertAfter(B.create("input", {
-                  type: "hidden",
-                  name: i
-                }), i), n.hasHiddenInput = !0), n.formEventDelegate = function(e) {
-                  n.fire(e.type, e)
-                }, B.bind(a, "submit reset", n.formEventDelegate), n.on("reset", function() {
-                  n.setContent(n.startContent, {
-                    format: "raw"
-                  })
-                }), !r.submit_patch || a.submit.nodeType || a.submit.length || a._mceOldSubmit || (a._mceOldSubmit = a.submit, a.submit = function() {
-                  return n.editorManager.triggerSave(), n.setDirty(!1), a._mceOldSubmit(a)
-                })), n.windowManager = new v(n), n.notificationManager = new y(n), "xml" == r.encoding && n.on("GetContent", function(e) {
-                  e.save && (e.content = B.encode(e.content))
-                }), r.add_form_submit_trigger && n.on("submit", function() {
-                  n.initialized && n.save()
-                }), r.add_unload_trigger && (n._beforeUnload = function() {
-                  !n.initialized || n.destroyed || n.isHidden() || n.save({
-                    format: "raw",
-                    no_events: !0,
-                    set_dirty: !1
-                  })
-                }, n.editorManager.on("BeforeUnload", n._beforeUnload)), t()
-              }
-            },
-            init: function() {
-              function e(n) {
-                var r = M.get(n),
-                  i, o;
-                if (i = M.urls[n] || t.documentBaseUrl.replace(/\/$/, ""), n = I(n), r && -1 === O(m, n)) {
-                  if (P(M.dependencies(n), function(t) {
-                      e(t)
-                    }), t.plugins[n]) return;
-                  o = new r(t, i, t.$), t.plugins[n] = o, o.init && (o.init(t, i), m.push(n))
-                }
-              }
-              var t = this,
-                n = t.settings,
-                r = t.getElement(),
-                i, o, a, s, l, c, u, d, f, h, p, m = [];
-              if (this.editorManager.i18n.setCode(n.language), t.rtl = n.rtl_ui || this.editorManager.i18n.rtl, t.editorManager.add(t), n.aria_label = n.aria_label || B.getAttrib(r, "aria-label", t.getLang("aria.rich_text_area")), n.theme && ("function" != typeof n.theme ? (n.theme = n.theme.replace(/-/, ""), c = D.get(n.theme), t.theme = new c(t, D.urls[n.theme]), t.theme.init && t.theme.init(t, D.urls[n.theme] || t.documentBaseUrl.replace(/\/$/, ""), t.$)) : t.theme = n.theme), P(n.plugins.replace(/\-/g, "").split(/[ ,]/), e), n.render_ui && t.theme && (t.orgDisplay = r.style.display, "function" != typeof n.theme ? (i = n.width || r.style.width || r.offsetWidth, o = n.height || r.style.height || r.offsetHeight, a = n.min_height || 100, h = /^[0-9\.]+(|px)$/i, h.test("" + i) && (i = Math.max(parseInt(i, 10), 100)), h.test("" + o) && (o = Math.max(parseInt(o, 10), a)), l = t.theme.renderUI({
-                  targetNode: r,
-                  width: i,
-                  height: o,
-                  deltaWidth: n.delta_width,
-                  deltaHeight: n.delta_height
-                }), n.content_editable || (o = (l.iframeHeight || o) + ("number" == typeof o ? l.deltaHeight || 0 : ""), a > o && (o = a))) : (l = n.theme(t, r), l.editorContainer.nodeType && (l.editorContainer = l.editorContainer.id = l.editorContainer.id || t.id + "_parent"), l.iframeContainer.nodeType && (l.iframeContainer = l.iframeContainer.id = l.iframeContainer.id || t.id + "_iframecontainer"), o = l.iframeHeight || r.offsetHeight), t.editorContainer = l.editorContainer), n.content_css && P(H(n.content_css), function(e) {
-                  t.contentCSS.push(t.documentBaseURI.toAbsolute(e))
-                }), n.content_style && t.contentStyles.push(n.content_style), n.content_editable) return r = s = l = null, t.initContentBody();
-              for (t.iframeHTML = n.doctype + "<html><head>", n.document_base_url != t.documentBaseUrl && (t.iframeHTML += '<base href="' + t.documentBaseURI.getURI() + '" />'), !w.caretAfter && n.ie7_compat && (t.iframeHTML += '<meta http-equiv="X-UA-Compatible" content="IE=7" />'), t.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />', p = 0; p < t.contentCSS.length; p++) {
-                var g = t.contentCSS[p];
-                t.iframeHTML += '<link type="text/css" rel="stylesheet" href="' + E._addCacheSuffix(g) + '" />', t.loadedCSS[g] = !0
-              }
-              d = n.body_id || "tinymce", -1 != d.indexOf("=") && (d = t.getParam("body_id", "", "hash"), d = d[t.id] || d), f = n.body_class || "", -1 != f.indexOf("=") && (f = t.getParam("body_class", "", "hash"), f = f[t.id] || ""), n.content_security_policy && (t.iframeHTML += '<meta http-equiv="Content-Security-Policy" content="' + n.content_security_policy + '" />'), t.iframeHTML += '</head><body id="' + d + '" class="mce-content-body ' + f + '" data-id="' + t.id + '"><br></body></html>';
-              var v = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinymce.get("' + t.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody(true);})()';
-              document.domain != location.hostname && w.ie && w.ie < 12 && (u = v);
-              var y = B.create("iframe", {
-                id: t.id + "_ifr",
-                frameBorder: "0",
-                allowTransparency: "true",
-                title: t.editorManager.translate("Rich Text Area. Press ALT-F9 for menu. Press ALT-F10 for toolbar. Press ALT-0 for help"),
-                style: {
-                  width: "100%",
-                  height: o,
-                  display: "block"
-                }
-              });
-              if (y.onload = function() {
-                  y.onload = null, t.fire("load")
-                }, B.setAttrib(y, "src", u || 'javascript:""'), t.contentAreaContainer = l.iframeContainer, t.iframeElement = y, s = B.add(l.iframeContainer, y), V) try {
-                t.getDoc()
-              } catch (b) {
-                s.src = u = v
-              }
-              l.editorContainer && (B.get(l.editorContainer).style.display = t.orgDisplay, t.hidden = B.isHidden(l.editorContainer)), t.getElement().style.display = "none", B.setAttrib(t.id, "aria-hidden", !0), u || t.initContentBody(), r = s = l = null
-            },
-            initContentBody: function(t) {
-              var n = this,
-                r = n.settings,
-                s = n.getElement(),
-                h = n.getDoc(),
-                p, m;
-              r.inline || (n.getElement().style.visibility = n.orgVisibility), t || r.content_editable || (h.open(), h.write(n.iframeHTML), h.close()), r.content_editable && (n.on("remove", function() {
-                var e = this.getBody();
-                B.removeClass(e, "mce-content-body"), B.removeClass(e, "mce-edit-focus"), B.setAttrib(e, "contentEditable", null)
-              }), B.addClass(s, "mce-content-body"), n.contentDocument = h = r.content_document || document, n.contentWindow = r.content_window || window, n.bodyElement = s, r.content_document = r.content_window = null, r.root_name = s.nodeName.toLowerCase()), p = n.getBody(), p.disabled = !0, n.readonly = r.readonly, n.readonly || (n.inline && "static" == B.getStyle(p, "position", !0) && (p.style.position = "relative"), p.contentEditable = n.getParam("content_editable_state", !0)), p.disabled = !1, n.editorUpload = new T(n), n.schema = new b(r), n.dom = new e(h, {
-                keep_values: !0,
-                url_converter: n.convertURL,
-                url_converter_scope: n,
-                hex_colors: r.force_hex_style_colors,
-                class_filter: r.class_filter,
-                update_styles: !0,
-                root_element: n.inline ? n.getBody() : null,
-                collect: r.content_editable,
-                schema: n.schema,
-                onSetAttrib: function(e) {
-                  n.fire("SetAttrib", e)
-                }
-              }), n.parser = new C(r, n.schema), n.parser.addAttributeFilter("src,href,style,tabindex", function(e, t) {
-                for (var r = e.length, i, o = n.dom, a, s; r--;)
-                  if (i = e[r], a = i.attr(t), s = "data-mce-" + t, !i.attributes.map[s]) {
-                    if (0 === a.indexOf("data:") || 0 === a.indexOf("blob:")) continue;
-                    "style" === t ? (a = o.serializeStyle(o.parseStyle(a), i.name), a.length || (a = null), i.attr(s, a), i.attr(t, a)) : "tabindex" === t ? (i.attr(s, a), i.attr(t, null)) : i.attr(s, n.convertURL(a, t, i.name))
-                  }
-              }), n.parser.addNodeFilter("script", function(e) {
-                for (var t = e.length, n, r; t--;) n = e[t], r = n.attr("type") || "no/type", 0 !== r.indexOf("mce-") && n.attr("type", "mce-" + r)
-              }), n.parser.addNodeFilter("#cdata", function(e) {
-                for (var t = e.length, n; t--;) n = e[t], n.type = 8, n.name = "#comment", n.value = "[CDATA[" + n.value + "]]"
-              }), n.parser.addNodeFilter("p,h1,h2,h3,h4,h5,h6,div", function(e) {
-                for (var t = e.length, r, i = n.schema.getNonEmptyElements(); t--;) r = e[t], r.isEmpty(i) && (r.append(new o("br", 1)).shortEnded = !0)
-              }), n.serializer = new a(r, n), n.selection = new l(n.dom, n.getWin(), n.serializer, n), n.formatter = new c(n), n.undoManager = new u(n), n.forceBlocks = new f(n), n.enterKey = new d(n), n._nodeChangeDispatcher = new i(n), n._selectionOverrides = new R(n), n.fire("PreInit"), r.browser_spellcheck || r.gecko_spellcheck || (h.body.spellcheck = !1, B.setAttrib(p, "spellcheck", "false")), n.fire("PostRender"), n.quirks = new x(n), r.directionality && (p.dir = r.directionality), r.nowrap && (p.style.whiteSpace = "nowrap"), r.protect && n.on("BeforeSetContent", function(e) {
-                P(r.protect, function(t) {
-                  e.content = e.content.replace(t, function(e) {
-                    return "<!--mce:protected " + escape(e) + "-->"
-                  })
-                })
-              }), n.on("SetContent", function() {
-                n.addVisual(n.getBody())
-              }), r.padd_empty_editor && n.on("PostProcess", function(e) {
-                e.content = e.content.replace(/^(<p[^>]*>(&nbsp;|&#160;|\s|\u00a0|)<\/p>[\r\n]*|<br \/>[\r\n]*)$/, "")
-              }), n.load({
-                initial: !0,
-                format: "html"
-              }), n.startContent = n.getContent({
+            }), e.loadQueue(function() {
+              n.removed || n.init()
+            })
+          }
+          var n = this,
+            r = n.settings,
+            i = n.id,
+            o = n.suffix;
+          if (!z.domLoaded) return void B.bind(window, "ready", e);
+          if (n.getElement() && w.contentEditable) {
+            r.inline ? n.inline = !0 : (n.orgVisibility = n.getElement().style.visibility, n.getElement().style.visibility = "hidden");
+            var a = n.getElement().form || B.getParent(i, "form");
+            a && (n.formElement = a, r.hidden_input && !/TEXTAREA|INPUT/i.test(n.getElement().nodeName) && (B.insertAfter(B.create("input", {
+              type: "hidden",
+              name: i
+            }), i), n.hasHiddenInput = !0), n.formEventDelegate = function(e) {
+              n.fire(e.type, e)
+            }, B.bind(a, "submit reset", n.formEventDelegate), n.on("reset", function() {
+              n.setContent(n.startContent, {
                 format: "raw"
-              }), n.initialized = !0, n.bindPendingEventDelegates(), n.fire("init"), n.focus(!0), n.nodeChanged({
-                initial: !0
-              }), n.execCallback("init_instance_callback", n), n.contentStyles.length > 0 && (m = "", P(n.contentStyles, function(e) {
-                m += e + "\r\n"
-              }), n.dom.addStyle(m)), P(n.contentCSS, function(e) {
-                n.loadedCSS[e] || (n.dom.loadCSS(e), n.loadedCSS[e] = !0)
-              }), r.auto_focus && N.setEditorTimeout(n, function() {
-                var e;
-                e = r.auto_focus === !0 ? n : n.editorManager.get(r.auto_focus), e.destroyed || e.focus()
-              }, 100), s = h = p = null
-            },
-            focus: function(e) {
-              function t(e) {
-                return n.dom.getParent(e, function(e) {
-                  return "true" === n.dom.getContentEditable(e)
+              })
+            }), !r.submit_patch || a.submit.nodeType || a.submit.length || a._mceOldSubmit || (a._mceOldSubmit = a.submit, a.submit = function() {
+              return n.editorManager.triggerSave(), n.setDirty(!1), a._mceOldSubmit(a)
+            })), n.windowManager = new v(n), n.notificationManager = new y(n), "xml" == r.encoding && n.on("GetContent", function(e) {
+              e.save && (e.content = B.encode(e.content))
+            }), r.add_form_submit_trigger && n.on("submit", function() {
+              n.initialized && n.save()
+            }), r.add_unload_trigger && (n._beforeUnload = function() {
+              !n.initialized || n.destroyed || n.isHidden() || n.save({
+                format: "raw",
+                no_events: !0,
+                set_dirty: !1
+              })
+            }, n.editorManager.on("BeforeUnload", n._beforeUnload)), t()
+          }
+        },
+        init: function() {
+          function e(n) {
+            var r = M.get(n),
+              i, o;
+            if (i = M.urls[n] || t.documentBaseUrl.replace(/\/$/, ""), n = I(n), r && -1 === O(m, n)) {
+              if (P(M.dependencies(n), function(t) {
+                  e(t)
+                }), t.plugins[n]) return;
+              o = new r(t, i, t.$), t.plugins[n] = o, o.init && (o.init(t, i), m.push(n))
+            }
+          }
+          var t = this,
+            n = t.settings,
+            r = t.getElement(),
+            i, o, a, s, l, c, u, d, f, h, p, m = [];
+          if (this.editorManager.i18n.setCode(n.language), t.rtl = n.rtl_ui || this.editorManager.i18n.rtl, t.editorManager.add(t), n.aria_label = n.aria_label || B.getAttrib(r, "aria-label", t.getLang("aria.rich_text_area")), n.theme && ("function" != typeof n.theme ? (n.theme = n.theme.replace(/-/, ""), c = D.get(n.theme), t.theme = new c(t, D.urls[n.theme]), t.theme.init && t.theme.init(t, D.urls[n.theme] || t.documentBaseUrl.replace(/\/$/, ""), t.$)) : t.theme = n.theme), P(n.plugins.replace(/\-/g, "").split(/[ ,]/), e), n.render_ui && t.theme && (t.orgDisplay = r.style.display, "function" != typeof n.theme ? (i = n.width || r.style.width || r.offsetWidth, o = n.height || r.style.height || r.offsetHeight, a = n.min_height || 100, h = /^[0-9\.]+(|px)$/i, h.test("" + i) && (i = Math.max(parseInt(i, 10), 100)), h.test("" + o) && (o = Math.max(parseInt(o, 10), a)), l = t.theme.renderUI({
+              targetNode: r,
+              width: i,
+              height: o,
+              deltaWidth: n.delta_width,
+              deltaHeight: n.delta_height
+            }), n.content_editable || (o = (l.iframeHeight || o) + ("number" == typeof o ? l.deltaHeight || 0 : ""), a > o && (o = a))) : (l = n.theme(t, r), l.editorContainer.nodeType && (l.editorContainer = l.editorContainer.id = l.editorContainer.id || t.id + "_parent"), l.iframeContainer.nodeType && (l.iframeContainer = l.iframeContainer.id = l.iframeContainer.id || t.id + "_iframecontainer"), o = l.iframeHeight || r.offsetHeight), t.editorContainer = l.editorContainer), n.content_css && P(H(n.content_css), function(e) {
+              t.contentCSS.push(t.documentBaseURI.toAbsolute(e))
+            }), n.content_style && t.contentStyles.push(n.content_style), n.content_editable) return r = s = l = null, t.initContentBody();
+          for (t.iframeHTML = n.doctype + "<html><head>", n.document_base_url != t.documentBaseUrl && (t.iframeHTML += '<base href="' + t.documentBaseURI.getURI() + '" />'), !w.caretAfter && n.ie7_compat && (t.iframeHTML += '<meta http-equiv="X-UA-Compatible" content="IE=7" />'), t.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />', p = 0; p < t.contentCSS.length; p++) {
+            var g = t.contentCSS[p];
+            t.iframeHTML += '<link type="text/css" rel="stylesheet" href="' + E._addCacheSuffix(g) + '" />', t.loadedCSS[g] = !0
+          }
+          d = n.body_id || "tinymce", -1 != d.indexOf("=") && (d = t.getParam("body_id", "", "hash"), d = d[t.id] || d), f = n.body_class || "", -1 != f.indexOf("=") && (f = t.getParam("body_class", "", "hash"), f = f[t.id] || ""), n.content_security_policy && (t.iframeHTML += '<meta http-equiv="Content-Security-Policy" content="' + n.content_security_policy + '" />'), t.iframeHTML += '</head><body id="' + d + '" class="mce-content-body ' + f + '" data-id="' + t.id + '"><br></body></html>';
+          var v = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinymce.get("' + t.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody(true);})()';
+          document.domain != location.hostname && w.ie && w.ie < 12 && (u = v);
+          var y = B.create("iframe", {
+            id: t.id + "_ifr",
+            frameBorder: "0",
+            allowTransparency: "true",
+            title: t.editorManager.translate("Rich Text Area. Press ALT-F9 for menu. Press ALT-F10 for toolbar. Press ALT-0 for help"),
+            style: {
+              width: "100%",
+              height: o,
+              display: "block"
+            }
+          });
+          if (y.onload = function() {
+              y.onload = null, t.fire("load")
+            }, B.setAttrib(y, "src", u || 'javascript:""'), t.contentAreaContainer = l.iframeContainer, t.iframeElement = y, s = B.add(l.iframeContainer, y), V) try {
+            t.getDoc()
+          } catch (b) {
+            s.src = u = v
+          }
+          l.editorContainer && (B.get(l.editorContainer).style.display = t.orgDisplay, t.hidden = B.isHidden(l.editorContainer)), t.getElement().style.display = "none", B.setAttrib(t.id, "aria-hidden", !0), u || t.initContentBody(), r = s = l = null
+        },
+        initContentBody: function(t) {
+          var n = this,
+            r = n.settings,
+            s = n.getElement(),
+            h = n.getDoc(),
+            p, m;
+          r.inline || (n.getElement().style.visibility = n.orgVisibility), t || r.content_editable || (h.open(), h.write(n.iframeHTML), h.close()), r.content_editable && (n.on("remove", function() {
+            var e = this.getBody();
+            B.removeClass(e, "mce-content-body"), B.removeClass(e, "mce-edit-focus"), B.setAttrib(e, "contentEditable", null)
+          }), B.addClass(s, "mce-content-body"), n.contentDocument = h = r.content_document || document, n.contentWindow = r.content_window || window, n.bodyElement = s, r.content_document = r.content_window = null, r.root_name = s.nodeName.toLowerCase()), p = n.getBody(), p.disabled = !0, n.readonly = r.readonly, n.readonly || (n.inline && "static" == B.getStyle(p, "position", !0) && (p.style.position = "relative"), p.contentEditable = n.getParam("content_editable_state", !0)), p.disabled = !1, n.editorUpload = new T(n), n.schema = new b(r), n.dom = new e(h, {
+            keep_values: !0,
+            url_converter: n.convertURL,
+            url_converter_scope: n,
+            hex_colors: r.force_hex_style_colors,
+            class_filter: r.class_filter,
+            update_styles: !0,
+            root_element: n.inline ? n.getBody() : null,
+            collect: r.content_editable,
+            schema: n.schema,
+            onSetAttrib: function(e) {
+              n.fire("SetAttrib", e)
+            }
+          }), n.parser = new C(r, n.schema), n.parser.addAttributeFilter("src,href,style,tabindex", function(e, t) {
+            for (var r = e.length, i, o = n.dom, a, s; r--;)
+              if (i = e[r], a = i.attr(t), s = "data-mce-" + t, !i.attributes.map[s]) {
+                if (0 === a.indexOf("data:") || 0 === a.indexOf("blob:")) continue;
+                "style" === t ? (a = o.serializeStyle(o.parseStyle(a), i.name), a.length || (a = null), i.attr(s, a), i.attr(t, a)) : "tabindex" === t ? (i.attr(s, a), i.attr(t, null)) : i.attr(s, n.convertURL(a, t, i.name))
+              }
+          }), n.parser.addNodeFilter("script", function(e) {
+            for (var t = e.length, n, r; t--;) n = e[t], r = n.attr("type") || "no/type", 0 !== r.indexOf("mce-") && n.attr("type", "mce-" + r)
+          }), n.parser.addNodeFilter("#cdata", function(e) {
+            for (var t = e.length, n; t--;) n = e[t], n.type = 8, n.name = "#comment", n.value = "[CDATA[" + n.value + "]]"
+          }), n.parser.addNodeFilter("p,h1,h2,h3,h4,h5,h6,div", function(e) {
+            for (var t = e.length, r, i = n.schema.getNonEmptyElements(); t--;) r = e[t], r.isEmpty(i) && (r.append(new o("br", 1)).shortEnded = !0)
+          }), n.serializer = new a(r, n), n.selection = new l(n.dom, n.getWin(), n.serializer, n), n.formatter = new c(n), n.undoManager = new u(n), n.forceBlocks = new f(n), n.enterKey = new d(n), n._nodeChangeDispatcher = new i(n), n._selectionOverrides = new R(n), n.fire("PreInit"), r.browser_spellcheck || r.gecko_spellcheck || (h.body.spellcheck = !1, B.setAttrib(p, "spellcheck", "false")), n.fire("PostRender"), n.quirks = new x(n), r.directionality && (p.dir = r.directionality), r.nowrap && (p.style.whiteSpace = "nowrap"), r.protect && n.on("BeforeSetContent", function(e) {
+            P(r.protect, function(t) {
+              e.content = e.content.replace(t, function(e) {
+                return "<!--mce:protected " + escape(e) + "-->"
+              })
+            })
+          }), n.on("SetContent", function() {
+            n.addVisual(n.getBody())
+          }), r.padd_empty_editor && n.on("PostProcess", function(e) {
+            e.content = e.content.replace(/^(<p[^>]*>(&nbsp;|&#160;|\s|\u00a0|)<\/p>[\r\n]*|<br \/>[\r\n]*)$/, "")
+          }), n.load({
+            initial: !0,
+            format: "html"
+          }), n.startContent = n.getContent({
+            format: "raw"
+          }), n.initialized = !0, n.bindPendingEventDelegates(), n.fire("init"), n.focus(!0), n.nodeChanged({
+            initial: !0
+          }), n.execCallback("init_instance_callback", n), n.contentStyles.length > 0 && (m = "", P(n.contentStyles, function(e) {
+            m += e + "\r\n"
+          }), n.dom.addStyle(m)), P(n.contentCSS, function(e) {
+            n.loadedCSS[e] || (n.dom.loadCSS(e), n.loadedCSS[e] = !0)
+          }), r.auto_focus && N.setEditorTimeout(n, function() {
+            var e;
+            e = r.auto_focus === !0 ? n : n.editorManager.get(r.auto_focus), e.destroyed || e.focus()
+          }, 100), s = h = p = null
+        },
+        focus: function(e) {
+          function t(e) {
+            return n.dom.getParent(e, function(e) {
+              return "true" === n.dom.getContentEditable(e)
+            })
+          }
+          var n = this,
+            r = n.selection,
+            i = n.settings.content_editable,
+            o, a, s = n.getDoc(),
+            l = n.getBody(),
+            c;
+          if (!e) {
+            if (o = r.getRng(), o.item && (a = o.item(0)), n._refreshContentEditable(), c = t(r.getNode()), n.$.contains(l, c)) return c.focus(), r.normalize(), void n.editorManager.setActive(n);
+            if (i || (w.opera || n.getBody().focus(), n.getWin().focus()), W || i) {
+              if (l.setActive) try {
+                l.setActive()
+              } catch (u) {
+                l.focus()
+              } else l.focus();
+              i && r.normalize()
+            }
+            a && a.ownerDocument == s && (o = s.body.createControlRange(), o.addElement(a), o.select())
+          }
+          n.editorManager.setActive(n)
+        },
+        execCallback: function(e) {
+          var t = this,
+            n = t.settings[e],
+            r;
+          if (n) return t.callbackLookup && (r = t.callbackLookup[e]) && (n = r.func, r = r.scope), "string" == typeof n && (r = n.replace(/\.\w+$/, ""), r = r ? F(r) : 0, n = F(n), t.callbackLookup = t.callbackLookup || {}, t.callbackLookup[e] = {
+            func: n,
+            scope: r
+          }), n.apply(r || t, Array.prototype.slice.call(arguments, 1))
+        },
+        translate: function(e) {
+          var t = this.settings.language || "en",
+            n = this.editorManager.i18n;
+          return e ? n.data[t + "." + e] || e.replace(/\{\#([^\}]+)\}/g, function(e, r) {
+            return n.data[t + "." + r] || "{#" + r + "}"
+          }) : ""
+        },
+        getLang: function(e, n) {
+          return this.editorManager.i18n.data[(this.settings.language || "en") + "." + e] || (n !== t ? n : "{#" + e + "}")
+        },
+        getParam: function(e, t, n) {
+          var r = e in this.settings ? this.settings[e] : t,
+            i;
+          return "hash" === n ? (i = {}, "string" == typeof r ? P(r.indexOf("=") > 0 ? r.split(/[;,](?![^=;,]*(?:[;,]|$))/) : r.split(","), function(e) {
+            e = e.split("="), e.length > 1 ? i[I(e[0])] = I(e[1]) : i[I(e[0])] = I(e)
+          }) : i = r, i) : r
+        },
+        nodeChanged: function(e) {
+          this._nodeChangeDispatcher.nodeChanged(e)
+        },
+        addButton: function(e, t) {
+          var n = this;
+          t.cmd && (t.onclick = function() {
+            n.execCommand(t.cmd)
+          }), t.text || t.icon || (t.icon = e), n.buttons = n.buttons || {}, t.tooltip = t.tooltip || t.title, n.buttons[e] = t
+        },
+        addMenuItem: function(e, t) {
+          var n = this;
+          t.cmd && (t.onclick = function() {
+            n.execCommand(t.cmd)
+          }), n.menuItems = n.menuItems || {}, n.menuItems[e] = t
+        },
+        addContextToolbar: function(e, t) {
+          var n = this,
+            r;
+          n.contextToolbars = n.contextToolbars || [], "string" == typeof e && (r = e, e = function(e) {
+            return n.dom.is(e, r)
+          }), n.contextToolbars.push({
+            predicate: e,
+            items: t
+          })
+        },
+        addCommand: function(e, t, n) {
+          this.editorCommands.addCommand(e, t, n)
+        },
+        addQueryStateHandler: function(e, t, n) {
+          this.editorCommands.addQueryStateHandler(e, t, n)
+        },
+        addQueryValueHandler: function(e, t, n) {
+          this.editorCommands.addQueryValueHandler(e, t, n)
+        },
+        addShortcut: function(e, t, n, r) {
+          this.shortcuts.add(e, t, n, r)
+        },
+        execCommand: function(e, t, n, r) {
+          return this.editorCommands.execCommand(e, t, n, r)
+        },
+        queryCommandState: function(e) {
+          return this.editorCommands.queryCommandState(e)
+        },
+        queryCommandValue: function(e) {
+          return this.editorCommands.queryCommandValue(e)
+        },
+        queryCommandSupported: function(e) {
+          return this.editorCommands.queryCommandSupported(e)
+        },
+        show: function() {
+          var e = this;
+          e.hidden && (e.hidden = !1, e.inline ? e.getBody().contentEditable = !0 : (B.show(e.getContainer()), B.hide(e.id)), e.load(), e.fire("show"))
+        },
+        hide: function() {
+          var e = this,
+            t = e.getDoc();
+          e.hidden || (V && t && !e.inline && t.execCommand("SelectAll"), e.save(), e.inline ? (e.getBody().contentEditable = !1, e == e.editorManager.focusedEditor && (e.editorManager.focusedEditor = null)) : (B.hide(e.getContainer()), B.setStyle(e.id, "display", e.orgDisplay)), e.hidden = !0, e.fire("hide"))
+        },
+        isHidden: function() {
+          return !!this.hidden
+        },
+        setProgressState: function(e, t) {
+          this.fire("ProgressState", {
+            state: e,
+            time: t
+          })
+        },
+        load: function(e) {
+          var n = this,
+            r = n.getElement(),
+            i;
+          return r ? (e = e || {}, e.load = !0, i = n.setContent(r.value !== t ? r.value : r.innerHTML, e), e.element = r, e.no_events || n.fire("LoadContent", e), e.element = r = null, i) : void 0
+        },
+        save: function(e) {
+          var t = this,
+            n = t.getElement(),
+            r, i;
+          if (n && t.initialized) return e = e || {}, e.save = !0, e.element = n, r = e.content = t.getContent(e), e.no_events || t.fire("SaveContent", e), "raw" == e.format && t.fire("RawSaveContent", e), r = e.content, /TEXTAREA|INPUT/i.test(n.nodeName) ? n.value = r : (t.inline || (n.innerHTML = r), (i = B.getParent(t.id, "form")) && P(i.elements, function(e) {
+            return e.name == t.id ? (e.value = r, !1) : void 0
+          })), e.element = n = null, e.set_dirty !== !1 && t.setDirty(!1), r
+        },
+        setContent: function(e, t) {
+          var n = this,
+            r = n.getBody(),
+            i, o;
+          return t = t || {}, t.format = t.format || "html", t.set = !0, t.content = e, t.no_events || n.fire("BeforeSetContent", t), e = t.content, 0 === e.length || /^\s+$/.test(e) ? (o = V && 11 > V ? "" : '<br data-mce-bogus="1">', "TABLE" == r.nodeName ? e = "<tr><td>" + o + "</td></tr>" : /^(UL|OL)$/.test(r.nodeName) && (e = "<li>" + o + "</li>"), i = n.settings.forced_root_block, i && n.schema.isValidChild(r.nodeName.toLowerCase(), i.toLowerCase()) ? (e = o, e = n.dom.createHTML(i, n.settings.forced_root_block_attrs, e)) : V || e || (e = '<br data-mce-bogus="1">'), n.dom.setHTML(r, e), n.fire("SetContent", t)) : ("raw" !== t.format && (e = new s({
+            validate: n.validate
+          }, n.schema).serialize(n.parser.parse(e, {
+            isRootContent: !0
+          }))), t.content = I(e), n.dom.setHTML(r, t.content), t.no_events || n.fire("SetContent", t)), t.content
+        },
+        getContent: function(e) {
+          var t = this,
+            n, r = t.getBody();
+          return e = e || {}, e.format = e.format || "html", e.get = !0, e.getInner = !0, e.no_events || t.fire("BeforeGetContent", e), n = "raw" == e.format ? t.serializer.getTrimmedContent() : "text" == e.format ? r.innerText || r.textContent : t.serializer.serialize(r, e), "text" != e.format ? e.content = I(n) : e.content = n, e.no_events || t.fire("GetContent", e), e.content
+        },
+        insertContent: function(e, t) {
+          t && (e = L({
+            content: e
+          }, t)), this.execCommand("mceInsertContent", !1, e)
+        },
+        isDirty: function() {
+          return !this.isNotDirty
+        },
+        setDirty: function(e) {
+          var t = !this.isNotDirty;
+          this.isNotDirty = !e, e && e != t && this.fire("dirty")
+        },
+        setMode: function(e) {
+          S.setMode(this, e)
+        },
+        getContainer: function() {
+          var e = this;
+          return e.container || (e.container = B.get(e.editorContainer || e.id + "_parent")), e.container
+        },
+        getContentAreaContainer: function() {
+          return this.contentAreaContainer
+        },
+        getElement: function() {
+          return this.targetElm || (this.targetElm = B.get(this.id)), this.targetElm
+        },
+        getWin: function() {
+          var e = this,
+            t;
+          return e.contentWindow || (t = e.iframeElement, t && (e.contentWindow = t.contentWindow)), e.contentWindow
+        },
+        getDoc: function() {
+          var e = this,
+            t;
+          return e.contentDocument || (t = e.getWin(), t && (e.contentDocument = t.document)), e.contentDocument
+        },
+        getBody: function() {
+          return this.bodyElement || this.getDoc().body
+        },
+        convertURL: function(e, t, n) {
+          var r = this,
+            i = r.settings;
+          return i.urlconverter_callback ? r.execCallback("urlconverter_callback", e, n, !0, t) : !i.convert_urls || n && "LINK" == n.nodeName || 0 === e.indexOf("file:") || 0 === e.length ? e : i.relative_urls ? r.documentBaseURI.toRelative(e) : e = r.documentBaseURI.toAbsolute(e, i.remove_script_host)
+        },
+        addVisual: function(e) {
+          var n = this,
+            r = n.settings,
+            i = n.dom,
+            o;
+          e = e || n.getBody(), n.hasVisual === t && (n.hasVisual = r.visual), P(i.select("table,a", e), function(e) {
+            var t;
+            switch (e.nodeName) {
+              case "TABLE":
+                return o = r.visual_table_class || "mce-item-table", t = i.getAttrib(e, "border"), void(t && "0" != t || !n.hasVisual ? i.removeClass(e, o) : i.addClass(e, o));
+              case "A":
+                return void(i.getAttrib(e, "href", !1) || (t = i.getAttrib(e, "name") || e.id, o = r.visual_anchor_class || "mce-item-anchor", t && n.hasVisual ? i.addClass(e, o) : i.removeClass(e, o)))
+            }
+          }), n.fire("VisualAid", {
+            element: e,
+            hasVisual: n.hasVisual
+          })
+        },
+        remove: function() {
+          var e = this;
+          e.removed || (e.save(), e.removed = 1, e.unbindAllNativeEvents(), e.hasHiddenInput && B.remove(e.getElement().nextSibling), e.inline || (V && 10 > V && e.getDoc().execCommand("SelectAll", !1, null), B.setStyle(e.id, "display", e.orgDisplay), e.getBody().onload = null), e.fire("remove"), e.editorManager.remove(e), B.remove(e.getContainer()), e._selectionOverrides.destroy(), e.editorUpload.destroy(), e.destroy())
+        },
+        destroy: function(e) {
+          var t = this,
+            n;
+          if (!t.destroyed) {
+            if (!e && !t.removed) return void t.remove();
+            e || (t.editorManager.off("beforeunload", t._beforeUnload), t.theme && t.theme.destroy && t.theme.destroy(), t.selection.destroy(), t.dom.destroy()), n = t.formElement, n && (n._mceOldSubmit && (n.submit = n._mceOldSubmit, n._mceOldSubmit = null), B.unbind(n, "submit reset", t.formEventDelegate)), t.contentAreaContainer = t.formElement = t.container = t.editorContainer = null, t.bodyElement = t.contentDocument = t.contentWindow = null, t.iframeElement = t.targetElm = null, t.selection && (t.selection = t.selection.win = t.selection.dom = t.selection.dom.doc = null), t.destroyed = 1
+          }
+        },
+        uploadImages: function(e) {
+          return this.editorUpload.uploadImages(e)
+        },
+        _scanForImages: function() {
+          return this.editorUpload.scanForImages()
+        },
+        _refreshContentEditable: function() {
+          var e = this,
+            t, n;
+          e._isHidden() && (t = e.getBody(), n = t.parentNode, n.removeChild(t), n.appendChild(t), t.focus())
+        },
+        _isHidden: function() {
+          var e;
+          return W ? (e = this.selection.getSel(), !e || !e.rangeCount || 0 === e.rangeCount) : 0
+        }
+      }, L(A.prototype, _), A
+    }), r(Ge, [], function() {
+      var e = {},
+        t = "en";
+      return {
+        setCode: function(e) {
+          e && (t = e, this.rtl = this.data[e] ? "rtl" === this.data[e]._dir : !1)
+        },
+        getCode: function() {
+          return t
+        },
+        rtl: !1,
+        add: function(t, n) {
+          var r = e[t];
+          r || (e[t] = r = {});
+          for (var i in n) r[i] = n[i];
+          this.setCode(t)
+        },
+        translate: function(n) {
+          var r;
+          if (r = e[t], r || (r = {}), "undefined" == typeof n) return n;
+          if ("string" != typeof n && n.raw) return n.raw;
+          if (n.push) {
+            var i = n.slice(1);
+            n = (r[n[0]] || n[0]).replace(/\{([0-9]+)\}/g, function(e, t) {
+              return i[t]
+            })
+          }
+          return (r[n] || n).replace(/{context:\w+}$/, "")
+        },
+        data: e
+      }
+    }), r(Je, [w, u, h], function(e, t, n) {
+      function r(e) {
+        function l() {
+          try {
+            return document.activeElement
+          } catch (e) {
+            return document.body
+          }
+        }
+
+        function c(e, t) {
+          if (t && t.startContainer) {
+            if (!e.isChildOf(t.startContainer, e.getRoot()) || !e.isChildOf(t.endContainer, e.getRoot())) return;
+            return {
+              startContainer: t.startContainer,
+              startOffset: t.startOffset,
+              endContainer: t.endContainer,
+              endOffset: t.endOffset
+            }
+          }
+          return t
+        }
+
+        function u(e, t) {
+          var n;
+          return t.startContainer ? (n = e.getDoc().createRange(), n.setStart(t.startContainer, t.startOffset), n.setEnd(t.endContainer, t.endOffset)) : n = t, n
+        }
+
+        function d(e) {
+          return !!s.getParent(e, r.isEditorUIElement)
+        }
+
+        function f(r) {
+          var f = r.editor;
+          f.on("init", function() {
+            (f.inline || n.ie) && ("onbeforedeactivate" in document && n.ie < 9 ? f.dom.bind(f.getBody(), "beforedeactivate", function(e) {
+              if (e.target == f.getBody()) try {
+                f.lastRng = f.selection.getRng()
+              } catch (t) {}
+            }) : f.on("nodechange mouseup keyup", function(e) {
+              var t = l();
+              "nodechange" == e.type && e.selectionChange || (t && t.id == f.id + "_ifr" && (t = f.getBody()), f.dom.isChildOf(t, f.getBody()) && (f.lastRng = f.selection.getRng()))
+            }), n.webkit && !i && (i = function() {
+              var t = e.activeEditor;
+              if (t && t.selection) {
+                var n = t.selection.getRng();
+                n && !n.collapsed && (f.lastRng = n)
+              }
+            }, s.bind(document, "selectionchange", i)))
+          }), f.on("setcontent", function() {
+            f.lastRng = null
+          }), f.on("mousedown", function() {
+            f.selection.lastFocusBookmark = null
+          }), f.on("focusin", function() {
+            var t = e.focusedEditor,
+              n;
+            f.selection.lastFocusBookmark && (n = u(f, f.selection.lastFocusBookmark), f.selection.lastFocusBookmark = null, f.selection.setRng(n)), t != f && (t && t.fire("blur", {
+              focusedEditor: f
+            }), e.setActive(f), e.focusedEditor = f, f.fire("focus", {
+              blurredEditor: t
+            }), f.focus(!0)), f.lastRng = null
+          }), f.on("focusout", function() {
+            t.setEditorTimeout(f, function() {
+              var t = e.focusedEditor;
+              d(l()) || t != f || (f.fire("blur", {
+                focusedEditor: null
+              }), e.focusedEditor = null, f.selection && (f.selection.lastFocusBookmark = null))
+            })
+          }), o || (o = function(t) {
+            var n = e.activeEditor;
+            n && t.target.ownerDocument == document && (n.selection && t.target != n.getBody() && (n.selection.lastFocusBookmark = c(n.dom, n.lastRng)), t.target == document.body || d(t.target) || e.focusedEditor != n || (n.fire("blur", {
+              focusedEditor: null
+            }), e.focusedEditor = null))
+          }, s.bind(document, "focusin", o)), f.inline && !a && (a = function(t) {
+            var n = e.activeEditor;
+            if (n.inline && !n.dom.isChildOf(t.target, n.getBody())) {
+              var r = n.selection.getRng();
+              r.collapsed || (n.lastRng = r)
+            }
+          }, s.bind(document, "mouseup", a))
+        }
+
+        function h(t) {
+          e.focusedEditor == t.editor && (e.focusedEditor = null), e.activeEditor || (s.unbind(document, "selectionchange", i), s.unbind(document, "focusin", o), s.unbind(document, "mouseup", a), i = o = a = null)
+        }
+        e.on("AddEditor", f), e.on("RemoveEditor", h)
+      }
+      var i, o, a, s = e.DOM;
+      return r.isEditorUIElement = function(e) {
+        return -1 !== e.className.toString().indexOf("mce-")
+      }, r
+    }), r(Qe, [Ke, g, w, te, h, m, oe, Ge, Je], function(e, t, n, r, i, o, a, s, l) {
+      function c(e) {
+        m(b.editors, function(t) {
+          t.fire("ResizeWindow", e)
+        })
+      }
+
+      function u(e, n) {
+        n !== C && (n ? t(window).on("resize", c) : t(window).off("resize", c), C = n)
+      }
+
+      function d(e) {
+        var t = b.editors,
+          n;
+        delete t[e.id];
+        for (var r = 0; r < t.length; r++)
+          if (t[r] == e) {
+            t.splice(r, 1), n = !0;
+            break
+          }
+        return b.activeEditor == e && (b.activeEditor = t[0]), b.focusedEditor == e && (b.focusedEditor = null), n
+      }
+
+      function f(e) {
+        return e && !(e.getContainer() || e.getBody()).parentNode && (d(e), e.unbindAllNativeEvents(), e.destroy(!0), e = null), e
+      }
+      var h = n.DOM,
+        p = o.explode,
+        m = o.each,
+        g = o.extend,
+        v = 0,
+        y, b, C = !1;
+      return b = {
+        $: t,
+        majorVersion: "4",
+        minorVersion: "3.3",
+        releaseDate: "2016-01-14",
+        editors: [],
+        i18n: s,
+        activeEditor: null,
+        setup: function() {
+          var e = this,
+            t, n, i = "",
+            o, a;
+          if (n = document.location.href, /^[^:]+:\/\/\/?[^\/]+\//.test(n) && (n = n.replace(/[\?#].*$/, "").replace(/[\/\\][^\/]+$/, ""), /[\/\\]$/.test(n) || (n += "/")), o = window.tinymce || window.tinyMCEPreInit) t = o.base || o.baseURL, i = o.suffix;
+          else {
+            for (var s = document.getElementsByTagName("script"), c = 0; c < s.length; c++) {
+              a = s[c].src;
+              var u = a.substring(a.lastIndexOf("/"));
+              if (/tinymce(\.full|\.jquery|)(\.min|\.dev|)\.js/.test(a)) {
+                -1 != u.indexOf(".min") && (i = ".min"), t = a.substring(0, a.lastIndexOf("/"));
+                break
+              }
+            }!t && document.currentScript && (a = document.currentScript.src, -1 != a.indexOf(".min") && (i = ".min"), t = a.substring(0, a.lastIndexOf("/")))
+          }
+          e.baseURL = new r(n).toAbsolute(t), e.documentBaseURL = n, e.baseURI = new r(e.baseURL), e.suffix = i, e.focusManager = new l(e)
+        },
+        init: function(t) {
+          function n(e) {
+            var t = e.id;
+            return t || (t = e.name, t = t && !h.get(t) ? e.name : h.uniqueId(), e.setAttribute("id", t)), t
+          }
+
+          function r(t, n, r) {
+            if (!f(s.get(t))) {
+              var i = new e(t, n, s);
+              i.targetElm = i.targetElm || r, l.push(i), i.render()
+            }
+          }
+
+          function i(e) {
+            var n = t[e];
+            if (n) return n.apply(s, Array.prototype.slice.call(arguments, 2))
+          }
+
+          function o(e, t) {
+            return t.constructor === RegExp ? t.test(e.className) : h.hasClass(e, t)
+          }
+
+          function a() {
+            var e, s;
+            if (h.unbind(window, "ready", a), i("onpageload"), t.types) return void m(t.types, function(e) {
+              m(h.select(e.selector), function(i) {
+                r(n(i), g({}, t, e), i)
+              })
+            });
+            if (t.selector) return void m(h.select(t.selector), function(e) {
+              r(n(e), t, e)
+            });
+            switch (t.target && r(n(t.target), t), t.mode) {
+              case "exact":
+                e = t.elements || "", e.length > 0 && m(p(e), function(e) {
+                  var n;
+                  (n = h.get(e)) ? r(e, t, n): m(document.forms, function(n) {
+                    m(n.elements, function(n) {
+                      n.name === e && (e = "mce_editor_" + v++, h.setAttrib(n, "id", e), r(e, t, n))
+                    })
+                  })
+                });
+                break;
+              case "textareas":
+              case "specific_textareas":
+                m(h.select("textarea"), function(e) {
+                  t.editor_deselector && o(e, t.editor_deselector) || (!t.editor_selector || o(e, t.editor_selector)) && r(n(e), t, e)
                 })
-              }
-              var n = this,
-                r = n.selection,
-                i = n.settings.content_editable,
-                o, a, s = n.getDoc(),
-                l = n.getBody(),
-                c;
-              if (!e) {
-                if (o = r.getRng(), o.item && (a = o.item(0)), n._refreshContentEditable(), c = t(r.getNode()), n.$.contains(l, c)) return c.focus(), r.normalize(), void n.editorManager.setActive(n);
-                if (i || (w.opera || n.getBody().focus(), n.getWin().focus()), W || i) {
-                  if (l.setActive) try {
-                    l.setActive()
-                  } catch (u) {
-                    l.focus()
-                  } else l.focus();
-                  i && r.normalize()
-                }
-                a && a.ownerDocument == s && (o = s.body.createControlRange(), o.addElement(a), o.select())
-              }
-              n.editorManager.setActive(n)
-            },
-            execCallback: function(e) {
-              var t = this,
-                n = t.settings[e],
-                r;
-              if (n) return t.callbackLookup && (r = t.callbackLookup[e]) && (n = r.func, r = r.scope), "string" == typeof n && (r = n.replace(/\.\w+$/, ""), r = r ? F(r) : 0, n = F(n), t.callbackLookup = t.callbackLookup || {}, t.callbackLookup[e] = {
-                func: n,
-                scope: r
-              }), n.apply(r || t, Array.prototype.slice.call(arguments, 1))
-            },
-            translate: function(e) {
-              var t = this.settings.language || "en",
-                n = this.editorManager.i18n;
-              return e ? n.data[t + "." + e] || e.replace(/\{\#([^\}]+)\}/g, function(e, r) {
-                return n.data[t + "." + r] || "{#" + r + "}"
-              }) : ""
-            },
-            getLang: function(e, n) {
-              return this.editorManager.i18n.data[(this.settings.language || "en") + "." + e] || (n !== t ? n : "{#" + e + "}")
-            },
-            getParam: function(e, t, n) {
-              var r = e in this.settings ? this.settings[e] : t,
-                i;
-              return "hash" === n ? (i = {}, "string" == typeof r ? P(r.indexOf("=") > 0 ? r.split(/[;,](?![^=;,]*(?:[;,]|$))/) : r.split(","), function(e) {
-                e = e.split("="), e.length > 1 ? i[I(e[0])] = I(e[1]) : i[I(e[0])] = I(e)
-              }) : i = r, i) : r
-            },
-            nodeChanged: function(e) {
-              this._nodeChangeDispatcher.nodeChanged(e)
-            },
-            addButton: function(e, t) {
-              var n = this;
-              t.cmd && (t.onclick = function() {
-                n.execCommand(t.cmd)
-              }), t.text || t.icon || (t.icon = e), n.buttons = n.buttons || {}, t.tooltip = t.tooltip || t.title, n.buttons[e] = t
-            },
-            addMenuItem: function(e, t) {
-              var n = this;
-              t.cmd && (t.onclick = function() {
-                n.execCommand(t.cmd)
-              }), n.menuItems = n.menuItems || {}, n.menuItems[e] = t
-            },
-            addContextToolbar: function(e, t) {
-              var n = this,
-                r;
-              n.contextToolbars = n.contextToolbars || [], "string" == typeof e && (r = e, e = function(e) {
-                return n.dom.is(e, r)
-              }), n.contextToolbars.push({
-                predicate: e,
-                items: t
+            }
+            t.oninit && (e = s = 0, m(l, function(t) {
+              s++, t.initialized ? e++ : t.on("init", function() {
+                e++, e == s && i("oninit")
+              }), e == s && i("oninit")
+            }))
+          }
+          var s = this,
+            l = [];
+          s.settings = t, h.bind(window, "ready", a)
+        },
+        get: function(e) {
+          return arguments.length ? e in this.editors ? this.editors[e] : null : this.editors
+        },
+        add: function(e) {
+          var t = this,
+            n = t.editors;
+          return n[e.id] = e, n.push(e), u(n, !0), t.activeEditor = e, t.fire("AddEditor", {
+            editor: e
+          }), y || (y = function() {
+            t.fire("BeforeUnload")
+          }, h.bind(window, "beforeunload", y)), e
+        },
+        createEditor: function(t, n) {
+          return this.add(new e(t, n, this))
+        },
+        remove: function(e) {
+          var t = this,
+            n, r = t.editors,
+            i; {
+            if (e) return "string" == typeof e ? (e = e.selector || e, void m(h.select(e), function(e) {
+              i = r[e.id], i && t.remove(i)
+            })) : (i = e, r[i.id] ? (d(i) && t.fire("RemoveEditor", {
+              editor: i
+            }), r.length || h.unbind(window, "beforeunload", y), i.remove(), u(r, r.length > 0), i) : null);
+            for (n = r.length - 1; n >= 0; n--) t.remove(r[n])
+          }
+        },
+        execCommand: function(t, n, r) {
+          var i = this,
+            o = i.get(r);
+          switch (t) {
+            case "mceAddEditor":
+              return i.get(r) || new e(r, i.settings, i).render(), !0;
+            case "mceRemoveEditor":
+              return o && o.remove(), !0;
+            case "mceToggleEditor":
+              return o ? (o.isHidden() ? o.show() : o.hide(), !0) : (i.execCommand("mceAddEditor", 0, r), !0)
+          }
+          return i.activeEditor ? i.activeEditor.execCommand(t, n, r) : !1
+        },
+        triggerSave: function() {
+          m(this.editors, function(e) {
+            e.save()
+          })
+        },
+        addI18n: function(e, t) {
+          s.add(e, t)
+        },
+        translate: function(e) {
+          return s.translate(e)
+        },
+        setActive: function(e) {
+          var t = this.activeEditor;
+          this.activeEditor != e && (t && t.fire("deactivate", {
+            relatedTarget: e
+          }), e.fire("activate", {
+            relatedTarget: t
+          })), this.activeEditor = e
+        }
+      }, g(b, a), b.setup(), window.tinymce = window.tinyMCE = b, b
+    }), r(Ze, [Qe, m], function(e, t) {
+      var n = t.each,
+        r = t.explode;
+      e.on("AddEditor", function(e) {
+        var t = e.editor;
+        t.on("preInit", function() {
+          function e(e, t) {
+            n(t, function(t, n) {
+              t && s.setStyle(e, n, t)
+            }), s.rename(e, "span")
+          }
+
+          function i(e) {
+            s = t.dom, l.convert_fonts_to_spans && n(s.select("font,u,strike", e.node), function(e) {
+              o[e.nodeName.toLowerCase()](s, e)
+            })
+          }
+          var o, a, s, l = t.settings;
+          l.inline_styles && (a = r(l.font_size_legacy_values), o = {
+            font: function(t, n) {
+              e(n, {
+                backgroundColor: n.style.backgroundColor,
+                color: n.color,
+                fontFamily: n.face,
+                fontSize: a[parseInt(n.size, 10) - 1]
               })
             },
-            addCommand: function(e, t, n) {
-              this.editorCommands.addCommand(e, t, n)
-            },
-            addQueryStateHandler: function(e, t, n) {
-              this.editorCommands.addQueryStateHandler(e, t, n)
-            },
-            addQueryValueHandler: function(e, t, n) {
-              this.editorCommands.addQueryValueHandler(e, t, n)
-            },
-            addShortcut: function(e, t, n, r) {
-              this.shortcuts.add(e, t, n, r)
-            },
-            execCommand: function(e, t, n, r) {
-              return this.editorCommands.execCommand(e, t, n, r)
-            },
-            queryCommandState: function(e) {
-              return this.editorCommands.queryCommandState(e)
-            },
-            queryCommandValue: function(e) {
-              return this.editorCommands.queryCommandValue(e)
-            },
-            queryCommandSupported: function(e) {
-              return this.editorCommands.queryCommandSupported(e)
-            },
-            show: function() {
-              var e = this;
-              e.hidden && (e.hidden = !1, e.inline ? e.getBody().contentEditable = !0 : (B.show(e.getContainer()), B.hide(e.id)), e.load(), e.fire("show"))
-            },
-            hide: function() {
-              var e = this,
-                t = e.getDoc();
-              e.hidden || (V && t && !e.inline && t.execCommand("SelectAll"), e.save(), e.inline ? (e.getBody().contentEditable = !1, e == e.editorManager.focusedEditor && (e.editorManager.focusedEditor = null)) : (B.hide(e.getContainer()), B.setStyle(e.id, "display", e.orgDisplay)), e.hidden = !0, e.fire("hide"))
-            },
-            isHidden: function() {
-              return !!this.hidden
-            },
-            setProgressState: function(e, t) {
-              this.fire("ProgressState", {
-                state: e,
-                time: t
+            u: function(n, r) {
+              "html4" === t.settings.schema && e(r, {
+                textDecoration: "underline"
               })
             },
-            load: function(e) {
-                var n = this,
-                  r = n.getElement(),
-                  i;
-                return r ? (e = e || {}, e.load = !0, i = n.setContent(r.value !== t ? r.value : r.innerHTML, e), e.element = r, e.no_events || n.fire("LoadContent", e), e.element = r = null, i) : void
+            strike: function(t, n) {
+              e(n, {
+                textDecoration: "line-through"
+              })
+            }
+          }, t.on("PreProcess SetContent", i))
+        })
+      })
+    }), r(et, [oe, m], function(e, t) {
+        var n = {
+            send: function(e) {
+                function r() {
+                  !e.async || 4 == i.readyState || o++ > 1e4 ? (e.success && 1e4 > o && 200 == i.status ? e.success.call(e.success_scope, "" + i.responseText, i, e) : e.error && e.error.call(e.error_scope, o > 1e4 ? "TIMED_OUT" : "GENERAL", i, e), i = null) : setT

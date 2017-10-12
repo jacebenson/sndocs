@@ -1175,82 +1175,370 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
 });
 /*! RESOURCE: AddTeamMembers */
 var AddTeamMembers = Class.create(GlideDialogWindow, {
-      initialize: function() {
-        this.setUpFacade();
-      },
-      setUpFacade: function() {
-        GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-        this.setTitle(getMessage("Add Team Members"));
-        this.setBody(this.getMarkUp(), false, false);
-      },
-      setUpEvents: function() {
-        var dialog = this;
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
+    this.setTitle(getMessage("Add Team Members"));
+    this.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (dialog.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          dialog.showStatus(getMessage("Adding team members..."));
+          processor.getXML(function() {
+            dialog.refresh();
+            dialog._onCloseClicked();
+          });
+        } else {
+          dialog._onCloseClicked();
+        }
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      teamCombo.on("change", function() {
+        dialog.updateMembers();
+      });
+    }
+  },
+  updateMembers: function() {
+    var arrMemberInfo = [];
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      var strTeamSysId = teamCombo.value;
+      var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+      recTeamMember.addQuery("team", strTeamSysId);
+      recTeamMember.query();
+      while (recTeamMember.next()) {
+        var recSysUser = new GlideRecord("sys_user");
+        recSysUser.addQuery("sys_id", recTeamMember.name);
+        recSysUser.query();
+        var strName = recSysUser.next() ? recSysUser.name : "";
+        var strPoints = recTeamMember.default_sprint_points + "";
+        arrMemberInfo.push({
+          name: strName,
+          points: strPoints
+        });
+      }
+    }
+    if (arrMemberInfo.length > 0) {
+      var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
+        "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
+      for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
+        var strMemberName = arrMemberInfo[nSlot].name + "";
+        var strMemberPoints = arrMemberInfo[nSlot].points + "";
+        strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
+          "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
+      }
+      $("memberId").update(strHtml);
+    } else {
+      $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenTeamSysIds: function() {
+    return $F('teamId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getTeamInfo');
+    groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapTeamInfo = {};
+    var teamData = response.responseXML.getElementsByTagName("team");
+    var strName, strSysId;
+    for (var i = 0; i < teamData.length; i++) {
+      strName = teamData[i].getAttribute("name");
+      strSysId = teamData[i].getAttribute("sysid");
+      mapTeamInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrTeamNames = [];
+    for (var strTeamName in mapTeamInfo) {
+      arrTeamNames.push(strTeamName + "");
+    }
+    arrTeamNames.sort();
+    var strMarkUp = "";
+    if (arrTeamNames.length > 0) {
+      var strTable = "<table><tr><td><label for='teamId'>" + getMessage("Team") + "</label>&nbsp;<select id='teamId'>";
+      for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
+        strName = arrTeamNames[nSlot];
+        strSysId = mapTeamInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></label></td></tr></table>";
+      var strTable2 = "<table style='width: 100%;'><tr><td style='width: 50%;'></td><td><table id='memberId'></table></td><td style='width: 50%;'></td></tr></table>";
+      strMarkUp = "<div id='task_controls' style='overflow: auto;>" + strTable + strTable2 +
+        "</div><table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='ok' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></td></tr></table>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No release teams found</p>" +
+        "<table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancelNG' type='button'>" + getMessage("Cancel") + "</button></td></tr></table></div>";
+    }
+    this.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+    this.setWidth(280);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenTeamSysId = this.getUserChosenTeamSysIds();
+    if (strChosenTeamSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_teams = strChosenTeamSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+/*! RESOURCE: ChangeMaxHeightOfTextAreasRecordProducer */
+document.observe('dom:loaded', function() {
+  document.styleSheets[0].insertRule("HTML[data-doctype=true] #item_table textarea { max-height: 150px !important; }", 0);
+});
+/*! RESOURCE: ScrumAddSprints */
+var ScrumAddSprints = Class.create({
+  initialize: function(gr) {
+    this._gr = gr;
+    this._prmNms = ["spName", "spDuration", "spStartDate", "spStartNum", "spNum", "_tn", "_sys_id"];
+    this._dateFN = ["spStartDate"];
+    this._refObs = [];
+    this._prmVls = [];
+    for (var i = 0; i < this._prmNms.length; i++) {
+      this._prmVls[this._prmNms[i]] = "";
+    }
+    this._prmErr = [];
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._crtDlg = new dialogClass("scrum_add_sprints_dialog");
+    this._crtDlg.setTitle("Add Sprints");
+    this._crtDlg.setPreference("_tn", this._gr.getTableName());
+    this._crtDlg.setPreference("_sys_id", (this._gr.getUniqueValue()));
+    this._crtDlg.setPreference("handler", this);
+  },
+  showDialog: function() {
+    this._crtDlg.render();
+  },
+  onSubmit: function() {
+    this._readFormValues();
+    if (!this._validate()) {
+      var errMsg = "Before you submit:";
+      for (var i = 0; i < this._prmErr.length; i++) {
+        errMsg += "\n * " + this._prmErr[i];
+      }
+      alert(errMsg);
+      return false;
+    }
+    this._crtDlg.destroy();
+    var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+    ga.addParam("sysparm_name", "checkDuration");
+    for (var i = 0; i < this._prmNms.length; i++) {
+      ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+    }
+    ga.getXML(this.checkComplete.bind(this));
+    return false;
+  },
+  checkComplete: function(response) {
+    var resp = response.responseXML.getElementsByTagName("item");
+    if (resp[0].getAttribute("result") == "success") {
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._plsWtDlg = new dialogClass("scrum_please_wait");
+      this._plsWtDlg.setTitle("Working.  Please wait.");
+      this._plsWtDlg.render();
+      var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+      ga.addParam("sysparm_name", "addSprints");
+      for (var i = 0; i < this._prmNms.length; i++) {
+        ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+      }
+      ga.getXML(this.createComplete.bind(this));
+      return false;
+    }
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._rlsPshDlg = new dialogClass("scrum_release_push_confirm_dialog");
+    this._rlsPshDlg.setTitle("Modify Release Dates");
+    this._rlsPshDlg.setPreference("handler", this);
+    this._rlsPshDlg.render();
+  },
+  confirmReleasePush: function() {
+    this._rlsPshDlg.destroy();
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    this._plsWtDlg = new dialogClass("scrum_please_wait");
+    this._plsWtDlg.setTitle("Working.  Please wait.");
+    this._plsWtDlg.render();
+    var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+    ga.addParam("sysparm_name", "addSprints");
+    for (var i = 0; i < this._prmNms.length; i++) {
+      ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+    }
+    ga.getXML(this.createComplete.bind(this));
+    return false;
+  },
+  cancelReleasePush: function(response) {
+    this._rlsPshDlg.destroy();
+    window.location.reload();
+    return false;
+  },
+  createComplete: function(response) {
+    this._plsWtDlg.destroy();
+    var resp = response.responseXML.getElementsByTagName("item");
+    if (resp[0].getAttribute("result") == "success") {
+      this._sprints = response.responseXML.documentElement.getAttribute("answer");
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._viewConfirm = new dialogClass("scrum_sprints_view_confirm_dialog");
+      this._viewConfirm.setTitle("Sprints Created");
+      this._viewConfirm.setPreference("handler", this);
+      this._viewConfirm.render();
+    } else {
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._createError = new dialogClass("scrum_error");
+      this._createError.setTitle("Error Creating Sprints");
+      this._createError.setPreference("handler", this);
+      this._createError.render();
+    }
+  },
+  viewConfirmed: function() {
+    this._viewConfirm.destroy();
+    window.location = "rm_sprint_list.do?sysparm_query=numberIN" + this._sprints + "&sysparm_view=scrum";
+    return false;
+  },
+  viewCancelled: function() {
+    this._viewConfirm.destroy();
+    window.location.reload();
+    return false;
+  },
+  popCal: function(dateFieldId) {
+    return new GwtDateTimePicker(dateFieldId, g_user_date_time_format, true);
+  },
+  _validate: function() {
+    var valid = true;
+    this._prmErr = [];
+    if (this._prmVls["spName"] == "") {
+      this._prmErr.push("You must supply a Name");
+      valid = false;
+    }
+    if (this._prmVls["spDuration"] == "" || isNaN(this._prmVls['spDuration'])) {
+      this._prmErr.push("You must supply a valid numeric duration");
+      valid = false;
+    }
+    if (this._prmVls["spStartDate"] == "") {
+      this._prmErr.push("You must supply a Start Date");
+      valid = false;
+    }
+    if (this._prmVls["spNum"] == "" || isNaN(this._prmVls['spNum'])) {
+      this._prmErr.push("You must supply a valid Number of Sprints to create");
+      valid = false;
+    }
+    if (this._prmVls["spStartNum"] == "" || isNaN(this._prmVls['spStartNum'])) {
+      this._prmErr.push("You must supply a valid starting number");
+      valid = false;
+    }
+    return valid;
+  },
+  _readFormValues: function() {
+    for (var i = 0; i < this._prmNms.length; i++) {
+      var frmVl = this._getValue(this._prmNms[i]);
+      if ((typeof frmVl === "undefined") || frmVl == "undefined" || frmVl == null || frmVl == "null") {
+        frmVl = "";
+      }
+      this._prmVls[this._prmNms[i]] = frmVl;
+    }
+  },
+  _getValue: function(inptNm) {
+    return gel(inptNm).value;
+  },
+  type: "ScrumAddSprints"
+});
+/*! RESOURCE: UpdateSetPickerHeaderBar */
+addLoadEvent(moveUpdateSetPicker);
+
+function moveUpdateSetPicker() {
+  try {
+    if ($('navpage_header_control_button')) {
+      $('update_set_picker_select').className = '';
+      if ($('update_set_picker').select('li')[0]) {
+        $('update_set_picker').select('ul')[0].style.marginBottom = "0px";
+        $('update_set_picker').select('li')[0].className = '';
+        $('update_set_picker').select('li')[0].style.paddingRight = "5px";
+        $('update_set_picker').select('li')[0].style.listStyleType = "none";
+        $('update_set_picker').select('li')[0].select('a')[0].style.color = "#FFF";
+        $('update_set_picker').select('li')[0].select('a')[0].style.border = "none";
+        $('update_set_picker').select('li')[0].select('a')[1].style.color = "#FFF";
+        $('update_set_picker').select('li')[0].select('a')[1].style.border = "none";
+        $('update_set_picker').select('li')[0].select('a')[2].style.color = "#FFF";
+        $('update_set_picker').select('li')[0].select('a')[2].style.border = "none";
+        $('update_set_picker_select').style.color = "#000";
+        $$('.btn-icon').each(function(d) {
+          d.style.lineHeight = 'inherit';
+        });
+      }
+      if ($('update_set_picker').select('legend')[0]) {
+        $('update_set_picker').select('legend')[0].remove();
+      }
+      $('nav_header_stripe_decorations').insert({
+        top: $('update_set_picker')
+      });
+      $('update_set_picker').id = 'update_set_picker_new';
+    }
+  } catch (e) {}
+}
+/*! RESOURCE: ScrumCloneReleaseTeamDialog */
+var ScrumCloneReleaseTeamDialog = Class.create();
+ScrumCloneReleaseTeamDialog.prototype = {
+    initialize: function() {
+      this.setUpFacade();
+    },
+    setUpFacade: function() {
+      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+      this._mstrDlg = new dialogClass("task_window");
+      this._mstrDlg.setTitle(getMessage("Add Team Members"));
+      this._mstrDlg.setBody(this.getMarkUp(), false, false);
+    },
+    setUpEvents: function() {
+        var dialog = this._mstrDlg;
+        var _this = this;
         var okButton = $("ok");
         if (okButton) {
-          okButton.on("click", function() {
-            var mapData = {};
-            if (dialog.fillDataMap(mapData)) {
-              var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
-              for (var strKey in mapData) {
-                processor.addParam(strKey, mapData[strKey]);
-              }
-              dialog.showStatus(getMessage("Adding team members..."));
-              processor.getXML(function() {
-                dialog.refresh();
-                dialog._onCloseClicked();
-              });
-            } else {
-              dialog._onCloseClicked();
-            }
-          });
-        }
-        var cancelButton = $("cancel");
-        if (cancelButton) {
-          cancelButton.on("click", function() {
-            dialog._onCloseClicked();
-          });
-        }
-        var okNGButton = $("okNG");
-        if (okNGButton) {
-          okNGButton.on("click", function() {
-            dialog._onCloseClicked();
-          });
-        }
-        var cancelNGButton = $("cancelNG");
-        if (cancelNGButton) {
-          cancelNGButton.on("click", function() {
-            dialog._onCloseClicked();
-          });
-        }
-        var teamCombo = $("teamId");
-        if (teamCombo) {
-          teamCombo.on("change", function() {
-            dialog.updateMembers();
-          });
-        }
-      },
-      updateMembers: function() {
-          var arrMemberInfo = [];
-          var teamCombo = $("teamId");
-          if (teamCombo) {
-            var strTeamSysId = teamCombo.value;
-            var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
-            recTeamMember.addQuery("team", strTeamSysId);
-            recTeamMember.query();
-            while (recTeamMember.next()) {
-              var recSysUser = new GlideRecord("sys_user");
-              recSysUser.addQuery("sys_id", recTeamMember.name);
-              recSysUser.query();
-              var strName = recSysUser.next() ? recSysUser.name : "";
-              var strPoints = recTeamMember.default_sprint_points + "";
-              arrMemberInfo.push({
-                name: strName,
-                points: strPoints
-              });
-            }
-          }
-          if (arrMemberInfo.length > 0) {
-            var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
-              "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
-            for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
-              var strMemberName = arrMemberIn
+          okButton.on("

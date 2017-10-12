@@ -1,29 +1,30 @@
-/*! RESOURCE: /scripts/heisenberg/bootstrap/collapse.js */ + function($) {
-  'use strict';
-  var Collapse = function(element, options) {
-    this.$element = $(element)
-    this.options = $.extend({}, Collapse.DEFAULTS, options)
-    this.transitioning = null
-    if (this.options.parent) this.$parent = $(this.options.parent)
-    if (this.options.toggle) this.toggle()
-  }
-  Collapse.VERSION = '3.2.0'
-  Collapse.DEFAULTS = {
-    toggle: true
-  }
-  Collapse.prototype.dimension = function() {
-    var hasWidth = this.$element.hasClass('width')
-    return hasWidth ? 'width' : 'height'
-  }
-  Collapse.prototype.show = function() {
-    if (this.transitioning || this.$element.hasClass('in')) return
-    var startEvent = $.Event('show.bs.collapse')
-    this.$element.trigger(startEvent)
-    if (startEvent.isDefaultPrevented()) return
-    var actives = this.$parent && this.$parent.find('> .panel > .in')
-    if (actives && actives.length) {
-      var hasData = actives.data('bs.collapse')
-      if (hasData && hasData.transitioning) return
+/*! RESOURCE: /scripts/heisenberg/custom/collapse.js */
+(function($) {
+  "use strict";
+  var bsCollapse = $.fn.collapse;
+  $.fn.collapse = function(options) {
+    var $this = this;
+    $this.hideFix();
+    return bsCollapse.call($this, options);
+  };
+  $(document).on('click.bs.collapse.data-api', '[data-sn-toggle="collapse"]', function(e) {
+    var href
+    var $this = $(this)
+    var target = $this.attr('data-target') ||
+      e.preventDefault() ||
+      (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')
+    var $target = $(target)
+    var data = $target.data('bs.collapse')
+    var option = data ? 'toggle' : $this.data()
+    var parent = $this.attr('data-parent')
+    var $parent = parent && $(parent)
+    if (!data || !data.transitioning) {
+      if ($parent) $parent.find('[data-toggle="collapse"][data-parent="' + parent + '"]').not($this).addClass('collapsed')
+      $this[$target.hasClass('in') ? 'addClass' : 'removeClass']('collapsed')
+    }
+    $.fn.collapse.call($target, option)
+  });
+})(jQuery);;eturn
       Plugin.call(actives, 'hide')
       hasData || actives.data('bs.collapse', null)
     }

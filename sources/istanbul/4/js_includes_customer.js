@@ -969,12 +969,193 @@ addLoadEvent(function() {
 })(jQuery);
 /*! RESOURCE: AddMembersFromGroup */
 var AddMembersFromGroup = Class.create(GlideDialogWindow, {
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
+    this.setTitle(getMessage("Add Members From Group"));
+    this.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (dialog.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          dialog.showStatus(getMessage("Adding group users..."));
+          processor.getXML(function() {
+            dialog.refresh();
+            dialog._onCloseClicked();
+          });
+        } else {
+          dialog._onCloseClicked();
+        }
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenGroupSysIds: function() {
+    return $F('groupId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getRoleIds: function() {
+    var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
+    var arrRoleIds = [];
+    var record = new GlideRecord("sys_user_role");
+    record.addQuery("name", "IN", arrRoleNames.join(","));
+    record.query();
+    while (record.next())
+      arrRoleIds.push(record.sys_id + "");
+    return arrRoleIds;
+  },
+  hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
+    for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
+      if (arrScrumRoleSysIds[index] == "" + roleSysId)
+        return true;
+    var record = new GlideRecord("sys_user_role_contains");
+    record.addQuery("role", roleSysId);
+    record.query();
+    while (record.next())
+      if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
+        return true;
+    return false;
+  },
+  getGroupIds: function() {
+    var arrScrumRoleIds = this.getRoleIds();
+    var arrGroupIds = [];
+    var record = new GlideRecord("sys_group_has_role");
+    record.query();
+    while (record.next())
+      if (this.hasScrumRole(record.role, arrScrumRoleIds))
+        arrGroupIds.push(record.group + "");
+    return arrGroupIds;
+  },
+  getGroupInfo: function() {
+    var mapGroupInfo = {};
+    var arrRoleIds = this.getRoleIds();
+    var arrGroupIds = this.getGroupIds(arrRoleIds);
+    var record = new GlideRecord("sys_user_group");
+    record.addQuery("sys_id", "IN", arrGroupIds.join(","));
+    record.query();
+    while (record.next()) {
+      var strName = record.name + "";
+      var strSysId = record.sys_id + "";
+      mapGroupInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    return mapGroupInfo;
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getGroupInfo');
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapGroupInfo = {};
+    var groupData = response.responseXML.getElementsByTagName("group");
+    var strName, strSysId;
+    for (var i = 0; i < groupData.length; i++) {
+      strName = groupData[i].getAttribute("name");
+      strSysId = groupData[i].getAttribute("sysid");
+      mapGroupInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrGroupNames = [];
+    for (var strGroupName in mapGroupInfo) {
+      arrGroupNames.push(strGroupName + "");
+    }
+    arrGroupNames.sort();
+    var strMarkUp = "";
+    if (arrGroupNames.length > 0) {
+      var strTable = "<table><tr><td><label for='groupId'><select id='groupId'>";
+      for (var nSlot = 0; nSlot < arrGroupNames.length; ++nSlot) {
+        strName = arrGroupNames[nSlot];
+        strSysId = mapGroupInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></label></td></tr></table>";
+      strMarkUp = "<div id='task_controls'>" + strTable +
+        "<div style='text-align: right;'>" +
+        "<button id='ok' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></div></div>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No groups with scrum_user role found</p>" +
+        "<div style='text-align: right;'>" +
+        "<button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancelNG' type='button'>" + getMessage("Cancel") +
+        "</button></div></div>";
+    }
+    this.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+    this.setWidth(180);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenGroupSysId = this.getUserChosenGroupSysIds();
+    if (strChosenGroupSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_groups = strChosenGroupSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+/*! RESOURCE: isCMS */
+function isCMS() {
+  var url = document.URL.split('//')[1];
+  var start_pos = url.indexOf('/') + 1;
+  var end_pos = url.indexOf('/', start_pos);
+  var urlSuffix = url.substring(start_pos, end_pos);
+  return $$('.' + urlSuffix + '_site_container').length > 0;
+}
+/*! RESOURCE: AddTeamMembers */
+var AddTeamMembers = Class.create(GlideDialogWindow, {
       initialize: function() {
         this.setUpFacade();
       },
       setUpFacade: function() {
         GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-        this.setTitle(getMessage("Add Members From Group"));
+        this.setTitle(getMessage("Add Team Members"));
         this.setBody(this.getMarkUp(), false, false);
       },
       setUpEvents: function() {
@@ -984,11 +1165,11 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
           okButton.on("click", function() {
             var mapData = {};
             if (dialog.fillDataMap(mapData)) {
-              var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
+              var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
               for (var strKey in mapData) {
                 processor.addParam(strKey, mapData[strKey]);
               }
-              dialog.showStatus(getMessage("Adding group users..."));
+              dialog.showStatus(getMessage("Adding team members..."));
               processor.getXML(function() {
                 dialog.refresh();
                 dialog._onCloseClicked();
@@ -1016,97 +1197,24 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
             dialog._onCloseClicked();
           });
         }
-      },
-      refresh: function() {
-        GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
-      },
-      getScrumReleaseTeamSysId: function() {
-        return g_form.getUniqueValue() + "";
-      },
-      getUserChosenGroupSysIds: function() {
-        return $F('groupId') + "";
-      },
-      showStatus: function(strMessage) {
-        $("task_controls").update(strMessage);
-      },
-      display: function(bIsVisible) {
-        $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-      },
-      getRoleIds: function() {
-        var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
-        var arrRoleIds = [];
-        var record = new GlideRecord("sys_user_role");
-        record.addQuery("name", "IN", arrRoleNames.join(","));
-        record.query();
-        while (record.next())
-          arrRoleIds.push(record.sys_id + "");
-        return arrRoleIds;
-      },
-      hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
-        for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
-          if (arrScrumRoleSysIds[index] == "" + roleSysId)
-            return true;
-        var record = new GlideRecord("sys_user_role_contains");
-        record.addQuery("role", roleSysId);
-        record.query();
-        while (record.next())
-          if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
-            return true;
-        return false;
-      },
-      getGroupIds: function() {
-        var arrScrumRoleIds = this.getRoleIds();
-        var arrGroupIds = [];
-        var record = new GlideRecord("sys_group_has_role");
-        record.query();
-        while (record.next())
-          if (this.hasScrumRole(record.role, arrScrumRoleIds))
-            arrGroupIds.push(record.group + "");
-        return arrGroupIds;
-      },
-      getGroupInfo: function() {
-        var mapGroupInfo = {};
-        var arrRoleIds = this.getRoleIds();
-        var arrGroupIds = this.getGroupIds(arrRoleIds);
-        var record = new GlideRecord("sys_user_group");
-        record.addQuery("sys_id", "IN", arrGroupIds.join(","));
-        record.query();
-        while (record.next()) {
-          var strName = record.name + "";
-          var strSysId = record.sys_id + "";
-          mapGroupInfo[strName] = {
-            name: strName,
-            sysid: strSysId
-          };
+        var teamCombo = $("teamId");
+        if (teamCombo) {
+          teamCombo.on("change", function() {
+            dialog.updateMembers();
+          });
         }
-        return mapGroupInfo;
       },
-      getMarkUp: function() {
-        var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
-        groupAjax.addParam('sysparm_name', 'getGroupInfo');
-        groupAjax.getXML(this.generateMarkUp.bind(this));
-      },
-      generateMarkUp: function(response) {
-          var mapGroupInfo = {};
-          var groupData = response.responseXML.getElementsByTagName("group");
-          var strName, strSysId;
-          for (var i = 0; i < groupData.length; i++) {
-            strName = groupData[i].getAttribute("name");
-            strSysId = groupData[i].getAttribute("sysid");
-            mapGroupInfo[strName] = {
-              name: strName,
-              sysid: strSysId
-            };
-          }
-          var arrGroupNames = [];
-          for (var strGroupName in mapGroupInfo) {
-            arrGroupNames.push(strGroupName + "");
-          }
-          arrGroupNames.sort();
-          var strMarkUp = "";
-          if (arrGroupNames.length > 0) {
-            var strTable = "<table><tr><td><label for='groupId'><select id='groupId'>";
-            for (var nSlot = 0; nSlot < arrGroupNames.length; ++nSlot) {
-              strName = arrGroupNames[nSlot];
-              strSysId = mapGroupInfo[strName].sysid;
-              strTable += "<option value='" + strSysI
+      updateMembers: function() {
+          var arrMemberInfo = [];
+          var teamCombo = $("teamId");
+          if (teamCombo) {
+            var strTeamSysId = teamCombo.value;
+            var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+            recTeamMember.addQuery("team", strTeamSysId);
+            recTeamMember.query();
+            while (recTeamMember.next()) {
+              var recSysUser = new GlideRecord("sys_user");
+              recSysUser.addQuery("sys_id", recTeamMember.name);
+              recSysUser.query();
+              var strName = recSysUser.next() ? recSysUser.name : "";
+              var strPoint

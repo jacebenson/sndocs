@@ -1313,76 +1313,16 @@ angular.module("sn.common.stream").directive("snStream", function(getTemplateUrl
               }
             };
             $scope.parsePresence = function(sessionData) {
-              var status = sessionData.status;
-              var name = sessionData.user_display_name;
-              switch (status) {
-                case 'typing':
-                  return i18n.format(typing, name);
-                case 'viewing':
-                  return i18n.format(viewing, name);
-                case 'entered':
-                  return i18n.format(entered, name);
-                case 'probably left':
-                  return i18n.format(probablyLeft, name);
-                case 'exited':
-                  return i18n.format(exited, name);
-                case 'offline':
-                  return i18n.format(offline, name);
-                default:
-                  return '';
-              }
-            };
-            $scope.members = [];
-            $scope.members.loading = true;
-            var mentionMap = {};
-            $scope.selectAtMention = function(item) {
-              if (item.termLengthIsZero)
-                return (item.name || "") + "\n";
-              mentionMap[item.name] = item.sys_id;
-              return "@[" + item.name + "]";
-            };
-            var typingTimer;
-            $scope.searchMembersAsync = function(term) {
-              $scope.members = [];
-              $scope.members.loading = true;
-              $timeout.cancel(typingTimer);
-              if (term.length === 0) {
-                $scope.members = [{
-                  termLengthIsZero: true
-                }];
-                $scope.members.loading = false;
-              } else {
-                typingTimer = $timeout(function() {
-                  snMention.retrieveMembers($scope.table, $scope.sysId, term).then(function(members) {
-                    $scope.members = members;
-                    $scope.members.loading = false;
-                  }, function() {
-                    $scope.members = [{
-                      termLengthIsZero: true
-                    }];
-                    $scope.members.loading = false;
-                  });
-                }, 500);
-              }
-            };
-            $scope.expandMentions = function(text) {
-              return stream.expandMentions(text, mentionMap)
-            }
-            $scope.reduceMentions = function(text) {
-              if (!text)
-                return text;
-              var regexMentionParts = /[\w\d\s/\']+/gi;
-              text = text.replace(/@\[[\w\d\s]+:[\w\d\s/\']+\]/gi, function(mention) {
-                var mentionParts = mention.match(regexMentionParts);
-                if (mentionParts.length === 2) {
-                  var name = mentionParts[1];
-                  var userID = mentionParts[0];
-                  mentionMap[name] = userID;
-                  return "@[" + name + "]";
-                }
-                return mentionParts;
-              });
-              return text;
-            }
-            $scope.parseMentions = function(entry) {
-                var regexMentionParts = /[\w\d\s/\'
+                var status = sessionData.status;
+                var name = sessionData.user_display_name;
+                switch (status) {
+                  case 'typing':
+                    return i18n.format(typing, name);
+                  case 'viewing':
+                    return i18n.format(viewing, name);
+                  case 'entered':
+                    return i18n.format(entered, name);
+                  case 'probably left':
+                    return i18n.format(probablyLeft, name);
+                  case 'exited':
+                    return i18n.format(exited, nam

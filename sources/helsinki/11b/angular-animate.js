@@ -1177,490 +1177,91 @@
       ];
     }];
     var $$AnimateJsProvider = ['$animateProvider', function($animateProvider) {
-      this.$get = ['$injector', '$$AnimateRunner', '$$jqLite',
-        function($injector, $$AnimateRunner, $$jqLite) {
-          var applyAnimationClasses = applyAnimationClassesFactory($$jqLite);
-          return function(element, event, classes, options) {
-            var animationClosed = false;
-            if (arguments.length === 3 && isObject(classes)) {
-              options = classes;
-              classes = null;
-            }
-            options = prepareAnimationOptions(options);
-            if (!classes) {
-              classes = element.attr('class') || '';
-              if (options.addClass) {
-                classes += ' ' + options.addClass;
-              }
-              if (options.removeClass) {
-                classes += ' ' + options.removeClass;
-              }
-            }
-            var classesToAdd = options.addClass;
-            var classesToRemove = options.removeClass;
-            var animations = lookupAnimations(classes);
-            var before, after;
-            if (animations.length) {
-              var afterFn, beforeFn;
-              if (event == 'leave') {
-                beforeFn = 'leave';
-                afterFn = 'afterLeave';
-              } else {
-                beforeFn = 'before' + event.charAt(0).toUpperCase() + event.substr(1);
-                afterFn = event;
-              }
-              if (event !== 'enter' && event !== 'move') {
-                before = packageAnimations(element, event, options, animations, beforeFn);
-              }
-              after = packageAnimations(element, event, options, animations, afterFn);
-            }
-            if (!before && !after) return;
-
-            function applyOptions() {
-              options.domOperation();
-              applyAnimationClasses(element, options);
-            }
-
-            function close() {
-              animationClosed = true;
-              applyOptions();
-              applyAnimationStyles(element, options);
-            }
-            var runner;
-            return {
-              $$willAnimate: true,
-              end: function() {
-                if (runner) {
-                  runner.end();
-                } else {
-                  close();
-                  runner = new $$AnimateRunner();
-                  runner.complete(true);
-                }
-                return runner;
-              },
-              start: function() {
-                if (runner) {
-                  return runner;
-                }
-                runner = new $$AnimateRunner();
-                var closeActiveAnimations;
-                var chain = [];
-                if (before) {
-                  chain.push(function(fn) {
-                    closeActiveAnimations = before(fn);
-                  });
-                }
-                if (chain.length) {
-                  chain.push(function(fn) {
-                    applyOptions();
-                    fn(true);
-                  });
-                } else {
-                  applyOptions();
-                }
-                if (after) {
-                  chain.push(function(fn) {
-                    closeActiveAnimations = after(fn);
-                  });
-                }
-                runner.setHost({
-                  end: function() {
-                    endAnimations();
-                  },
-                  cancel: function() {
-                    endAnimations(true);
-                  }
-                });
-                $$AnimateRunner.chain(chain, onComplete);
-                return runner;
-
-                function onComplete(success) {
-                  close(success);
-                  runner.complete(success);
-                }
-
-                function endAnimations(cancelled) {
-                  if (!animationClosed) {
-                    (closeActiveAnimations || noop)(cancelled);
-                    onComplete(cancelled);
-                  }
-                }
-              }
-            };
-
-            function executeAnimationFn(fn, element, event, options, onDone) {
-              var args;
-              switch (event) {
-                case 'animate':
-                  args = [element, options.from, options.to, onDone];
-                  break;
-                case 'setClass':
-                  args = [element, classesToAdd, classesToRemove, onDone];
-                  break;
-                case 'addClass':
-                  args = [element, classesToAdd, onDone];
-                  break;
-                case 'removeClass':
-                  args = [element, classesToRemove, onDone];
-                  break;
-                default:
-                  args = [element, onDone];
-                  break;
-              }
-              args.push(options);
-              var value = fn.apply(fn, args);
-              if (value) {
-                if (isFunction(value.start)) {
-                  value = value.start();
-                }
-                if (value instanceof $$AnimateRunner) {
-                  value.done(onDone);
-                } else if (isFunction(value)) {
-                  return value;
-                }
-              }
-              return noop;
-            }
-
-            function groupEventedAnimations(element, event, options, animations, fnName) {
-              var operations = [];
-              forEach(animations, function(ani) {
-                var animation = ani[fnName];
-                if (!animation) return;
-                operations.push(function() {
-                  var runner;
-                  var endProgressCb;
-                  var resolved = false;
-                  var onAnimationComplete = function(rejected) {
-                    if (!resolved) {
-                      resolved = true;
-                      (endProgressCb || noop)(rejected);
-                      runner.complete(!rejected);
-                    }
-                  };
-                  runner = new $$AnimateRunner({
-                    end: function() {
-                      onAnimationComplete();
-                    },
-                    cancel: function() {
-                      onAnimationComplete(true);
-                    }
-                  });
-                  endProgressCb = executeAnimationFn(animation, element, event, options, function(result) {
-                    var cancelled = result === false;
-                    onAnimationComplete(cancelled);
-                  });
-                  return runner;
-                });
-              });
-              return operations;
-            }
-
-            function packageAnimations(element, event, options, animations, fnName) {
-              var operations = groupEventedAnimations(element, event, options, animations, fnName);
-              if (operations.length === 0) {
-                var a, b;
-                if (fnName === 'beforeSetClass') {
-                  a = groupEventedAnimations(element, 'removeClass', options, animations, 'beforeRemoveClass');
-                  b = groupEventedAnimations(element, 'addClass', options, animations, 'beforeAddClass');
-                } else if (fnName === 'setClass') {
-                  a = groupEventedAnimations(element, 'removeClass', options, animations, 'removeClass');
-                  b = groupEventedAnimations(element, 'addClass', options, animations, 'addClass');
-                }
-                if (a) {
-                  operations = operations.concat(a);
-                }
-                if (b) {
-                  operations = operations.concat(b);
-                }
-              }
-              if (operations.length === 0) return;
-              return function startAnimation(callback) {
-                var runners = [];
-                if (operations.length) {
-                  forEach(operations, function(animateFn) {
-                    runners.push(animateFn());
-                  });
-                }
-                runners.length ? $$AnimateRunner.all(runners, callback) : callback();
-                return function endFn(reject) {
-                  forEach(runners, function(runner) {
-                    reject ? runner.cancel() : runner.end();
-                  });
-                };
-              };
-            }
-          };
-
-          function lookupAnimations(classes) {
-            classes = isArray(classes) ? classes : classes.split(' ');
-            var matches = [],
-              flagMap = {};
-            for (var i = 0; i < classes.length; i++) {
-              var klass = classes[i],
-                animationFactory = $animateProvider.$$registeredAnimations[klass];
-              if (animationFactory && !flagMap[klass]) {
-                matches.push($injector.get(animationFactory));
-                flagMap[klass] = true;
-              }
-            }
-            return matches;
-          }
-        }
-      ];
-    }];
-    var $$AnimateJsDriverProvider = ['$$animationProvider', function($$animationProvider) {
-      $$animationProvider.drivers.push('$$animateJsDriver');
-      this.$get = ['$$animateJs', '$$AnimateRunner', function($$animateJs, $$AnimateRunner) {
-        return function initDriverFn(animationDetails) {
-          if (animationDetails.from && animationDetails.to) {
-            var fromAnimation = prepareAnimation(animationDetails.from);
-            var toAnimation = prepareAnimation(animationDetails.to);
-            if (!fromAnimation && !toAnimation) return;
-            return {
-              start: function() {
-                var animationRunners = [];
-                if (fromAnimation) {
-                  animationRunners.push(fromAnimation.start());
-                }
-                if (toAnimation) {
-                  animationRunners.push(toAnimation.start());
-                }
-                $$AnimateRunner.all(animationRunners, done);
-                var runner = new $$AnimateRunner({
-                  end: endFnFactory(),
-                  cancel: endFnFactory()
-                });
-                return runner;
-
-                function endFnFactory() {
-                  return function() {
-                    forEach(animationRunners, function(runner) {
-                      runner.end();
-                    });
-                  };
-                }
-
-                function done(status) {
-                  runner.complete(status);
-                }
-              }
-            };
-          } else {
-            return prepareAnimation(animationDetails);
-          }
-        };
-
-        function prepareAnimation(animationDetails) {
-          var element = animationDetails.element;
-          var event = animationDetails.event;
-          var options = animationDetails.options;
-          var classes = animationDetails.classes;
-          return $$animateJs(element, event, classes, options);
-        }
-      }];
-    }];
-    var NG_ANIMATE_ATTR_NAME = 'data-ng-animate';
-    var NG_ANIMATE_PIN_DATA = '$ngAnimatePin';
-    var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
-          var PRE_DIGEST_STATE = 1;
-          var RUNNING_STATE = 2;
-          var ONE_SPACE = ' ';
-          var rules = this.rules = {
-            skip: [],
-            cancel: [],
-            join: []
-          };
-
-          function makeTruthyCssClassMap(classString) {
-            if (!classString) {
-              return null;
-            }
-            var keys = classString.split(ONE_SPACE);
-            var map = Object.create(null);
-            forEach(keys, function(key) {
-              map[key] = true;
-            });
-            return map;
-          }
-
-          function hasMatchingClasses(newClassString, currentClassString) {
-            if (newClassString && currentClassString) {
-              var currentClassMap = makeTruthyCssClassMap(currentClassString);
-              return newClassString.split(ONE_SPACE).some(function(className) {
-                return currentClassMap[className];
-              });
-            }
-          }
-
-          function isAllowed(ruleType, element, currentAnimation, previousAnimation) {
-            return rules[ruleType].some(function(fn) {
-              return fn(element, currentAnimation, previousAnimation);
-            });
-          }
-
-          function hasAnimationClasses(animation, and) {
-            var a = (animation.addClass || '').length > 0;
-            var b = (animation.removeClass || '').length > 0;
-            return and ? a && b : a || b;
-          }
-          rules.join.push(function(element, newAnimation, currentAnimation) {
-            return !newAnimation.structural && hasAnimationClasses(newAnimation);
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return !newAnimation.structural && !hasAnimationClasses(newAnimation);
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.event == 'leave' && newAnimation.structural;
-          });
-          rules.skip.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.structural && currentAnimation.state === RUNNING_STATE && !newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.structural && newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-            return currentAnimation.state === RUNNING_STATE && newAnimation.structural;
-          });
-          rules.cancel.push(function(element, newAnimation, currentAnimation) {
-            if (currentAnimation.structural) return false;
-            var nA = newAnimation.addClass;
-            var nR = newAnimation.removeClass;
-            var cA = currentAnimation.addClass;
-            var cR = currentAnimation.removeClass;
-            if ((isUndefined(nA) && isUndefined(nR)) || (isUndefined(cA) && isUndefined(cR))) {
-              return false;
-            }
-            return hasMatchingClasses(nA, cR) || hasMatchingClasses(nR, cA);
-          });
-          this.$get = ['$$rAF', '$rootScope', '$rootElement', '$document', '$$HashMap',
-              '$$animation', '$$AnimateRunner', '$templateRequest', '$$jqLite', '$$forceReflow',
-              function($$rAF, $rootScope, $rootElement, $document, $$HashMap,
-                $$animation, $$AnimateRunner, $templateRequest, $$jqLite, $$forceReflow) {
-                var activeAnimationsLookup = new $$HashMap();
-                var disabledElementsLookup = new $$HashMap();
-                var animationsEnabled = null;
-
-                function postDigestTaskFactory() {
-                  var postDigestCalled = false;
-                  return function(fn) {
-                    if (postDigestCalled) {
-                      fn();
-                    } else {
-                      $rootScope.$$postDigest(function() {
-                        postDigestCalled = true;
-                        fn();
-                      });
-                    }
-                  };
-                }
-                var deregisterWatch = $rootScope.$watch(
-                  function() {
-                    return $templateRequest.totalPendingRequests === 0;
-                  },
-                  function(isEmpty) {
-                    if (!isEmpty) return;
-                    deregisterWatch();
-                    $rootScope.$$postDigest(function() {
-                      $rootScope.$$postDigest(function() {
-                        if (animationsEnabled === null) {
-                          animationsEnabled = true;
-                        }
-                      });
-                    });
-                  }
-                );
-                var callbackRegistry = {};
-                var classNameFilter = $animateProvider.classNameFilter();
-                var isAnimatableClassName = !classNameFilter ?
-                  function() {
-                    return true;
-                  } :
-                  function(className) {
-                    return classNameFilter.test(className);
-                  };
+          this.$get = ['$injector', '$$AnimateRunner', '$$jqLite',
+              function($injector, $$AnimateRunner, $$jqLite) {
                 var applyAnimationClasses = applyAnimationClassesFactory($$jqLite);
-
-                function normalizeAnimationDetails(element, animation) {
-                  return mergeAnimationDetails(element, animation, {});
-                }
-                var contains = Node.prototype.contains || function(arg) {
-                  return this === arg || !!(this.compareDocumentPosition(arg) & 16);
-                };
-
-                function findCallbacks(parent, element, event) {
-                  var targetNode = getDomNode(element);
-                  var targetParentNode = getDomNode(parent);
-                  var matches = [];
-                  var entries = callbackRegistry[event];
-                  if (entries) {
-                    forEach(entries, function(entry) {
-                      if (contains.call(entry.node, targetNode)) {
-                        matches.push(entry.callback);
-                      } else if (event === 'leave' && contains.call(entry.node, targetParentNode)) {
-                        matches.push(entry.callback);
-                      }
-                    });
-                  }
-                  return matches;
-                }
-                var $animate = {
-                  on: function(event, container, callback) {
-                    var node = extractElementNode(container);
-                    callbackRegistry[event] = callbackRegistry[event] || [];
-                    callbackRegistry[event].push({
-                      node: node,
-                      callback: callback
-                    });
-                    jqLite(container).on('$destroy', function() {
-                      $animate.off(event, container, callback);
-                    });
-                  },
-                  off: function(event, container, callback) {
-                    var entries = callbackRegistry[event];
-                    if (!entries) return;
-                    callbackRegistry[event] = arguments.length === 1 ?
-                      null :
-                      filterFromRegistry(entries, container, callback);
-
-                    function filterFromRegistry(list, matchContainer, matchCallback) {
-                      var containerNode = extractElementNode(matchContainer);
-                      return list.filter(function(entry) {
-                        var isMatch = entry.node === containerNode &&
-                          (!matchCallback || entry.callback === matchCallback);
-                        return !isMatch;
-                      });
+                return function(element, event, classes, options) {
+                    var animationClosed = false;
+                    if (arguments.length === 3 && isObject(classes)) {
+                      options = classes;
+                      classes = null;
                     }
-                  },
-                  pin: function(element, parentElement) {
-                    assertArg(isElement(element), 'element', 'not an element');
-                    assertArg(isElement(parentElement), 'parentElement', 'not an element');
-                    element.data(NG_ANIMATE_PIN_DATA, parentElement);
-                  },
-                  push: function(element, event, options, domOperation) {
-                    options = options || {};
-                    options.domOperation = domOperation;
-                    return queueAnimation(element, event, options);
-                  },
-                  enabled: function(element, bool) {
-                    var argCount = arguments.length;
-                    if (argCount === 0) {
-                      bool = !!animationsEnabled;
-                    } else {
-                      var hasElement = isElement(element);
-                      if (!hasElement) {
-                        bool = animationsEnabled = !!element;
+                    options = prepareAnimationOptions(options);
+                    if (!classes) {
+                      classes = element.attr('class') || '';
+                      if (options.addClass) {
+                        classes += ' ' + options.addClass;
+                      }
+                      if (options.removeClass) {
+                        classes += ' ' + options.removeClass;
+                      }
+                    }
+                    var classesToAdd = options.addClass;
+                    var classesToRemove = options.removeClass;
+                    var animations = lookupAnimations(classes);
+                    var before, after;
+                    if (animations.length) {
+                      var afterFn, beforeFn;
+                      if (event == 'leave') {
+                        beforeFn = 'leave';
+                        afterFn = 'afterLeave';
                       } else {
-                        var node = getDomNode(element);
-                        var recordExists = disabledElementsLookup.get(node);
-                        if (argCount === 1) {
-                          bool = !recordExists;
-                        } else {
-                          disabledElementsLookup.put(node, !bool);
-                        }
+                        beforeFn = 'before' + event.charAt(0).toUpperCase() + event.substr(1);
+                        afterFn = event;
                       }
+                      if (event !== 'enter' && event !== 'move') {
+                        before = packageAnimations(element, event, options, animations, beforeFn);
+                      }
+                      after = packageAnimations(element, event, options, animations, afterFn);
                     }
-                    return bool;
-                  }
-                }
+                    if (!before && !after) return;
+
+                    function applyOptions() {
+                      options.domOperation();
+                      applyAnimationClasses(element, options);
+                    }
+
+                    function close() {
+                      animationClosed = true;
+                      applyOptions();
+                      applyAnimationStyles(element, options);
+                    }
+                    var runner;
+                    return {
+                      $$willAnimate: true,
+                      end: function() {
+                        if (runner) {
+                          runner.end();
+                        } else {
+                          close();
+                          runner = new $$AnimateRunner();
+                          runner.complete(true);
+                        }
+                        return runner;
+                      },
+                      start: function() {
+                          if (runner) {
+                            return runner;
+                          }
+                          runner = new $$AnimateRunner();
+                          var closeActiveAnimations;
+                          var chain = [];
+                          if (before) {
+                            chain.push(function(fn) {
+                              closeActiveAnimations = before(fn);
+                            });
+                          }
+                          if (chain.length) {
+                            chain.push(function(fn) {
+                              applyOptions();
+                              fn(true);
+                            });
+                          } else {
+                            applyOptions();
+                          }
+                          if (after) {
+                            chain.push(function(fn) {
+                              closeActiveAnimations = after(fn);
+                            });
+                          }
+                          runner.set

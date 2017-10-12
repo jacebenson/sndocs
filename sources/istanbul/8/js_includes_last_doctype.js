@@ -6370,1140 +6370,229 @@ function setNodes(sName, array, request) {
 };
 /*! RESOURCE: /scripts/lib/glide_updates/prototype.effects.js */
 (function() {
-  var elemdisplay = {};
-  var rfxtypes = /^(?:toggle|show|hide)$/;
-  var ralpha = /alpha\([^)]*\)/i;
-  var rdigit = /\d/;
-  var ropacity = /opacity=([^)]*)/;
-  var rfxnum = /^([+\-]=)?([\d+.\-]+)(.*)$/;
-  var rnumpx = /^-?\d+(?:px)?$/i;
-  var rnum = /^-?\d/;
-  var timerId;
-  var fxAttrs = [
-    ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
-    ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
-    ["opacity"]
-  ];
-  var shrinkWrapBlocks = false;
-  var inlineBlockNeedsLayout = false;
-  var cssFloat = false;
-  var curCSS;
-  var opacitySupport;
-  document.observe("dom:loaded", function() {
-    var div = document.createElement("div");
-    div.style.width = div.style.paddingLeft = "1px";
-    document.body.appendChild(div);
-    if ("zoom" in div.style) {
-      div.style.display = "inline";
-      div.style.zoom = 1;
-      inlineBlockNeedsLayout = div.offsetWidth === 2;
-      div.style.display = "";
-      div.innerHTML = "<div style='width:4px;'></div>";
-      shrinkWrapBlocks = div.offsetWidth !== 2;
+    var elemdisplay = {};
+    var rfxtypes = /^(?:toggle|show|hide)$/;
+    var ralpha = /alpha\([^)]*\)/i;
+    var rdigit = /\d/;
+    var ropacity = /opacity=([^)]*)/;
+    var rfxnum = /^([+\-]=)?([\d+.\-]+)(.*)$/;
+    var rnumpx = /^-?\d+(?:px)?$/i;
+    var rnum = /^-?\d/;
+    var timerId;
+    var fxAttrs = [
+      ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+      ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+      ["opacity"]
+    ];
+    var shrinkWrapBlocks = false;
+    var inlineBlockNeedsLayout = false;
+    var cssFloat = false;
+    var curCSS;
+    var opacitySupport;
+    document.observe("dom:loaded", function() {
+      var div = document.createElement("div");
+      div.style.width = div.style.paddingLeft = "1px";
+      document.body.appendChild(div);
+      if ("zoom" in div.style) {
+        div.style.display = "inline";
+        div.style.zoom = 1;
+        inlineBlockNeedsLayout = div.offsetWidth === 2;
+        div.style.display = "";
+        div.innerHTML = "<div style='width:4px;'></div>";
+        shrinkWrapBlocks = div.offsetWidth !== 2;
+        document.body.removeChild(div);
+      }
+      div = document.createElement("div");
+      div.style.display = "none";
+      div.innerHTML = "<link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
+      document.body.appendChild(div);
+      var a = div.getElementsByTagName("a")[0];
+      opacitySupport = /^0.55$/.test(a.style.opacity);
+      cssFloat = !!a.style.cssFloat;
       document.body.removeChild(div);
-    }
-    div = document.createElement("div");
-    div.style.display = "none";
-    div.innerHTML = "<link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
-    document.body.appendChild(div);
-    var a = div.getElementsByTagName("a")[0];
-    opacitySupport = /^0.55$/.test(a.style.opacity);
-    cssFloat = !!a.style.cssFloat;
-    document.body.removeChild(div);
-    if (!opacitySupport) {
-      Prototype.cssHooks.opacity = {
-        get: function(elem, computed) {
-          return ropacity.test((computed && elem.currentStyle ? elem.currentStyle.filter : elem.style.filter) || "") ?
-            (parseFloat(RegExp.$1) / 100) + "" :
-            computed ? "1" : "";
-        },
-        set: function(elem, value) {
-          var style = elem.style;
-          style.zoom = 1;
-          var opacity = Prototype.isNaN(value) ?
-            "" :
-            "alpha(opacity=" + value * 100 + ")",
-            filter = style.filter || "";
-          style.filter = ralpha.test(filter) ?
-            filter.replace(ralpha, opacity) :
-            style.filter + ' ' + opacity;
+      if (!opacitySupport) {
+        Prototype.cssHooks.opacity = {
+          get: function(elem, computed) {
+            return ropacity.test((computed && elem.currentStyle ? elem.currentStyle.filter : elem.style.filter) || "") ?
+              (parseFloat(RegExp.$1) / 100) + "" :
+              computed ? "1" : "";
+          },
+          set: function(elem, value) {
+            var style = elem.style;
+            style.zoom = 1;
+            var opacity = Prototype.isNaN(value) ?
+              "" :
+              "alpha(opacity=" + value * 100 + ")",
+              filter = style.filter || "";
+            style.filter = ralpha.test(filter) ?
+              filter.replace(ralpha, opacity) :
+              style.filter + ' ' + opacity;
+          }
+        };
+      }
+    });
+    if (document.defaultView && document.defaultView.getComputedStyle) {
+      curCSS = function(elem, newName, name) {
+        var ret;
+        var defaultView;
+        var computedStyle;
+        name = name.replace(rupper, "-$1").toLowerCase();
+        if (!(defaultView = elem.ownerDocument.defaultView))
+          return undefined;
+        if ((computedStyle = defaultView.getComputedStyle(elem, null))) {
+          ret = computedStyle.getPropertyValue(name);
+          if (ret === "" && !contains(elem.ownerDocument.documentElement, elem))
+            ret = style(elem, name);
         }
+        return ret;
+      };
+    } else if (document.documentElement.currentStyle) {
+      curCSS = function(elem, name) {
+        var left;
+        var rsLeft;
+        var ret = elem.currentStyle && elem.currentStyle[name];
+        var style = elem.style;
+        if (!rnumpx.test(ret) && rnum.test(ret)) {
+          left = style.left;
+          rsLeft = elem.runtimeStyle.left;
+          elem.runtimeStyle.left = elem.currentStyle.left;
+          style.left = name === "fontSize" ? "1em" : (ret || 0);
+          ret = style.pixelLeft + "px";
+          style.left = left;
+          elem.runtimeStyle.left = rsLeft;
+        }
+        return ret === "" ? "auto" : ret;
       };
     }
-  });
-  if (document.defaultView && document.defaultView.getComputedStyle) {
-    curCSS = function(elem, newName, name) {
+
+    function contains(a, b) {
+      return document.compareDocumentPosition ? a.compareDocumentPosition(b) & 16 :
+        (a !== b && (a.contains ? a.contains(b) : true));
+    }
+
+    function style(elem, name, value, extra) {
+      if (!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)
+        return;
       var ret;
-      var defaultView;
-      var computedStyle;
-      name = name.replace(rupper, "-$1").toLowerCase();
-      if (!(defaultView = elem.ownerDocument.defaultView))
-        return undefined;
-      if ((computedStyle = defaultView.getComputedStyle(elem, null))) {
-        ret = computedStyle.getPropertyValue(name);
-        if (ret === "" && !contains(elem.ownerDocument.documentElement, elem))
-          ret = style(elem, name);
+      var origName = name.camelize();
+      var s = elem.style;
+      var hooks = Prototype.cssHooks[origName];
+      name = Prototype.cssProps[origName] || origName;
+      if (value !== undefined) {
+        if (typeof value === "number" && isNaN(value) || value == null)
+          return;
+        if (typeof value === "number" && !Prototype.cssNumber[origName])
+          value += "px";
+        if (!hooks || !("set" in hooks) || (value = hooks.set(elem, value)) !== undefined) {
+          try {
+            s[name] = value;
+          } catch (e) {}
+        }
+      } else {
+        if (hooks && "get" in hooks && (ret = hooks.get(elem, false, extra)) !== undefined)
+          return ret;
+        return s[name];
+      }
+    }
+
+    function isEmptyObject(obj) {
+      for (var name in obj)
+        return false;
+      return true;
+    }
+
+    function isWindow(obj) {
+      return obj && typeof obj === "object" && "setInterval" in obj;
+    }
+
+    function arrayMerge(first, second) {
+      var i = first.length;
+      var j = 0;
+      if (typeof second.length === "number") {
+        for (var l = second.length; j < l; j++)
+          first[i++] = second[j];
+      } else {
+        while (second[j] !== undefined)
+          first[i++] = second[j++];
+      }
+      first.length = i;
+      return first;
+    }
+
+    function makeArray(array) {
+      var ret = [];
+      if (array != null) {
+        var type = typeof array;
+        if (array.length == null || type === "string" || type === "function" || type === "regexp" || isWindow(array))
+          Array.prototype.push.call(ret, array);
+        else
+          arrayMerge(ret, array);
       }
       return ret;
-    };
-  } else if (document.documentElement.currentStyle) {
-    curCSS = function(elem, name) {
-      var left;
-      var rsLeft;
-      var ret = elem.currentStyle && elem.currentStyle[name];
-      var style = elem.style;
-      if (!rnumpx.test(ret) && rnum.test(ret)) {
-        left = style.left;
-        rsLeft = elem.runtimeStyle.left;
-        elem.runtimeStyle.left = elem.currentStyle.left;
-        style.left = name === "fontSize" ? "1em" : (ret || 0);
-        ret = style.pixelLeft + "px";
-        style.left = left;
-        elem.runtimeStyle.left = rsLeft;
-      }
-      return ret === "" ? "auto" : ret;
-    };
-  }
-
-  function contains(a, b) {
-    return document.compareDocumentPosition ? a.compareDocumentPosition(b) & 16 :
-      (a !== b && (a.contains ? a.contains(b) : true));
-  }
-
-  function style(elem, name, value, extra) {
-    if (!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)
-      return;
-    var ret;
-    var origName = name.camelize();
-    var s = elem.style;
-    var hooks = Prototype.cssHooks[origName];
-    name = Prototype.cssProps[origName] || origName;
-    if (value !== undefined) {
-      if (typeof value === "number" && isNaN(value) || value == null)
-        return;
-      if (typeof value === "number" && !Prototype.cssNumber[origName])
-        value += "px";
-      if (!hooks || !("set" in hooks) || (value = hooks.set(elem, value)) !== undefined) {
-        try {
-          s[name] = value;
-        } catch (e) {}
-      }
-    } else {
-      if (hooks && "get" in hooks && (ret = hooks.get(elem, false, extra)) !== undefined)
-        return ret;
-      return s[name];
     }
-  }
 
-  function isEmptyObject(obj) {
-    for (var name in obj)
-      return false;
-    return true;
-  }
-
-  function isWindow(obj) {
-    return obj && typeof obj === "object" && "setInterval" in obj;
-  }
-
-  function arrayMerge(first, second) {
-    var i = first.length;
-    var j = 0;
-    if (typeof second.length === "number") {
-      for (var l = second.length; j < l; j++)
-        first[i++] = second[j];
-    } else {
-      while (second[j] !== undefined)
-        first[i++] = second[j++];
+    function genFx(type, num) {
+      var obj = {};
+      fxAttrs.concat.apply([], fxAttrs.slice(0, num)).each(function(context) {
+        obj[context] = type;
+      });
+      return obj;
     }
-    first.length = i;
-    return first;
-  }
 
-  function makeArray(array) {
-    var ret = [];
-    if (array != null) {
-      var type = typeof array;
-      if (array.length == null || type === "string" || type === "function" || type === "regexp" || isWindow(array))
-        Array.prototype.push.call(ret, array);
-      else
-        arrayMerge(ret, array);
+    function defaultDisplay(nodeName) {
+      if (elemdisplay[nodeName])
+        return elemdisplay[nodeName];
+      var e = $(document.createElement(nodeName));
+      document.body.appendChild(e);
+      var display = e.getStyle("display");
+      e.remove();
+      if (display === "none" || display === "")
+        display = "block";
+      elemdisplay[nodeName] = display;
+      return display;
     }
-    return ret;
-  }
-
-  function genFx(type, num) {
-    var obj = {};
-    fxAttrs.concat.apply([], fxAttrs.slice(0, num)).each(function(context) {
-      obj[context] = type;
-    });
-    return obj;
-  }
-
-  function defaultDisplay(nodeName) {
-    if (elemdisplay[nodeName])
-      return elemdisplay[nodeName];
-    var e = $(document.createElement(nodeName));
-    document.body.appendChild(e);
-    var display = e.getStyle("display");
-    e.remove();
-    if (display === "none" || display === "")
-      display = "block";
-    elemdisplay[nodeName] = display;
-    return display;
-  }
-  Prototype.effects = {
-    speed: function(speed, easing, fn) {
-      var opt = speed && typeof speed === "object" ? Object.extend({}, speed) : {
-        complete: fn || !fn && easing || typeof speed == 'function' && speed,
-        duration: speed,
-        easing: fn && easing || easing && !(typeof easing == 'function') && easing
-      };
-      opt.duration = Prototype.effects.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
-        opt.duration in Prototype.effects.fx.speeds ? Prototype.effects.fx.speeds[opt.duration] : Prototype.effects.fx.speeds._default;
-      opt.old = opt.complete;
-      opt.complete = function() {
-        if (opt.queue !== false)
-          $(this).dequeue();
-        if (typeof opt.old == 'function')
-          opt.old.call(this);
-      };
-      return opt;
-    },
-    easing: {
-      linear: function(p, n, firstNum, diff) {
-        return firstNum + diff * p;
+    Prototype.effects = {
+      speed: function(speed, easing, fn) {
+        var opt = speed && typeof speed === "object" ? Object.extend({}, speed) : {
+          complete: fn || !fn && easing || typeof speed == 'function' && speed,
+          duration: speed,
+          easing: fn && easing || easing && !(typeof easing == 'function') && easing
+        };
+        opt.duration = Prototype.effects.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
+          opt.duration in Prototype.effects.fx.speeds ? Prototype.effects.fx.speeds[opt.duration] : Prototype.effects.fx.speeds._default;
+        opt.old = opt.complete;
+        opt.complete = function() {
+          if (opt.queue !== false)
+            $(this).dequeue();
+          if (typeof opt.old == 'function')
+            opt.old.call(this);
+        };
+        return opt;
       },
-      swing: function(p, n, firstNum, diff) {
-        return ((-Math.cos(p * Math.PI) / 2) + 0.5) * diff + firstNum;
-      }
-    },
-    timers: [],
-    fx: function(elem, options, prop) {
-      this.elem = elem;
-      this.options = options;
-      this.prop = prop;
-      if (!options.orig)
-        options.orig = {};
-    }
-  };
-  Prototype.effects.fx.prototype = {
-    update: function() {
-      if (this.options.step)
-        this.options.step.call(this.elem, this.now, this);
-      (Prototype.effects.fx.step[this.prop] || Prototype.effects.fx.step._default)(this);
-    },
-    cur: function() {
-      if (this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null))
-        return this.elem[this.prop];
-      var r = parseFloat(this.elem.getStyle(this.prop));
-      return r || 0;
-    },
-    custom: function(from, to, unit) {
-      var self = this;
-      var fx = Prototype.effects.fx;
-      this.startTime = new Date().getTime()
-      this.start = from;
-      this.end = to;
-      this.unit = unit || this.unit || "px";
-      this.now = this.start;
-      this.pos = this.state = 0;
-
-      function t(gotoEnd) {
-        return self.step(gotoEnd);
-      }
-      t.elem = this.elem;
-      if (t() && Prototype.effects.timers.push(t) && !timerId)
-        timerId = setInterval(fx.tick, fx.interval);
-    },
-    show: function() {
-      this.options.orig[this.prop] = style(this.elem, this.prop);
-      this.options.show = true;
-      this.custom(this.prop === "width" || this.prop === "height" ? 1 : 0, this.cur());
-      $(this.elem).show();
-    },
-    hide: function() {
-      this.options.orig[this.prop] = style(this.elem, this.prop);
-      this.options.hide = true;
-      this.custom(this.cur(), 0);
-    },
-    step: function(gotoEnd) {
-      var t = new Date().getTime();
-      var done = true;
-      if (gotoEnd || t >= this.options.duration + this.startTime) {
-        this.now = this.end;
-        this.pos = this.state = 1;
-        this.update();
-        this.options.curAnim[this.prop] = true;
-        for (var i in this.options.curAnim) {
-          if (this.options.curAnim[i] !== true)
-            done = false;
+      easing: {
+        linear: function(p, n, firstNum, diff) {
+          return firstNum + diff * p;
+        },
+        swing: function(p, n, firstNum, diff) {
+          return ((-Math.cos(p * Math.PI) / 2) + 0.5) * diff + firstNum;
         }
-        if (done) {
-          if (this.options.overflow != null && !shrinkWrapBlocks) {
-            var elem = this.elem;
-            var options = this.options;
-            var overflowArray = ["", "X", "Y"];
-            for (var ii = 0, ll = overflowArray.length; ii < ll; ii++)
-              elem.style["overflow" + overflowArray[ii]] = options.overflow[ii];
-          }
-          if (this.options.hide) {
-            $(this.elem).hide();
-            if (Prototype.Browser.IE)
-              $(this.elem).setStyle({
-                filter: ''
-              });
-          }
-          if (this.options.hide || this.options.show) {
-            for (var p in this.options.curAnim)
-              style(this.elem, p, this.options.orig[p]);
-          }
-          this.options.complete.call(this.elem);
-        }
-        return false;
-      } else {
-        var n = t - this.startTime;
-        this.state = n / this.options.duration;
-        var specialEasing = this.options.specialEasing && this.options.specialEasing[this.prop];
-        var defaultEasing = this.options.easing || (Prototype.effects.easing.swing ? "swing" : "linear");
-        this.pos = Prototype.effects.easing[specialEasing || defaultEasing](this.state, n, 0, 1, this.options.duration);
-        this.now = this.start + ((this.end - this.start) * this.pos);
-        this.update();
-      }
-      return true;
-    }
-  };
-  Object.extend(Prototype.effects.fx, {
-    tick: function() {
-      var timers = Prototype.effects.timers;
-      for (var i = 0; i < timers.length; i++) {
-        if (!timers[i]())
-          timers.splice(i--, 1);
-      }
-      if (!timers.length)
-        Prototype.effects.fx.stop();
-    },
-    interval: 13,
-    stop: function() {
-      clearInterval(timerId);
-      timerId = null;
-    },
-    speeds: {
-      slow: 600,
-      fast: 200,
-      _default: 400
-    },
-    step: {
-      opacity: function(fx) {
-        fx.elem.setStyle({
-          opacity: fx.now
-        });
       },
-      _default: function(fx) {
-        if (fx.elem.style && fx.elem.style[fx.prop] != null)
-          fx.elem.style[fx.prop] = (fx.prop === "width" || fx.prop === "height" ? Math.max(0, fx.now) : fx.now) + fx.unit;
-        else
-          fx.elem[fx.prop] = fx.now;
+      timers: [],
+      fx: function(elem, options, prop) {
+        this.elem = elem;
+        this.options = options;
+        this.prop = prop;
+        if (!options.orig)
+          options.orig = {};
       }
-    }
-  });
-  Object.extend(Prototype, {
-    isNaN: function(obj) {
-      return obj == null || !rdigit.test(obj) || isNaN(obj);
-    },
-    queue: function(elem, type, data) {
-      if (!elem)
-        return;
-      type = (type || "fx") + "queue";
-      var q = elem.retrieve(type);
-      if (!data)
-        return q || [];
-      if (!q || Object.isArray(data))
-        q = elem.store(type, makeArray(data));
-      else
-        q.push(data);
-      return q;
-    },
-    dequeue: function(elem, type) {
-      type = type || "fx";
-      var queue = Prototype.queue(elem, type);
-      var fn = queue.shift();
-      if (fn === "inprogress")
-        fn = queue.shift();
-      if (fn) {
-        if (type === "fx")
-          queue.unshift("inprogress");
-        fn.call(elem, function() {
-          Prototype.dequeue(elem, type);
-        });
-      }
-    },
-    cssHooks: {
-      opacity: {
-        get: function(elem, computed) {
-          if (computed) {
-            var ret = curCSS(elem, "opacity", "opacity");
-            return ret === "" ? "1" : ret;
-          }
-          return elem.style.opacity;
-        }
-      }
-    },
-    cssProps: {
-      "float": cssFloat ? "cssFloat" : "styleFloat"
-    },
-    cssNumber: {
-      "zIndex": true,
-      "fontWeight": true,
-      "opacity": true,
-      "zoom": true,
-      "lineHeight": true
-    }
-  });
-
-  function show(elem, speed, easing, callback) {
-    if (speed || speed === 0)
-      return animate(elem, genFx("show", 3), speed, easing, callback);
-    var display = elem.style.display;
-    if (!elem.retrieve("olddisplay") && display === "none")
-      display = elem.style.display = "";
-    if (display === "" && elem.getStyle("display") === "none")
-      elem.store("olddisplay", defaultDisplay(elem.nodeName));
-    display = elem.style.display;
-    if (display === "" || display === "none")
-      elem.style.display = elem.retrieve("olddisplay") || "";
-    return elem;
-  }
-
-  function hide(elem, speed, easing, callback) {
-    if (speed || speed === 0)
-      return animate(elem, genFx("hide", 3), speed, easing, callback);
-    var display = elem.getStyle('display');
-    if (display !== "none")
-      elem.store("olddisplay", elem.getStyle('display'));
-    elem.style.display = "none";
-    return elem;
-  }
-
-  function toggle(elem, fn, fn2, callback) {
-    var bool = typeof fn === "boolean";
-    if (typeof fn == 'function' && typeof fn2 == 'function')
-      toggle.apply(this, arguments);
-    else if (fn == null || bool) {
-      var state = bool ? fn : !elem.visible();
-      elem[state ? "show" : "hide"]();
-    } else
-      animate(elem, genFx("toggle", 3), fn, fn2, callback);
-    return elem;
-  }
-
-  function fadeTo(elem, speed, to, easing, callback) {
-    elem.setStyle({
-      opacity: 0
-    });
-    if (!elem.visible())
-      elem.show();
-    return animate(elem, {
-      opacity: to
-    }, speed, easing, callback);
-  }
-
-  function animate(elem, prop, speed, easing, callback) {
-    var optall = Prototype.effects.speed(speed, easing, callback);
-    if (isEmptyObject(prop))
-      return optall.complete;
-    return elem[optall.queue === false ? "_execute" : "queue"](function() {
-      var opt = Object.extend({}, optall);
-      var p;
-      var isElement = elem.nodeType === 1;
-      var hidden = isElement && !elem.visible();
-      for (p in prop) {
-        var name = p.camelize();
-        if (p !== name) {
-          prop[name] = prop[p];
-          delete prop[p];
-          p = name;
-        }
-        if (prop[p] === "hide" && hidden || prop[p] === "show" && !hidden)
-          return opt.complete.call(this);
-        if (isElement && (p === "height" || p === "width")) {
-          opt.overflow = [elem.style.overflow, elem.style.overflowX, elem.style.overflowY];
-          if (elem.getStyle("display") === "inline" && elem.getStyle("float") === "none") {
-            if (!inlineBlockNeedsLayout)
-              elem.style.display = "inline-block";
-            else {
-              var display = defaultDisplay(this.nodeName);
-              if (display === "inline")
-                elem.style.display = "inline-block";
-              else {
-                elem.style.display = "inline";
-                elem.style.zoom = 1;
-              }
-            }
-          }
-        }
-        if (Object.isArray(prop[p])) {
-          (opt.specialEasing = opt.specialEasing || {})[p] = prop[p][1];
-          prop[p] = prop[p][0];
-        }
-      }
-      if (opt.overflow != null)
-        elem.style.overflow = "hidden";
-      opt.curAnim = Object.extend({}, prop);
-      for (var i in prop) {
-        var name = i;
-        var val = prop[i];
-        var e = new Prototype.effects.fx(elem, opt, name);
-        if (rfxtypes.test(val)) {
-          e[val === "toggle" ? hidden ? "show" : "hide" : val](prop);
-        } else {
-          var parts = rfxnum.exec(val);
-          var start = e.cur() || 0;
-          if (parts) {
-            var end = parseFloat(parts[2]);
-            var unit = parts[3] || "px";
-            if (unit !== "px") {
-              style(elem, name, (end || 1) + unit);
-              start = ((end || 1) / e.cur()) * start;
-              style(name, start + unit);
-            }
-            if (parts[1])
-              end = ((parts[1] === "-=" ? -1 : 1) * end) + start;
-            e.custom(start, end, unit);
-          } else {
-            e.custom(start, val, "");
-          }
-        }
-      }
-      return true;
-    });
-  }
-
-  function stop(elem, clearQueue, gotoEnd) {
-    var timers = Prototype.effects.timers;
-    if (clearQueue)
-      elem.queue([]);
-    for (var i = timers.length - 1; i >= 0; i--) {
-      if (timers[i].elem === elem) {
-        if (gotoEnd) {
-          timers[i](true);
-        }
-        timers.splice(i, 1);
-      }
-    }
-    if (!gotoEnd)
-      elem.dequeue();
-    return elem;
-  }
-
-  function queue(elem, type, data) {
-    if (typeof type !== "string") {
-      data = type;
-      type = "fx";
-    }
-    if (data === undefined)
-      return Prototype.queue(elem, type);
-    var queue = Prototype.queue(elem, type, data);
-    if (type === "fx" && queue[0] !== "inprogress")
-      Prototype.dequeue(elem, type);
-    return elem;
-  }
-
-  function dequeue(elem, type) {
-    Prototype.dequeue(elem, type);
-    return elem;
-  }
-
-  function delay(elem, time, type) {
-    time = Prototype.effects.fx ? Prototype.effects.fx.speeds[time] || time : time;
-    type = type || "fx";
-    return elem.queue(type, function() {
-      setTimeout(function() {
-        Prototype.dequeue(elem, type);
-      }, time);
-    });
-  }
-
-  function clearQueue(elem, type) {
-    return elem.queue(type || "fx", []);
-  }
-  return Element.addMethods({
-    show: show,
-    hide: hide,
-    toggle: toggle,
-    fadeTo: fadeTo,
-    animate: animate,
-    slideDown: function(elem, speed, easing, callback) {
-      return animate(elem, genFx('show', 1), speed, easing, callback);
-    },
-    slideUp: function(elem, speed, easing, callback) {
-      return animate(elem, genFx('hide', 1), speed, easing, callback);
-    },
-    slideToggle: function(elem, speed, easing, callback) {
-      return animate(elem, genFx('toggle', 1), speed, easing, callback);
-    },
-    fadeIn: function(elem, speed, easing, callback) {
-      return animate(elem, {
-        opacity: 'show'
-      }, speed, easing, callback);
-    },
-    fadeOut: function(elem, speed, easing, callback) {
-      return animate(elem, {
-        opacity: 'hide'
-      }, speed, easing, callback);
-    },
-    fadeToggle: function(elem, speed, easing, callback) {
-      return animate(elem, {
-        opacity: 'toggle'
-      }, speed, easing, callback);
-    },
-    stop: stop,
-    queue: queue,
-    dequeue: dequeue,
-    delay: delay,
-    clearQueue: clearQueue,
-    _execute: function(elem, f) {
-      f();
-      return elem;
-    }
-  });
-}());;
-/*! RESOURCE: /scripts/classes/doctype/GlideModal.js */
-(function(global, $) {
-  "use strict";
-  var GlideModal = function() {
-    GlideModal.prototype.initialize.apply(this, arguments);
-  };
-  GlideModal.prototype = {
-    initialize: function(id, readOnly, width, height) {
-      this.preferences = {};
-      this.id = id;
-      this.readOnly = readOnly;
-      this.backdropStatic = false;
-      this.nologValue = false;
-      this.setDialog(id);
-      this.setSize(width, height);
-      this.setPreference('renderer', 'RenderForm');
-      this.setPreference('type', 'direct');
-    },
-    setDialog: function(dialogName) {
-      this.setPreference('table', dialogName);
-    },
-    setPreference: function(name, value) {
-      this.preferences[name] = value;
-    },
-    getPreference: function(name) {
-      return this.preferences[name];
-    },
-    setAutoFullHeight: function(isAutoFullHeight) {
-      this.isAutoFullHeight = isAutoFullHeight;
-    },
-    setSize: function(width) {
-      this.size = 'modal-md';
-      if (!width)
-        this.size = 'modal-md';
-      else if (typeof width == 'string' && width.indexOf('modal-') == 0)
-        this.size = width;
-      else if (width < 350)
-        this.size = 'modal-alert';
-      else if (width < 450)
-        this.size = 'modal-sm';
-      else if (width < 650)
-        this.size = 'modal-md';
-      else
-        this.size = 'modal-lg';
-    },
-    setWidth: function(width) {
-      this.setSize(width);
-    },
-    setTitle: function(title) {
-      this.title = title;
-    },
-    setBackdropStatic: function(makeStatic) {
-      this.backdropStatic = makeStatic;
-    },
-    setNologValue: function(nolog) {
-      this.nologValue = !!nolog;
-    },
-    updateTitle: function() {
-      $('.modal-title', this.$window).html(this.title);
-    },
-    updateSize: function() {
-      $('.modal-dialog', this.$window).attr('class', 'modal-dialog').addClass(this.size);
-    },
-    setFocus: function(el) {},
-    render: function() {
-      var description = this.getDescribingText();
-      var ajax = new GlideAjax("RenderInfo");
-      if (this.nologValue)
-        ajax.addParam("ni.nolog.sysparm_value", true);
-      ajax.addParam("sysparm_value", description);
-      ajax.addParam("sysparm_name", this.id);
-      ajax.getXML(this._renderFromAjax.bind(this));
-    },
-    switchView: function(newView) {
-      this.setPreferenceAndReload({
-        'sysparm_view': newView
-      });
-    },
-    setPreferenceAndReload: function(params) {
-      for (var key in params)
-        this.preferences[key] = params[key];
-      this.render();
-    },
-    _renderFromAjax: function(response) {
-      var xml = response.responseXML;
-      var newBody = xml.getElementsByTagName("html")[0];
-      xml = newBody.xml ? newBody.xml :
-        new XMLSerializer().serializeToString(newBody);
-      if (!xml)
-        return;
-      this.setPreferencesFromBody(response.responseXML);
-      this.setEscapedBody(xml);
-      this._evalScripts(xml);
-    },
-    maximizeHeight: function(callback) {
-      if (this.resizeTimeout)
-        clearTimeout(this.resizeTimeout);
-      var context = this;
-      this.resizeTimeout = setTimeout(function() {
-        var padding = 100;
-        var $modalBody = context.$modalContent.find('.modal-body');
-        var modalHeight = context.$modalContent.height();
-        var modalToolsHeight = modalHeight - $modalBody.height();
-        var newHeight = $(window).height() - padding - modalToolsHeight;
-        $modalBody.height(newHeight);
-        if (callback)
-          callback.apply(context);
-      }, 150);
-    },
-    renderWithContent: function(content) {
-      this._createModal();
-      if (typeof content == 'string')
-        $('.modal-body', this.$window)[0].innerHTML = content;
-      else
-        $('.modal-body', this.$window).html(content);
-      var self = this;
-      this.$window.on('show.bs.modal', function() {
-        self.isOpen = true;
-        self.$modalContent = self.$window.find('.modal-content');
-        if (self.isAutoFullHeight)
-          self.maximizeHeight();
-      }).on('hidden.bs.modal', function() {
-        self.isOpen = false;
-      });
-      this.$window.modal({
-        backdrop: this.readOnly || this.backdropStatic ? 'static' : undefined,
-        keyboard: !this.readOnly
-      });
-      this.fireEvent("bodyrendered", this);
-      _frameChanged();
-    },
-    renderIframe: function(url, onloadCallback) {
-      var loadingMessage = 'Loading...';
-      var div = document.createElement('div');
-      div.setAttribute('style', 'position: absolute; top: 2px; right: 2px; bottom: 2px; left: 2px;');
-      var loading = document.createElement('div');
-      loading.setAttribute('style', 'position: absolute; top: 10px; left: 10px;');
-      loading.setAttribute('class', 'loading');
-      if (loading.textContent)
-        loading.textContent = loadingMessage;
-      else
-        loading.innerText = loadingMessage;
-      var iframe = document.createElement('iframe');
-      iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white; visibility: hidden;');
-      iframe.src = url;
-      div.appendChild(loading);
-      div.appendChild(iframe);
-      var context = this;
-      this.on('bodyrendered', function() {
-        context.$modalContent.find('iframe').load(function(evt) {
-          context.$modalContent.find('.loading').hide();
-          iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white;');
-          if (onloadCallback && evt.target && evt.target.contentWindow)
-            onloadCallback.apply(evt.target.contentWindow);
-        });
-      });
-      this.renderWithContent(div);
-    },
-    _createModal: function() {
-      var template;
-      if (this.$window) {
-        this.updateTitle();
-        this.updateSize();
-        return;
-      }
-      if (this.template) {
-        template = this.template
-      } else {
-        template = getTemplate();
-      }
-      this._closeIdenticalModals();
-      var html = new Template(template).evaluate({
-        title: this.title,
-        id: this.id,
-        size: this.size,
-        readOnly: this.readOnly ? 'true' : 'false',
-        showHelp: this.showHelp ? 'true' : 'false'
-      });
-      var $modal = $(html);
-      $modal.data('gWindow', this);
-      this.$window = $modal;
-      $(document.body).append(this.$window);
-      this._watchForClose();
-      this._watchHelp();
-    },
-    _onWindowResize: function(context) {
-      return function() {
-        if (context.isOpen && context.isAutoFullHeight) {
-          context.maximizeHeight();
-        }
-      }
-    },
-    setEscapedBody: function(body) {
-      if (!body)
-        return;
-      body = body.replace(/\t/g, "");
-      body = body.replace(/\r/g, "");
-      body = body.replace(/\n+/g, "\n");
-      body = body.replace(/%27/g, "'");
-      body = body.replace(/%3c/g, "<");
-      body = body.replace(/%3e/g, ">");
-      body = body.replace(/&amp;/g, "&");
-      this.setBody(body, true);
-    },
-    setBody: function(html, noEvaluate) {
-      if (typeof html == 'string') {
-        html = this._substituteGet(html);
-        html = this._fixBrowserTags(html);
-        this.renderWithContent(html);
-        if (!noEvaluate)
-          this._evalScripts(html);
-      } else {
-        this.renderWithContent(html);
-      }
-    },
-    setPreferencesFromBody: function(xml) {
-      var prefs = xml.getElementsByTagName("renderpreference");
-      if (prefs.length > 0) {
-        for (var i = 0; i < prefs.length; i++) {
-          var pref = prefs[i];
-          var name = pref.getAttribute("name");
-          var valu = pref.getAttribute("value");
-          this.setPreference(name, valu);
-          if (name == "title")
-            this.setTitle(valu);
-          if (name == "render_title" && valu == "false")
-            this.setTitle("");
-        }
-      }
-    },
-    _substituteGet: function(html) {
-      if (!html)
-        return html;
-      var substitutions = [this.type(), 'GlideDialogWindow', 'GlideDialogForm'];
-      for (var i = 0; i < substitutions.length; i++) {
-        var reg = new RegExp(substitutions[i] + ".get\\(", "g");
-        html = html.replace(reg, this.type() + ".prototype.get('" + this.getID() + "'");
-      }
-      return html;
-    },
-    _fixBrowserTags: function(html) {
-      if (!html)
-        return html;
-      var tags = ["script", "a ", "div", "span", "select"];
-      for (var i = 0; i < tags.length; i++) {
-        var tag = tags[i];
-        html = html.replace(new RegExp('<' + tag + '([^>]*?)/>', 'img'), '<' + tag + '$1></' + tag + '>');
-      }
-      return html;
-    },
-    _evalScripts: function(html) {
-      html = this._substituteGet(html, this.type());
-      var x = loadXML("<xml>" + html + "</xml>");
-      if (x) {
-        var scripts = x.getElementsByTagName("script");
-        for (var i = 0; i < scripts.length; i++) {
-          var script = scripts[i];
-          var s = "";
-          if (script.getAttribute("type") == "application/xml")
-            continue;
-          if (script.getAttribute("src")) {
-            var url = script.getAttribute("src");
-            var req = serverRequestWait(url);
-            s = req.responseText;
-          } else {
-            s = getTextValue(script);
-            if (!s)
-              s = script.innerHTML;
-          }
-          if (s)
-            evalScript(s, true);
-        }
-      }
-      if (!window.G_vmlCanvasManager)
-        return;
-      window.G_vmlCanvasManager.init_(document)
-    },
-    getID: function() {
-      return this.id;
-    },
-    getPreferences: function() {
-      return this.preferences;
-    },
-    getDescribingXML: function() {
-      var section = document.createElement("section");
-      section.setAttribute("name", this.getID());
-      var preferences = this.getPreferences();
-      for (var name in preferences) {
-        if (!preferences.hasOwnProperty(name))
-          continue;
-        var p = document.createElement("preference");
-        var v = preferences[name];
-        p.setAttribute("name", name);
-        if (v !== null && typeof v == 'object') {
-          if (typeof v.join == "function") {
-            v = v.join(",");
-          } else if (typeof v.toString == "function") {
-            v = v.toString();
-          }
-        }
-        if (v && typeof v.escapeHTML === "function")
-          v = v.escapeHTML();
-        if (v)
-          p.setAttribute("value", v);
-        section.appendChild(p);
-      }
-      return section;
-    },
-    getDescribingText: function() {
-      var gxml = document.createElement("gxml");
-      var x = this.getDescribingXML();
-      gxml.appendChild(x);
-      return gxml.innerHTML;
-    },
-    destroy: function() {
-      if (!this.fireEvent('closeconfirm', this))
-        return;
-      if (this.$window)
-        this.$window.modal('hide');
-    },
-    _removeWindow: function() {
-      this.fireEvent('beforeclose', this);
-      this.$window.remove();
-    },
-    get: function(id) {
-      if (!id)
-        return this;
-      var win = document.getElementById(id);
-      if (!win)
-        return this;
-      return $(win).data('gWindow');
-    },
-    _watchForClose: function() {
-      this.$window.on('click', '[data-dismiss=GlideModal]', function() {
-        this.destroy();
-      }.bind(this));
-      this.$window.on('hidden.bs.modal', function() {
-        this._removeWindow(true);
-      }.bind(this));
-    },
-    _watchHelp: function() {
-      this.$window.on('click', '.help', function() {
-        if (this._helpCallback)
-          this._helpCallback.call();
-      }.bind(this));
-    },
-    on: function(evtName, callbackFn) {
-      if (!this._events)
-        this._events = {};
-      if (!this._events[evtName])
-        this._events[evtName] = [];
-      this._events[evtName].push(callbackFn);
-    },
-    fireEvent: function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      var evtName = args.shift();
-      if (!this._events || !this._events[evtName])
-        return true;
-      for (var i = 0; i < this._events[evtName].length; i++) {
-        var ev = this._events[evtName][i];
-        if (!ev)
-          continue;
-        if (ev.apply(this, args) === false)
-          return false;
-      }
-      return true;
-    },
-    _closeIdenticalModals: function() {
-      var $existingModal = $('#' + this.id).data('gWindow');
-      if (!$existingModal)
-        return;
-      $existingModal.destroy();
-    },
-    addDecoration: function(decorationElement, leftSide) {},
-    addFunctionDecoration: function(imgSrc, imgAlt, func, side) {
-      if (imgSrc == 'images/help.gif')
-        this.addHelpDecoration(func);
-    },
-    addHelpDecoration: function(func) {
-      this.showHelp = true;
-      this._helpCallback = func;
-    },
-    type: function() {
-      return "GlideModal";
-    }
-  };
-
-  function getTemplate() {
-    return '<div id="#{HTML:id}" tabindex="-1" ' +
-      'aria-hidden="true" class="modal" role="dialog" ' +
-      'aria-labelledby="#{HTML:id}_title" data-readonly="#{HTML:readOnly}" data-has-help="#{HTML:showHelp}">' +
-      '	<div class="modal-dialog #{size}">' +
-      '		<div class="modal-content">' +
-      '			<header class="modal-header">' +
-      '				<button data-dismiss="GlideModal" class="btn btn-icon close icon-cross">' +
-      '					<span class="sr-only">Close</span>' +
-      '				</button>' +
-      '			<h4 id="#{HTML:id}_title" class="modal-title">' +
-      '				#{HTML:title}' +
-      '			<button class="btn btn-icon icon-help help">' +
-      '				<span class="sr-only">Help</span>' +
-      '			</button>' +
-      '			</h4>' +
-      '			</header>' +
-      '			<div class="modal-body container-fluid"></div>' +
-      '		</div>' +
-      '	</div>' +
-      '</div>';
-  }
-  global.GlideModal = GlideModal;
-})(window, jQuery);;
-/*! RESOURCE: /scripts/classes/doctype/GlideModalForm.js */
-(function(global, $) {
-  "use strict";
-  var GlideModalForm = function() {
-    GlideModalForm.prototype.init.apply(this, arguments);
-  };
-  GlideModalForm.prototype = $.extend({}, GlideModal.prototype, {
-    IGNORED_PREFERENCES: {
-      'renderer': true,
-      'type': true,
-      'table': true
-    },
-    init: function(title, tableName, onCompletionCallback, readOnly) {
-      this.initialize.call(this, tableName, readOnly, 800);
-      this.tableName = tableName;
-      if (title) {
-        this.setTitle(title);
-      }
-      if (onCompletionCallback) {
-        this.setCompletionCallback(onCompletionCallback);
-      }
-    },
-    setSize: function(width) {
-      this.size = 'modal-95';
-    },
-    setFooter: function(bool) {
-      this.hasFooter = !!bool;
-    },
-    setSysID: function(id) {
-      this.setPreference('sys_id', id);
-    },
-    setType: function(type) {
-      this.setPreference('type', type);
-    },
-    setTemplate: function(template) {
-      this.template = template;
-    },
-    setCompletionCallback: function(func) {
-      this.onCompletionFunc = func;
-    },
-    setOnloadCallback: function(func) {
-      this.onFormLoad = func;
-    },
-    render: function() {
-      this._createModal();
-      var body = $('.modal-body', this.$window)[0];
-      body.innerHTML = getFormTemplate();
-      var frame = $('.modal-frame', this.$window);
-      frame.on('load', function() {
-        this._formLoaded();
-      }.bind(this));
-      this.$window.modal({
-        backdrop: 'static'
-      });
-      this._bodyHeight = $('#' + this.id)[0].getHeight();
-      var margin = $('.modal-dialog', this.$window)[0].offsetTop * 2;
-      margin += frame.offset().top;
-      if (this._bodyHeight > margin)
-        this._bodyHeight -= margin;
-      if (this.hasFooter) {
-        this._bodyHeight = this._bodyHeight - 40;
-      }
-      frame.css('height', this._bodyHeight);
-      var $doc = frame[0].contentWindow ? frame[0].contentWindow.document : frame[0].contentDocument;
-      var $body = $($doc.body);
-      $body.html('');
-      $body.append($('link').clone());
-      $body.append('<center>' + getMessage('Loading') + '... <br/><img src="images/ajax-loader.gifx"/></center></span>');
-      var f = $('.modal_dialog_form_poster', this.$window)[0];
-      f.action = this.getPreference('table') + '.do';
-      addHidden(f, 'sysparm_clear_stack', 'true');
-      addHidden(f, 'sysparm_nameofstack', 'formDialog');
-      addHidden(f, 'sysparm_titleless', 'true');
-      addHidden(f, 'sysparm_is_dialog_form', 'true');
-      var sysId = this.getPreference('sys_id');
-      if (!sysId)
-        sysId = '';
-      addHidden(f, 'sys_id', sysId);
-      var targetField = '';
-      if (this.fieldIDSet)
-        targetField = this.getPreference('sysparm_target_field');
-      for (var id in this.preferences) {
-        if (!this.IGNORED_PREFERENCES[id])
-          addHidden(f, id, this.preferences[id]);
-      }
-      var parms = [];
-      parms.push('sysparm_skipmsgs=true');
-      parms.push('sysparm_nostack=true');
-      parms.push('sysparm_target_field=' + targetField);
-      parms.push('sysparm_returned_action=$action');
-      parms.push('sysparm_returned_sysid=$sys_id');
-      parms.push('sysparm_returned_value=$display_value');
-      addHidden(f, 'sysparm_goto_url', 'modal_dialog_form_response.do?' + parms.join('&'));
-      f.submit();
-    },
-    switchView: function(newView) {
-      this.setPreferenceAndReload({
-        'sysparm_view': newView
-      });
-    },
-    setPreferenceAndReload: function(params) {
-      for (var key in params)
-        this.preferences[key] = params[key];
-      this.render();
-    },
-    _formLoaded: function() {
-      var frame = $('.modal-frame', this.$window);
-      if (frame.contents().get(0).location.href.indexOf('modal_dialog_form_response') != -1) {
-        if (this.onCompletionFunc) {
-          var f = $('.modal_dialog_form_response form', frame.contents())[0];
-          this.onCompletionFunc(f.action.value, f.sysid.value, this.tableName, f.value.value);
-        }
-        this.destroy();
-        return;
-      }
-      if (this.onFormLoad)
-        this.onFormLoad(this);
-    },
-    addParm: function(k, v) {
-      this.setPreference(k, v);
-    }
-  });
-
-  function getFormTemplate() {
-    return '<form class="modal_dialog_form_poster" target="dialog_frame" method="POST" style="display: inline;"/>' +
-      '<iframe id="dialog_frame" name="dialog_frame" class="modal-frame" style="width:100%;height:100%;" frameborder="no" />';
-  }
-  global.GlideModalForm = GlideModalForm;
-})(window, jQuery);;;
+    };
+    Prototype.effects.fx.prototype = {
+        update: function() {
+          if (this.options.step)
+            this.options.step.call(this.elem, this.now, this);
+          (Prototype.effects.fx.step[this.prop] || Prototype.effects.fx.step._default)(this);
+        },
+        cur: function() {
+            if (this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null))
+              return this.elem[this.prop];
+            var r = parseFloat(

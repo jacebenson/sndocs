@@ -1741,40 +1741,4 @@ org.cometd.Cometd = function(name) {
       }
       return result;
     };
-    this.getTransportTypes = function() {
-      return _transports.getTransportTypes();
-    };
-    this.unregisterTransport = function(type) {
-      var transport = _transports.remove(type);
-      if (transport !== null) {
-        this._debug('Unregistered transport', type);
-        if (_isFunction(transport.unregistered)) {
-          transport.unregistered();
-        }
-      }
-      return transport;
-    };
-    this.unregisterTransports = function() {
-      _transports.clear();
-    };
-    this.findTransport = function(name) {
-      return _transports.find(name);
-    };
-    this.configure = function(configuration) {
-      _configure.call(this, configuration);
-    };
-    this.init = function(configuration, handshakeProps) {
-      this.configure(configuration);
-      this.handshake(handshakeProps);
-    };
-    this.handshake = function(handshakeProps, handshakeCallback) {
-      _setStatus('disconnected');
-      _reestablish = false;
-      _handshake(handshakeProps, handshakeCallback);
-    };
-    this.disconnect = function(sync, disconnectProps, disconnectCallback) {
-        if (_isDisconnected()) {
-          return;
-        }
-        if (typeof sync !== 'boolean') {
-          disconnec
+    this.getTransportTypes =

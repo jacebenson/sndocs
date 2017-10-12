@@ -1385,4 +1385,231 @@ angular.module("sn.common.stream").directive("snStream", function(getTemplateUrl
               return text;
             }
             $scope.parseMentions = function(entry) {
-                var regexMentionParts = /[\w\d\s/\'
+              var regexMentionParts = /[\w\d\s/\']+/gi;
+              entry = entry.replace(/@\[[\w\d\s]+:[\w\d\s/\']+\]/gi, function(mention) {
+                var mentionParts = mention.match(regexMentionParts);
+                if (mentionParts.length === 2) {
+                  return '<a class="at-mention at-mention-user-' + mentionParts[0] + '">@' + mentionParts[1] + '</a>';
+                }
+                return mentionParts;
+              });
+              return entry;
+            };
+            $scope.parseLinks = function(text) {
+              var regexLinks = /@L\[([^|]+?)\|([^\]]*)]/gi;
+              return text.replace(regexLinks, "<a href='$1' target='_blank'>$2</a>");
+            };
+            $scope.parseSpecial = function(text) {
+              var parsedText = $scope.parseLinks($sanitize(text));
+              parsedText = $scope.parseMentions(parsedText);
+              return $sce.trustAsHtml(parsedText);
+            };
+            $scope.getFullEntryValue = function(entry, event) {
+              event.stopPropagation();
+              var index = getEntryIndex(entry);
+              var journal = $scope.entries[index].entries.journal[0];
+              journal.loading = true;
+              $http.get('/api/now/ui/stream_entry/full_entry', {
+                params: {
+                  sysparm_sys_id: journal.sys_id
+                }
+              }).then(function(response) {
+                journal.new_value = response.data.result.replace(/\n/g, '<br/>');
+                journal.is_truncated = false;
+                journal.loading = false;
+                journal.showMore = true;
+              });
+            };
+
+            function getEntryIndex(entry) {
+              for (var i = 0, l = $scope.entries.length; i < l; i++) {
+                if (entry === $scope.entries[i]) {
+                  return i;
+                }
+              }
+            }
+            $scope.$watch('active', function(n, o) {
+              if (n === o)
+                return;
+              if ($scope.active)
+                startPolling();
+              else
+                cancelStream();
+            });
+            $scope.defaultControls = {
+              getTitle: function(entry) {
+                if (entry && entry.short_description) {
+                  return entry.short_description;
+                } else if (entry && entry.shortDescription) {
+                  return entry.shortDescription;
+                }
+              },
+              showCreatedBy: function() {
+                return true;
+              },
+              hideCommentLabel: function(journal) {
+                return false;
+              },
+              showRecord: function($event, entry) {},
+              showRecordLink: function() {
+                return true;
+              }
+            };
+            if ($scope.controls) {
+              for (var attr in $scope.controls) {
+                $scope.defaultControls[attr] = $scope.controls[attr];
+              }
+            }
+            $scope.controls = $scope.defaultControls;
+            if ($scope.showCommentsAndWorkNotes === undefined) {
+              $scope.showCommentsAndWorkNotes = $scope.defaultShowCommentsAndWorkNotes;
+            }
+            snCustomEvent.observe('sn.stream.change_input_display', function(table, display) {
+              if (table != $scope.table)
+                return;
+              $scope.showCommentsAndWorkNotes = display;
+              $scope.$apply();
+            });
+            $scope.$on("$destroy", function() {
+              cancelStream();
+            });
+            $scope.$on('sn.stream.interval', function($event, time) {
+              interval = time;
+              reschedulePoll();
+            });
+            $scope.$on("sn.stream.tap", function() {
+              if (stream)
+                stream.tap();
+              else
+                startPolling();
+            });
+            $scope.$on('window_visibility_change', function($event, hidden) {
+              interval = (hidden) ? 120000 : undefined;
+              reschedulePoll();
+            });
+            $scope.$on("sn.stream.refresh", function(event, data) {
+              stream._successCallback(data.response);
+            });
+            $scope.$on("sn.stream.reload", function() {
+              startPolling();
+            });
+            $scope.$on('sn.stream.input_value', function(otherScope, value) {
+              $scope.inputTypeValue = value;
+            });
+            $scope.$watchCollection('[table, query, sysId]', startPolling);
+            $scope.changeInputType = function(field) {
+              $scope.inputType = field.checked ? field.name : primaryJournalField;
+              userPreferences.setPreference('glide.ui.' + $scope.table + '.stream_input', $scope.inputType);
+            };
+            $scope.$watch('inputType', function() {
+              if (!$scope.inputType || !$scope.preferredInput)
+                return;
+              $scope.preferredInput = $scope.inputType;
+            });
+            $scope.submitCheck = function(event) {
+              var key = event.keyCode || event.which;
+              if (key === 13) {
+                $scope.postJournalEntryForCurrent(event);
+              }
+            };
+            $scope.postJournalEntry = function(type, entry, event) {
+              type = type || primaryJournalFieldOrder[0];
+              event.stopPropagation();
+              var requestTable = $scope.table || "board:" + $scope.board.sys_id;
+              stream.insertForEntry(type, entry.journalText, requestTable, entry.document_id);
+              entry.journalText = "";
+              entry.commentBoxVisible = false;
+              snRecordPresence.termPresence();
+            };
+            $scope.postJournalEntryForCurrent = function(event) {
+              event.stopPropagation();
+              var entries = [];
+              if ($scope.multipleInputs) {
+                angular.forEach($scope.fields, function(item) {
+                  if (!item.value)
+                    return;
+                  entries.push({
+                    field: item.name,
+                    text: item.value
+                  });
+                })
+              } else {
+                entries.push({
+                  field: $scope.inputType,
+                  text: $scope.inputTypeValue
+                })
+              }
+              var request = stream.insertEntries(entries, $scope.table, $scope.sysId, mentionMap);
+              if (request) {
+                request.then(function() {
+                  for (var i = 0; i < entries.length; i++) {
+                    fireInsertEvent(entries[i].field, entries[i].text);
+                  }
+                });
+              }
+              clearInputs();
+              return false;
+            };
+
+            function fireInsertEvent(name, value) {
+              snCustomEvent.fire('sn.stream.insert', name, value);
+            }
+
+            function clearInputs() {
+              $scope.inputTypeValue = "";
+              angular.forEach($scope.fields, function(item) {
+                if (item.value)
+                  item.filled = true;
+                item.value = "";
+              });
+            }
+            $scope.showCommentBox = function(entry, event) {
+              event.stopPropagation();
+              if (entry !== $scope.selectedEntry)
+                $scope.closeEntry();
+              $scope.selectedEntry = entry;
+              entry.commentBoxVisible = !entry.commentBoxVisible;
+              if (entry.commentBoxVisible) {
+                snRecordPresence.initPresence($scope.table, entry.document_id);
+              }
+            };
+            $scope.showMore = function(journal, event) {
+              event.stopPropagation();
+              journal.showMore = true;
+            };
+            $scope.showLess = function(journal, event) {
+              event.stopPropagation();
+              journal.showMore = false;
+            };
+            $scope.closeEntry = function() {
+              if ($scope.selectedEntry)
+                $scope.selectedEntry.commentBoxVisible = false;
+            };
+            $scope.previewAttachment = function(evt, attachmentUrl) {
+              snCustomEvent.fire('sn.attachment.preview', evt, attachmentUrl);
+            }
+            $scope.$on('sn.sessions', function(someOtherScope, sessions) {
+              if ($scope.selectedEntry && $scope.selectedEntry.commentBoxVisible)
+                $scope.selectedEntry.sessions = sessions;
+            });
+            $scope.$watch("inputTypeValue", function() {
+              emitTyping($scope.inputTypeValue);
+            });
+            $scope.$watch("selectedEntry.journalText", function(newValue) {
+              if ($scope.selectedEntry)
+                emitTyping(newValue || "");
+            });
+            $scope.$watch('useMultipleInputs', function() {
+              setMultipleInputs();
+            });
+
+            function emitTyping(inputValue) {
+              var status = inputValue.length ? "typing" : "viewing";
+              $scope.$emit("record.typing", {
+                status: status,
+                value: inputValue,
+                table: $scope.table,
+                sys_id: $scope.sys_id
+              });
+            }
+            f

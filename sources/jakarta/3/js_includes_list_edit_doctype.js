@@ -4272,92 +4272,1077 @@ var GwtListEditGList = Class.create({
 });;
 /*! RESOURCE: /scripts/GwtListEditGlideRecord.js */
 var GwtListEditGlideRecord = Class.create({
-      initialized: false,
-      initialize: function(changes, tableController, renderer) {
-        this.changes = changes;
-        this.tableController = tableController;
-        this.renderer = renderer;
-        this.currentRow = -1;
-        this.sysIds = [];
-        this.displayValues = {};
-        if (!this.initialized)
-          this._setIgnoreNames();
-        else
-          this._clearValues();
-        this.initialized = true;
-      },
-      addQuery: function() {
-        alert('GwtListEditGlideRecord.addQuery is not currently supported');
-      },
-      getEncodedQuery: function() {
-        alert('GwtListEditGlideRecord.addQuery is not currently supported');
-      },
-      deleteRecord: function() {
-        var sysId = this._getRowSysId();
-        if (!sysId)
-          return;
-        if (this.changes.isDeletedRow(sysId))
-          return;
-        this.renderer.deleteRowToggle(sysId);
-      },
-      get: function(sysId) {
-        var rec = this.changes.get(sysId);
-        if (rec) {
-          this.currentRow = 0;
-          this.sysIds = [sysId];
-          return true;
-        }
-        this.currentRow = -1;
-        this.sysIds = [];
-        return false;
-      },
-      getTableName: function() {
-        return this.tableController.tableName;
-      },
-      gotoTop: function() {
-        this.currentRow = -1;
-      },
-      hasNext: function() {
-        return (this.currentRow + 1 < this.sysIds.length);
-      },
-      insert: function() {
-        var values = {};
-        var dspValues = {};
-        for (var xname in this) {
-          if (this.ignoreNames[xname])
-            continue;
-          values[xname] = this[xname];
-        }
-        for (var xname in this.displayValues)
-          dspValues[xname] = this.displayValues[xname];
-        this.renderer.addRowWithValues(values, dspValues);
-      },
-      next: function() {
-        if (!this.hasNext())
-          return false;
-        this.currentRow++;
-        this._loadRow();
-        return true;
-      },
-      _next: function() {
-        return this.next;
-      },
-      query: function() {
-        this._initRows();
-        this.currentRow = -1;
+  initialized: false,
+  initialize: function(changes, tableController, renderer) {
+    this.changes = changes;
+    this.tableController = tableController;
+    this.renderer = renderer;
+    this.currentRow = -1;
+    this.sysIds = [];
+    this.displayValues = {};
+    if (!this.initialized)
+      this._setIgnoreNames();
+    else
+      this._clearValues();
+    this.initialized = true;
+  },
+  addQuery: function() {
+    alert('GwtListEditGlideRecord.addQuery is not currently supported');
+  },
+  getEncodedQuery: function() {
+    alert('GwtListEditGlideRecord.addQuery is not currently supported');
+  },
+  deleteRecord: function() {
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return;
+    if (this.changes.isDeletedRow(sysId))
+      return;
+    this.renderer.deleteRowToggle(sysId);
+  },
+  get: function(sysId) {
+    var rec = this.changes.get(sysId);
+    if (rec) {
+      this.currentRow = 0;
+      this.sysIds = [sysId];
+      return true;
+    }
+    this.currentRow = -1;
+    this.sysIds = [];
+    return false;
+  },
+  getTableName: function() {
+    return this.tableController.tableName;
+  },
+  gotoTop: function() {
+    this.currentRow = -1;
+  },
+  hasNext: function() {
+    return (this.currentRow + 1 < this.sysIds.length);
+  },
+  insert: function() {
+    var values = {};
+    var dspValues = {};
+    for (var xname in this) {
+      if (this.ignoreNames[xname])
+        continue;
+      values[xname] = this[xname];
+    }
+    for (var xname in this.displayValues)
+      dspValues[xname] = this.displayValues[xname];
+    this.renderer.addRowWithValues(values, dspValues);
+  },
+  next: function() {
+    if (!this.hasNext())
+      return false;
+    this.currentRow++;
+    this._loadRow();
+    return true;
+  },
+  _next: function() {
+    return this.next;
+  },
+  query: function() {
+    this._initRows();
+    this.currentRow = -1;
+    return;
+  },
+  setDisplayValue: function(fieldName, dsp) {
+    this.displayValue[fieldName] = dsp;
+    if ('undefined' === typeof this[fieldName])
+      this[fieldName] = dsp;
+  },
+  update: function() {
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return;
+    var record = this.changes.get(sysId);
+    if (!record)
+      return;
+    for (var xname in this) {
+      if (this.ignoreNames[xname])
+        continue;
+      if (xname == 'sys_id')
+        continue;
+      var val = this[xname];
+      var dsp = this.displayValues[xname];
+      var field = record.getField(xname);
+      if (!field)
+        field = record.addField(xname);
+      var changed = false;
+      if (field.getValue() != val) {
+        this.renderer.setValue(sysId, xname, val);
+        changed = true;
+      }
+      if ((typeof dsp != 'undefined') && (field.getDisplayValue() != dsp)) {
+        this.renderer.setDisplayValue(sysId, xname, dsp);
+        changed = true;
+      }
+      if (changed)
+        this.renderer.renderValue(sysId, xname);
+    }
+  },
+  getRowCount: function() {
+    return this.sysIds.length;
+  },
+  _initRows: function() {
+    var receiver = new GwtListEditGlideRecord.RowBuilder();
+    this.changes.exportRecords(receiver);
+    this.sysIds = receiver.sysIds;
+  },
+  _loadRow: function() {
+    this._clearValues();
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return null;
+    var record = this.changes.get(sysId);
+    if (!record)
+      return;
+    this.sys_id = sysId;
+    var fields = record.getFields();
+    for (var fname in fields) {
+      if (fname.indexOf('.') != -1)
+        continue;
+      var field = fields[fname];
+      this[fname] = field.getValue();
+      this.displayValues[fname] = field.getDisplayValue();
+    }
+  },
+  _getRowSysId: function() {
+    if ((this.currentRow < 0) || (this.currentRow >= this.sysIds.length))
+      return;
+    return this.sysIds[this.currentRow];
+  },
+  _clearValues: function() {
+    this.displayValues = {};
+    for (var xname in this) {
+      if (this.ignoreNames[xname] && this.ignoreNames[xname] == true)
+        continue;
+      delete this[xname];
+    }
+  },
+  _setIgnoreNames: function() {
+    this.ignoreNames = [];
+    for (var xname in this) {
+      this.ignoreNames[xname] = true;
+    }
+  },
+  toString: function() {
+    return 'GwtListEditGlideRecord';
+  }
+});
+GwtListEditGlideRecord.RowBuilder = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function($super) {
+      $super();
+      this.sysIds = [];
+    },
+    changedRecord: function(sysID, record) {
+      if (record.isDeleted())
         return;
+      if (record.isDefaultValues())
+        return;
+      this.sysIds.push(sysID);
+    },
+    toString: function() {
+      return 'GlideListEditor.RowUpdater';
+    }
+  });;
+/*! RESOURCE: /scripts/GlideListEditor.js */
+var GlideListEditor = Class.create({
+  MSGS: [
+    'Mark deleted', 'New row'
+  ],
+  initialize: function(table) {
+    this.tableController = new GwtListEditTableController(table);
+    this.changes = new GwtListEditorPendingChanges(this.tableController);
+    this.tableController.changes = this.changes;
+    this.renderer = new GwtListEditValueRenderer(this.changes, this.tableController);
+    this.tableController.renderer = this.renderer;
+    this.savePolicy = this.tableController.buildSavePolicy();
+    this.gridEdit = new GwtGridEdit(this.tableController);
+    this.msgs = getMessages(this.MSGS);
+    this.emptyRecord = null;
+    this._observeTableEvents();
+    if (this.tableController.isFormUI())
+      this.changes.loadTable(function() {});
+  },
+  updateTable: function(tableDOM) {
+    if (this.tableController.isForTable(tableDOM))
+      return;
+    this.tableController.updateTable(tableDOM);
+    this.renderer.updateTable();
+    this.gridEdit.updateTable();
+    this._observeTableEvents();
+  },
+  unLoadTable: function(tableDOM) {
+    this.tableController.unLoadTable(tableDOM);
+  },
+  _observeTableEvents: function() {
+    var policyCallback = this._savePolicy.bind(this);
+    this.tableController.observe('glide:list_v2.edit.cells_changed', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.focus_moved', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.save_now', policyCallback);
+    Event.observe(this.tableController.tableElementDOM, 'click', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.changes_saved', this._handleChangesSaved.bind(this));
+    this.tableController.observe('glide:list_v2.edit.rows_deleted', this._handleRowsDeleted.bind(this));
+    this.tableController.observe('glide:list_v2.edit.focus_moved', this._handleFocusMoved.bind(this));
+    Event.observe(this.tableController.tableElementDOM, 'glide:list_v2.edit.update_column', this._updateColumn.bind(this));
+    Event.observe(this.tableController.tableElementDOM, 'glide:list_v2.edit.check_enter_once', this._checkEnterOnce.bind(this));
+    if (window.GlideListEditorMessaging)
+      new GlideListEditorMessaging(this);
+  },
+  createCellEditor: function(element, ignoreTypes) {
+    if (!this.tableController.canEdit())
+      return null;
+    this.gridEdit.hideCursor();
+    this.gridEdit.clearRanges();
+    this.gridEdit.setAnchorCell(element);
+    this.cellEditor = new GwtCellEditor(this.gridEdit, ignoreTypes,
+      this.changes, this.tableController, this.renderer);
+    return this.cellEditor;
+  },
+  setCursor: function(element) {
+    this.gridEdit.setCursorElement(element);
+  },
+  _savePolicy: function(evt) {
+    this.savePolicy.analyzeEvent(evt);
+    if (this.savePolicy.isDirectSave()) {
+      this.saveChanges(this._saveComplete.bind(this));
+      return;
+    }
+    if (this.savePolicy.isDeferredSave()) {
+      this._fireChangesDeferred();
+      this._saveComplete();
+      return;
+    }
+    if (this.savePolicy.isImpliedSave()) {
+      this.saveChanges(null);
+      return;
+    }
+  },
+  _fireChangesDeferred: function() {
+    var info = {
+      listId: this.tableController.listID,
+      defers: this.savePolicy.getDeferredSaves()
+    };
+    this.tableController.fire('glide:list_v2.edit.changes_deferred', info);
+  },
+  _saveComplete: function() {
+    var info = {
+      listId: this.tableController.listID
+    };
+    this.tableController.fire('glide:list_v2.edit.saves_completed', info);
+    CustomEvent.fire('list_content_changed');
+  },
+  _handleChangesSaved: function(evt) {
+    this.savePolicy.handleChangesSaved(evt);
+  },
+  _handleRowsDeleted: function(evt) {
+    this.savePolicy.handleRowsDeleted(evt);
+    this.gridEdit.showCursor();
+  },
+  _handleFocusMoved: function(evt) {
+    if (!this.cellEditor)
+      return;
+    if (!this.cellEditor.isActive())
+      return;
+    if (evt.memo.listId !== this.tableController.listID)
+      return;
+    var cursorCell = this.gridEdit.getCursorCell();
+    var anchorCell = this.gridEdit.getAnchorCell();
+    if (cursorCell !== anchorCell) {
+      this.cellEditor.dismiss();
+      GwtListEditor.forPage.edit(cursorCell);
+    }
+  },
+  saveNow: function() {
+    var info = {
+      listId: this.tableController.listID
+    };
+    this.tableController.fire('glide:list_v2.edit.save_now', info);
+  },
+  applyUpdates: function() {
+    this.changes.resetAggregates();
+    var updater = new GlideListEditor.RowUpdater(this.changes, this.tableController, this.renderer);
+    this.changes.exportRecords(updater);
+    if (this.tableController.needsInsertRow())
+      this.renderer.addRowNoInsert();
+  },
+  _getRow: function(sysId) {
+    return this.tableController.getRow(sysId);
+  },
+  addRow: function() {
+    this.renderer.addRow();
+  },
+  saveUpdatesInForm: function() {
+    addHidden(this._getForm(), this._getXmlIslandName(), this._serializeModified());
+  },
+  _serializeModified: function() {
+    var xml = this._createRecordUpdateXml();
+    var selector = new GlideListEditor.IsModifiedRecordSelector(this.changes);
+    var receiver = new GlideListEditor.XmlSerializingReceiver(xml, xml.documentElement, selector);
+    this.changes.exportChanges(receiver);
+    return getXMLString(xml);
+  },
+  _createRecordUpdateXml: function() {
+    var xml = loadXML("<record_update/>");
+    this.tableController.exportXml(xml.documentElement);
+    return xml;
+  },
+  _getForm: function() {
+    if ((typeof g_form == "undefined") || (!g_form))
+      return null;
+    return gel(g_form.getTableName() + ".do");
+  },
+  _getXmlIslandName: function() {
+    return "ni.java.com.glide.ui_list_edit.ListEditFormatterAction[" + this.tableController.listID + "]";
+  },
+  callOnSubmit: function() {
+    var retVal;
+    var scriptName = "onSubmit_" + this.tableController.listID;
+    for (var ndx = 0;
+      (ndx < 100) && (retVal != false); ndx++) {
+      var f = GlideListEditor.getClientScriptFunc(scriptName, ndx);
+      if (f == null)
+        break;
+      try {
+        retVal = f();
+      } catch (ex) {}
+    }
+    return retVal;
+  },
+  saveChanges: function(onComplete) {
+    var saver = new GwtListEditAjaxChangeSaver(this.changes, this.tableController, onComplete);
+    saver.save();
+  },
+  buildGList: function() {
+    return new GwtListEditGList(this.changes, this.tableController, this.renderer);
+  },
+  hasChanges: function() {
+    var selector = new GlideListEditor.IsModifiedRecordSelector(this.changes);
+    var inspector = new GlideListEditor.ChangeCounter(selector);
+    this.changes.inspectRecords(inspector);
+    return inspector.isDone();
+  },
+  deleteRowToggle: function(sysId) {
+    this.renderer.deleteRowToggle(sysId);
+  },
+  getSelectedRows: function() {
+    return this.gridEdit.getSelectedRows();
+  },
+  _updateColumn: function(evt) {
+    var columnName = evt.memo.columnName;
+    var value = evt.memo.newValue;
+    var ids = evt.memo.ids != null ? evt.memo.ids : this.changes.calcWritableSysIds(this.tableController.sysIds, [columnName]);
+    var numIds = ids.length;
+    for (var i = 0; i < numIds; i++) {
+      var id = ids[i];
+      if (evt.memo.ids != null || this.changes.emptyRecord == null || this.changes.emptyRecord.sysId != id) {
+        this.renderer.setValue(id, columnName, value);
+        this.changes.setRenderValue(id, columnName, value);
+        if (this.changes.isFieldDirty(id, columnName)) {
+          this.renderer.renderValue(id, columnName);
+        }
+      }
+    }
+  },
+  _checkEnterOnce: function(evt) {
+    var properties = evt.memo.properties;
+    var answer = [];
+    var l = properties.length;
+    for (var j = 0; j < l; j++) {
+      var p = properties[j];
+      var columnName = p.field;
+      var ids = evt.memo.ids != null ? evt.memo.ids : this.changes.calcWritableSysIds(this.tableController.sysIds, [columnName]);
+      var numIds = ids.length;
+      for (var i = 0; i < numIds; i++) {
+        var id = ids[i];
+        if (this.changes.emptyRecord == null || this.changes.emptyRecord.sysId != id) {
+          if (evt.memo.oldValues != null || this.changes.isFieldDirty(id, columnName)) {
+            var field = this.changes.getField(id, columnName);
+            var originalValue = evt.memo.oldValues != null ? evt.memo.oldValues[i] : field.getOriginalDisplay();
+            var currentValue = evt.memo.newValue != null ? evt.memo.newValue : field.getRenderValue();
+            var isDirty = p.isDirty(originalValue, currentValue);
+            if (isDirty) {
+              answer.push({
+                sys_id: id,
+                name: columnName,
+                value: currentValue
+              });
+            }
+          }
+        }
+      }
+    }
+    evt.answer = answer;
+  },
+  toString: function() {
+    return 'GlideListEditor';
+  }
+});
+
+function getQueryForList(listID) {
+  var e = gel('sysparm_query');
+  if (e)
+    return e.value;
+  var t = GwtListEditor.getTableElem(listID);
+  if (t)
+    return getAttributeValue(t, 'glide_list_query') + '';
+  return '';
+}
+GlideListEditor.getClientScriptFunc = function(scriptName, ndx) {
+  var n = scriptName + "_" + ndx;
+  var f = window[n];
+  if (typeof f != "function")
+    return null;
+  return f;
+};
+GlideListEditor.RowUpdater = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function($super, changes, tableController, renderer) {
+      $super();
+      this.changes = changes;
+      this.tableController = tableController;
+      this.renderer = renderer;
+      this.hasChanges = false;
+    },
+    changedRecord: function(sysID, record) {
+      if (record.isAdded()) {
+        this.hasChanges = true;
+        if (this.tableController.getRow(sysID))
+          this.renderer.updateRowWithRecord(record);
+        else {
+          this.renderer.insertRowForRecord(record);
+          this.renderer.showViewDecorations(sysID);
+          this.changes.addToAggregates(record);
+        }
+      } else if (record.isUpdated()) {
+        this.hasChanges = true;
+        this.renderer.updateRowWithRecord(record);
+      } else if (record.isDeleted()) {
+        this.hasChanges = true;
+        this.renderer.updateRowWithRecord(record);
+        this.renderer.deleteRowWithRecord(record);
+      }
+    },
+    isChanged: function() {
+      return this.hasChanges;
+    },
+    toString: function() {
+      return 'GlideListEditor.RowUpdater';
+    }
+  });
+GlideListEditor.XmlSerializingReceiver = Class.create(
+  GwtListEditorPendingChanges.ChangeReceiver, {
+    initialize: function($super, doc, dst, selector) {
+      $super();
+      this.doc = doc;
+      this.dst = dst;
+      this.selector = selector;
+      this.record = null;
+    },
+    beginRecord: function(sysID, op) {
+      if (!this.selector.isSelected(sysID, op))
+        return;
+      var record = this._createElement("record");
+      record.setAttribute("sys_id", sysID);
+      record.setAttribute("operation", op);
+      this.record = record;
+      return true;
+    },
+    endRecord: function(sysID) {
+      if (this.record)
+        this.dst.appendChild(this.record);
+      this.record = null;
+    },
+    changedField: function(sysID, info) {
+      var node = this._createElement("field");
+      this._populateFieldNode(node, info);
+      this.record.appendChild(node);
+    },
+    _populateFieldNode: function(node, info) {
+      node.setAttribute('name', info.getName());
+      node.setAttribute('modified', info.isModified().toString());
+      node.setAttribute('value_set', info.isValueSet().toString());
+      node.setAttribute('dsp_set', info.isDisplayValueSet().toString());
+      this._appendValueNode(node, 'value', info.value);
+      if (info.displaySet)
+        this._appendValueNode(node, 'display_value', info.displayValue);
+    },
+    _createElement: function(name) {
+      return this.doc.createElement(name);
+    },
+    _createTextNode: function(value) {
+      return this.doc.createTextNode(value);
+    },
+    _appendValueNode: function(dst, name, value) {
+      if (!value)
+        value = '';
+      var node = this._createElement(name);
+      var text = this._createTextNode(value);
+      node.appendChild(text);
+      dst.appendChild(node);
+    },
+    toString: function() {
+      return 'GlideListEditor.XmlSerializingReceiver';
+    }
+  });
+GlideListEditor.ChangeCounter = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function(selector) {
+      this.selector = selector;
+      this.changeCount = 0;
+    },
+    changedRecord: function(sysID, record) {
+      if (this.selector.isSelected(sysID, record.operation))
+        this.changeCount++;
+    },
+    isDone: function() {
+      return this.changeCount > 0;
+    },
+    toString: function() {
+      return 'GlideListEditor.ChangeCounter';
+    }
+  });
+GlideListEditor.IsModifiedRecordSelector = Class.create({
+  initialize: function(changes) {
+    this.changes = changes;
+  },
+  isSelected: function(sysID, op) {
+    if (("add" === op) || ("delete" === op) || ("delete_pending" === op) || ("add_existing" === op))
+      return true;
+    var record = this.changes.get(sysID);
+    return record.isModified();
+  },
+  toString: function() {
+    return 'GlideListEditor.IsModifiedRecordSelector';
+  }
+});;
+/*! RESOURCE: /scripts/GlideListAggregates.js */
+var GlideListAggregates = Class.create({
+  initialize: function(tableController) {
+    this.aggregates = {};
+    this.tableController = tableController;
+    this._initAggregates();
+  },
+  getAggregate: function(fieldName, type) {
+    var agg = this.aggregates[fieldName + ":" + type];
+    if (!agg)
+      return null;
+    return agg;
+  },
+  getAggregateValue: function(fieldName, type) {
+    var agg = this.aggregates[fieldName + ":" + type];
+    if (!agg)
+      return null;
+    return agg.value;
+  },
+  getAggregateElement: function(fieldName, type) {
+    var agg = this.getAggregate(fieldName, type);
+    if (!agg)
+      return null;
+    var td = this.tableController.getCellByNdx(agg.rowNdx, agg.colNdx);
+    var spans = td.getElementsByTagName("SPAN");
+    for (var spanNdx = 0; spanNdx < spans.length; spanNdx++) {
+      var span = spans[spanNdx];
+      if (!hasClassName(span, "aggregate_value"))
+        continue;
+      var aggtype = getAttributeValue(span, "aggregate_type");
+      if (aggtype == type)
+        return span;
+    }
+    return null;
+  },
+  getAggregateFields: function() {
+    return this.aggregateFields;
+  },
+  updateAggregates: function(fieldName, oldValue, newValue) {
+    if (oldValue == newValue)
+      return;
+    this._updateAggregate(fieldName, "MIN", oldValue, newValue);
+    this._updateAggregate(fieldName, "MAX", oldValue, newValue);
+    this._updateAggregate(fieldName, "SUM", oldValue, newValue);
+    this._updateAggregate(fieldName, "AVG", oldValue, newValue, 0);
+  },
+  addToAggregates: function(fieldName, value) {
+    if (value != "") {
+      this._updateAggregate(fieldName, "MIN", null, value);
+      this._updateAggregate(fieldName, "MAX", null, value);
+      this._updateAggregate(fieldName, "SUM", null, value);
+    }
+    this._updateAggregate(fieldName, "AVG", null, value, 1);
+  },
+  removeFromAggregates: function(fieldName, value) {
+    if (value != "") {
+      this._updateAggregate(fieldName, "MIN", value, null);
+      this._updateAggregate(fieldName, "MAX", value, null);
+      this._updateAggregate(fieldName, "SUM", value, null);
+    }
+    this._updateAggregate(fieldName, "AVG", value, null, -1);
+  },
+  rowCountChanged: function(increment) {
+    for (var k in this.aggregates)
+      this.aggregates[k].rowNdx += increment;
+  },
+  _initAggregates: function() {
+    var fields = {};
+    this.aggregateRow = -1;
+    this.aggregates = {};
+    this.aggregateFields = [];
+    var rowCount = this.tableController.getRowCount();
+    for (var rowNdx = 0; rowNdx < rowCount; rowNdx++) {
+      var row = this.tableController.getRowByNdx(rowNdx);
+      if (!hasClassName(row, "aggregate"))
+        continue;
+      for (var colNdx = 0; colNdx < row.cells.length; colNdx++) {
+        var spans = row.cells[colNdx].getElementsByTagName("SPAN");
+        for (var spanNdx = 0; spanNdx < spans.length; spanNdx++) {
+          var span = spans[spanNdx];
+          if (!hasClassName(span, "aggregate_value"))
+            continue;
+          var type = getAttributeValue(span, "aggregate_type");
+          if (!type)
+            continue;
+          this._addAggregate(fields,
+            getAttributeValue(span, "aggregate_field"),
+            type,
+            getAttributeValue(span, "aggregate_count"),
+            getAttributeValue(span, "aggregate_value"),
+            rowNdx, colNdx);
+        }
+      }
+    }
+  },
+  _addAggregate: function(fields, fieldName, type, count, value, rowNdx, colNdx) {
+    this.aggregates[fieldName + ":" + type] = {
+      type: type,
+      count: count,
+      value: value,
+      rowNdx: rowNdx,
+      colNdx: colNdx
+    };
+    if (!fields[fieldName]) {
+      fields[fieldName] = true;
+      this.aggregateFields.push(fieldName);
+    }
+  },
+  _updateAggregate: function(fieldName, type, oldValue, newValue, countChange) {
+    var agg = this.getAggregate(fieldName, type);
+    if (!agg)
+      return;
+    var aggValue = '';
+    if (agg.type == "MIN")
+      aggValue = this._updateAggregateMin(agg, oldValue, newValue);
+    else if (agg.type == "MAX")
+      aggValue = this._updateAggregateMax(agg, oldValue, newValue);
+    else if (agg.type == "SUM")
+      aggValue = this._updateAggregateTotal(agg, oldValue, newValue);
+    else if (agg.type == "AVG")
+      aggValue = this._updateAggregateAverage(agg, oldValue, newValue, countChange);
+    this._setAggregate(agg, fieldName, type, aggValue, countChange);
+  },
+  _setAggregate: function(agg, fieldName, type, aggValue, countChange) {
+    if (aggValue != null) {
+      var aggSpan = this.getAggregateElement(fieldName, type);
+      if (!aggSpan)
+        return;
+      agg.value = aggValue;
+      setAttributeValue(aggSpan, "aggregate_value", agg.value);
+      if (((type == "SUM") || (type == "AVG")) && agg.value % 1 != 0)
+        aggSpan.innerHTML = this._format(agg.value);
+      else
+        aggSpan.innerHTML = aggValue;
+      if (countChange)
+        setAttributeValue(aggSpan, "aggregate_count", agg.count);
+    }
+  },
+  _updateAggregateMin: function(agg, oldValue, newValue) {
+    if (agg.value == "?")
+      return null;
+    if ((newValue != null) && (newValue < agg.value))
+      return newValue;
+    if ((oldValue != null) && (oldValue == agg.value))
+      return "?";
+    return null;
+  },
+  _updateAggregateMax: function(agg, oldValue, newValue) {
+    if (agg.value == "?")
+      return null;
+    if ((newValue != null) && (newValue > agg.value))
+      return newValue;
+    if ((oldValue != null) && (oldValue == agg.value))
+      return "?";
+    return null;
+  },
+  _updateAggregateTotal: function(agg, oldValue, newValue) {
+    if (!oldValue || isNaN(oldValue))
+      oldValue = '0';
+    if (!newValue || isNaN(newValue))
+      newValue = '0';
+    if (isNaN(agg.value))
+      return;
+    oldValue = new Number(oldValue);
+    newValue = new Number(newValue);
+    var total = new Number(agg.value);
+    total += (newValue - oldValue);
+    total = parseFloat(total.toFixed(this._precision(agg.value, oldValue, newValue)));
+    return total;
+  },
+  _precision: function(total, oldValue, newValue) {
+    var len = Math.max(this._precisionLength(total), this._precisionLength(oldValue), this._precisionLength(newValue));
+    return len;
+  },
+  _precisionLength: function(value) {
+    value = parseFloat(value);
+    var precisionLen = "";
+    if (value.toString().indexOf(".") >= 0) {
+      precisionLen = value.toString().substr(value.toString().indexOf(".") + 1, value.toString().length);
+    }
+    return precisionLen.length;
+  },
+  _updateAggregateAverage: function(agg, oldValue, newValue, countChange) {
+    if (!oldValue || isNaN(oldValue))
+      oldValue = '0';
+    if (!newValue || isNaN(newValue))
+      newValue = '0';
+    if (isNaN(agg.value) || isNaN(agg.count))
+      return;
+    agg.count = new Number(agg.count);
+    var value = new Number(agg.value);
+    var total = (value * agg.count);
+    agg.count += countChange;
+    if (!agg.count)
+      return 0;
+    oldValue = new Number(oldValue);
+    newValue = new Number(newValue);
+    total += (newValue - oldValue);
+    return this._format(total / agg.count);
+  },
+  _format: function(num) {
+    if (isNaN(num))
+      return num;
+    return num.toFixed(2);
+  },
+  resetAggregates: function() {
+    this._initAggregates();
+  },
+  type: 'GlideListAggregate'
+});;
+/*! RESOURCE: /scripts/GwtListEditRecord.js */
+var GwtListEditRecord = Class.create({
+  initialize: function(sysId) {
+    this.sysId = sysId;
+    if (sysId == "-1")
+      this.operation = "default_values";
+    else
+      this.operation = "update";
+    this.fields = {};
+  },
+  addField: function(name) {
+    var f = this.getField(name);
+    if (f)
+      return f;
+    this.fields[name] = new GwtListEditField(name);
+    return this.fields[name];
+  },
+  getField: function(name) {
+    return this.fields[name];
+  },
+  getFields: function() {
+    return this.fields;
+  },
+  setOperation: function(operation) {
+    if (this.sysId == "-1")
+      return;
+    this.operation = operation;
+  },
+  isModified: function() {
+    for (var n in this.fields) {
+      var field = this.fields[n];
+      if (field.isModified())
+        return true;
+    }
+    return false;
+  },
+  isNew: function() {
+    return "new" === this.operation;
+  },
+  isDefaultValues: function() {
+    if (this.sysId == "-1")
+      return true;
+    return "default_values" === this.operation;
+  },
+  isAdded: function() {
+    return "add" === this.operation || "add_existing" === this.operation;
+  },
+  isUpdated: function() {
+    return "update" === this.operation;
+  },
+  isDeleted: function() {
+    if ("delete_pending" === this.operation)
+      return true;
+    return ("delete" === this.operation);
+  },
+  clearModified: function() {
+    for (var n in this.fields)
+      this.fields[n].clearModified();
+  },
+  type: 'GwtListEditRecord'
+});
+var GwtListEditField = Class.create({
+  initialize: function(name) {
+    this.name = name;
+    this.label = name;
+    this.referenceValid = true;
+    this._clear();
+  },
+  getName: function() {
+    return this.name;
+  },
+  getLabel: function() {
+    return this.label;
+  },
+  getOriginalValue: function() {
+    return this.originalValue;
+  },
+  getOriginalDisplay: function() {
+    return this.originalDisplay;
+  },
+  getValue: function() {
+    return this.value;
+  },
+  getDisplayValue: function() {
+    return this.displayValue;
+  },
+  getRenderValue: function() {
+    return this.renderValue;
+  },
+  isValueSet: function() {
+    return this.valueSet;
+  },
+  isDisplayValueSet: function() {
+    return this.displaySet;
+  },
+  isRenderValueSet: function() {
+    return this.renderSet;
+  },
+  isModified: function() {
+    return this.modified;
+  },
+  isWritable: function() {
+    return this.canWrite;
+  },
+  isMandatory: function() {
+    return this.mandatory;
+  },
+  isOKExtension: function() {
+    return this.okExtension;
+  },
+  isReferenceValid: function() {
+    return this.referenceValid;
+  },
+  clearModified: function() {
+    this.modified = false;
+  },
+  setWritable: function(canWrite) {
+    this.canWrite = canWrite;
+  },
+  setMandatory: function(mandatory) {
+    this.mandatory = mandatory;
+  },
+  setOKExtension: function(okExtension) {
+    this.okExtension = okExtension;
+  },
+  setLabel: function(label) {
+    this.label = label;
+  },
+  setInitialValues: function(v, dsp) {
+    this._clear();
+    this.originalValue = v;
+    this.originalDisplay = dsp;
+    this.value = v;
+    this.displayValue = dsp;
+    this._convertNullsToBlank();
+  },
+  setValue: function(v) {
+    if (this.value != v)
+      this.modified = true;
+    this.value = v;
+    this.valueSet = true;
+    this.renderSet = false;
+    this.renderValue = "";
+    this._convertNullsToBlank();
+  },
+  setDisplayValue: function(v) {
+    if (this.displayValue != v)
+      this.modified = true;
+    this.displayValue = v;
+    this.displaySet = true;
+    this.renderSet = false;
+    this.renderValue = "";
+    this._convertNullsToBlank();
+  },
+  setRenderValue: function(v) {
+    this.renderValue = v;
+    this.renderSet = true;
+    this._convertNullsToBlank();
+  },
+  setReferenceValid: function(valid) {
+    this.referenceValid = valid;
+  },
+  unsetValue: function() {
+    this.value = '';
+    this.valueSet = false;
+  },
+  unsetDisplayValue: function() {
+    this.displayValue = '';
+    this.displaySet = false;
+  },
+  unsetRenderValue: function() {
+    this.renderValue = '';
+    this.renderSet = false;
+  },
+  _clear: function() {
+    this.value = '';
+    this.displayValue = '';
+    this.renderValue = '';
+    this.valueSet = false;
+    this.displaySet = false;
+    this.renderSet = false;
+    this.modified = false;
+    this.canWrite = false;
+    this.mandatory = false;
+  },
+  _convertNullsToBlank: function() {
+    if (!this.value)
+      this.value = '';
+    if (!this.displayValue)
+      this.displayValue = '';
+    if (!this.renderValue)
+      this.renderValue = '';
+  },
+  type: 'GwtListEditField'
+});;
+/*! RESOURCE: /scripts/GwtGridEdit.js */
+var GwtGridEdit = Class.create({
+      initialize: function(tableController) {
+        this.tableController = tableController;
+        this.anchor = null;
+        this.rec = 0;
+        this.col = 0;
+        this.editOnInsert = false;
+        this.iconIndex = null;
+        this.updateTable();
+        Event.observe(window, 'resize', this._resize.bind(this));
+        CustomEvent.observe("partial.page.reload", this.clearCursor.bind(this));
+        CustomEvent.observe("tab.activated", this.clearCursor.bind(this));
+        CustomEvent.observe('list.section.toggle', this.clearCursor.bind(this));
       },
-      setDisplayValue: function(fieldName, dsp) {
-        this.displayValue[fieldName] = dsp;
-        if ('undefined' === typeof this[fieldName])
-          this[fieldName] = dsp;
+      updateTable: function() {
+        this.tableController.observeOnBody("keydown", this.keyDown.bind(this));
+        this.tableController.observeOnBody("blur", this.blur.bind(this));
+        if (isMSIE)
+          this.tableController.observeOnBody("focusout", this.blur.bind(this));
+        this.tableController.observe('glide:list_v2.edit.saves_completed', this._handleSavesCompleted.bind(this));
+        this.tableController.observe('glide:list_v2.edit.row_added', this._handleRowAdded.bind(this));
+        this.cellSelector = this.tableController.buildCellSelector();
       },
-      update: function() {
-          var sysId = this._getRowSysId();
-          if (!sysId)
-            return;
-          var record = this.changes.get(sysId);
-          if (!record)
-            return;
-          for (var xname in this) {
-            if (this.ignoreN
+      unLoadTable: function() {
+        this.cellSelector = null;
+      },
+      setAnchorCell: function(anchor) {
+        this.anchor = $(anchor);
+        this.setCursorElement(this.anchor);
+      },
+      getAnchorCell: function() {
+        return this.anchor;
+      },
+      getAnchorSysId: function() {
+        return this.tableController.getSysIdByCell(this.getAnchorCell());
+      },
+      getAnchorAttribute: function(attribute) {
+        return this.tableController.getAttributeByCell(attribute, this.getAnchorCell());
+      },
+      getAnchorFqFieldName: function() {
+        var anchor = this.getAnchorCell();
+        var row = this.tableController.getRowByCell(anchor);
+        if (row.hasAttribute('data-detail-row'))
+          return row.getAttribute('data-detail-row');
+        return this.tableController.getNameFromColumn(anchor.cellIndex);
+      },
+      getAnchorRow: function() {
+        return this.tableController.getRowByCell(this.getAnchorCell());
+      },
+      getAnchorPos: function() {
+        return this.tableController.getRecordPos(this.getAnchorRow());
+      },
+      keyDown: function(e) {
+        if (e.keyCode == Event.KEY_TAB) {
+          var shouldStop = this.tabKey(e);
+          if (shouldStop)
+            e.stop();
+          return;
+        }
+        if (!this._inEditor())
+          return;
+        switch (e.keyCode) {
+          case Event.KEY_DOWN:
+            e.stop();
+            if (e.shiftKey)
+              this.selectVerticalKey(e, "down");
+            else
+              this.downArrow(e);
+            break;
+          case Event.KEY_UP:
+            e.stop();
+            if (e.shiftKey)
+              this.selectVerticalKey(e, "up");
+            else
+              this.upArrow(e);
+            break;
+          case Event.KEY_RIGHT:
+            e.stop();
+            this.moveRight();
+            break;
+          case Event.KEY_LEFT:
+            e.stop();
+            this.moveLeft();
+            break;
+          case Event.KEY_RETURN:
+            e.preventDefault();
+            if (e.shiftKey || e.ctrlKey)
+              break;
+            if (this.tableController.isHierarchical())
+              e.stop();
+            this.editCursor();
+            break;
+          case Event.KEY_ESC:
+            this.clearCursor();
+            break;
+          case 32:
+            this.tableController.openContextMenu(e.target, e);
+            break;
+        }
+      },
+      blur: function(evt) {
+        this.hideCursor();
+      },
+      editCursor: function() {
+        var cursor = this.getCursorCell();
+        if (cursor)
+          GwtListEditor.forPage.edit(cursor);
+      },
+      editNextRow: function() {
+        if (this.tableController.insertRow && (this.rec >= this.cellSelector.maxRow))
+          this.editOnInsert = true;
+        else
+          this.editOnInsert = false;
+        this.downArrow();
+        if (!this.editOnInsert)
+          this.editCursor();
+      },
+      selectVerticalKey: function(evt, direction) {
+          this.selectVertical(evt, direction, this.rec, this.col);
+          if ("down" === direction)
+            this._fire

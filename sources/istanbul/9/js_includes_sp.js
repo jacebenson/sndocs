@@ -91565,1291 +91565,290 @@ angular.module('sn.$sp').directive('snFieldListElement', function(getTemplateUrl
 });;
 /*! RESOURCE: /scripts/app.$sp/directive.spReferenceElement.js */
 angular.module('sn.$sp').directive('spReferenceElement', function($timeout, $http, urlTools, filterExpressionParser, $sanitize, i18n, spIs, spUtil) {
-  "use strict";
-  return {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      ed: "=?",
-      field: "=",
-      refTable: "=?",
-      refId: "=?",
-      snOptions: "=?",
-      snOnBlur: "&",
-      snOnClose: "&",
-      minimumInputLength: "@",
-      snDisabled: "=",
-      dropdownCssClass: "@",
-      formatResultCssClass: "&",
-      displayColumn: "@",
-      recordValues: '&',
-      getGlideForm: '&glideForm',
-      domain: "@",
-      snSelectWidth: '@',
-    },
-    template: '<input type="text" name="{{field.name}}" ng-disabled="snDisabled" style="min-width: 150px;" />',
-    link: function(scope, element, attrs, ctrl) {
-      scope.ed = scope.ed || scope.field.ed;
-      scope.selectWidth = scope.snSelectWidth || '100%';
-      element.css("opacity", 0);
-      var fireReadyEvent = true;
-      var g_form;
-      var displayColumns;
-      var refAutoCompleter;
-      var refOrderBy;
-      var field = scope.field;
-      var isMultiple = scope.snOptions && scope.snOptions.multiple === true;
-      if (angular.isDefined(scope.getGlideForm))
-        g_form = scope.getGlideForm();
-      var fieldAttributes = {};
-      if (scope.field && scope.field.attributes && typeof scope.ed.attributes == 'undefined') {
-        if (Array.isArray(scope.field.attributes)) {
-          fieldAttributes = scope.field.attributes;
-        } else {
-          fieldAttributes = spUtil.parseAttributes(scope.field.attributes);
-        }
-      } else {
-        fieldAttributes = spUtil.parseAttributes(scope.ed.attributes);
-      }
-      if (angular.isDefined(fieldAttributes['ref_ac_columns']))
-        displayColumns = fieldAttributes['ref_ac_columns'];
-      if (angular.isDefined(fieldAttributes['ref_auto_completer']))
-        refAutoCompleter = fieldAttributes['ref_auto_completer'];
-      else
-        refAutoCompleter = "AJAXReferenceCompleter";
-      if (angular.isDefined(fieldAttributes['ref_ac_order_by']))
-        refOrderBy = fieldAttributes['ref_ac_order_by'];
-      var s2Helpers = {
-        formatSelection: function(item) {
-          return $sanitize(getDisplayValue(item));
-        },
-        formatResult: function(item) {
-          var displayValues = getDisplayValues(item);
-          if (displayValues.length == 1)
-            return $sanitize(displayValues[0]);
-          if (displayValues.length > 1) {
-            var width = 100 / displayValues.length;
-            var markup = "";
-            for (var i = 0; i < displayValues.length; i++)
-              markup += "<div style='width: " + width + "%;display: inline-block;' class='select2-result-cell'>" + $sanitize(displayValues[i]) + "</div>";
-            return markup;
-          }
-          return "";
-        },
-        search: function(queryParams) {
-          var url = urlTools.getURL('sp_ref_list_data');
-          return $http.post(url, queryParams.data).then(function(response) {
-            queryParams.success(response);
-          });
-        },
-        initSelection: function(elem, callback) {
-          if (scope.field.displayValue) {
-            if (isMultiple) {
-              var items = [];
-              var values = scope.field.value.split(',');
-              var displayValues = scope.field.display_value_list;
-              if (Array.isArray(scope.field.displayValue)) {
-                displayValues.length = 0;
-                for (var i in scope.field.displayValue)
-                  displayValues[i] = scope.field.displayValue[i];
-                scope.field.displayValue = displayValues.join(g_glide_list_separator);
-              } else if (values.length == 1) {
-                displayValues.length = 0;
-                displayValues[0] = scope.field.displayValue;
-              } else if (scope.field.displayValue != displayValues.join(g_glide_list_separator)) {
-                displayValues.length = 0;
-                var split = scope.field.displayValue.split(',');
-                for (var i in split)
-                  displayValues[i] = split[i];
-              }
-              for (var i = 0; i < values.length; i++) {
-                items.push({
-                  sys_id: values[i],
-                  name: displayValues[i]
-                });
-              }
-              callback(items);
-            } else {
-              callback({
-                sys_id: scope.field.value,
-                name: scope.field.displayValue
-              });
-            }
-          } else
-            callback([]);
-        },
-        onSelecting: function(e) {
-          var selectedItem = e.choice;
-          if ('sys_id' in selectedItem) {
-            var values = field.value == '' ? [] : field.value.split(',');
-            var displayValues = field.display_value_list;
-            values.push(selectedItem.sys_id);
-            displayValues.push(getDisplayValue(selectedItem));
-            g_form.setValue(field.name, values.join(','), displayValues.join(g_glide_list_separator));
-            e.preventDefault();
-            element.select2('val', values).select2('close');
-          }
-        },
-        onRemoving: function(e) {
-          var removed = e.choice;
-          var values = field.value.split(',');
-          var displayValues = field.display_value_list;
-          for (var i = values.length - 1; i >= 0; i--) {
-            if (removed.sys_id == values[i]) {
-              values.splice(i, 1);
-              displayValues.splice(i, 1);
-              break;
-            }
-          }
-          g_form.setValue(field.name, values.join(','), displayValues.join(g_glide_list_separator));
-          e.preventDefault();
-          element.select2('val', values);
-        },
-        select2Change: function(e) {
-          e.stopImmediatePropagation();
-          if (e.added) {
-            var selectedItem = e.added;
-            var value = selectedItem.sys_id;
-            var displayValue = value ? getDisplayValue(selectedItem) : '';
-            if (scope.field['_cat_variable'] === true && ('price' in selectedItem || 'recurring_price' in selectedItem))
-              setPrice(selectedItem.price, selectedItem.recurring_price);
-            g_form.setValue(scope.field.name, value, displayValue);
-          } else if (e.removed) {
-            if (scope.field['_cat_variable'] === true)
-              setPrice(0, 0);
-            g_form.clearValue(scope.field.name);
-          }
-        }
-      };
-      var config = {
-        width: scope.selectWidth,
-        minimumInputLength: scope.minimumInputLength ? parseInt(scope.minimumInputLength, 10) : 0,
-        containerCssClass: 'select2-reference ng-form-element',
-        placeholder: '   ',
-        formatSearching: '',
-        allowClear: attrs.allowClear !== 'false',
-        id: function(item) {
-          return item.sys_id;
-        },
-        sortResults: (scope.snOptions && scope.snOptions.sortResults) ? scope.snOptions.sortResults : undefined,
-        ajax: {
-          quietMillis: NOW.ac_wait_time,
-          data: function(filterText, page) {
-            var filterExpression = filterExpressionParser.parse(filterText, scope.ed.defaultOperator);
-            var q = '';
-            var columnsToSearch = getReferenceColumnsToSearch();
-            var queryArr = [];
-            var query;
-            columnsToSearch.forEach(function(colToSearch) {
-              query = "";
-              if (field.ed.queryString)
-                query += field.ed.queryString + '^';
-              query += colToSearch + filterExpression.operator + filterExpression.filterText +
-                '^' + colToSearch + 'ISNOTEMPTY' + getExcludedValues();
-              queryArr.push(query);
-            });
-            q += queryArr.join("^NQ");
-            if (refOrderBy)
-              q += "^ORDERBY" + refOrderBy;
-            q += "^EQ";
-            var params = {
-              start: (scope.pageSize * (page - 1)),
-              count: scope.pageSize,
-              sysparm_target_table: scope.refTable,
-              sysparm_target_sys_id: scope.refId,
-              sysparm_target_field: scope.ed.name,
-              table: scope.ed.reference,
-              qualifier: scope.ed.qualifier,
-              data_adapter: scope.ed.data_adapter,
-              attributes: scope.ed.attributes,
-              dependent_field: scope.ed.dependent_field,
-              dependent_table: scope.ed.dependent_table,
-              dependent_value: scope.ed.dependent_value,
-              p: scope.ed.reference + ';q:' + q + ';r:' + scope.ed.qualifier
-            };
-            if (displayColumns)
-              params.required_fields = displayColumns.split(";").join(":");
-            if (scope.domain) {
-              params.sysparm_domain = scope.domain;
-            }
-            if (angular.isDefined(scope.field) && scope.field['_cat_variable'] === true) {
-              delete params['sysparm_target_table'];
-              params['sysparm_include_variables'] = true;
-              params['variable_ids'] = scope.field.sys_id;
-              var getFieldSequence = g_form.$private.options('getFieldSequence');
-              if (getFieldSequence) {
-                params['variable_sequence1'] = getFieldSequence();
-              }
-              var itemSysId = g_form.$private.options('itemSysId');
-              params['sysparm_id'] = itemSysId;
-              var getFieldParams = g_form.$private.options('getFieldParams');
-              if (getFieldParams) {
-                angular.extend(params, getFieldParams());
-              }
-            }
-            if (scope.recordValues)
-              params.sysparm_record_values = scope.recordValues();
-            return params;
-          },
-          results: function(data, page) {
-            return ctrl.filterResults(data, page, scope.pageSize);
-          },
-          transport: s2Helpers.search
-        },
-        formatSelection: s2Helpers.formatSelection,
-        formatResult: s2Helpers.formatResult,
-        initSelection: s2Helpers.initSelection,
-        dropdownCssClass: attrs.dropdownCssClass,
-        formatResultCssClass: scope.formatResultCssClass || null,
-        multiple: isMultiple
-      };
-      if (isMultiple && scope.ed.reference == "sys_user" && !scope.field._cat_variable) {
-        config.createSearchChoice = function(term) {
-          if (spIs.an.email(term)) {
-            return {
-              email: term,
-              name: term,
-              user_name: term,
-              sys_id: term
-            };
-          }
-        };
-      }
-      if (scope.snOptions) {
-        if (scope.snOptions.placeholder) {
-          config.placeholder = scope.snOptions.placeholder;
-        }
-        if (scope.snOptions.width) {
-          config.width = scope.snOptions.width;
-        }
-      }
-
-      function getReferenceColumnsToSearch() {
-        var colNames = ['name'];
-        if (fieldAttributes['ref_ac_columns_search'] == 'true' && 'ref_ac_columns' in fieldAttributes && fieldAttributes['ref_ac_columns'] != '') {
-          colNames = fieldAttributes['ref_ac_columns'].split(';');
-          if (scope.ed.searchField)
-            colNames.push(scope.ed.searchField);
-        } else if (scope.ed.searchField)
-          colNames = [scope.ed.searchField];
-        else if (fieldAttributes['ref_ac_order_by'])
-          colNames = [fieldAttributes['ref_ac_order_by']];
-        return colNames.filter(onlyUnique);
-      }
-
-      function getExcludedValues() {
-        if (scope.ed.excludeValues && scope.ed.excludeValues != '') {
-          return '^sys_idNOT IN' + scope.ed.excludeValues;
-        }
-        return '';
-      }
-
-      function init() {
-        $timeout(function() {
-          i18n.getMessage('Searching...', function(searchingMsg) {
-            config.formatSearching = function() {
-              return searchingMsg;
-            };
-          });
-          element.css("opacity", 1);
-          element.select2("destroy");
-          var select2 = element.select2(config);
-          element.select2("val", scope.field.value.split(','));
-          if (isMultiple) {
-            element.bind("select2-selecting", s2Helpers.onSelecting);
-            element.bind("select2-removing", s2Helpers.onRemoving);
-          } else {
-            element.bind("change select2-removed", s2Helpers.select2Change);
-          }
-          element.bind("select2-blur", function() {
-            $timeout(function() {
-              scope.snOnBlur();
-            });
-          });
-          if (fireReadyEvent) {
-            scope.$emit('select2.ready', element);
-            fireReadyEvent = false;
-          }
-        });
-      }
-
-      function getDisplayValue(selectedItem) {
-        var displayValue = '';
-        if (selectedItem && selectedItem.sys_id) {
-          if (scope.displayColumn && typeof selectedItem[scope.displayColumn] != "undefined")
-            displayValue = selectedItem[scope.displayColumn];
-          else if (selectedItem.$$displayValue)
-            displayValue = selectedItem.$$displayValue;
-          else if (selectedItem.name)
-            displayValue = selectedItem.name;
-          else if (selectedItem.title)
-            displayValue = selectedItem.title;
-        }
-        return displayValue;
-      }
-
-      function getDisplayValues(selectedItem) {
-        var displayValues = [];
-        if (selectedItem && selectedItem.sys_id) {
-          displayValues.push(getDisplayValue(selectedItem));
-        }
-        if (displayColumns && refAutoCompleter === "AJAXTableCompleter") {
-          var columns = displayColumns.split(";");
-          for (var i = 0; i < columns.length; i++) {
-            var column = columns[i];
-            if (selectedItem[column])
-              displayValues.push(selectedItem[column]);
-          }
-        }
-        return displayValues.filter(onlyUnique);
-      }
-
-      function onlyUnique(value, index, self) {
-        return self.indexOf(value) === index;
-      }
-
-      function setPrice(p, rp) {
-        scope.field.price = p;
-        scope.field.recurring_price = rp;
-      }
-      g_form.$private.events.on("change", function(fieldName, oldValue, value) {
-        if (fieldName == field.name) {
-          if (value == "" && scope.field.display_value_list)
-            scope.field.display_value_list.length = 0;
-          element.select2("val", typeof value == 'string' ? value.split(',') : value);
-        }
-      });
-      scope.$on("snReferencePicker.activate", function(evt, parms) {
-        $timeout(function() {
-          element.select2("open");
-        })
-      });
-      init();
-    },
-    controller: function($scope, $rootScope) {
-      $scope.pageSize = 20;
-      this.filterResults = function(data, page) {
-        return {
-          results: data.data.items,
-          more: (page * $scope.pageSize < data.data.total)
-        };
-      };
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.$sp/directive.spCurrencyElement.js */
-angular.module('sn.$sp').directive('spCurrencyElement', function() {
-  return {
-    templateUrl: 'sp_element_currency.xml',
-    restrict: 'E',
-    replace: true,
-    scope: {
-      field: '=',
-      snBlur: '&',
-      snChange: '&',
-      'getGlideForm': '&glideForm'
-    },
-    controller: function($scope) {
-      var g_form = $scope.getGlideForm();
-      var field = $scope.field;
-      g_form.$private.events.on("change", function(fieldName, oldValue, newValue) {
-        if (fieldName == field.name) {
-          if (newValue.indexOf(";") > 0) {
-            var v = newValue.split(";");
-            field.currencyCode = v[0];
-            field.currencyValue = v[1];
-          } else
-            field.currencyValue = newValue;
-        }
-      });
-      $scope.formatValue = function(shouldSetValue) {
-        var v = field.currencyValue;
-        if (field.currencyValue != "")
-          v = field.currencyCode + ";" + field.currencyValue;
-        field.stagedValue = v;
-        $scope.snChange();
-        if (shouldSetValue)
-          $scope.snBlur();
-      }
-    }
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/directive.spDurationElement.js */
-angular.module('sn.$sp').directive('spDurationElement', function() {
-  "use strict";
-
-  function getVisibleUnits(attributes) {
-    var maxUnit = "days";
-    var o = {
-      days: ["days", "hours", "minutes", "seconds"],
-      hours: ["hours", "minutes", "seconds"],
-      minutes: ["minutes", "seconds"],
-      seconds: ["seconds"]
-    };
-    if (attributes && attributes.max_unit && attributes.max_unit in o)
-      maxUnit = attributes.max_unit;
-    return o[maxUnit];
-  }
-  return {
-    restrict: 'E',
-    replace: true,
-    require: 'ngModel',
-    templateUrl: 'sp_element_duration.xml',
-    link: function(scope, element, attrs, ngModelCtrl) {
-      var theDawnOfTime;
-      scope.field = scope.$eval(attrs.field);
-      scope.visibleUnits = getVisibleUnits(scope.field.attributes);
-      ngModelCtrl.$formatters.push(function() {
-        if (!ngModelCtrl.$modelValue)
-          return {
-            days: 0,
-            hours: 0,
-            minutes: 0,
-            seconds: 0
-          };
-        theDawnOfTime = moment("1970-01-01 00:00:00");
-        var dur = moment.duration(moment(ngModelCtrl.$modelValue).diff(theDawnOfTime));
-        if (moment(ngModelCtrl.$modelValue).isDST())
-          dur.add(1, "hours");
-        var d = parseInt(dur.asDays(), 10);
-        var h = dur.get('hours');
-        var m = dur.get('minutes');
-        var s = dur.get('seconds');
-        if (scope.visibleUnits[0] == "hours") {
-          h = h + (d * 24);
-          d = 0;
-        } else if (scope.visibleUnits[0] == "minutes") {
-          m = m + (h * 60) + (d * 1440);
-          d = h = 0;
-        } else if (scope.visibleUnits[0] == "seconds") {
-          s = s + (m * 60) + (h * 3600) + (d * 86400);
-          d = h = m = 0;
-        }
-        return {
-          days: d,
-          hours: h,
-          minutes: m,
-          seconds: s
-        };
-      });
-      ngModelCtrl.$render = function() {
-        scope.parts = ngModelCtrl.$viewValue;
-      };
-      ngModelCtrl.$parsers.push(function(model) {
-        theDawnOfTime = moment("1970-01-01 00:00:00");
-        var modelValue = moment.duration(model);
-        var newValue = theDawnOfTime.add(modelValue).format("YYYY-MM-DD HH:mm:ss");
-        return newValue;
-      });
-      scope.updateDuration = function() {
-        ngModelCtrl.$setViewValue(angular.copy(scope.parts));
-      };
-      scope.showLabel = function(unit) {
-        if (unit == "days" || unit == "hours")
-          return true;
-        if (scope.visibleUnits[0] == "minutes")
-          return unit == "minutes";
-        return scope.visibleUnits[0] == "seconds";
-      };
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.$sp/controller.spLogin.js */
-angular.module("sn.$sp").controller("spLogin", function($scope, $http, $window, urlTools, $location, i18n) {
-  $scope.login = function(username, password) {
-    var url = urlTools.getURL('view_form.login');
-    var pageId = $location.search().id || $scope.page.id;
-    var isLoginPage = $scope.portal.login_page_dv == pageId;
-    return $http({
-      method: 'post',
-      url: url,
-      data: urlTools.encodeURIParameters({
-        'sysparm_type': 'login',
-        'ni.nolog.user_password': true,
-        'remember_me': typeof remember_me != 'undefined' && !!remember_me ? true : false,
-        'user_name': username,
-        'user_password': password,
-        'get_redirect_url': true,
-        'sysparm_goto_url': isLoginPage ? null : $location.url()
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).then(function(response) {
-      if (!response.data) {
-        $scope.message = i18n.getMessage("There was an error processing your request");
-        return;
-      }
-      if (response.data.status == 'success') {
-        $scope.success = response.data.message;
-        $window.location = response.data.redirect_url;
-      } else {
-        $scope.message = response.data.message;
-      }
-    }, function errorCallback(response) {
-      $scope.message = i18n.getMessage("There was an error processing your request");
-    });
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/directive.spMessageDialog.js */
-angular.module("sn.$sp").directive('spMessageDialog', function(nowServer, i18n, $timeout) {
-  return {
-    restrict: 'E',
-    scope: {
-      name: '@',
-      title: '@',
-      message: '@',
-      question: '@',
-      ok: '@',
-      cancel: '@',
-      dialogClass: '@',
-      checkboxMessage: '@',
-      checkboxCallback: '&',
-      checkboxState: '='
-    },
-    replace: true,
-    templateUrl: 'sp_dialog.xml',
-    link: function(scope, element) {
-      element.remove();
-      element.appendTo($('body'));
-      if (scope.checkboxMessage) {
-        scope.checkboxModel = {
-          value: scope.checkboxState
-        };
-        scope.update = function() {
-          scope.checkboxState = scope.checkboxModel.value;
-          $timeout(function() {
-            scope.checkboxCallback()(scope.checkboxState);
-          })
-        }
-      }
-    }
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/controller.spPage.js */
-angular.module("sn.$sp").controller("spPage", function($scope, $http, $location, $window, $timeout, spUtil, nowServer, snRecordWatcher, cabrillo, $rootScope, glideUserSession) {
-  var _ = $window._;
-  $scope.firstPage = true;
-  $scope.page = {};
-  $scope.page.title = "Loading...";
-  $scope.theme = {};
-  $scope.portal = {};
-  $scope.sessions = {};
-  $scope.status = "";
-  $scope.isViewNative = cabrillo.isNative();
-  $scope.openWindow = function(parms) {
-    var jo = JSON.parse(parms);
-    var left = window.screenX + window.innerWidth - 540;
-    var top = window.screenY + 140;
-    window.open(jo.url, jo.name, "left=" + left + ",top=" + top + "," + jo.specs);
-  };
-  $scope.parseJSON = function(str) {
-    return JSON.parse(str);
-  }
-  $scope.getContainerClasses = function(container) {
-    var classes = {};
-    classes[container.width] = !container.bootstrap_alt;
-    classes[container.container_class_name] = true;
-    return classes;
-  }
-  var oid = $location.search().id;
-  var oldPath = $location.path();
-  $rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl) {
-    $scope.$broadcast("$$uiNotification.dismiss");
-    $scope.locationChanged = (oldUrl != newUrl);
-    var s = $location.search();
-    var p = $location.path();
-    if (oldPath != p) {
-      $window.location.href = $location.absUrl();
-      return;
-    }
-    if (angular.isDefined($scope.containers) && oid == s.id && s.spa) {
-      e.pageIsHandling = true;
-      return;
-    }
-    if (p.indexOf(".do") > 0 && p.indexOf("sp.do") == -1) {
-      var newUrl = $location.absUrl();
-      newUrl = newUrl.substr(newUrl.search(/[^\/]+.do/));
-      $window.location.href = "/" + newUrl;
-      return;
-    }
-    if (!window.NOW.has_access && $scope.locationChanged) {
-      $window.location.href = $location.absUrl();
-      return;
-    }
-    oid = s.id;
-    var t = getUrl();
-    refreshPage(t);
-  });
-
-  function getUrl() {
-    var currentParms = $location.search();
-    var params = {};
-    angular.extend(params, currentParms);
-    params.time = new Date().getTime();
-    params.portal_id = $scope.portal_id;
-    params.request_uri = $location.url();
-    return '/api/now/sp/page?' + $.param(params);
-  }
-
-  function loadPage(response) {
-    $scope.firstPage = false;
-    $scope.containers = _.filter(response.containers, {
-      'subheader': false
-    });
-    $scope.subheaders = _.filter(response.containers, {
-      'subheader': true
-    });
-    $scope.rectangles = response.rectangles;
-    $scope.style = '';
-    var p = response.page;
-    var u = response.user;
-    if (!isPublicOrUserLoggedIn(p, u)) {
-      if ($scope.locationChanged) {
-        $window.location.href = $location.absUrl();
-        return;
-      }
-    }
-    $rootScope.page = $scope.page = p;
-    setCSS(p);
-    if (response.portal.title)
-      $window.document.title = (p.title) ? response.portal.title + ' - ' + p.title : response.portal.title;
-    else
-      $window.document.title = p.title;
-    $timeout(function() {
-      jQuery('section, .flex-item').scrollTop(0);
-    });
-    $rootScope.theme = $scope.theme = response.theme;
-    var style = "";
-    if ($scope.isNative)
-      style = 'isNative';
-    response.portal.logoutUrl = "/logout.do?sysparm_goto_url=/" + response.portal.url_suffix;
-    $rootScope.portal = $scope.portal = response.portal;
-    if (!$scope.user) {
-      $rootScope.user = $scope.user = {};
-      glideUserSession.loadCurrentUser().then(function(g_user) {
-        $rootScope.g_user = g_user;
-      });
-    }
-    angular.extend($scope.user, response.user);
-    $scope.user.logged_in = $scope.user.user_name != 'guest';
-    $scope.$broadcast('$$uiNotification', response.$$uiNotification);
-    snRecordWatcher.init();
-  }
-  var pageLoaded = false;
-  $scope.$on('sp.page.reload', function() {
-    var t = getUrl();
-    refreshPage(t);
-  });
-
-  function refreshPage(dataURL) {
-    if (window.pageData && !pageLoaded) {
-      pageLoaded = true;
-      loadPage(pageData);
-    } else {
-      $http.get(dataURL, {
-        headers: spUtil.getHeaders()
-      }).success(function(response) {
-        loadPage(response.result);
-      });
-    }
-  }
-
-  function isPublicOrUserLoggedIn(page, user) {
-    if (page.public)
-      return true;
-    if (user.user_name == "guest")
-      return false;
-    return true;
-  }
-
-  function setCSS(page) {
-    jQuery("style[data-page-id='" + page.sys_id + "']").remove();
-    if (page.css) {
-      var buf = [
-        '<style type="text/css" data-page-id="' + page.sys_id + '" data-page-title="' + page.title + '">',
-        page.css,
-        '</style>'
-      ];
-      jQuery(jQuery(buf.join('\n'))).appendTo('head');
-    }
-  }
-  $(window).keydown(onKeyDown);
-
-  function onKeyDown(e) {
-    if (e.keyCode != 83)
-      return;
-    if (e.metaKey || e.ctrlKey) {
-      e.stopPropagation();
-      e.preventDefault();
-      $rootScope.$broadcast("$sp.save", e);
-    }
-  }
-  $scope.$on('$destroy', function() {
-    $(window).off("keydown", onKeyDown);
-  })
-});;
-/*! RESOURCE: /scripts/app.$sp/service.spPreference.js */
-angular.module('sn.$sp').factory('spPreference', function(nowServer, $http) {
-  "use strict";
-  return {
-    set: function(name, value) {
-      if (value !== null && typeof value === 'object')
-        value = JSON.stringify(value);
-      var dataURL = nowServer.getURL("$sp");
-      var n = {
-        sysparm_ck: g_ck,
-        type: "set_preference",
-        name: name,
-        value: value
-      }
-      Object.keys(n).forEach(function(t) {
-        dataURL += "&" + t + "=" + encodeURIComponent(n[t])
-      })
-      $http.post(dataURL);
-    },
-    get: function(name, callback) {
-      if (name == null)
-        return null;
-      var dataURL = nowServer.getURL("$sp");
-      var n = {
-        sysparm_ck: g_ck,
-        type: "get_preference",
-        name: name
-      }
-      Object.keys(n).forEach(function(t) {
-        dataURL += "&" + t + "=" + encodeURIComponent(n[t])
-      })
-      $http.post(dataURL).then(function(response) {
-        var answer = response.data.value;
-        if (callback && typeof callback === "function")
-          callback(answer);
-        else
-          console.warn("spPreference.get synchronous use not supported in Service Portal (preference: " + name + "), use callback");
-      })
-    }
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/factory.spWidget.js */
-angular.module('sn.$sp').factory('spWidgetService', function($compile, lazyLoader, spServer, $rootScope, $injector) {
-  var head = document.head || document.getElementsByTagName('head')[0];
-
-  function addElement(options) {
-    var el = document.createElement('style');
-    el.type = 'text/css';
-    if (options.id)
-      el.setAttribute('id', options.id);
-    if (options.widget)
-      el.setAttribute('widget', options.widget);
-    if (el.styleSheet)
-      el.styleSheet.cssText = options.css;
-    else
-      el.appendChild(document.createTextNode(options.css));
-    return el;
-  }
-
-  function render(scope, element, template) {
-    element.html(template);
-    var el = $compile(element.contents())(scope);
-    element.replaceWith(el);
-  }
-
-  function loadCSS(scope) {
-    var id = scope.widget.directiveName + '-s';
-    if (scope.widget.css) {
-      if (scope.widget.update)
-        scope.widget.css = scope.widget.css.replace(new RegExp('v' + scope.widget.sys_id, 'g'), scope.widget.directiveName);
-      if (!$("head #" + id).length)
-        head.appendChild(addElement({
-          css: scope.widget.css,
-          id: id,
-          widget: scope.widget.name
-        }));
-    }
-    if (scope.widget.rectangle && scope.widget.rectangle.css)
-      head.appendChild(addElement({
-        css: scope.widget.rectangle.css,
-        widget: scope.widget.name
-      }));
-  }
-
-  function initData(scope) {
-    scope.data = scope.widget.data;
-    scope.options = scope.widget.options;
-    scope.widget_parameters = scope.options;
-  }
-
-  function noData(scope) {
-    if (!scope.widget || !Object.keys(scope.widget).length) {
-      return true;
-    }
-    return false;
-  }
-
-  function loadDirective(scope, directiveName) {
-    if (scope.widget.providers) {
-      lazyLoader.providers(scope.widget.providers);
-    }
-    lazyLoader.directive(directiveName, function($injector) {
-      var api = {
-        restrict: 'C',
-        replace: false
-      };
-      if (typeof scope.data.replace !== 'undefined')
-        api.replace = scope.data.replace;
-      if (scope.widget.template)
-        api.template = scope.widget.template;
-      if (scope.widget.client_script) {
-        try {
-          var stmt = 'api.controller=' + scope.widget.client_script;
-          var src = scope.widget.id || directiveName;
-          stmt = "//# sourceURL=" + src + ".js\n" + stmt;
-          eval(stmt);
-          api.controller.displayName = src;
-          if (scope.widget.controller_as) {
-            api.controllerAs = scope.widget.controller_as;
-            api.bindToController = {
-              data: '=',
-              options: '=',
-              widget: '=',
-              server: '='
-            };
-          }
-        } catch (e) {
-          console.log(e);
-          console.log(scope.widget.client_script);
-        }
-      }
-      api.link = function(sc, elem, attr, ctrl) {
-        var link;
-        if (scope.widget.link) {
-          eval('link=' + scope.widget.link);
-          if (link) {
-            link(sc, elem, attr, ctrl)
-          }
-        };
-      };
-      return api;
-    });
-  }
-
-  function initGlobals(scope) {
-    scope.page = scope.page || $rootScope.page;
-    scope.portal = $rootScope.portal;
-    scope.user = $rootScope.user;
-    scope.theme = $rootScope.theme;
-    scope.server = spServer.set(scope);
-  }
-  return {
-    render: render,
-    loadCSS: loadCSS,
-    initData: initData,
-    initGlobals: initGlobals,
-    noData: noData,
-    loadDirective: loadDirective
-  }
-});;
-/*! RESOURCE: /scripts/app.$sp/directive.spWidget.js */
-angular.module('sn.$sp').directive('spWidget', function($rootScope, $timeout, lazyLoader, spWidgetService, spUtil) {
-  'use strict';
-  var service = spWidgetService;
-
-  function renderWidget(scope, element) {
-    if (scope.widget.ngTemplates)
-      lazyLoader.putTemplates(scope.widget.ngTemplates);
-    service.initData(scope);
-    service.initGlobals(scope);
-    var name = scope.widget.sys_id;
-    name = "v" + name;
-    if (scope.widget.update) {
-      name += spUtil.createUid('xxxxx');
-    }
-    scope.widget.directiveName = name;
-    scope.$watch("widget", function(newValue, oldValue) {
-      if (newValue !== oldValue)
-        service.initData(scope);
-    });
-    var idTag = (scope.widget.rectangle_id) ? "id=\"x" + scope.widget.rectangle_id + "\"" : "";
-    var template = '<div ' + idTag + ' class="' + name + '" data="data" options="options" widget="widget" server="server"></div>';
-    if (name.length == 0)
-      return;
-
-    function load() {
-      service.loadDirective(scope, name, template);
-      service.loadCSS(scope);
-      service.render(scope, element, template);
-    }
-    if (scope.widget.dependencies) {
-      lazyLoader.dependencies(scope.widget.dependencies).then(load, function(e) {
-        spUtil.format('An error occurred when loading widget dependencies for: {name} ({id}) {error}', {
-          name: scope.widget.name,
-          id: scope.widget.sys_id,
-          error: e
-        });
-        load();
-      });
-    } else {
-      load();
-    }
-  }
-
-  function link(scope, element) {
-    if (service.noData(scope)) {
-      var w = scope.$watch("widget", function() {
-        if (!service.noData(scope)) {
-          w();
-          renderWidget(scope, element);
-        }
-      });
-      return;
-    }
-    renderWidget(scope, element);
-  }
-  return {
-    restrict: "E",
-    link: link,
-    scope: {
-      widget: '=',
-      page: '=?'
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.$sp/controller.spWidgetDebug.js */
-angular.module('sn.$sp').controller('spWidgetDebug', function($scope, $rootScope, $uibModal, $http, spUtil, $window, i18n) {
-  $scope.reveal = false;
-  $scope.page = $rootScope.page;
-  $scope.portal = $rootScope.portal;
-  var menu = [
-    null, [i18n.getMessage("Instance Options"), editInstance],
-    [i18n.getMessage('Instance in Page Editor') + ' ➚', instancePageEdit],
-    [i18n.getMessage('Page in Designer') + ' ➚', openDesigner],
-    null, [i18n.getMessage('Edit Container Background'), editBackground],
-    null, [i18n.getMessage('Widget Options Schema'), editOptionSchema],
-    [i18n.getMessage('Widget in Form Modal'), editWidget],
-    [i18n.getMessage('Widget in Editor') + ' ➚', openWidgetEditor],
-    null, [i18n.getMessage('Log to console') + ': $scope.data', logScopeData],
-    [i18n.getMessage('Log to console') + ': $scope', logScope]
-  ];
-  $scope.contextMenu = function(event) {
-    if (!event.ctrlKey || !$rootScope.user.can_debug)
-      return [];
-    var w = $scope.rectangle.widget;
-    menu[0] = spUtil.format("'{widget}' {text} : {time}", {
-      widget: w.name,
-      text: i18n.getMessage('generated in'),
-      time: w._server_time
-    });
-    menu[1] = (!w.option_schema && !w.rectangle.widget_parameters && !w.field_list) ? [i18n.getMessage("Instance Options")] : [i18n.getMessage("Instance Options"), editInstance];
-    var p = "_debugContextMenu";
-    if (p in w && Array.isArray(w[p]))
-      return menu.concat([null], w[p]);
-    return menu;
-  };
-
-  function logScope() {
-    console.log("Widget instance...", $scope.rectangle.widget);
-  }
-
-  function logScopeData() {
-    console.log("Widget $scope.data...", $scope.rectangle.widget.data);
-  }
-
-  function editWidget() {
-    editRecord('sp_widget', $scope.rectangle.widget.sys_id);
-  }
-
-  function editInstance() {
-    editRecord('sp_instance', $scope.rectangle.sys_id);
-  }
-
-  function editBackground() {
-    editRecord('sp_container', $scope.container.sys_id);
-  }
-
-  function openDesigner() {
-    var page = '$spd.do';
-    var ops = {
-      portal: $scope.portal.url_suffix,
-      page: page,
-      pageId: $scope.page.id,
-      instance: $scope.rectangle.sys_id
-    };
-    $window.open(spUtil.format('/{page}#/{portal}/editor/{pageId}/{instance}', ops), page);
-  }
-
-  function openWidgetEditor() {
-    openConfig({
-      id: 'widget_editor',
-      sys_id: $scope.rectangle.widget.sys_id
-    });
-  }
-
-  function instancePageEdit() {
-    openConfig({
-      id: 'page_edit',
-      p: $scope.page.id,
-      table: 'sp_instance',
-      sys_id: $scope.rectangle.sys_id
-    });
-  }
-
-  function editOptionSchema() {
-    var data = {
-      embeddedWidgetId: 'we20',
-      embeddedWidgetOptions: {
-        sys_id: $scope.rectangle.widget.sys_id
-      }
-    };
-    spUtil.get('widget-modal', data).then(function(widget) {
-      var myModalCtrl = null;
-      widget.options.afterOpen = function(modalCtrl) {
-        myModalCtrl = modalCtrl;
-      };
-      var unregister = $scope.$on('$sp.we20.options_saved', function() {
-        myModalCtrl.close();
-        unregister();
-      });
-      widget.options.afterClose = function() {
-        $scope.rectangle.debugModal = null;
-        $rootScope.$broadcast('sp.page.reload');
-      };
-      $scope.rectangle.debugModal = widget;
-    });
-  }
-
-  function openConfig(params) {
-    $window.open('/sp_config?' + $.param(params), 'sp_config');
-  }
-
-  function editRecord(table, sys_id) {
-    var input = {
-      table: table,
-      sys_id: sys_id
-    };
-    spUtil.get('widget-options-config', input).then(function(widget) {
-      var myModalCtrl = null;
-      widget.options.afterClose = function() {
-        $scope.rectangle.debugModal = null;
-      };
-      widget.options.afterOpen = function(modalCtrl) {
-        myModalCtrl = modalCtrl;
-      };
-      $scope.rectangle.debugModal = widget;
-      var unregister = $scope.$on('sp.form.record.updated', function(evt, fields) {
-        unregister();
-        unregister = null;
-        myModalCtrl.close();
-        $rootScope.$broadcast('sp.page.reload');
-      });
-    });
-  }
-});;
-/*! RESOURCE: /scripts/app.$sp/directive.spNavbarToggle.js */
-angular.module('sn.$sp').directive('spNavbarToggle', function(cabrillo, $timeout) {
-  return {
-    restrict: 'A',
-    link: function($scope, element, attrs) {
-      $scope.toggleNavMenu = function() {
-        $(element).collapse('toggle');
-      }
-      if (cabrillo.isNative) {
-        cabrillo.viewLayout.setNavigationBarButtons([{
-          title: 'Menu'
-        }], $scope.toggleNavMenu);
-      }
-    }
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/directive.spAttachmentButton.js */
-angular.module('sn.$sp').directive('spAttachmentButton', function(cabrillo, $rootScope, $timeout) {
-  'use strict';
-  return {
-    restrict: 'E',
-    template: function() {
-      var inputTemplate;
-      if (cabrillo.isNative()) {
-        inputTemplate = '<a href="#" id="attachment_add" ng-click="showAttachOptions()" class="panel-button sp-attachment-add"><span class="glyphicon glyphicon-camera"></span></a>';
-      } else {
-        inputTemplate = '<input type="file" style="display: none" multiple="true" ng-file-select="attachmentHandler.onFileSelect($files)" class="sp-attachments-input"/>';
-        inputTemplate += '<a href="javascript:void(0)" id="attachment_add" ng-click="attachmentHandler.openSelector($event)" class="panel-button sp-attachment-add"><span class="glyphicon glyphicon-paperclip"></span></a>';
-      }
-      return [
-        '<span class="file-upload-input">',
-        inputTemplate,
-        '</span>'
-      ].join('');
-    },
-    controller: function($element, $scope) {
-      $scope.attachmentClassNames = 'btn-default attachment-btn btn-primary icon-paperclip icon-camera list-group-btn';
-      $scope.showAttachOptions = function() {
-        var handler = $scope.attachmentHandler;
-        cabrillo.attachments.addFile(
-          handler.tableName,
-          handler.tableId,
-          null, {
-            maxWidth: 1000,
-            maxHeight: 1000
-          }
-        ).then(function(data) {
-          handler.getAttachmentList();
-          $rootScope.$broadcast("added_attachment");
-        }, function() {
-          console.log('Failed to attach new file');
-        });
-      };
-      $scope.$on('attachment_select_files', function(e) {
-        $timeout(function() {
-          $($element).find('.sp-attachments-input').click();
-        });
-      });
-    }
-  }
-});;
-/*! RESOURCE: /scripts/app.$sp/directive.spPageRow.js */
-angular.module('sn.$sp').directive('spPageRow', function($rootScope, $timeout, $compile) {
-  return {
-    restrict: 'E',
-    templateUrl: 'sp_page_row',
-    compile: function($tElement) {
-      var el = angular.element($tElement[0]);
-      var recursiveNode = el.children(".sp-row-content").remove();
-      return function(scope, element, attrs) {
-        var newNode = recursiveNode.clone();
-        element.append(newNode);
-        $compile(newNode)(scope);
-      };
-    },
-    replace: false,
-    scope: {
-      columns: "=",
-      container: "=",
-      row: '='
-    },
-    controller: function($scope) {}
-  }
-});
-/*! RESOURCE: /scripts/app.$sp/directive.spPanel.js */
-angular.module('sn.$sp').directive('spPanel', function() {
-  return {
-    restrict: 'E',
-    transclude: true,
-    replace: true,
-    link: function($scope, $element, $attributes, controller, transcludeFn) {
-      $scope.widgetParameters = $scope.widget_parameters || $scope.$parent.widget_parameters || {};
-      if (!$scope.options)
-        $scope.options = $scope.$eval($attributes.options) || $scope.$parent.options;
-      var title;
-      try {
-        title = $scope.$eval($attributes.title);
-      } catch (e) {
-        title = $attributes.title
-      }
-      $scope.title = title || $scope.options.title;
-      $scope.bodyClass = $scope.$eval($attributes.bodyClass) || "panel-body";
-      transcludeFn($scope, function(clone) {
-        var container = $element.find('div.transclude');
-        container.empty();
-        container.append(clone);
-      });
-    },
-    template: '<div class="panel panel-{{options.color}} b">' +
-      '<div class="panel-heading"> <h4 class="panel-title">' +
-      '<fa ng-if="options.glyph.length" name="{{options.glyph}}" class="m-r-sm" />{{title}}</h4>' +
-      '</div>' +
-      '<div class="{{bodyClass}} transclude"></div>' +
-      '</div>'
-  }
-});;
-/*! RESOURCE: /scripts/app.$sp/directive.spModel.js */
-angular.module('sn.$sp').directive('spVariableLayout', function() {
-    'use strict';
-    return {
-      restrict: 'E',
-      templateUrl: 'sp_variable_layout.xml',
-      scope: false
-    };
-  }).directive('spModel', function($timeout, spUtil, glideFormFactory, glideUserSession, catalogItemFactory, glideFormEnvironmentFactory, catalogGlideFormFactory, spUIActionFactory, glideModalFactory, $uibModal,
-      spModal, glideListFactory) {
-      'use strict';
+      "use strict";
       return {
         restrict: 'E',
-        templateUrl: 'sp_model.xml',
         replace: true,
         scope: {
-          formModel: "=",
-          mandatory: '=',
-          isInlineForm: '=?'
+          ed: "=?",
+          field: "=",
+          refTable: "=?",
+          refId: "=?",
+          snOptions: "=?",
+          snOnBlur: "&",
+          snOnClose: "&",
+          minimumInputLength: "@",
+          snDisabled: "=",
+          dropdownCssClass: "@",
+          formatResultCssClass: "&",
+          displayColumn: "@",
+          recordValues: '&',
+          getGlideForm: '&glideForm',
+          domain: "@",
+          snSelectWidth: '@',
         },
-        controller: function($scope) {
+        template: '<input type="text" name="{{field.name}}" ng-disabled="snDisabled" style="min-width: 150px;" />',
+        link: function(scope, element, attrs, ctrl) {
+            scope.ed = scope.ed || scope.field.ed;
+            scope.selectWidth = scope.snSelectWidth || '100%';
+            element.css("opacity", 0);
+            var fireReadyEvent = true;
             var g_form;
-            var flatFields;
-            var isCatalogItem;
-            var debounceFieldChange;
-            var formModel;
-            $scope.$watch('formModel', function(newValue) {
-              if (angular.isDefined(newValue))
-                init();
-            });
-
-            function onChange(fieldName, oldValue, newValue) {
-              if (!(fieldName in formModel._fields))
-                return;
-              $timeout.cancel(debounceFieldChange[fieldName]);
-              debounceFieldChange[fieldName] = $timeout(function() {
-                var field = formModel._fields[fieldName];
-                if (isCatalogItem) {
-                  if (field._pricing) {
-                    setPrices(field, newValue);
-                    setBoolean(field, newValue);
-                    calcPrice();
+            var displayColumns;
+            var refAutoCompleter;
+            var refOrderBy;
+            var field = scope.field;
+            var isMultiple = scope.snOptions && scope.snOptions.multiple === true;
+            if (angular.isDefined(scope.getGlideForm))
+              g_form = scope.getGlideForm();
+            var fieldAttributes = {};
+            if (scope.field && scope.field.attributes && typeof scope.ed.attributes == 'undefined') {
+              if (Array.isArray(scope.field.attributes)) {
+                fieldAttributes = scope.field.attributes;
+              } else {
+                fieldAttributes = spUtil.parseAttributes(scope.field.attributes);
+              }
+            } else {
+              fieldAttributes = spUtil.parseAttributes(scope.ed.attributes);
+            }
+            if (angular.isDefined(fieldAttributes['ref_ac_columns']))
+              displayColumns = fieldAttributes['ref_ac_columns'];
+            if (angular.isDefined(fieldAttributes['ref_auto_completer']))
+              refAutoCompleter = fieldAttributes['ref_auto_completer'];
+            else
+              refAutoCompleter = "AJAXReferenceCompleter";
+            if (angular.isDefined(fieldAttributes['ref_ac_order_by']))
+              refOrderBy = fieldAttributes['ref_ac_order_by'];
+            var s2Helpers = {
+              formatSelection: function(item) {
+                return $sanitize(getDisplayValue(item));
+              },
+              formatResult: function(item) {
+                var displayValues = getDisplayValues(item);
+                if (displayValues.length == 1)
+                  return $sanitize(displayValues[0]);
+                if (displayValues.length > 1) {
+                  var width = 100 / displayValues.length;
+                  var markup = "";
+                  for (var i = 0; i < displayValues.length; i++)
+                    markup += "<div style='width: " + width + "%;display: inline-block;' class='select2-result-cell'>" + $sanitize(displayValues[i]) + "</div>";
+                  return markup;
+                }
+                return "";
+              },
+              search: function(queryParams) {
+                var url = urlTools.getURL('sp_ref_list_data');
+                return $http.post(url, queryParams.data).then(function(response) {
+                  queryParams.success(response);
+                });
+              },
+              initSelection: function(elem, callback) {
+                if (scope.field.displayValue) {
+                  if (isMultiple) {
+                    var items = [];
+                    var values = scope.field.value.split(',');
+                    var displayValues = scope.field.display_value_list;
+                    if (Array.isArray(scope.field.displayValue)) {
+                      displayValues.length = 0;
+                      for (var i in scope.field.displayValue)
+                        displayValues[i] = scope.field.displayValue[i];
+                      scope.field.displayValue = displayValues.join(g_glide_list_separator);
+                    } else if (values.length == 1) {
+                      displayValues.length = 0;
+                      displayValues[0] = scope.field.displayValue;
+                    } else if (scope.field.displayValue != displayValues.join(g_glide_list_separator)) {
+                      displayValues.length = 0;
+                      var split = scope.field.displayValue.split(',');
+                      for (var i in split)
+                        displayValues[i] = split[i];
+                    }
+                    for (var i = 0; i < values.length; i++) {
+                      items.push({
+                        sys_id: values[i],
+                        name: displayValues[i]
+                      });
+                    }
+                    callback(items);
+                  } else {
+                    callback({
+                      sys_id: scope.field.value,
+                      name: scope.field.displayValue
+                    });
+                  }
+                } else
+                  callback([]);
+              },
+              onSelecting: function(e) {
+                var selectedItem = e.choice;
+                if ('sys_id' in selectedItem) {
+                  var values = field.value == '' ? [] : field.value.split(',');
+                  var displayValues = field.display_value_list;
+                  values.push(selectedItem.sys_id);
+                  displayValues.push(getDisplayValue(selectedItem));
+                  g_form.setValue(field.name, values.join(','), displayValues.join(g_glide_list_separator));
+                  e.preventDefault();
+                  element.select2('val', values).select2('close');
+                }
+              },
+              onRemoving: function(e) {
+                var removed = e.choice;
+                var values = field.value.split(',');
+                var displayValues = field.display_value_list;
+                for (var i = values.length - 1; i >= 0; i--) {
+                  if (removed.sys_id == values[i]) {
+                    values.splice(i, 1);
+                    displayValues.splice(i, 1);
+                    break;
                   }
                 }
-                populateMandatory();
-                var p = {
-                  field: field,
-                  oldValue: oldValue,
-                  newValue: newValue
-                };
-                $scope.$emit("field.change", p);
-                $scope.$emit("field.change." + field.name, p);
-              });
-            }
-
-            function populateMandatory() {
-              var mandatory = [];
-              var field;
-              for (var f in flatFields) {
-                field = flatFields[f];
-                if (typeof field.mandatory_filled == 'undefined')
-                  continue;
-                if (field.mandatory_filled())
-                  continue;
-                if (field.visible && field.isMandatory())
-                  mandatory.push(field);
+                g_form.setValue(field.name, values.join(','), displayValues.join(g_glide_list_separator));
+                e.preventDefault();
+                element.select2('val', values);
+              },
+              select2Change: function(e) {
+                e.stopImmediatePropagation();
+                if (e.added) {
+                  var selectedItem = e.added;
+                  var value = selectedItem.sys_id;
+                  var displayValue = value ? getDisplayValue(selectedItem) : '';
+                  if (scope.field['_cat_variable'] === true && ('price' in selectedItem || 'recurring_price' in selectedItem))
+                    setPrice(selectedItem.price, selectedItem.recurring_price);
+                  g_form.setValue(scope.field.name, value, displayValue);
+                } else if (e.removed) {
+                  if (scope.field['_cat_variable'] === true)
+                    setPrice(0, 0);
+                  g_form.clearValue(scope.field.name);
+                }
               }
-              $scope.mandatory = mandatory;
-              $scope.$emit("variable.mandatory.change");
+            };
+            var config = {
+              width: scope.selectWidth,
+              minimumInputLength: scope.minimumInputLength ? parseInt(scope.minimumInputLength, 10) : 0,
+              containerCssClass: 'select2-reference ng-form-element',
+              placeholder: '   ',
+              formatSearching: '',
+              allowClear: attrs.allowClear !== 'false',
+              id: function(item) {
+                return item.sys_id;
+              },
+              sortResults: (scope.snOptions && scope.snOptions.sortResults) ? scope.snOptions.sortResults : undefined,
+              ajax: {
+                quietMillis: NOW.ac_wait_time,
+                data: function(filterText, page) {
+                  var filterExpression = filterExpressionParser.parse(filterText, scope.ed.defaultOperator);
+                  var q = '';
+                  var columnsToSearch = getReferenceColumnsToSearch();
+                  var queryArr = [];
+                  var query;
+                  columnsToSearch.forEach(function(colToSearch) {
+                    query = "";
+                    if (field.ed.queryString)
+                      query += field.ed.queryString + '^';
+                    query += colToSearch + filterExpression.operator + filterExpression.filterText +
+                      '^' + colToSearch + 'ISNOTEMPTY' + getExcludedValues();
+                    queryArr.push(query);
+                  });
+                  q += queryArr.join("^NQ");
+                  if (refOrderBy)
+                    q += "^ORDERBY" + refOrderBy;
+                  q += "^EQ";
+                  var params = {
+                    start: (scope.pageSize * (page - 1)),
+                    count: scope.pageSize,
+                    sysparm_target_table: scope.refTable,
+                    sysparm_target_sys_id: scope.refId,
+                    sysparm_target_field: scope.ed.name,
+                    table: scope.ed.reference,
+                    qualifier: scope.ed.qualifier,
+                    data_adapter: scope.ed.data_adapter,
+                    attributes: scope.ed.attributes,
+                    dependent_field: scope.ed.dependent_field,
+                    dependent_table: scope.ed.dependent_table,
+                    dependent_value: scope.ed.dependent_value,
+                    p: scope.ed.reference + ';q:' + q + ';r:' + scope.ed.qualifier
+                  };
+                  if (displayColumns)
+                    params.required_fields = displayColumns.split(";").join(":");
+                  if (scope.domain) {
+                    params.sysparm_domain = scope.domain;
+                  }
+                  if (angular.isDefined(scope.field) && scope.field['_cat_variable'] === true) {
+                    delete params['sysparm_target_table'];
+                    params['sysparm_include_variables'] = true;
+                    params['variable_ids'] = scope.field.sys_id;
+                    var getFieldSequence = g_form.$private.options('getFieldSequence');
+                    if (getFieldSequence) {
+                      params['variable_sequence1'] = getFieldSequence();
+                    }
+                    var itemSysId = g_form.$private.options('itemSysId');
+                    params['sysparm_id'] = itemSysId;
+                    var getFieldParams = g_form.$private.options('getFieldParams');
+                    if (getFieldParams) {
+                      angular.extend(params, getFieldParams());
+                    }
+                  }
+                  if (scope.recordValues)
+                    params.sysparm_record_values = scope.recordValues();
+                  return params;
+                },
+                results: function(data, page) {
+                  return ctrl.filterResults(data, page, scope.pageSize);
+                },
+                transport: s2Helpers.search
+              },
+              formatSelection: s2Helpers.formatSelection,
+              formatResult: s2Helpers.formatResult,
+              initSelection: s2Helpers.initSelection,
+              dropdownCssClass: attrs.dropdownCssClass,
+              formatResultCssClass: scope.formatResultCssClass || null,
+              multiple: isMultiple
+            };
+            if (isMultiple && scope.ed.reference == "sys_user" && !scope.field._cat_variable) {
+              config.createSearchChoice = function(term) {
+                if (spIs.an.email(term)) {
+                  return {
+                    email: term,
+                    name: term,
+                    user_name: term,
+                    sys_id: term
+                  };
+                }
+              };
             }
-
-            function uiMessageHandler(g_form, type, message) {
-              switch (type) {
-                case 'infoMessage':
-                  spUtil.addInfoMessage(message);
-                  break;
-                case 'errorMessage':
-                  spUtil.addErrorMessage(message);
-                  break;
-                case 'clearMessages':
-                  break;
-                default:
-                  return false;
+            if (scope.snOptions) {
+              if (scope.snOptions.placeholder) {
+                config.placeholder = scope.snOptions.placeholder;
+              }
+              if (scope.snOptions.width) {
+                config.width = scope.snOptions.width;
               }
             }
 
-            function getFieldsFromView(fm) {
-              var fields = [],
-                field, variable;
-              if (typeof fm._view !== "undefined") {
-                for (var f in fm._view) {
-                  field = fm._view[f];
-                  if (fm._fields[fie
+            function getReferenceColumnsToSearch() {
+              var colNames = ['name'];
+              if (fieldAttributes['ref_ac_columns_search'] == 'true' && 'ref_ac_columns' in fieldAttributes && fieldAttributes['ref_ac_columns'] != '') {
+                colNames = fieldAttributes['ref_ac_columns'].split(';');
+                if (scope.ed.searchField)
+                  colNames.push(scope.ed.searchField);
+              } else if (scope.ed.searchField)
+                colNames = [scope.ed.searchField];
+              else if (fieldAttributes['ref_ac_order_by'])
+                colNames = [fieldAttributes['ref_ac_order_by']];
+              return colNames.filter(onlyUnique);
+            }
+
+            function getExcludedValues() {
+              if (scope.ed.excludeValues && scope.ed.excludeValues != '') {
+                return '^sys_idNOT IN' + scope.ed.excludeValues;
+              }
+              return '';
+            }
+
+            function init() {
+              $timeout(function() {
+                    i18n.getMessage('Searching...', function(searchingMsg) {
+                      config.formatSearching = function() {
+                        return searchingMsg;
+                      };
+                    });
+                    element.css("op

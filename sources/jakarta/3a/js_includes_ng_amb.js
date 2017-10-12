@@ -1733,11 +1733,12 @@ org.cometd.Cometd = function(name) {
       return subscription;
     }
     this.registerTransport = function(type, transport, index) {
-        var result = _transports.add(type, transport, index);
-        if (result) {
-          this._debug('Registered transport', type);
-          if (_isFunction(transport.registered)) {
-            transport.registered(type, this);
+      var result = _transports.add(type, transport, index);
+      if (result) {
+        this._debug('Registered transport', type);
+        if (_isFunction(transport.registered)) {
+          transport.registered(type, this);
+        }
       }
       return result;
     };
@@ -1829,4 +1830,56 @@ org.cometd.Cometd = function(name) {
     this.clearListeners = function() {
       _listeners = {};
     };
-    this.subscribe = function(channel, scope, callba
+    this.subscribe = function(channel, scope, callback, subscribeProps, subscribeCallback) {
+      if (arguments.length < 2) {
+        throw 'Illegal arguments number: required 2, got ' + arguments.length;
+      }
+      if (!_isString(channel)) {
+        throw 'Illegal argument type: channel must be a string';
+      }
+      if (_isDisconnected()) {
+        throw 'Illegal state: already disconnected';
+      }
+      if (_isFunction(scope)) {
+        subscribeCallback = subscribeProps;
+        subscribeProps = callback;
+        callback = scope;
+        scope = undefined;
+      }
+      if (_isFunction(subscribeProps)) {
+        subscribeCallback = subscribeProps;
+        subscribeProps = undefined;
+      }
+      var send = !_hasSubscriptions(channel);
+      var subscription = _addListener(channel, scope, callback, false);
+      if (send) {
+        var bayeuxMessage = {
+          channel: '/meta/subscribe',
+          subscription: channel,
+          _callback: subscribeCallback
+        };
+        var message = this._mixin(false, {}, subscribeProps, bayeuxMessage);
+        _queueSend(message);
+      }
+      return subscription;
+    };
+    this.unsubscribe = function(subscription, unsubscribeProps, unsubscribeCallback) {
+        if (arguments.length < 1) {
+          throw 'Illegal arguments number: required 1, got ' + arguments.length;
+        }
+        if (_isDisconnected()) {
+          throw 'Illegal state: already disconnected';
+        }
+        if (_isFunction(unsubscribeProps)) {
+          unsubscribeCallback = unsubscribeProps;
+          unsubscribeProps = undefined;
+        }
+        this.removeListener(subscription);
+        var channel = subscription.channel;
+        if (!_hasSubscriptions(channel)) {
+          var bayeuxMessage = {
+            channel: '/meta/unsubscribe',
+            subscription: channel,
+            _callback: unsubscribeCallback
+          };
+          var message

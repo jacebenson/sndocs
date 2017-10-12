@@ -3790,286 +3790,1239 @@ GwtListEditRecordDecorations.Templates = {
 };;
 /*! RESOURCE: /scripts/GwtListEditValueRenderer.js */
 var GwtListEditValueRenderer = Class.create({
-      MSGS: [
-        'Insert a new row...',
-        'Undelete',
-        'Mark deleted',
-        'Loading...',
-        'A new {0} identified by {1} will be created upon save'
-      ],
-      initialize: function(changes, tableController) {
-        this.changes = changes;
-        this.tableController = tableController;
-        this.gList = new GwtListEditGList(this.changes, this.tableController, this);
-        this.decor = new GwtListEditRecordDecorations(this.changes, this.tableController);
-        this.emptyRecord = null;
-        this.msgs = getMessages(this.MSGS);
-      },
-      updateTable: function() {
-        this.decor.updateTable();
-      },
-      setValue: function(sysId, fieldName, value) {
-        if (this.changes.isEmptyRecord(sysId))
-          this._saveEmptyRecord(sysId);
-        return this.changes.setValue(sysId, fieldName, value, this._callOnChange.bind(this));
-      },
-      setDisplayValue: function(sysId, fieldName, value) {
-        if (this.changes.isEmptyRecord(sysId))
-          this._saveEmptyRecord(sysId);
-        return this.changes.setDisplayValue(sysId, fieldName, value, this._callOnChange.bind(this));
-      },
-      addRow: function() {
-        if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
-          return;
-        this.addRowWithValues({}, {});
-      },
-      addRowWithValues: function(values, displayValues) {
-        if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
-          return;
-        var adder = this._addRowHandler.bind(this, values, displayValues);
-        this.changes.loadDefaults(adder);
-      },
-      _addRowHandler: function(values, displayValues) {
-        var sysId = this._generateId();
-        var record = this.changes.addRecord(sysId, "add");
-        this.changes.setDefaults(record);
-        this._populateFields(record, values, displayValues);
-        this.insertRowForRecord(record);
-        this.changes.addToAggregates(record);
-      },
-      _populateFields: function(record, values, displayValues) {
-        for (var v in values) {
-          var field = record.addField(v);
-          field.setValue(values[v]);
-        }
-        for (var v in displayValues) {
-          var field = record.addField(v);
-          field.setDisplayValue(displayValues[v]);
-        }
-      },
-      addRowNoInsert: function() {
-        if (!this.tableController.canCreate)
-          return;
-        if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
-          return;
-        if (!this.emptyRecord) {
-          this.changes.loadDefaults(this._addRowNoInsertHandler.bind(this));
-          return;
-        }
-        this.insertRowForRecord(this.emptyRecord);
-        this.decor.showEdit(this.emptyRecord.sysId);
-      },
-      _addRowNoInsertHandler: function() {
-        if (!this.emptyRecord) {
-          var sysId = this._generateId();
-          this.emptyRecord = this.changes.addEmptyRecord(sysId);
-        }
-        this.changes.setDefaults(this.emptyRecord);
-        this.insertRowForRecord(this.emptyRecord);
-        this.decor.showEdit(this.emptyRecord.sysId);
-      },
-      renderValue: function(sysId, fieldName, valueToDisplay, newRow) {
-        var cell = this.tableController.getCell(sysId, fieldName);
-        if (!cell)
-          return;
-        var cellIndex = document.documentElement.getAttribute('data-doctype') == 'true' ? 2 : 1;
-        var dspValue = this._getValueToRender(sysId, fieldName, valueToDisplay);
-        if (newRow && (cellIndex === cell.cellIndex) && ("" === dspValue)) {
-          dspValue = this.msgs['Insert a new row...'];
-          cell.addClassName("list_edit_new_row");
-        }
-        this._renderContents(cell, sysId, fieldName, dspValue, newRow);
-        this._markChangedField(cell, sysId, fieldName);
-      },
-      _renderContents: function(cell, sysId, fieldName, dspValue, newRow) {
-        if (dspValue)
-          dspValue = dspValue.escapeHTML();
-        if (!newRow && this.tableController.isFirstField(fieldName)) {
-          var linkLabel = this._getLinkLabel(cell);
-          if (linkLabel) {
-            linkLabel.nodeValue = dspValue;
+  MSGS: [
+    'Insert a new row...',
+    'Undelete',
+    'Mark deleted',
+    'Loading...',
+    'A new {0} identified by {1} will be created upon save'
+  ],
+  initialize: function(changes, tableController) {
+    this.changes = changes;
+    this.tableController = tableController;
+    this.gList = new GwtListEditGList(this.changes, this.tableController, this);
+    this.decor = new GwtListEditRecordDecorations(this.changes, this.tableController);
+    this.emptyRecord = null;
+    this.msgs = getMessages(this.MSGS);
+  },
+  updateTable: function() {
+    this.decor.updateTable();
+  },
+  setValue: function(sysId, fieldName, value) {
+    if (this.changes.isEmptyRecord(sysId))
+      this._saveEmptyRecord(sysId);
+    return this.changes.setValue(sysId, fieldName, value, this._callOnChange.bind(this));
+  },
+  setDisplayValue: function(sysId, fieldName, value) {
+    if (this.changes.isEmptyRecord(sysId))
+      this._saveEmptyRecord(sysId);
+    return this.changes.setDisplayValue(sysId, fieldName, value, this._callOnChange.bind(this));
+  },
+  addRow: function() {
+    if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
+      return;
+    this.addRowWithValues({}, {});
+  },
+  addRowWithValues: function(values, displayValues) {
+    if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
+      return;
+    var adder = this._addRowHandler.bind(this, values, displayValues);
+    this.changes.loadDefaults(adder);
+  },
+  _addRowHandler: function(values, displayValues) {
+    var sysId = this._generateId();
+    var record = this.changes.addRecord(sysId, "add");
+    this.changes.setDefaults(record);
+    this._populateFields(record, values, displayValues);
+    this.insertRowForRecord(record);
+    this.changes.addToAggregates(record);
+  },
+  _populateFields: function(record, values, displayValues) {
+    for (var v in values) {
+      var field = record.addField(v);
+      field.setValue(values[v]);
+    }
+    for (var v in displayValues) {
+      var field = record.addField(v);
+      field.setDisplayValue(displayValues[v]);
+    }
+  },
+  addRowNoInsert: function() {
+    if (!this.tableController.canCreate)
+      return;
+    if (GlideLists2[this.tableController.listID] && GlideLists2[this.tableController.listID].disableRowAdd)
+      return;
+    if (!this.emptyRecord) {
+      this.changes.loadDefaults(this._addRowNoInsertHandler.bind(this));
+      return;
+    }
+    this.insertRowForRecord(this.emptyRecord);
+    this.decor.showEdit(this.emptyRecord.sysId);
+  },
+  _addRowNoInsertHandler: function() {
+    if (!this.emptyRecord) {
+      var sysId = this._generateId();
+      this.emptyRecord = this.changes.addEmptyRecord(sysId);
+    }
+    this.changes.setDefaults(this.emptyRecord);
+    this.insertRowForRecord(this.emptyRecord);
+    this.decor.showEdit(this.emptyRecord.sysId);
+  },
+  renderValue: function(sysId, fieldName, valueToDisplay, newRow) {
+    var cell = this.tableController.getCell(sysId, fieldName);
+    if (!cell)
+      return;
+    var cellIndex = document.documentElement.getAttribute('data-doctype') == 'true' ? 2 : 1;
+    var dspValue = this._getValueToRender(sysId, fieldName, valueToDisplay);
+    if (newRow && (cellIndex === cell.cellIndex) && ("" === dspValue)) {
+      dspValue = this.msgs['Insert a new row...'];
+      cell.addClassName("list_edit_new_row");
+    }
+    this._renderContents(cell, sysId, fieldName, dspValue, newRow);
+    this._markChangedField(cell, sysId, fieldName);
+  },
+  _renderContents: function(cell, sysId, fieldName, dspValue, newRow) {
+    if (dspValue)
+      dspValue = dspValue.escapeHTML();
+    if (!newRow && this.tableController.isFirstField(fieldName)) {
+      var linkLabel = this._getLinkLabel(cell);
+      if (linkLabel) {
+        linkLabel.nodeValue = dspValue;
+        return;
+      }
+    }
+    var doctypeMode = document.documentElement.getAttribute('data-doctype') == 'true';
+    cell.innerHTML = "";
+    var fieldElement = this.tableController.getFieldElement(fieldName);
+    if (fieldElement.isReference()) {
+      var referenceValue = this.changes.getValue(sysId, fieldName);
+      if (referenceValue) {
+        if ('NULL' === referenceValue) {
+          if (!hasClassName(cell, "list_edit_new_row"))
+            dspValue = '';
+        } else if (!this.changes.isReferenceValid(sysId, fieldName)) {
+          if (fieldElement.isDynamicCreation()) {
+            var o = {
+              sys_id: referenceValue,
+              display: dspValue,
+              title: new GwtMessage().format(
+                this.msgs['A new {0} identified by {1} will be created upon save.'],
+                fieldElement.getRefLabel(), referenceValue)
+            };
+            var dynamicTemplate = doctypeMode ?
+              GwtListEditValueRenderer.Templates.RENDER_DYNAMIC_REFERENCE_DOCTYPE :
+              GwtListEditValueRenderer.Templates.RENDER_DYNAMIC_REFERENCE
+            cell.insert(dynamicTemplate.evaluate(o));
+            return;
+          }
+          dspValue = '';
+        } else {
+          if (this.tableController.omitLinks == false) {
+            var o = {
+              sys_id: referenceValue,
+              refKey: fieldElement.refKey,
+              display: dspValue,
+              href: fieldElement.reference
+            };
+            var template = doctypeMode ?
+              GwtListEditValueRenderer.Templates.RENDER_REFERENCE_DOCTYPE :
+              GwtListEditValueRenderer.Templates.RENDER_REFERENCE
+            cell.insert(template.evaluate(o));
             return;
           }
         }
-        var doctypeMode = document.documentElement.getAttribute('data-doctype') == 'true';
-        cell.innerHTML = "";
-        var fieldElement = this.tableController.getFieldElement(fieldName);
-        if (fieldElement.isReference()) {
-          var referenceValue = this.changes.getValue(sysId, fieldName);
-          if (referenceValue) {
-            if ('NULL' === referenceValue) {
-              if (!hasClassName(cell, "list_edit_new_row"))
-                dspValue = '';
-            } else if (!this.changes.isReferenceValid(sysId, fieldName)) {
-              if (fieldElement.isDynamicCreation()) {
-                var o = {
-                  sys_id: referenceValue,
-                  display: dspValue,
-                  title: new GwtMessage().format(
-                    this.msgs['A new {0} identified by {1} will be created upon save.'],
-                    fieldElement.getRefLabel(), referenceValue)
-                };
-                var dynamicTemplate = doctypeMode ?
-                  GwtListEditValueRenderer.Templates.RENDER_DYNAMIC_REFERENCE_DOCTYPE :
-                  GwtListEditValueRenderer.Templates.RENDER_DYNAMIC_REFERENCE
-                cell.insert(dynamicTemplate.evaluate(o));
-                return;
-              }
-              dspValue = '';
-            } else {
-              if (this.tableController.omitLinks == false) {
-                var o = {
-                  sys_id: referenceValue,
-                  refKey: fieldElement.refKey,
-                  display: dspValue,
-                  href: fieldElement.reference
-                };
-                var template = doctypeMode ?
-                  GwtListEditValueRenderer.Templates.RENDER_REFERENCE_DOCTYPE :
-                  GwtListEditValueRenderer.Templates.RENDER_REFERENCE
-                cell.insert(template.evaluate(o));
-                return;
-              }
+      }
+    }
+    var defaultTemplate = doctypeMode ? GwtListEditValueRenderer.Templates.RENDER_DEFAULT_DOCTYPE : GwtListEditValueRenderer.Templates.RENDER_DEFAULT;
+    cell.insert(defaultTemplate.evaluate({
+      display: dspValue
+    }));
+  },
+  _getLinkLabel: function(cell) {
+    if (!cell)
+      return null;
+    if (!cell.firstChild)
+      return null;
+    var child = cell.down('a.linked') || cell.firstChild;
+    return child.firstChild;
+  },
+  _getValueToRender: function(sysId, fieldName, valueToDisplay) {
+    if (valueToDisplay)
+      return valueToDisplay;
+    return this.changes.getValueToRender(sysId, fieldName);
+  },
+  _saveEmptyRecord: function(id) {
+    var record = this.changes.saveEmptyRecord(id);
+    var sysId = this.tableController.getRelatedSysID();
+    if (sysId)
+      this.changes.addField(id, this.tableController.relatedField, sysId);
+    var tr = $(id);
+    if (tr) {
+      this._removeAddRowClassName(tr);
+      this._resetBackgroundColor(tr);
+    }
+    this.updateRowWithRecord(record);
+    this.changes.addToAggregates(record);
+    this.emptyRecord = null;
+    this.addRowNoInsert();
+  },
+  insertRowForRecord: function(record) {
+    var isNew = record.isNew();
+    this.tableController.buildRow(record.sysId);
+    this.changes.rowCountChanged(1);
+    var fields = record.getFields();
+    for (var n in fields)
+      this.renderValue(record.sysId, n, "", isNew);
+    var info = {
+      listId: this.tableController.listID,
+      sys_id: record.sysId
+    };
+    this.tableController.fire('glide:list_v2.edit.row_added', info);
+  },
+  showViewDecorations: function(sysId) {
+    this.decor.showView(sysId);
+  },
+  isDoctype: function() {
+    return document.documentElement.getAttribute('data-doctype') == 'true';
+  },
+  updateRowWithRecord: function(record) {
+    var fields = record.getFields();
+    for (var n in fields) {
+      this.renderValue(record.sysId, n);
+      var field = fields[n];
+      if (field.isDisplayValueSet())
+        this.changes.updateAggregates(n, field.getOriginalDisplay(), field.getDisplayValue());
+      else if (field.isValueSet())
+        this.changes.updateAggregates(n, field.getOriginalValue(), field.getValue());
+    }
+  },
+  deleteRowWithRecord: function(record) {
+    var sysId = record.sysId;
+    var tr = this.tableController.getRow(sysId);
+    if (tr) {
+      if (!hasClassName(tr, "list_delete"))
+        GwtListEditTableController.addClassToRow(tr, "list_delete");
+      var img = tr.select('.list_delete_row')[0];
+      img.src = "images/undelete_row.gifx";
+      writeTitle(img, this.msgs['Undelete']);
+      if (this.isDoctype())
+        img.setStyle({
+          color: '#cfcfcf'
+        });
+    }
+    this.changes.removeFromAggregates(record);
+  },
+  deleteRowToggle: function(sysId) {
+    var record = this.changes.get(sysId);
+    if (record && record.operation == "delete_pending")
+      return;
+    if (!record)
+      record = this.changes.addRecord(sysId, "delete_pending");
+    if (this.tableController.isFormUI())
+      g_form.fieldChanged("delete_row", true);
+    if (record.operation == "delete") {
+      this._undeleteRow(record);
+      var tr = this.tableController.getRow(sysId);
+      if (tr) {
+        GwtListEditTableController.removeClassFromRow(tr, "list_delete");
+        var img = tr.select('.list_delete_row')[0];
+        img.src = "images/delete_row.gifx";
+        writeTitle(img, this.msgs['Mark deleted']);
+        if (this.isDoctype())
+          img.setStyle({
+            color: '#FF402C'
+          })
+      }
+    } else if (record.operation == "add") {
+      this.tableController.deleteRow(sysId);
+      this.changes.remove(sysId);
+      this.changes.rowCountChanged(-1);
+      this.changes.removeFromAggregates(record);
+      var info = {
+        listId: this.tableController.listID,
+        deletes: [sysId]
+      };
+      this.tableController.fire('glide:list_v2.edit.rows_deleted', info);
+    } else {
+      record.operation = "delete_pending";
+      if (img) {
+        img.src = "images/loading_anim2.gifx";
+        img.alt = this.msgs['Loading...'];
+      }
+      var tr = this.tableController.getRow(sysId);
+      if (tr) {
+        GwtListEditTableController.addClassToRow(tr, "list_delete");
+        var img = tr.select('.list_delete_row')[0];
+        img.src = "images/loading_anim2.gifx";
+        writeTitle(img, this.msgs['Loading...']);
+      }
+      this.changes.loadValues([sysId], this.changes.getAggregateFields(), this._deleteRowHandler.bind(this, sysId));
+    }
+  },
+  _deleteRowHandler: function(sysId) {
+    var record = this.changes.get(sysId);
+    if (!record)
+      return;
+    record.setOperation("delete");
+    this.deleteRowWithRecord(record);
+  },
+  _undeleteRow: function(record) {
+    record.setOperation("update");
+    this.changes.addToAggregates(record);
+  },
+  _generateId: function() {
+    var aj = new GlideAjax("GlideSystemAjax");
+    aj.addParam("sysparm_name", "newGuid");
+    aj.getXMLWait();
+    return aj.getAnswer();
+  },
+  _callOnChange: function(sysId, fieldName, oldValue, value) {
+    var old_g_list = null;
+    if (typeof g_list != "undefined")
+      old_g_list = g_list;
+    g_list = this.gList;
+    var scriptName = "onChange_" + this.tableController.listID + "_" + fieldName;
+    for (var ndx = 0; ndx < 100; ndx++) {
+      var f = GlideListEditor.getClientScriptFunc(scriptName, ndx);
+      if (f == null)
+        break;
+      try {
+        f(sysId, oldValue, value);
+      } catch (ex) {}
+    }
+    g_list = old_g_list;
+  },
+  _markChangedField: function(cell, sysId, fieldName) {
+    if (!this.tableController.hasDeferredChanges())
+      return;
+    if (!this.changes.isFieldDirty(sysId, fieldName))
+      return;
+    addClassName(cell, 'list_edit_dirty');
+  },
+  _removeAddRowClassName: function(tr) {
+    var newRows = tr.select('.list_edit_new_row');
+    for (var i = 0; i < newRows.length; i++)
+      newRows[i].removeClassName('list_edit_new_row');
+  },
+  _resetBackgroundColor: function(tr) {
+    var previousRows = tr.previousSiblings();
+    if (previousRows.length > 0) {
+      if (previousRows[0].hasClassName("list_odd"))
+        tr.className = "list_even";
+      else
+        tr.className = "list_odd";
+      addClassName(tr, "list_row");
+    }
+  },
+  toString: function() {
+    return 'GwtListEditValueRenderer';
+  }
+});
+GwtListEditValueRenderer.Templates = {
+  RENDER_REFERENCE: new Template(
+    '<a class="linked" sys_id="#{sys_id}" href="#{href}.do?sys_id=#{sys_id}&sysparm_refkey=#{refKey}">#{display}</a>'
+  ),
+  RENDER_DYNAMIC_REFERENCE: new Template(
+    '<span class="ref_dynamic" title="#{title}">#{display}</span>'
+  ),
+  RENDER_REFERENCE_DOCTYPE: new Template(
+    '<div></div><a class="linked" sys_id="#{sys_id}" href="#{href}.do?sys_id=#{sys_id}&sysparm_refkey=#{refKey}">#{display}</a>'
+  ),
+  RENDER_DYNAMIC_REFERENCE_DOCTYPE: new Template(
+    '<div></div><span class="ref_dynamic" title="#{title}">#{display}</span>'
+  ),
+  RENDER_DEFAULT: new Template('#{display}'),
+  RENDER_DEFAULT_DOCTYPE: new Template('<div></div>#{display}')
+};;
+/*! RESOURCE: /scripts/GwtListEditGList.js */
+var GwtListEditGList = Class.create({
+  initialize: function(changes, tableController, renderer) {
+    this.changes = changes;
+    this.tableController = tableController;
+    this.renderer = renderer;
+  },
+  getValue: function(sysId, fieldName) {
+    return this.changes.getValue(sysId, fieldName);
+  },
+  getDisplayValue: function(sysId, fieldName) {
+    return this.changes.getDisplayValue(sysId, fieldName);
+  },
+  isWritable: function(sysId, fieldName) {
+    return this.changes.isWritable(sysId, fieldName);
+  },
+  setValue: function(sysId, fieldName, value) {
+    this.renderer.setValue(sysId, fieldName, value);
+  },
+  setDisplayValue: function(sysId, fieldName, value) {
+    this.renderer.setDisplayValue(sysId, fieldName, value);
+    if (!this.changes.isValueSet(sysId, fieldName))
+      this.changes.setValue(sysId, fieldName, value);
+  },
+  renderValue: function(sysId, fieldName, valueToDisplay) {
+    this.renderer.renderValue(sysId, fieldName, valueToDisplay, false);
+  },
+  getAggregate: function(fieldName, type) {
+    return this.changes.getAggregateValue(fieldName, type);
+  },
+  getRowCount: function() {
+    return this.tableController.rowCount - this.changes.getDeletedRowCount() + this.changes.getAddedRowCount();
+  },
+  addRow: function() {
+    this.renderer.addRow();
+  },
+  addRowWithValues: function(values, displayValues) {
+    this.renderer.addRow(values, displayValues);
+  },
+  deleteRowToggle: function(sysId) {
+    this.renderer.deleteRowToggle(sysId);
+  },
+  getGlideRecord: function() {
+    return new GwtListEditGlideRecord(this.changes, this.tableController, this.renderer);
+  },
+  toString: function() {
+    return 'GwtListEditGList';
+  }
+});;
+/*! RESOURCE: /scripts/GwtListEditGlideRecord.js */
+var GwtListEditGlideRecord = Class.create({
+  initialized: false,
+  initialize: function(changes, tableController, renderer) {
+    this.changes = changes;
+    this.tableController = tableController;
+    this.renderer = renderer;
+    this.currentRow = -1;
+    this.sysIds = [];
+    this.displayValues = {};
+    if (!this.initialized)
+      this._setIgnoreNames();
+    else
+      this._clearValues();
+    this.initialized = true;
+  },
+  addQuery: function() {
+    alert('GwtListEditGlideRecord.addQuery is not currently supported');
+  },
+  getEncodedQuery: function() {
+    alert('GwtListEditGlideRecord.addQuery is not currently supported');
+  },
+  deleteRecord: function() {
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return;
+    if (this.changes.isDeletedRow(sysId))
+      return;
+    this.renderer.deleteRowToggle(sysId);
+  },
+  get: function(sysId) {
+    var rec = this.changes.get(sysId);
+    if (rec) {
+      this.currentRow = 0;
+      this.sysIds = [sysId];
+      return true;
+    }
+    this.currentRow = -1;
+    this.sysIds = [];
+    return false;
+  },
+  getTableName: function() {
+    return this.tableController.tableName;
+  },
+  gotoTop: function() {
+    this.currentRow = -1;
+  },
+  hasNext: function() {
+    return (this.currentRow + 1 < this.sysIds.length);
+  },
+  insert: function() {
+    var values = {};
+    var dspValues = {};
+    for (var xname in this) {
+      if (this.ignoreNames[xname])
+        continue;
+      values[xname] = this[xname];
+    }
+    for (var xname in this.displayValues)
+      dspValues[xname] = this.displayValues[xname];
+    this.renderer.addRowWithValues(values, dspValues);
+  },
+  next: function() {
+    if (!this.hasNext())
+      return false;
+    this.currentRow++;
+    this._loadRow();
+    return true;
+  },
+  _next: function() {
+    return this.next;
+  },
+  query: function() {
+    this._initRows();
+    this.currentRow = -1;
+    return;
+  },
+  setDisplayValue: function(fieldName, dsp) {
+    this.displayValue[fieldName] = dsp;
+    if ('undefined' === typeof this[fieldName])
+      this[fieldName] = dsp;
+  },
+  update: function() {
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return;
+    var record = this.changes.get(sysId);
+    if (!record)
+      return;
+    for (var xname in this) {
+      if (this.ignoreNames[xname])
+        continue;
+      if (xname == 'sys_id')
+        continue;
+      var val = this[xname];
+      var dsp = this.displayValues[xname];
+      var field = record.getField(xname);
+      if (!field)
+        field = record.addField(xname);
+      var changed = false;
+      if (field.getValue() != val) {
+        this.renderer.setValue(sysId, xname, val);
+        changed = true;
+      }
+      if ((typeof dsp != 'undefined') && (field.getDisplayValue() != dsp)) {
+        this.renderer.setDisplayValue(sysId, xname, dsp);
+        changed = true;
+      }
+      if (changed)
+        this.renderer.renderValue(sysId, xname);
+    }
+  },
+  getRowCount: function() {
+    return this.sysIds.length;
+  },
+  _initRows: function() {
+    var receiver = new GwtListEditGlideRecord.RowBuilder();
+    this.changes.exportRecords(receiver);
+    this.sysIds = receiver.sysIds;
+  },
+  _loadRow: function() {
+    this._clearValues();
+    var sysId = this._getRowSysId();
+    if (!sysId)
+      return null;
+    var record = this.changes.get(sysId);
+    if (!record)
+      return;
+    this.sys_id = sysId;
+    var fields = record.getFields();
+    for (var fname in fields) {
+      if (fname.indexOf('.') != -1)
+        continue;
+      var field = fields[fname];
+      this[fname] = field.getValue();
+      this.displayValues[fname] = field.getDisplayValue();
+    }
+  },
+  _getRowSysId: function() {
+    if ((this.currentRow < 0) || (this.currentRow >= this.sysIds.length))
+      return;
+    return this.sysIds[this.currentRow];
+  },
+  _clearValues: function() {
+    this.displayValues = {};
+    for (var xname in this) {
+      if (this.ignoreNames[xname] && this.ignoreNames[xname] == true)
+        continue;
+      delete this[xname];
+    }
+  },
+  _setIgnoreNames: function() {
+    this.ignoreNames = [];
+    for (var xname in this) {
+      this.ignoreNames[xname] = true;
+    }
+  },
+  toString: function() {
+    return 'GwtListEditGlideRecord';
+  }
+});
+GwtListEditGlideRecord.RowBuilder = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function($super) {
+      $super();
+      this.sysIds = [];
+    },
+    changedRecord: function(sysID, record) {
+      if (record.isDeleted())
+        return;
+      if (record.isDefaultValues())
+        return;
+      this.sysIds.push(sysID);
+    },
+    toString: function() {
+      return 'GlideListEditor.RowUpdater';
+    }
+  });;
+/*! RESOURCE: /scripts/GlideListEditor.js */
+var GlideListEditor = Class.create({
+  MSGS: [
+    'Mark deleted', 'New row'
+  ],
+  initialize: function(table) {
+    this.tableController = new GwtListEditTableController(table);
+    this.changes = new GwtListEditorPendingChanges(this.tableController);
+    this.tableController.changes = this.changes;
+    this.renderer = new GwtListEditValueRenderer(this.changes, this.tableController);
+    this.tableController.renderer = this.renderer;
+    this.savePolicy = this.tableController.buildSavePolicy();
+    this.gridEdit = new GwtGridEdit(this.tableController);
+    this.msgs = getMessages(this.MSGS);
+    this.emptyRecord = null;
+    this._observeTableEvents();
+    if (this.tableController.isFormUI())
+      this.changes.loadTable(function() {});
+  },
+  updateTable: function(tableDOM) {
+    if (this.tableController.isForTable(tableDOM))
+      return;
+    this.tableController.updateTable(tableDOM);
+    this.renderer.updateTable();
+    this.gridEdit.updateTable();
+    this._observeTableEvents();
+  },
+  unLoadTable: function(tableDOM) {
+    this.tableController.unLoadTable(tableDOM);
+  },
+  _observeTableEvents: function() {
+    var policyCallback = this._savePolicy.bind(this);
+    this.tableController.observe('glide:list_v2.edit.cells_changed', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.focus_moved', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.save_now', policyCallback);
+    Event.observe(this.tableController.tableElementDOM, 'click', policyCallback);
+    this.tableController.observe('glide:list_v2.edit.changes_saved', this._handleChangesSaved.bind(this));
+    this.tableController.observe('glide:list_v2.edit.rows_deleted', this._handleRowsDeleted.bind(this));
+    this.tableController.observe('glide:list_v2.edit.focus_moved', this._handleFocusMoved.bind(this));
+    Event.observe(this.tableController.tableElementDOM, 'glide:list_v2.edit.update_column', this._updateColumn.bind(this));
+    Event.observe(this.tableController.tableElementDOM, 'glide:list_v2.edit.check_enter_once', this._checkEnterOnce.bind(this));
+    if (window.GlideListEditorMessaging)
+      new GlideListEditorMessaging(this);
+  },
+  createCellEditor: function(element, ignoreTypes) {
+    if (!this.tableController.canEdit())
+      return null;
+    this.gridEdit.hideCursor();
+    this.gridEdit.clearRanges();
+    this.gridEdit.setAnchorCell(element);
+    this.cellEditor = new GwtCellEditor(this.gridEdit, ignoreTypes,
+      this.changes, this.tableController, this.renderer);
+    return this.cellEditor;
+  },
+  setCursor: function(element) {
+    this.gridEdit.setCursorElement(element);
+  },
+  _savePolicy: function(evt) {
+    this.savePolicy.analyzeEvent(evt);
+    if (this.savePolicy.isDirectSave()) {
+      this.saveChanges(this._saveComplete.bind(this));
+      return;
+    }
+    if (this.savePolicy.isDeferredSave()) {
+      this._fireChangesDeferred();
+      this._saveComplete();
+      return;
+    }
+    if (this.savePolicy.isImpliedSave()) {
+      this.saveChanges(null);
+      return;
+    }
+  },
+  _fireChangesDeferred: function() {
+    var info = {
+      listId: this.tableController.listID,
+      defers: this.savePolicy.getDeferredSaves()
+    };
+    this.tableController.fire('glide:list_v2.edit.changes_deferred', info);
+  },
+  _saveComplete: function() {
+    var info = {
+      listId: this.tableController.listID
+    };
+    this.tableController.fire('glide:list_v2.edit.saves_completed', info);
+    CustomEvent.fire('list_content_changed');
+  },
+  _handleChangesSaved: function(evt) {
+    this.savePolicy.handleChangesSaved(evt);
+  },
+  _handleRowsDeleted: function(evt) {
+    this.savePolicy.handleRowsDeleted(evt);
+    this.gridEdit.showCursor();
+  },
+  _handleFocusMoved: function(evt) {
+    if (!this.cellEditor)
+      return;
+    if (!this.cellEditor.isActive())
+      return;
+    if (evt.memo.listId !== this.tableController.listID)
+      return;
+    var cursorCell = this.gridEdit.getCursorCell();
+    var anchorCell = this.gridEdit.getAnchorCell();
+    if (cursorCell !== anchorCell) {
+      this.cellEditor.dismiss();
+      GwtListEditor.forPage.edit(cursorCell);
+    }
+  },
+  saveNow: function() {
+    var info = {
+      listId: this.tableController.listID
+    };
+    this.tableController.fire('glide:list_v2.edit.save_now', info);
+  },
+  applyUpdates: function() {
+    this.changes.resetAggregates();
+    var updater = new GlideListEditor.RowUpdater(this.changes, this.tableController, this.renderer);
+    this.changes.exportRecords(updater);
+    if (this.tableController.needsInsertRow())
+      this.renderer.addRowNoInsert();
+  },
+  _getRow: function(sysId) {
+    return this.tableController.getRow(sysId);
+  },
+  addRow: function() {
+    this.renderer.addRow();
+  },
+  saveUpdatesInForm: function() {
+    addHidden(this._getForm(), this._getXmlIslandName(), this._serializeModified());
+  },
+  _serializeModified: function() {
+    var xml = this._createRecordUpdateXml();
+    var selector = new GlideListEditor.IsModifiedRecordSelector(this.changes);
+    var receiver = new GlideListEditor.XmlSerializingReceiver(xml, xml.documentElement, selector);
+    this.changes.exportChanges(receiver);
+    return getXMLString(xml);
+  },
+  _createRecordUpdateXml: function() {
+    var xml = loadXML("<record_update/>");
+    this.tableController.exportXml(xml.documentElement);
+    return xml;
+  },
+  _getForm: function() {
+    if ((typeof g_form == "undefined") || (!g_form))
+      return null;
+    return gel(g_form.getTableName() + ".do");
+  },
+  _getXmlIslandName: function() {
+    return "ni.java.com.glide.ui_list_edit.ListEditFormatterAction[" + this.tableController.listID + "]";
+  },
+  callOnSubmit: function() {
+    var retVal;
+    var scriptName = "onSubmit_" + this.tableController.listID;
+    for (var ndx = 0;
+      (ndx < 100) && (retVal != false); ndx++) {
+      var f = GlideListEditor.getClientScriptFunc(scriptName, ndx);
+      if (f == null)
+        break;
+      try {
+        retVal = f();
+      } catch (ex) {}
+    }
+    return retVal;
+  },
+  saveChanges: function(onComplete) {
+    var saver = new GwtListEditAjaxChangeSaver(this.changes, this.tableController, onComplete);
+    saver.save();
+  },
+  buildGList: function() {
+    return new GwtListEditGList(this.changes, this.tableController, this.renderer);
+  },
+  hasChanges: function() {
+    var selector = new GlideListEditor.IsModifiedRecordSelector(this.changes);
+    var inspector = new GlideListEditor.ChangeCounter(selector);
+    this.changes.inspectRecords(inspector);
+    return inspector.isDone();
+  },
+  deleteRowToggle: function(sysId) {
+    this.renderer.deleteRowToggle(sysId);
+  },
+  getSelectedRows: function() {
+    return this.gridEdit.getSelectedRows();
+  },
+  _updateColumn: function(evt) {
+    var columnName = evt.memo.columnName;
+    var value = evt.memo.newValue;
+    var ids = evt.memo.ids != null ? evt.memo.ids : this.changes.calcWritableSysIds(this.tableController.sysIds, [columnName]);
+    var numIds = ids.length;
+    for (var i = 0; i < numIds; i++) {
+      var id = ids[i];
+      if (evt.memo.ids != null || this.changes.emptyRecord == null || this.changes.emptyRecord.sysId != id) {
+        this.renderer.setValue(id, columnName, value);
+        this.changes.setRenderValue(id, columnName, value);
+        if (this.changes.isFieldDirty(id, columnName)) {
+          this.renderer.renderValue(id, columnName);
+        }
+      }
+    }
+  },
+  _checkEnterOnce: function(evt) {
+    var properties = evt.memo.properties;
+    var answer = [];
+    var l = properties.length;
+    for (var j = 0; j < l; j++) {
+      var p = properties[j];
+      var columnName = p.field;
+      var ids = evt.memo.ids != null ? evt.memo.ids : this.changes.calcWritableSysIds(this.tableController.sysIds, [columnName]);
+      var numIds = ids.length;
+      for (var i = 0; i < numIds; i++) {
+        var id = ids[i];
+        if (this.changes.emptyRecord == null || this.changes.emptyRecord.sysId != id) {
+          if (evt.memo.oldValues != null || this.changes.isFieldDirty(id, columnName)) {
+            var field = this.changes.getField(id, columnName);
+            var originalValue = evt.memo.oldValues != null ? evt.memo.oldValues[i] : field.getOriginalDisplay();
+            var currentValue = evt.memo.newValue != null ? evt.memo.newValue : field.getRenderValue();
+            var isDirty = p.isDirty(originalValue, currentValue);
+            if (isDirty) {
+              answer.push({
+                sys_id: id,
+                name: columnName,
+                value: currentValue
+              });
             }
           }
         }
-        var defaultTemplate = doctypeMode ? GwtListEditValueRenderer.Templates.RENDER_DEFAULT_DOCTYPE : GwtListEditValueRenderer.Templates.RENDER_DEFAULT;
-        cell.insert(defaultTemplate.evaluate({
-          display: dspValue
-        }));
-      },
-      _getLinkLabel: function(cell) {
-        if (!cell)
-          return null;
-        if (!cell.firstChild)
-          return null;
-        var child = cell.down('a.linked') || cell.firstChild;
-        return child.firstChild;
-      },
-      _getValueToRender: function(sysId, fieldName, valueToDisplay) {
-        if (valueToDisplay)
-          return valueToDisplay;
-        return this.changes.getValueToRender(sysId, fieldName);
-      },
-      _saveEmptyRecord: function(id) {
-        var record = this.changes.saveEmptyRecord(id);
-        var sysId = this.tableController.getRelatedSysID();
-        if (sysId)
-          this.changes.addField(id, this.tableController.relatedField, sysId);
-        var tr = $(id);
-        if (tr) {
-          this._removeAddRowClassName(tr);
-          this._resetBackgroundColor(tr);
+      }
+    }
+    evt.answer = answer;
+  },
+  toString: function() {
+    return 'GlideListEditor';
+  }
+});
+
+function getQueryForList(listID) {
+  var e = gel('sysparm_query');
+  if (e)
+    return e.value;
+  var t = GwtListEditor.getTableElem(listID);
+  if (t)
+    return getAttributeValue(t, 'glide_list_query') + '';
+  return '';
+}
+GlideListEditor.getClientScriptFunc = function(scriptName, ndx) {
+  var n = scriptName + "_" + ndx;
+  var f = window[n];
+  if (typeof f != "function")
+    return null;
+  return f;
+};
+GlideListEditor.RowUpdater = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function($super, changes, tableController, renderer) {
+      $super();
+      this.changes = changes;
+      this.tableController = tableController;
+      this.renderer = renderer;
+      this.hasChanges = false;
+    },
+    changedRecord: function(sysID, record) {
+      if (record.isAdded()) {
+        this.hasChanges = true;
+        if (this.tableController.getRow(sysID))
+          this.renderer.updateRowWithRecord(record);
+        else {
+          this.renderer.insertRowForRecord(record);
+          this.renderer.showViewDecorations(sysID);
+          this.changes.addToAggregates(record);
         }
-        this.updateRowWithRecord(record);
-        this.changes.addToAggregates(record);
-        this.emptyRecord = null;
-        this.addRowNoInsert();
-      },
-      insertRowForRecord: function(record) {
-        var isNew = record.isNew();
-        this.tableController.buildRow(record.sysId);
-        this.changes.rowCountChanged(1);
-        var fields = record.getFields();
-        for (var n in fields)
-          this.renderValue(record.sysId, n, "", isNew);
-        var info = {
-          listId: this.tableController.listID,
-          sys_id: record.sysId
-        };
-        this.tableController.fire('glide:list_v2.edit.row_added', info);
-      },
-      showViewDecorations: function(sysId) {
-        this.decor.showView(sysId);
-      },
-      isDoctype: function() {
-        return document.documentElement.getAttribute('data-doctype') == 'true';
-      },
-      updateRowWithRecord: function(record) {
-        var fields = record.getFields();
-        for (var n in fields) {
-          this.renderValue(record.sysId, n);
-          var field = fields[n];
-          if (field.isDisplayValueSet())
-            this.changes.updateAggregates(n, field.getOriginalDisplay(), field.getDisplayValue());
-          else if (field.isValueSet())
-            this.changes.updateAggregates(n, field.getOriginalValue(), field.getValue());
+      } else if (record.isUpdated()) {
+        this.hasChanges = true;
+        this.renderer.updateRowWithRecord(record);
+      } else if (record.isDeleted()) {
+        this.hasChanges = true;
+        this.renderer.updateRowWithRecord(record);
+        this.renderer.deleteRowWithRecord(record);
+      }
+    },
+    isChanged: function() {
+      return this.hasChanges;
+    },
+    toString: function() {
+      return 'GlideListEditor.RowUpdater';
+    }
+  });
+GlideListEditor.XmlSerializingReceiver = Class.create(
+  GwtListEditorPendingChanges.ChangeReceiver, {
+    initialize: function($super, doc, dst, selector) {
+      $super();
+      this.doc = doc;
+      this.dst = dst;
+      this.selector = selector;
+      this.record = null;
+    },
+    beginRecord: function(sysID, op) {
+      if (!this.selector.isSelected(sysID, op))
+        return;
+      var record = this._createElement("record");
+      record.setAttribute("sys_id", sysID);
+      record.setAttribute("operation", op);
+      this.record = record;
+      return true;
+    },
+    endRecord: function(sysID) {
+      if (this.record)
+        this.dst.appendChild(this.record);
+      this.record = null;
+    },
+    changedField: function(sysID, info) {
+      var node = this._createElement("field");
+      this._populateFieldNode(node, info);
+      this.record.appendChild(node);
+    },
+    _populateFieldNode: function(node, info) {
+      node.setAttribute('name', info.getName());
+      node.setAttribute('modified', info.isModified().toString());
+      node.setAttribute('value_set', info.isValueSet().toString());
+      node.setAttribute('dsp_set', info.isDisplayValueSet().toString());
+      this._appendValueNode(node, 'value', info.value);
+      if (info.displaySet)
+        this._appendValueNode(node, 'display_value', info.displayValue);
+    },
+    _createElement: function(name) {
+      return this.doc.createElement(name);
+    },
+    _createTextNode: function(value) {
+      return this.doc.createTextNode(value);
+    },
+    _appendValueNode: function(dst, name, value) {
+      if (!value)
+        value = '';
+      var node = this._createElement(name);
+      var text = this._createTextNode(value);
+      node.appendChild(text);
+      dst.appendChild(node);
+    },
+    toString: function() {
+      return 'GlideListEditor.XmlSerializingReceiver';
+    }
+  });
+GlideListEditor.ChangeCounter = Class.create(
+  GwtListEditorPendingChanges.RecordReceiver, {
+    initialize: function(selector) {
+      this.selector = selector;
+      this.changeCount = 0;
+    },
+    changedRecord: function(sysID, record) {
+      if (this.selector.isSelected(sysID, record.operation))
+        this.changeCount++;
+    },
+    isDone: function() {
+      return this.changeCount > 0;
+    },
+    toString: function() {
+      return 'GlideListEditor.ChangeCounter';
+    }
+  });
+GlideListEditor.IsModifiedRecordSelector = Class.create({
+  initialize: function(changes) {
+    this.changes = changes;
+  },
+  isSelected: function(sysID, op) {
+    if (("add" === op) || ("delete" === op) || ("delete_pending" === op) || ("add_existing" === op))
+      return true;
+    var record = this.changes.get(sysID);
+    return record.isModified();
+  },
+  toString: function() {
+    return 'GlideListEditor.IsModifiedRecordSelector';
+  }
+});;
+/*! RESOURCE: /scripts/GlideListAggregates.js */
+var GlideListAggregates = Class.create({
+  initialize: function(tableController) {
+    this.aggregates = {};
+    this.tableController = tableController;
+    this._initAggregates();
+  },
+  getAggregate: function(fieldName, type) {
+    var agg = this.aggregates[fieldName + ":" + type];
+    if (!agg)
+      return null;
+    return agg;
+  },
+  getAggregateValue: function(fieldName, type) {
+    var agg = this.aggregates[fieldName + ":" + type];
+    if (!agg)
+      return null;
+    return agg.value;
+  },
+  getAggregateElement: function(fieldName, type) {
+    var agg = this.getAggregate(fieldName, type);
+    if (!agg)
+      return null;
+    var td = this.tableController.getCellByNdx(agg.rowNdx, agg.colNdx);
+    var spans = td.getElementsByTagName("SPAN");
+    for (var spanNdx = 0; spanNdx < spans.length; spanNdx++) {
+      var span = spans[spanNdx];
+      if (!hasClassName(span, "aggregate_value"))
+        continue;
+      var aggtype = getAttributeValue(span, "aggregate_type");
+      if (aggtype == type)
+        return span;
+    }
+    return null;
+  },
+  getAggregateFields: function() {
+    return this.aggregateFields;
+  },
+  updateAggregates: function(fieldName, oldValue, newValue) {
+    if (oldValue == newValue)
+      return;
+    this._updateAggregate(fieldName, "MIN", oldValue, newValue);
+    this._updateAggregate(fieldName, "MAX", oldValue, newValue);
+    this._updateAggregate(fieldName, "SUM", oldValue, newValue);
+    this._updateAggregate(fieldName, "AVG", oldValue, newValue, 0);
+  },
+  addToAggregates: function(fieldName, value) {
+    if (value != "") {
+      this._updateAggregate(fieldName, "MIN", null, value);
+      this._updateAggregate(fieldName, "MAX", null, value);
+      this._updateAggregate(fieldName, "SUM", null, value);
+    }
+    this._updateAggregate(fieldName, "AVG", null, value, 1);
+  },
+  removeFromAggregates: function(fieldName, value) {
+    if (value != "") {
+      this._updateAggregate(fieldName, "MIN", value, null);
+      this._updateAggregate(fieldName, "MAX", value, null);
+      this._updateAggregate(fieldName, "SUM", value, null);
+    }
+    this._updateAggregate(fieldName, "AVG", value, null, -1);
+  },
+  rowCountChanged: function(increment) {
+    for (var k in this.aggregates)
+      this.aggregates[k].rowNdx += increment;
+  },
+  _initAggregates: function() {
+    var fields = {};
+    this.aggregateRow = -1;
+    this.aggregates = {};
+    this.aggregateFields = [];
+    var rowCount = this.tableController.getRowCount();
+    for (var rowNdx = 0; rowNdx < rowCount; rowNdx++) {
+      var row = this.tableController.getRowByNdx(rowNdx);
+      if (!hasClassName(row, "aggregate"))
+        continue;
+      for (var colNdx = 0; colNdx < row.cells.length; colNdx++) {
+        var spans = row.cells[colNdx].getElementsByTagName("SPAN");
+        for (var spanNdx = 0; spanNdx < spans.length; spanNdx++) {
+          var span = spans[spanNdx];
+          if (!hasClassName(span, "aggregate_value"))
+            continue;
+          var type = getAttributeValue(span, "aggregate_type");
+          if (!type)
+            continue;
+          this._addAggregate(fields,
+            getAttributeValue(span, "aggregate_field"),
+            type,
+            getAttributeValue(span, "aggregate_count"),
+            getAttributeValue(span, "aggregate_value"),
+            rowNdx, colNdx);
         }
+      }
+    }
+  },
+  _addAggregate: function(fields, fieldName, type, count, value, rowNdx, colNdx) {
+    this.aggregates[fieldName + ":" + type] = {
+      type: type,
+      count: count,
+      value: value,
+      rowNdx: rowNdx,
+      colNdx: colNdx
+    };
+    if (!fields[fieldName]) {
+      fields[fieldName] = true;
+      this.aggregateFields.push(fieldName);
+    }
+  },
+  _updateAggregate: function(fieldName, type, oldValue, newValue, countChange) {
+    var agg = this.getAggregate(fieldName, type);
+    if (!agg)
+      return;
+    var aggValue = '';
+    if (agg.type == "MIN")
+      aggValue = this._updateAggregateMin(agg, oldValue, newValue);
+    else if (agg.type == "MAX")
+      aggValue = this._updateAggregateMax(agg, oldValue, newValue);
+    else if (agg.type == "SUM")
+      aggValue = this._updateAggregateTotal(agg, oldValue, newValue);
+    else if (agg.type == "AVG")
+      aggValue = this._updateAggregateAverage(agg, oldValue, newValue, countChange);
+    this._setAggregate(agg, fieldName, type, aggValue, countChange);
+  },
+  _setAggregate: function(agg, fieldName, type, aggValue, countChange) {
+    if (aggValue != null) {
+      var aggSpan = this.getAggregateElement(fieldName, type);
+      if (!aggSpan)
+        return;
+      agg.value = aggValue;
+      setAttributeValue(aggSpan, "aggregate_value", agg.value);
+      if (((type == "SUM") || (type == "AVG")) && agg.value % 1 != 0)
+        aggSpan.innerHTML = this._format(agg.value);
+      else
+        aggSpan.innerHTML = aggValue;
+      if (countChange)
+        setAttributeValue(aggSpan, "aggregate_count", agg.count);
+    }
+  },
+  _updateAggregateMin: function(agg, oldValue, newValue) {
+    if (agg.value == "?")
+      return null;
+    if ((newValue != null) && (newValue < agg.value))
+      return newValue;
+    if ((oldValue != null) && (oldValue == agg.value))
+      return "?";
+    return null;
+  },
+  _updateAggregateMax: function(agg, oldValue, newValue) {
+    if (agg.value == "?")
+      return null;
+    if ((newValue != null) && (newValue > agg.value))
+      return newValue;
+    if ((oldValue != null) && (oldValue == agg.value))
+      return "?";
+    return null;
+  },
+  _updateAggregateTotal: function(agg, oldValue, newValue) {
+    if (!oldValue || isNaN(oldValue))
+      oldValue = '0';
+    if (!newValue || isNaN(newValue))
+      newValue = '0';
+    if (isNaN(agg.value))
+      return;
+    oldValue = new Number(oldValue);
+    newValue = new Number(newValue);
+    var total = new Number(agg.value);
+    total += (newValue - oldValue);
+    total = parseFloat(total.toFixed(this._precision(agg.value, oldValue, newValue)));
+    return total;
+  },
+  _precision: function(total, oldValue, newValue) {
+    var len = Math.max(this._precisionLength(total), this._precisionLength(oldValue), this._precisionLength(newValue));
+    return len;
+  },
+  _precisionLength: function(value) {
+    value = parseFloat(value);
+    var precisionLen = "";
+    if (value.toString().indexOf(".") >= 0) {
+      precisionLen = value.toString().substr(value.toString().indexOf(".") + 1, value.toString().length);
+    }
+    return precisionLen.length;
+  },
+  _updateAggregateAverage: function(agg, oldValue, newValue, countChange) {
+    if (!oldValue || isNaN(oldValue))
+      oldValue = '0';
+    if (!newValue || isNaN(newValue))
+      newValue = '0';
+    if (isNaN(agg.value) || isNaN(agg.count))
+      return;
+    agg.count = new Number(agg.count);
+    var value = new Number(agg.value);
+    var total = (value * agg.count);
+    agg.count += countChange;
+    if (!agg.count)
+      return 0;
+    oldValue = new Number(oldValue);
+    newValue = new Number(newValue);
+    total += (newValue - oldValue);
+    return this._format(total / agg.count);
+  },
+  _format: function(num) {
+    if (isNaN(num))
+      return num;
+    return num.toFixed(2);
+  },
+  resetAggregates: function() {
+    this._initAggregates();
+  },
+  type: 'GlideListAggregate'
+});;
+/*! RESOURCE: /scripts/GwtListEditRecord.js */
+var GwtListEditRecord = Class.create({
+  initialize: function(sysId) {
+    this.sysId = sysId;
+    if (sysId == "-1")
+      this.operation = "default_values";
+    else
+      this.operation = "update";
+    this.fields = {};
+  },
+  addField: function(name) {
+    var f = this.getField(name);
+    if (f)
+      return f;
+    this.fields[name] = new GwtListEditField(name);
+    return this.fields[name];
+  },
+  getField: function(name) {
+    return this.fields[name];
+  },
+  getFields: function() {
+    return this.fields;
+  },
+  setOperation: function(operation) {
+    if (this.sysId == "-1")
+      return;
+    this.operation = operation;
+  },
+  isModified: function() {
+    for (var n in this.fields) {
+      var field = this.fields[n];
+      if (field.isModified())
+        return true;
+    }
+    return false;
+  },
+  isNew: function() {
+    return "new" === this.operation;
+  },
+  isDefaultValues: function() {
+    if (this.sysId == "-1")
+      return true;
+    return "default_values" === this.operation;
+  },
+  isAdded: function() {
+    return "add" === this.operation || "add_existing" === this.operation;
+  },
+  isUpdated: function() {
+    return "update" === this.operation;
+  },
+  isDeleted: function() {
+    if ("delete_pending" === this.operation)
+      return true;
+    return ("delete" === this.operation);
+  },
+  clearModified: function() {
+    for (var n in this.fields)
+      this.fields[n].clearModified();
+  },
+  type: 'GwtListEditRecord'
+});
+var GwtListEditField = Class.create({
+      initialize: function(name) {
+        this.name = name;
+        this.label = name;
+        this.referenceValid = true;
+        this._clear();
       },
-      deleteRowWithRecord: function(record) {
-        var sysId = record.sysId;
-        var tr = this.tableController.getRow(sysId);
-        if (tr) {
-          if (!hasClassName(tr, "list_delete"))
-            GwtListEditTableController.addClassToRow(tr, "list_delete");
-          var img = tr.select('.list_delete_row')[0];
-          img.src = "images/undelete_row.gifx";
-          writeTitle(img, this.msgs['Undelete']);
-          if (this.isDoctype())
-            img.setStyle({
-              color: '#cfcfcf'
-            });
-        }
-        this.changes.removeFromAggregates(record);
+      getName: function() {
+        return this.name;
       },
-      deleteRowToggle: function(sysId) {
-        var record = this.changes.get(sysId);
-        if (record && record.operation == "delete_pending")
-          return;
-        if (!record)
-          record = this.changes.addRecord(sysId, "delete_pending");
-        if (this.tableController.isFormUI())
-          g_form.fieldChanged("delete_row", true);
-        if (record.operation == "delete") {
-          this._undeleteRow(record);
-          var tr = this.tableController.getRow(sysId);
-          if (tr) {
-            GwtListEditTableController.removeClassFromRow(tr, "list_delete");
-            var img = tr.select('.list_delete_row')[0];
-            img.src = "images/delete_row.gifx";
-            writeTitle(img, this.msgs['Mark deleted']);
-            if (this.isDoctype())
-              img.setStyle({
-                color: '#FF402C'
-              })
-          }
-        } else if (record.operation == "add") {
-          this.tableController.deleteRow(sysId);
-          this.changes.remove(sysId);
-          this.changes.rowCountChanged(-1);
-          this.changes.removeFromAggregates(record);
-          var info = {
-            listId: this.tableController.listID,
-            deletes: [sysId]
-          };
-          this.tableController.fire('glide:list_v2.edit.rows_deleted', info);
-        } else {
-          record.operation = "delete_pending";
-          if (img) {
-            img.src = "images/loading_anim2.gifx";
-            img.alt = this.msgs['Loading...'];
-          }
-          var tr = this.tableController.getRow(sysId);
-          if (tr) {
-            GwtListEditTableController.addClassToRow(tr, "list_delete");
-            var img = tr.select('.list_delete_row')[0];
-            img.src = "images/loading_anim2.gifx";
-            writeTitle(img, this.msgs['Loading...']);
-          }
-          this.changes.loadValues([sysId], this.changes.getAggregateFields(), this._deleteRowHandler.bind(this, sysId));
-        }
+      getLabel: function() {
+        return this.label;
       },
-      _deleteRowHandler: function(sysId) {
-        var record = this.changes.get(sysId);
-        if (!record)
-          return;
-        record.setOperation("delete");
-        this.deleteRowWithRecord(record);
+      getOriginalValue: function() {
+        return this.originalValue;
       },
-      _undeleteRow: function(record) {
-        record.setOperation("update");
-        this.changes.addToAggregates(record);
+      getOriginalDisplay: function() {
+        return this.originalDisplay;
       },
-      _generateId: function() {
-          var aj = new GlideAjax("GlideSystemAjax");
-          aj.addParam("sysparm_na
+      getValue: function() {
+        return this.value;
+      },
+      getDisplayValue:

@@ -1305,3 +1305,19 @@ var GlideForm = Class.create({
         }
         return;
       },
+      getGlideUIElement: function(fieldName) {
+        fieldName = this.removeCurrentPrefix(fieldName);
+        for (var i = 0; i < this.elements.length; i++) {
+          var thisElement = this.elements[i];
+          if (thisElement.fieldName == fieldName)
+            return thisElement;
+        }
+      },
+      getDerivedFields: function(fieldName) {
+          var parts = fieldName.split(".");
+          parts.shift();
+          fieldName = parts.join(".") + ".";
+          var list = new Array();
+          for (var i = 0; i < this.elements.length; i++) {
+            var thisElement = this.elements[i];
+            if (thi

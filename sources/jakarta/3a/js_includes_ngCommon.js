@@ -19273,4 +19273,71 @@ function(e) {
             b = 11,
             x = 1 / (b - 1),
             S = "Float32Array" in t;
-          if (4 !== argu
+          if (4 !== arguments.length) return !1;
+          for (var P = 0; 4 > P; ++P)
+            if ("number" != typeof arguments[P] || isNaN(arguments[P]) || !isFinite(arguments[P])) return !1;
+          e = Math.min(e, 1), a = Math.min(a, 1), e = Math.max(e, 0), a = Math.max(a, 0);
+          var w = S ? new Float32Array(b) : new Array(b),
+            V = !1,
+            C = function(t) {
+              return V || g(), e === r && a === n ? t : 0 === t ? 0 : 1 === t ? 1 : l(d(t), r, n)
+            };
+          C.getControlPoints = function() {
+            return [{
+              x: e,
+              y: r
+            }, {
+              x: a,
+              y: n
+            }]
+          };
+          var T = "generateBezier(" + [e, r, a, n] + ")";
+          return C.toString = function() {
+            return T
+          }, C
+        }
+
+        function u(e, t) {
+          var r = e;
+          return g.isString(e) ? v.Easings[e] || (r = !1) : r = g.isArray(e) && 1 === e.length ? s.apply(null, e) : g.isArray(e) && 2 === e.length ? b.apply(null, e.concat([t])) : g.isArray(e) && 4 === e.length ? l.apply(null, e) : !1, r === !1 && (r = v.Easings[v.defaults.easing] ? v.defaults.easing : h), r
+        }
+
+        function c(e) {
+          if (e) {
+            var t = (new Date).getTime(),
+              r = v.State.calls.length;
+            r > 1e4 && (v.State.calls = n(v.State.calls));
+            for (var o = 0; r > o; o++)
+              if (v.State.calls[o]) {
+                var s = v.State.calls[o],
+                  l = s[0],
+                  u = s[2],
+                  f = s[3],
+                  d = !!f,
+                  m = null;
+                f || (f = v.State.calls[o][3] = t - 16);
+                for (var y = Math.min((t - f) / u.duration, 1), h = 0, b = l.length; b > h; h++) {
+                  var S = l[h],
+                    w = S.element;
+                  if (i(w)) {
+                    var V = !1;
+                    if (u.display !== a && null !== u.display && "none" !== u.display) {
+                      if ("flex" === u.display) {
+                        var C = ["-webkit-box", "-moz-box", "-ms-flexbox", "-webkit-flex"];
+                        $.each(C, function(e, t) {
+                          x.setPropertyValue(w, "display", t)
+                        })
+                      }
+                      x.setPropertyValue(w, "display", u.display)
+                    }
+                    u.visibility !== a && "hidden" !== u.visibility && x.setPropertyValue(w, "visibility", u.visibility);
+                    for (var T in S)
+                      if ("element" !== T) {
+                        var k = S[T],
+                          A, F = g.isString(k.easing) ? v.Easings[k.easing] : k.easing;
+                        if (1 === y) A = k.endValue;
+                        else {
+                          var E = k.endValue - k.startValue;
+                          if (A = k.startValue + E * F(y, u, E), !d && A === k.currentValue) continue
+                        }
+                        if (k.cu

@@ -1,77 +1,81 @@
-/*! RESOURCE: /scripts/sn/common/clientScript/glideFormEnvironmentFactory.js */
-(function(exports, $log, undefined) {
+/*! RESOURCE: /scripts/sn/common/clientScript/angular/glideFormEnvironmentFactory.js */
+angular.module('sn.common.clientScript').factory('glideFormEnvironmentFactory', function(
+  $q,
+  $window,
+  $timeout,
+  glideFormFieldFactory,
+  glideAjaxFactory,
+  glideRecordFactory,
+  i18n,
+  glideModalFactory,
+  jQueryRequestShim
+) {
   'use strict';
-  var factory = exports.glideFormEnvironmentFactory = {
-    create: createGlideFormEnvironment,
-    defaultExtensionPoints: {
-      'window': null,
-      'document': null,
-      '$': null,
-      'jQuery': null,
-      '$$': null,
-      '$j': null,
-      'angular': null,
-      'snmCabrillo': null,
-      'cabrillo': null
+  var factory = $window.glideFormEnvironmentFactory;
+  angular.extend(factory.defaultExtensionPoints, {
+    GlideAjax: glideAjaxFactory.getClass(),
+    GlideRecord: glideRecordFactory.getClass(),
+    getMessage: i18n.getMessage,
+    getMessages: i18n.getMessages,
+    $: jQueryRequestShim
+  });
+  factory.createInitializer = function(g_form, g_user, g_scratchpad, clientScripts, uiPolicies, g_modal) {
+    if (typeof g_modal === 'undefined') {
+      g_modal = glideModalFactory.create();
     }
+    var g_env = glideFormEnvironmentFactory.create(g_form, g_scratchpad, g_user, g_modal);
+    if (clientScripts && clientScripts.messages) {
+      for (var key in clientScripts.messages) {
+        i18n.loadMessage(key, clientScripts.messages[key]);
+      }
+    }
+    return function() {
+      g_env.initScripts(clientScripts);
+      if (uiPolicies && (uiPolicies.length > 0)) {
+        g_env.initUIPolicyScripts(uiPolicies);
+      }
+      return g_env;
+    };
   };
-
-  function createGlideFormEnvironment(g_form, g_scratchpad, g_user, g_modal) {
-    if (typeof g_user === 'undefined' || !g_user) {
-      throw 'g_user is required!';
+  factory.createWithConfiguration = function(g_form, g_user, g_scratchpad, clientScripts, uiPolicies, g_modal) {
+    if (typeof g_modal === 'undefined') {
+      g_modal = glideModalFactory.create();
     }
-    if (typeof g_scratchpad === 'undefined' || !g_scratchpad) {
-      g_scratchpad = {};
+    var g_env = glideFormEnvironmentFactory.create(g_form, g_scratchpad, g_user, g_modal);
+    if (clientScripts && clientScripts.messages) {
+      for (var key in clientScripts.messages) {
+        i18n.loadMessage(key, clientScripts.messages[key]);
+      }
     }
-    var _extensionPoints = {
-      g_scratchpad: extend(g_scratchpad, {}, true),
-      g_user: typeof g_user.clone === 'function' ? g_user.clone() : g_user
-    };
-    if (typeof g_modal !== 'undefined') {
-      _extensionPoints['g_modal'] = g_modal;
-    }
-    var defaults = factory.defaultExtensionPoints;
-    Object.keys(defaults).forEach(function(name) {
-      registerExtensionPoint(name, defaults[name]);
-    });
-    var _isFormLoading = true;
-    var _isTemplateLoading = false;
-    var _onChangeScripts = {};
-    var _onSubmitScripts = [];
     return {
-      initScripts: initScripts,
-      initUIPolicyScripts: initUIPolicyScripts,
-      getExtensionPoints: getExtensionPoints,
-      registerExtensionPoint: registerExtensionPoint
-    };
-
-    function initScripts(scriptMap) {
-      var cs, script;
-      var onLoadScripts = [];
-      if (scriptMap.onLoad) {
-        for (var i = 0; i < scriptMap.onLoad.length; i++) {
-          try {
-            cs = scriptMap.onLoad[i];
-            script = _wrapScript(cs.script, null, 'onLoad');
-            onLoadScripts.push(_wrapExecuteClientScript(script, g_form, cs.name));
-          } catch (e) {
-            _logError('CS:ONLOAD', 'Could not load onLoad Client Script "' + cs.name + '": ' + e);
-          }
+      g_env: g_env,
+      initialize: function() {
+        g_env.initScripts(clientScripts);
+        if (uiPolicies && (uiPolicies.length > 0)) {
+          g_env.initUIPolicyScripts(uiPolicies);
         }
       }
-      if (scriptMap.onChange) {
-        for (var j = 0; j < scriptMap.onChange.length; j++) {
-          try {
-            cs = scriptMap.onChange[j];
-            script = _wrapScript(cs.script, ['control', 'oldValue', 'newValue', 'isLoading', 'isTemplate'], 'onChange');
-            if (!_onChangeScripts[cs.fieldName]) {
-              _onChangeScripts[cs.fieldName] = [];
-            }
-            _onChangeScripts[cs.fieldName].push(
-              _wrapExecuteClientScript(script, g_form, cs.name)
-            );
-          } catch (e) {
-            _logError('CS:ONCHANGE', 'Could not load onChange Client Script "' + cs.name + '": ' + e);
+    };
+  };
+  var FIELDS_INITIALIZED_INTERVAL = 195;
+  factory.onFieldsInitialized = function(fields) {
+    var $fieldsReady = $q.defer();
+    var $readyTimeout = $timeout(checkFormFields, FIELDS_INITIALIZED_INTERVAL);
+
+    function checkFormFields() {
+      var ready = fields.reduce(function(previous, field) {
+        return previous && glideFormFieldFactory.isInitialized(field);
+      }, true);
+      if (!ready) {
+        $readyTimeout = $timeout(checkFormFields, FIELDS_INITIALIZED_INTERVAL);
+        return;
+      }
+      $fieldsReady.resolve();
+    }
+    return $fieldsReady.promise;
+  };
+  return factory;
+});; Script "' + cs.name + '": ' + e);
           }
         }
       }

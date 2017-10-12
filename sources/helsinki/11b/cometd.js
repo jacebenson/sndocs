@@ -1337,11 +1337,189 @@ org.cometd.Cometd = function(name) {
       var url = _cometd.getURL();
       var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
       var bayeuxMessage = {
-          version: version,
-          minimumVersion: version,
-          channel: '/meta/handshake',
-          supportedConnectionTypes: transportTypes,
-          _callback: handshakeCallback,
-          advice: {
-            timeout: _advice.timeout,
-            interval: _advi
+        version: version,
+        minimumVersion: version,
+        channel: '/meta/handshake',
+        supportedConnectionTypes: transportTypes,
+        _callback: handshakeCallback,
+        advice: {
+          timeout: _advice.timeout,
+          interval: _advice.interval
+        }
+      };
+      var message = _cometd._mixin(false, {}, _handshakeProps, bayeuxMessage);
+      if (!_transport) {
+        _transport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
+        if (!_transport) {
+          var failure = 'Could not find initial transport among: ' + _transports.getTransportTypes();
+          _cometd._warn(failure);
+          throw failure;
+        }
+      }
+      _cometd._debug('Initial transport is', _transport.getType());
+      _setStatus('handshaking');
+      _cometd._debug('Handshake sent', message);
+      _send(false, [message], false, 'handshake');
+    }
+
+    function _delayedHandshake() {
+      _setStatus('handshaking');
+      _internalBatch = true;
+      _delayedSend(function() {
+        _handshake(_handshakeProps, _handshakeCallback);
+      });
+    }
+
+    function _handleCallback(message) {
+      var callback = _callbacks[message.id];
+      if (_isFunction(callback)) {
+        delete _callbacks[message.id];
+        callback.call(_cometd, message);
+      }
+    }
+
+    function _failHandshake(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/handshake', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var retry = !_isDisconnected() && _advice.reconnect !== 'none';
+      if (retry) {
+        _increaseBackoff();
+        _delayedHandshake();
+      } else {
+        _disconnect(false);
+      }
+    }
+
+    function _handshakeResponse(message) {
+      if (message.successful) {
+        _clientId = message.clientId;
+        var url = _cometd.getURL();
+        var newTransport = _transports.negotiateTransport(message.supportedConnectionTypes, message.version, _crossDomain, url);
+        if (newTransport === null) {
+          var failure = 'Could not negotiate transport with server; client=[' +
+            _transports.findTransportTypes(message.version, _crossDomain, url) +
+            '], server=[' + message.supportedConnectionTypes + ']';
+          var oldTransport = _cometd.getTransport();
+          _notifyTransportFailure(oldTransport.getType(), null, {
+            reason: failure,
+            connectionType: oldTransport.getType(),
+            transport: oldTransport
+          });
+          _cometd._warn(failure);
+          _transport.reset();
+          _failHandshake(message);
+          return;
+        } else if (_transport !== newTransport) {
+          _cometd._debug('Transport', _transport.getType(), '->', newTransport.getType());
+          _transport = newTransport;
+        }
+        _internalBatch = false;
+        _flushBatch();
+        message.reestablish = _reestablish;
+        _reestablish = true;
+        _handleCallback(message);
+        _notifyListeners('/meta/handshake', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failHandshake(message);
+      }
+    }
+
+    function _handshakeFailure(message) {
+      var version = '1.0';
+      var url = _cometd.getURL();
+      var oldTransport = _cometd.getTransport();
+      var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
+      var newTransport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
+      if (!newTransport) {
+        _notifyTransportFailure(oldTransport.getType(), null, message.failure);
+        _cometd._warn('Could not negotiate transport; client=[' + transportTypes + ']');
+        _transport.reset();
+        _failHandshake(message);
+      } else {
+        _cometd._debug('Transport', oldTransport.getType(), '->', newTransport.getType());
+        _notifyTransportFailure(oldTransport.getType(), newTransport.getType(), message.failure);
+        _failHandshake(message);
+        _transport = newTransport;
+      }
+    }
+
+    function _failConnect(message) {
+      _notifyListeners('/meta/connect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var action = _isDisconnected() ? 'none' : _advice.reconnect;
+      switch (action) {
+        case 'retry':
+          _delayedConnect();
+          _increaseBackoff();
+          break;
+        case 'handshake':
+          _transports.reset();
+          _resetBackoff();
+          _delayedHandshake();
+          break;
+        case 'none':
+          _disconnect(false);
+          break;
+        default:
+          throw 'Unrecognized advice action' + action;
+      }
+    }
+
+    function _connectResponse(message) {
+      _connected = message.successful;
+      if (_connected) {
+        _notifyListeners('/meta/connect', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failConnect(message);
+      }
+    }
+
+    function _connectFailure(message) {
+      _connected = false;
+      _failConnect(message);
+    }
+
+    function _failDisconnect(message) {
+      _disconnect(true);
+      _handleCallback(message);
+      _notifyListeners('/meta/disconnect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _disconnectResponse(message) {
+      if (message.successful) {
+        _disconnect(false);
+        _handleCallback(message);
+        _notifyListeners('/meta/disconnect', message);
+      } else {
+        _failDisconnect(message);
+      }
+    }
+
+    function _disconnectFailure(message) {
+      _failDisconnect(mess

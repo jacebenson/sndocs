@@ -1101,39 +1101,7 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
         $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
       },
       getRoleIds: function() {
-        var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
-        var arrRoleIds = [];
-        var record = new GlideRecord("sys_user_role");
-        record.addQuery("name", "IN", arrRoleNames.join(","));
-        record.query();
-        while (record.next())
-          arrRoleIds.push(record.sys_id + "");
-        return arrRoleIds;
-      },
-      hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
-        for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
-          if (arrScrumRoleSysIds[index] == "" + roleSysId)
-            return true;
-        var record = new GlideRecord("sys_user_role_contains");
-        record.addQuery("role", roleSysId);
-        record.query();
-        while (record.next())
-          if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
-            return true;
-        return false;
-      },
-      getGroupIds: function() {
-        var arrScrumRoleIds = this.getRoleIds();
-        var arrGroupIds = [];
-        var record = new GlideRecord("sys_group_has_role");
-        record.query();
-        while (record.next())
-          if (this.hasScrumRole(record.role, arrScrumRoleIds))
-            arrGroupIds.push(record.group + "");
-        return arrGroupIds;
-      },
-      getGroupInfo: function() {
-          var mapGroupInfo = {};
-          var arrRoleIds = this.getRoleIds();
-          var arrGroupIds = this.getGroupIds(arrRoleIds);
-          var record = new GlideRecord("sys_u
+          var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
+          var arrRoleIds = [];
+          var record = new GlideRecord("sys_user_role");
+          record.addQuery("name", "IN", arrRoleNames.join(","))

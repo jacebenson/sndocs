@@ -855,528 +855,555 @@ org.cometd.WebSocketTransport = function() {
   return _self;
 };
 org.cometd.Cometd = function(name) {
-    var _cometd = this;
-    var _name = name || 'default';
-    var _crossDomain = false;
-    var _transports = new org.cometd.TransportRegistry();
-    var _transport;
-    var _status = 'disconnected';
-    var _messageId = 0;
-    var _clientId = null;
-    var _batch = 0;
-    var _messageQueue = [];
-    var _internalBatch = false;
-    var _listeners = {};
-    var _backoff = 0;
-    var _scheduledSend = null;
-    var _extensions = [];
-    var _advice = {};
-    var _handshakeProps;
-    var _handshakeCallback;
-    var _callbacks = {};
-    var _reestablish = false;
-    var _connected = false;
-    var _config = {
-      protocol: null,
-      stickyReconnect: true,
-      connectTimeout: 0,
-      maxConnections: 2,
-      backoffIncrement: 1000,
-      maxBackoff: 60000,
-      logLevel: 'info',
-      reverseIncomingExtensions: true,
-      maxNetworkDelay: 10000,
-      requestHeaders: {},
-      appendMessageTypeToURL: true,
-      autoBatch: false,
-      advice: {
-        timeout: 60000,
-        interval: 0,
-        reconnect: 'retry'
-      }
-    };
-
-    function _fieldValue(object, name) {
-      try {
-        return object[name];
-      } catch (x) {
-        return undefined;
-      }
+  var _cometd = this;
+  var _name = name || 'default';
+  var _crossDomain = false;
+  var _transports = new org.cometd.TransportRegistry();
+  var _transport;
+  var _status = 'disconnected';
+  var _messageId = 0;
+  var _clientId = null;
+  var _batch = 0;
+  var _messageQueue = [];
+  var _internalBatch = false;
+  var _listeners = {};
+  var _backoff = 0;
+  var _scheduledSend = null;
+  var _extensions = [];
+  var _advice = {};
+  var _handshakeProps;
+  var _handshakeCallback;
+  var _callbacks = {};
+  var _reestablish = false;
+  var _connected = false;
+  var _config = {
+    protocol: null,
+    stickyReconnect: true,
+    connectTimeout: 0,
+    maxConnections: 2,
+    backoffIncrement: 1000,
+    maxBackoff: 60000,
+    logLevel: 'info',
+    reverseIncomingExtensions: true,
+    maxNetworkDelay: 10000,
+    requestHeaders: {},
+    appendMessageTypeToURL: true,
+    autoBatch: false,
+    advice: {
+      timeout: 60000,
+      interval: 0,
+      reconnect: 'retry'
     }
-    this._mixin = function(deep, target, objects) {
-      var result = target || {};
-      for (var i = 2; i < arguments.length; ++i) {
-        var object = arguments[i];
-        if (object === undefined || object === null) {
+  };
+
+  function _fieldValue(object, name) {
+    try {
+      return object[name];
+    } catch (x) {
+      return undefined;
+    }
+  }
+  this._mixin = function(deep, target, objects) {
+    var result = target || {};
+    for (var i = 2; i < arguments.length; ++i) {
+      var object = arguments[i];
+      if (object === undefined || object === null) {
+        continue;
+      }
+      for (var propName in object) {
+        var prop = _fieldValue(object, propName);
+        var targ = _fieldValue(result, propName);
+        if (prop === target) {
           continue;
         }
-        for (var propName in object) {
-          var prop = _fieldValue(object, propName);
-          var targ = _fieldValue(result, propName);
-          if (prop === target) {
-            continue;
-          }
-          if (prop === undefined) {
-            continue;
-          }
-          if (deep && typeof prop === 'object' && prop !== null) {
-            if (prop instanceof Array) {
-              result[propName] = this._mixin(deep, targ instanceof Array ? targ : [], prop);
-            } else {
-              var source = typeof targ === 'object' && !(targ instanceof Array) ? targ : {};
-              result[propName] = this._mixin(deep, source, prop);
-            }
+        if (prop === undefined) {
+          continue;
+        }
+        if (deep && typeof prop === 'object' && prop !== null) {
+          if (prop instanceof Array) {
+            result[propName] = this._mixin(deep, targ instanceof Array ? targ : [], prop);
           } else {
-            result[propName] = prop;
+            var source = typeof targ === 'object' && !(targ instanceof Array) ? targ : {};
+            result[propName] = this._mixin(deep, source, prop);
           }
-        }
-      }
-      return result;
-    };
-
-    function _isString(value) {
-      return org.cometd.Utils.isString(value);
-    }
-
-    function _isFunction(value) {
-      if (value === undefined || value === null) {
-        return false;
-      }
-      return typeof value === 'function';
-    }
-
-    function _log(level, args) {
-      if (window.console) {
-        var logger = window.console[level];
-        if (_isFunction(logger)) {
-          logger.apply(window.console, args);
-        }
-      }
-    }
-    this._warn = function() {
-      _log('warn', arguments);
-    };
-    this._info = function() {
-      if (_config.logLevel !== 'warn') {
-        _log('info', arguments);
-      }
-    };
-    this._debug = function() {
-      if (_config.logLevel === 'debug') {
-        _log('debug', arguments);
-      }
-    };
-    this._isCrossDomain = function(hostAndPort) {
-      return hostAndPort && hostAndPort !== window.location.host;
-    };
-
-    function _configure(configuration) {
-      _cometd._debug('Configuring cometd object with', configuration);
-      if (_isString(configuration)) {
-        configuration = {
-          url: configuration
-        };
-      }
-      if (!configuration) {
-        configuration = {};
-      }
-      _config = _cometd._mixin(false, _config, configuration);
-      var url = _cometd.getURL();
-      if (!url) {
-        throw 'Missing required configuration parameter \'url\' specifying the Bayeux server URL';
-      }
-      var urlParts = /(^https?:\/\/)?(((\[[^\]]+\])|([^:\/\?#]+))(:(\d+))?)?([^\?#]*)(.*)?/.exec(url);
-      var hostAndPort = urlParts[2];
-      var uri = urlParts[8];
-      var afterURI = urlParts[9];
-      _crossDomain = _cometd._isCrossDomain(hostAndPort);
-      if (_config.appendMessageTypeToURL) {
-        if (afterURI !== undefined && afterURI.length > 0) {
-          _cometd._info('Appending message type to URI ' + uri + afterURI + ' is not supported, disabling \'appendMessageTypeToURL\' configuration');
-          _config.appendMessageTypeToURL = false;
         } else {
-          var uriSegments = uri.split('/');
-          var lastSegmentIndex = uriSegments.length - 1;
-          if (uri.match(/\/$/)) {
-            lastSegmentIndex -= 1;
-          }
-          if (uriSegments[lastSegmentIndex].indexOf('.') >= 0) {
-            _cometd._info('Appending message type to URI ' + uri + ' is not supported, disabling \'appendMessageTypeToURL\' configuration');
-            _config.appendMessageTypeToURL = false;
-          }
+          result[propName] = prop;
         }
       }
     }
+    return result;
+  };
 
-    function _removeListener(subscription) {
-      if (subscription) {
-        var subscriptions = _listeners[subscription.channel];
-        if (subscriptions && subscriptions[subscription.id]) {
-          delete subscriptions[subscription.id];
-          _cometd._debug('Removed', subscription.listener ? 'listener' : 'subscription', subscription);
+  function _isString(value) {
+    return org.cometd.Utils.isString(value);
+  }
+
+  function _isFunction(value) {
+    if (value === undefined || value === null) {
+      return false;
+    }
+    return typeof value === 'function';
+  }
+
+  function _log(level, args) {
+    if (window.console) {
+      var logger = window.console[level];
+      if (_isFunction(logger)) {
+        logger.apply(window.console, args);
+      }
+    }
+  }
+  this._warn = function() {
+    _log('warn', arguments);
+  };
+  this._info = function() {
+    if (_config.logLevel !== 'warn') {
+      _log('info', arguments);
+    }
+  };
+  this._debug = function() {
+    if (_config.logLevel === 'debug') {
+      _log('debug', arguments);
+    }
+  };
+  this._isCrossDomain = function(hostAndPort) {
+    return hostAndPort && hostAndPort !== window.location.host;
+  };
+
+  function _configure(configuration) {
+    _cometd._debug('Configuring cometd object with', configuration);
+    if (_isString(configuration)) {
+      configuration = {
+        url: configuration
+      };
+    }
+    if (!configuration) {
+      configuration = {};
+    }
+    _config = _cometd._mixin(false, _config, configuration);
+    var url = _cometd.getURL();
+    if (!url) {
+      throw 'Missing required configuration parameter \'url\' specifying the Bayeux server URL';
+    }
+    var urlParts = /(^https?:\/\/)?(((\[[^\]]+\])|([^:\/\?#]+))(:(\d+))?)?([^\?#]*)(.*)?/.exec(url);
+    var hostAndPort = urlParts[2];
+    var uri = urlParts[8];
+    var afterURI = urlParts[9];
+    _crossDomain = _cometd._isCrossDomain(hostAndPort);
+    if (_config.appendMessageTypeToURL) {
+      if (afterURI !== undefined && afterURI.length > 0) {
+        _cometd._info('Appending message type to URI ' + uri + afterURI + ' is not supported, disabling \'appendMessageTypeToURL\' configuration');
+        _config.appendMessageTypeToURL = false;
+      } else {
+        var uriSegments = uri.split('/');
+        var lastSegmentIndex = uriSegments.length - 1;
+        if (uri.match(/\/$/)) {
+          lastSegmentIndex -= 1;
+        }
+        if (uriSegments[lastSegmentIndex].indexOf('.') >= 0) {
+          _cometd._info('Appending message type to URI ' + uri + ' is not supported, disabling \'appendMessageTypeToURL\' configuration');
+          _config.appendMessageTypeToURL = false;
         }
       }
     }
+  }
 
-    function _removeSubscription(subscription) {
-      if (subscription && !subscription.listener) {
-        _removeListener(subscription);
+  function _removeListener(subscription) {
+    if (subscription) {
+      var subscriptions = _listeners[subscription.channel];
+      if (subscriptions && subscriptions[subscription.id]) {
+        delete subscriptions[subscription.id];
+        _cometd._debug('Removed', subscription.listener ? 'listener' : 'subscription', subscription);
       }
     }
+  }
 
-    function _clearSubscriptions() {
-      for (var channel in _listeners) {
-        var subscriptions = _listeners[channel];
-        if (subscriptions) {
-          for (var i = 0; i < subscriptions.length; ++i) {
-            _removeSubscription(subscriptions[i]);
-          }
-        }
-      }
+  function _removeSubscription(subscription) {
+    if (subscription && !subscription.listener) {
+      _removeListener(subscription);
     }
+  }
 
-    function _setStatus(newStatus) {
-      if (_status !== newStatus) {
-        _cometd._debug('Status', _status, '->', newStatus);
-        _status = newStatus;
-      }
-    }
-
-    function _isDisconnected() {
-      return _status === 'disconnecting' || _status === 'disconnected';
-    }
-
-    function _nextMessageId() {
-      return ++_messageId;
-    }
-
-    function _applyExtension(scope, callback, name, message, outgoing) {
-      try {
-        return callback.call(scope, message);
-      } catch (x) {
-        _cometd._debug('Exception during execution of extension', name, x);
-        var exceptionCallback = _cometd.onExtensionException;
-        if (_isFunction(exceptionCallback)) {
-          _cometd._debug('Invoking extension exception callback', name, x);
-          try {
-            exceptionCallback.call(_cometd, x, name, outgoing, message);
-          } catch (xx) {
-            _cometd._info('Exception during execution of exception callback in extension', name, xx);
-          }
-        }
-        return message;
-      }
-    }
-
-    function _applyIncomingExtensions(message) {
-      for (var i = 0; i < _extensions.length; ++i) {
-        if (message === undefined || message === null) {
-          break;
-        }
-        var index = _config.reverseIncomingExtensions ? _extensions.length - 1 - i : i;
-        var extension = _extensions[index];
-        var callback = extension.extension.incoming;
-        if (_isFunction(callback)) {
-          var result = _applyExtension(extension.extension, callback, extension.name, message, false);
-          message = result === undefined ? message : result;
-        }
-      }
-      return message;
-    }
-
-    function _applyOutgoingExtensions(message) {
-      for (var i = 0; i < _extensions.length; ++i) {
-        if (message === undefined || message === null) {
-          break;
-        }
-        var extension = _extensions[i];
-        var callback = extension.extension.outgoing;
-        if (_isFunction(callback)) {
-          var result = _applyExtension(extension.extension, callback, extension.name, message, true);
-          message = result === undefined ? message : result;
-        }
-      }
-      return message;
-    }
-
-    function _notify(channel, message) {
+  function _clearSubscriptions() {
+    for (var channel in _listeners) {
       var subscriptions = _listeners[channel];
-      if (subscriptions && subscriptions.length > 0) {
+      if (subscriptions) {
         for (var i = 0; i < subscriptions.length; ++i) {
-          var subscription = subscriptions[i];
-          if (subscription) {
-            try {
-              subscription.callback.call(subscription.scope, message);
-            } catch (x) {
-              _cometd._debug('Exception during notification', subscription, message, x);
-              var listenerCallback = _cometd.onListenerException;
-              if (_isFunction(listenerCallback)) {
-                _cometd._debug('Invoking listener exception callback', subscription, x);
-                try {
-                  listenerCallback.call(_cometd, x, subscription, subscription.listener, message);
-                } catch (xx) {
-                  _cometd._info('Exception during execution of listener callback', subscription, xx);
-                }
+          _removeSubscription(subscriptions[i]);
+        }
+      }
+    }
+  }
+
+  function _setStatus(newStatus) {
+    if (_status !== newStatus) {
+      _cometd._debug('Status', _status, '->', newStatus);
+      _status = newStatus;
+    }
+  }
+
+  function _isDisconnected() {
+    return _status === 'disconnecting' || _status === 'disconnected';
+  }
+
+  function _nextMessageId() {
+    return ++_messageId;
+  }
+
+  function _applyExtension(scope, callback, name, message, outgoing) {
+    try {
+      return callback.call(scope, message);
+    } catch (x) {
+      _cometd._debug('Exception during execution of extension', name, x);
+      var exceptionCallback = _cometd.onExtensionException;
+      if (_isFunction(exceptionCallback)) {
+        _cometd._debug('Invoking extension exception callback', name, x);
+        try {
+          exceptionCallback.call(_cometd, x, name, outgoing, message);
+        } catch (xx) {
+          _cometd._info('Exception during execution of exception callback in extension', name, xx);
+        }
+      }
+      return message;
+    }
+  }
+
+  function _applyIncomingExtensions(message) {
+    for (var i = 0; i < _extensions.length; ++i) {
+      if (message === undefined || message === null) {
+        break;
+      }
+      var index = _config.reverseIncomingExtensions ? _extensions.length - 1 - i : i;
+      var extension = _extensions[index];
+      var callback = extension.extension.incoming;
+      if (_isFunction(callback)) {
+        var result = _applyExtension(extension.extension, callback, extension.name, message, false);
+        message = result === undefined ? message : result;
+      }
+    }
+    return message;
+  }
+
+  function _applyOutgoingExtensions(message) {
+    for (var i = 0; i < _extensions.length; ++i) {
+      if (message === undefined || message === null) {
+        break;
+      }
+      var extension = _extensions[i];
+      var callback = extension.extension.outgoing;
+      if (_isFunction(callback)) {
+        var result = _applyExtension(extension.extension, callback, extension.name, message, true);
+        message = result === undefined ? message : result;
+      }
+    }
+    return message;
+  }
+
+  function _notify(channel, message) {
+    var subscriptions = _listeners[channel];
+    if (subscriptions && subscriptions.length > 0) {
+      for (var i = 0; i < subscriptions.length; ++i) {
+        var subscription = subscriptions[i];
+        if (subscription) {
+          try {
+            subscription.callback.call(subscription.scope, message);
+          } catch (x) {
+            _cometd._debug('Exception during notification', subscription, message, x);
+            var listenerCallback = _cometd.onListenerException;
+            if (_isFunction(listenerCallback)) {
+              _cometd._debug('Invoking listener exception callback', subscription, x);
+              try {
+                listenerCallback.call(_cometd, x, subscription, subscription.listener, message);
+              } catch (xx) {
+                _cometd._info('Exception during execution of listener callback', subscription, xx);
               }
             }
           }
         }
       }
     }
+  }
 
-    function _notifyListeners(channel, message) {
-      _notify(channel, message);
-      var channelParts = channel.split('/');
-      var last = channelParts.length - 1;
-      for (var i = last; i > 0; --i) {
-        var channelPart = channelParts.slice(0, i).join('/') + '/*';
-        if (i === last) {
-          _notify(channelPart, message);
-        }
-        channelPart += '*';
+  function _notifyListeners(channel, message) {
+    _notify(channel, message);
+    var channelParts = channel.split('/');
+    var last = channelParts.length - 1;
+    for (var i = last; i > 0; --i) {
+      var channelPart = channelParts.slice(0, i).join('/') + '/*';
+      if (i === last) {
         _notify(channelPart, message);
       }
+      channelPart += '*';
+      _notify(channelPart, message);
     }
+  }
 
-    function _cancelDelayedSend() {
-      if (_scheduledSend !== null) {
-        org.cometd.Utils.clearTimeout(_scheduledSend);
+  function _cancelDelayedSend() {
+    if (_scheduledSend !== null) {
+      org.cometd.Utils.clearTimeout(_scheduledSend);
+    }
+    _scheduledSend = null;
+  }
+
+  function _delayedSend(operation) {
+    _cancelDelayedSend();
+    var delay = _advice.interval + _backoff;
+    _cometd._debug('Function scheduled in', delay, 'ms, interval =', _advice.interval, 'backoff =', _backoff, operation);
+    _scheduledSend = org.cometd.Utils.setTimeout(_cometd, operation, delay);
+  }
+  var _handleMessages;
+  var _handleFailure;
+
+  function _send(sync, messages, longpoll, extraPath) {
+    for (var i = 0; i < messages.length; ++i) {
+      var message = messages[i];
+      var messageId = '' + _nextMessageId();
+      message.id = messageId;
+      if (_clientId) {
+        message.clientId = _clientId;
       }
-      _scheduledSend = null;
-    }
-
-    function _delayedSend(operation) {
-      _cancelDelayedSend();
-      var delay = _advice.interval + _backoff;
-      _cometd._debug('Function scheduled in', delay, 'ms, interval =', _advice.interval, 'backoff =', _backoff, operation);
-      _scheduledSend = org.cometd.Utils.setTimeout(_cometd, operation, delay);
-    }
-    var _handleMessages;
-    var _handleFailure;
-
-    function _send(sync, messages, longpoll, extraPath) {
-      for (var i = 0; i < messages.length; ++i) {
-        var message = messages[i];
-        var messageId = '' + _nextMessageId();
+      var callback = undefined;
+      if (_isFunction(message._callback)) {
+        callback = message._callback;
+        delete message._callback;
+      }
+      message = _applyOutgoingExtensions(message);
+      if (message !== undefined && message !== null) {
         message.id = messageId;
-        if (_clientId) {
-          message.clientId = _clientId;
+        messages[i] = message;
+        if (callback) {
+          _callbacks[messageId] = callback;
         }
-        var callback = undefined;
-        if (_isFunction(message._callback)) {
-          callback = message._callback;
-          delete message._callback;
-        }
-        message = _applyOutgoingExtensions(message);
-        if (message !== undefined && message !== null) {
-          message.id = messageId;
-          messages[i] = message;
-          if (callback) {
-            _callbacks[messageId] = callback;
-          }
-        } else {
-          messages.splice(i--, 1);
-        }
-      }
-      if (messages.length === 0) {
-        return;
-      }
-      var url = _cometd.getURL();
-      if (_config.appendMessageTypeToURL) {
-        if (!url.match(/\/$/)) {
-          url = url + '/';
-        }
-        if (extraPath) {
-          url = url + extraPath;
-        }
-      }
-      var envelope = {
-        url: url,
-        sync: sync,
-        messages: messages,
-        onSuccess: function(rcvdMessages) {
-          try {
-            _handleMessages.call(_cometd, rcvdMessages);
-          } catch (x) {
-            _cometd._debug('Exception during handling of messages', x);
-          }
-        },
-        onFailure: function(conduit, messages, failure) {
-          try {
-            failure.connectionType = _cometd.getTransport().getType();
-            _handleFailure.call(_cometd, conduit, messages, failure);
-          } catch (x) {
-            _cometd._debug('Exception during handling of failure', x);
-          }
-        }
-      };
-      _cometd._debug('Send', envelope);
-      _transport.send(envelope, longpoll);
-    }
-
-    function _queueSend(message) {
-      if (_batch > 0 || _internalBatch === true) {
-        _messageQueue.push(message);
       } else {
-        _send(false, [message], false);
+        messages.splice(i--, 1);
       }
     }
-    this.send = _queueSend;
-
-    function _resetBackoff() {
-      _backoff = 0;
+    if (messages.length === 0) {
+      return;
     }
-
-    function _increaseBackoff() {
-      if (_backoff < _config.maxBackoff) {
-        _backoff += _config.backoffIncrement;
+    var url = _cometd.getURL();
+    if (_config.appendMessageTypeToURL) {
+      if (!url.match(/\/$/)) {
+        url = url + '/';
+      }
+      if (extraPath) {
+        url = url + extraPath;
       }
     }
-
-    function _startBatch() {
-      ++_batch;
-    }
-
-    function _flushBatch() {
-      var messages = _messageQueue;
-      _messageQueue = [];
-      if (messages.length > 0) {
-        _send(false, messages, false);
-      }
-    }
-
-    function _endBatch() {
-      --_batch;
-      if (_batch < 0) {
-        throw 'Calls to startBatch() and endBatch() are not paired';
-      }
-      if (_batch === 0 && !_isDisconnected() && !_internalBatch) {
-        _flushBatch();
-      }
-    }
-
-    function _connect() {
-      if (!_isDisconnected()) {
-        var message = {
-          channel: '/meta/connect',
-          connectionType: _transport.getType()
-        };
-        if (!_connected) {
-          message.advice = {
-            timeout: 0
-          };
-        }
-        _setStatus('connecting');
-        _cometd._debug('Connect sent', message);
-        _send(false, [message], true, 'connect');
-        _setStatus('connected');
-      }
-    }
-
-    function _delayedConnect() {
-      _setStatus('connecting');
-      _delayedSend(function() {
-        _connect();
-      });
-    }
-
-    function _updateAdvice(newAdvice) {
-      if (newAdvice) {
-        _advice = _cometd._mixin(false, {}, _config.advice, newAdvice);
-        _cometd._debug('New advice', _advice);
-      }
-    }
-
-    function _disconnect(abort) {
-      _cancelDelayedSend();
-      if (abort) {
-        _transport.abort();
-      }
-      _clientId = null;
-      _setStatus('disconnected');
-      _batch = 0;
-      _resetBackoff();
-      _transport = null;
-      if (_messageQueue.length > 0) {
-        _handleFailure.call(_cometd, undefined, _messageQueue, {
-          reason: 'Disconnected'
-        });
-        _messageQueue = [];
-      }
-    }
-
-    function _notifyTransportFailure(oldTransport, newTransport, failure) {
-      var callback = _cometd.onTransportFailure;
-      if (_isFunction(callback)) {
-        _cometd._debug('Invoking transport failure callback', oldTransport, newTransport, failure);
+    var envelope = {
+      url: url,
+      sync: sync,
+      messages: messages,
+      onSuccess: function(rcvdMessages) {
         try {
-          callback.call(_cometd, oldTransport, newTransport, failure);
+          _handleMessages.call(_cometd, rcvdMessages);
         } catch (x) {
-          _cometd._info('Exception during execution of transport failure callback', x);
+          _cometd._debug('Exception during handling of messages', x);
+        }
+      },
+      onFailure: function(conduit, messages, failure) {
+        try {
+          failure.connectionType = _cometd.getTransport().getType();
+          _handleFailure.call(_cometd, conduit, messages, failure);
+        } catch (x) {
+          _cometd._debug('Exception during handling of failure', x);
         }
       }
-    }
+    };
+    _cometd._debug('Send', envelope);
+    _transport.send(envelope, longpoll);
+  }
 
-    function _handshake(handshakeProps, handshakeCallback) {
-      if (_isFunction(handshakeProps)) {
-        handshakeCallback = handshakeProps;
-        handshakeProps = undefined;
-      }
-      _clientId = null;
-      _clearSubscriptions();
-      if (_isDisconnected()) {
-        _transports.reset();
-        _updateAdvice(_config.advice);
-      } else {
-        _updateAdvice(_cometd._mixin(false, _advice, {
-          reconnect: 'retry'
-        }));
-      }
-      _batch = 0;
-      _internalBatch = true;
-      _handshakeProps = handshakeProps;
-      _handshakeCallback = handshakeCallback;
-      var version = '1.0';
-      var url = _cometd.getURL();
-      var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
-      var bayeuxMessage = {
-        version: version,
-        minimumVersion: version,
-        channel: '/meta/handshake',
-        supportedConnectionTypes: transportTypes,
-        _callback: handshakeCallback,
-        advice: {
-          timeout: _advice.timeout,
-          interval: _advice.interval
-        }
+  function _queueSend(message) {
+    if (_batch > 0 || _internalBatch === true) {
+      _messageQueue.push(message);
+    } else {
+      _send(false, [message], false);
+    }
+  }
+  this.send = _queueSend;
+
+  function _resetBackoff() {
+    _backoff = 0;
+  }
+
+  function _increaseBackoff() {
+    if (_backoff < _config.maxBackoff) {
+      _backoff += _config.backoffIncrement;
+    }
+  }
+
+  function _startBatch() {
+    ++_batch;
+  }
+
+  function _flushBatch() {
+    var messages = _messageQueue;
+    _messageQueue = [];
+    if (messages.length > 0) {
+      _send(false, messages, false);
+    }
+  }
+
+  function _endBatch() {
+    --_batch;
+    if (_batch < 0) {
+      throw 'Calls to startBatch() and endBatch() are not paired';
+    }
+    if (_batch === 0 && !_isDisconnected() && !_internalBatch) {
+      _flushBatch();
+    }
+  }
+
+  function _connect() {
+    if (!_isDisconnected()) {
+      var message = {
+        channel: '/meta/connect',
+        connectionType: _transport.getType()
       };
-      var message = _cometd._mixin(false, {}, _handshakeProps, bayeuxMessage);
-      if (!_transport) {
-        _transport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
-        if (!_transport) {
-          var failure = 'Could not find initial transport among: ' + _transports.getTransportTypes();
-          _cometd._warn(failure);
-          throw failure;
-        }
+      if (!_connected) {
+        message.advice = {
+          timeout: 0
+        };
       }
-      _cometd._debug('Initial transport is', _transport.getType());
-      _setStatus('handshaking');
-      _cometd._debug('Handshake sent', message);
-      _send(false, [message], false, 'handshake');
+      _setStatus('connecting');
+      _cometd._debug('Connect sent', message);
+      _send(false, [message], true, 'connect');
+      _setStatus('connected');
     }
+  }
 
-    function _delayedHandshake() {
-      _setStatus('handshaking');
-      _internalBatch = true;
-      _delayedSend(function() {
-        _handshake(_handshakeProps, _handshakeCallback);
+  function _delayedConnect() {
+    _setStatus('connecting');
+    _delayedSend(function() {
+      _connect();
+    });
+  }
+
+  function _updateAdvice(newAdvice) {
+    if (newAdvice) {
+      _advice = _cometd._mixin(false, {}, _config.advice, newAdvice);
+      _cometd._debug('New advice', _advice);
+    }
+  }
+
+  function _disconnect(abort) {
+    _cancelDelayedSend();
+    if (abort) {
+      _transport.abort();
+    }
+    _clientId = null;
+    _setStatus('disconnected');
+    _batch = 0;
+    _resetBackoff();
+    _transport = null;
+    if (_messageQueue.length > 0) {
+      _handleFailure.call(_cometd, undefined, _messageQueue, {
+        reason: 'Disconnected'
       });
+      _messageQueue = [];
     }
+  }
 
-    function _handleCallback(message) {
-      var callback = _callbacks[message.id];
-      if (_isFunction(callback)) {
-        delete _callbacks[mes.getTransport();
+  function _notifyTransportFailure(oldTransport, newTransport, failure) {
+    var callback = _cometd.onTransportFailure;
+    if (_isFunction(callback)) {
+      _cometd._debug('Invoking transport failure callback', oldTransport, newTransport, failure);
+      try {
+        callback.call(_cometd, oldTransport, newTransport, failure);
+      } catch (x) {
+        _cometd._info('Exception during execution of transport failure callback', x);
+      }
+    }
+  }
+
+  function _handshake(handshakeProps, handshakeCallback) {
+    if (_isFunction(handshakeProps)) {
+      handshakeCallback = handshakeProps;
+      handshakeProps = undefined;
+    }
+    _clientId = null;
+    _clearSubscriptions();
+    if (_isDisconnected()) {
+      _transports.reset();
+      _updateAdvice(_config.advice);
+    } else {
+      _updateAdvice(_cometd._mixin(false, _advice, {
+        reconnect: 'retry'
+      }));
+    }
+    _batch = 0;
+    _internalBatch = true;
+    _handshakeProps = handshakeProps;
+    _handshakeCallback = handshakeCallback;
+    var version = '1.0';
+    var url = _cometd.getURL();
+    var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
+    var bayeuxMessage = {
+      version: version,
+      minimumVersion: version,
+      channel: '/meta/handshake',
+      supportedConnectionTypes: transportTypes,
+      _callback: handshakeCallback,
+      advice: {
+        timeout: _advice.timeout,
+        interval: _advice.interval
+      }
+    };
+    var message = _cometd._mixin(false, {}, _handshakeProps, bayeuxMessage);
+    if (!_transport) {
+      _transport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
+      if (!_transport) {
+        var failure = 'Could not find initial transport among: ' + _transports.getTransportTypes();
+        _cometd._warn(failure);
+        throw failure;
+      }
+    }
+    _cometd._debug('Initial transport is', _transport.getType());
+    _setStatus('handshaking');
+    _cometd._debug('Handshake sent', message);
+    _send(false, [message], false, 'handshake');
+  }
+
+  function _delayedHandshake() {
+    _setStatus('handshaking');
+    _internalBatch = true;
+    _delayedSend(function() {
+      _handshake(_handshakeProps, _handshakeCallback);
+    });
+  }
+
+  function _handleCallback(message) {
+    var callback = _callbacks[message.id];
+    if (_isFunction(callback)) {
+      delete _callbacks[message.id];
+      callback.call(_cometd, message);
+    }
+  }
+
+  function _failHandshake(message) {
+    _handleCallback(message);
+    _notifyListeners('/meta/handshake', message);
+    _notifyListeners('/meta/unsuccessful', message);
+    var retry = !_isDisconnected() && _advice.reconnect !== 'none';
+    if (retry) {
+      _increaseBackoff();
+      _delayedHandshake();
+    } else {
+      _disconnect(false);
+    }
+  }
+
+  function _handshakeResponse(message) {
+    if (message.successful) {
+      _clientId = message.clientId;
+      var url = _cometd.getURL();
+      var newTransport = _transports.negotiateTransport(message.supportedConnectionTypes, message.version, _crossDomain, url);
+      if (newTransport === null) {
+        var failure = 'Could not negotiate transport with server; client=[' +
+          _transports.findTransportTypes(message.version, _crossDomain, url) +
+          '], server=[' + message.supportedConnectionTypes + ']';
+        var oldTransport = _cometd.getTransport();
         _notifyTransportFailure(oldTransport.getType(), null, {
           reason: failure,
           connectionType: oldTransport.getType(),
@@ -2009,22 +2036,1216 @@ if (typeof define === 'function' && define.amd) {
 };
 /*! RESOURCE: /scripts/thirdparty/cometd/vanilla/vanilla.cometd.js */
 (function(global, org_cometd) {
-    org_cometd.JSON.toJSON = window.JSON.stringify;
-    org_cometd.JSON.fromJSON = window.JSON.parse;
+  org_cometd.JSON.toJSON = window.JSON.stringify;
+  org_cometd.JSON.fromJSON = window.JSON.parse;
 
-    function _setHeaders(xhr, headers) {
-      if (headers) {
-        for (var headerName in headers) {
-          if (headerName.toLowerCase() === 'content-type') {
-            continue;
-          }
-          xhr.setRequestHeader(headerName, headers[headerName]);
+  function _setHeaders(xhr, headers) {
+    if (headers) {
+      for (var headerName in headers) {
+        if (headerName.toLowerCase() === 'content-type') {
+          continue;
         }
+        xhr.setRequestHeader(headerName, headers[headerName]);
+      }
+    }
+  }
+
+  function LongPollingTransport() {
+    var _super = new org_cometd.LongPollingTransport();
+    var that = org_cometd.Transport.derive(_super);
+    that.xhrSend = function(packet) {
+      var request = new XMLHttpRequest();
+      request.open('POST', packet.url, true);
+      _setHeaders(request, packet.headers);
+      request.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+      request.xhrFields = {
+        withCredentials: true
+      };
+      request.onload = function() {
+        var state = this.status;
+        if (state >= 200 && state < 400)
+          packet.onSuccess(this.response);
+        else
+          packet.onError(state, this.statusText);
+      };
+      request.send(packet.body);
+      return request;
+    };
+    return that;
+  }
+  global.Cometd = function(name) {
+    var CometD = org_cometd.Cometd || org_cometd.CometD;
+    var cometd = new CometD(name);
+    if (org_cometd.WebSocket) {
+      cometd.registerTransport('websocket', new org_cometd.WebSocketTransport());
+    }
+    cometd.registerTransport('long-polling', new LongPollingTransport());
+    return cometd;
+  };
+})(window, org.cometd);;
+/*! RESOURCE: /scripts/amb_properties.js */
+var amb = amb || {
+  properties: {
+    servletURI: 'amb/',
+    logLevel: 'info',
+    loginWindow: 'true'
+  }
+};;
+/*! RESOURCE: /scripts/amb.Logger.js */
+amb['Logger'] = function(callerType) {
+  var _debugEnabled = amb['properties']['logLevel'] == 'debug';
+
+  function print(message) {
+    if (window.console)
+      console.log(callerType + ' ' + message);
+  }
+  return {
+    debug: function(message) {
+      if (_debugEnabled)
+        print('[DEBUG] ' + message);
+    },
+    addInfoMessage: function(message) {
+      print('[INFO] ' + message);
+    },
+    addErrorMessage: function(message) {
+      print('[ERROR] ' + message);
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.EventManager.js */
+amb.EventManager = function EventManager(events) {
+  var _subscriptions = [];
+  var _idCounter = 0;
+
+  function _getSubscriptions(event) {
+    var subscriptions = [];
+    for (var i = 0; i < _subscriptions.length; i++) {
+      if (_subscriptions[i].event == event)
+        subscriptions.push(_subscriptions[i]);
+    }
+    return subscriptions;
+  }
+  return {
+    subscribe: function(event, callback) {
+      var id = _idCounter++;
+      _subscriptions.push({
+        event: event,
+        callback: callback,
+        id: id
+      });
+      return id;
+    },
+    unsubscribe: function(id) {
+      for (var i = 0; i < _subscriptions.length; i++)
+        if (id == _subscriptions[i].id)
+          _subscriptions.splice(i, 1);
+    },
+    publish: function(event, args) {
+      var subscriptions = _getSubscriptions(event);
+      for (var i = 0; i < subscriptions.length; i++)
+        subscriptions[i].callback.apply(null, args);
+    },
+    getEvents: function() {
+      return events;
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.ServerConnection.js */
+amb.ServerConnection = function ServerConnection(cometd) {
+  var connected = false;
+  var disconnecting = false;
+  var eventManager = new amb.EventManager({
+    CONNECTION_INITIALIZED: 'connection.initialized',
+    CONNECTION_OPENED: 'connection.opened',
+    CONNECTION_CLOSED: 'connection.closed',
+    CONNECTION_BROKEN: 'connection.broken',
+    SESSION_LOGGED_IN: 'session.logged.in',
+    SESSION_LOGGED_OUT: 'session.logged.out',
+    SESSION_INVALIDATED: 'session.invalidated'
+  });
+  var state = "closed";
+  var LOGGER = new amb.Logger('amb.ServerConnection');
+  _initializeMetaChannelListeners();
+  var loggedIn = true;
+  var loginWindow = null;
+  var loginWindowEnabled = amb.properties['loginWindow'] === 'true';
+  var lastError = null;
+  var errorMessages = {
+    'UNKNOWN_CLIENT': '402::Unknown client'
+  };
+  var loginWindowOverride = false;
+  var ambServerConnection = {};
+  ambServerConnection.connect = function() {
+    if (connected) {
+      console.log(">>> connection exists, request satisfied");
+      return;
+    }
+    LOGGER.debug('Connecting to glide amb server -> ' + amb['properties']['servletURI']);
+    cometd.configure({
+      url: _getRelativePath(amb['properties']['servletURI']),
+      logLevel: amb['properties']['logLevel']
+    });
+    cometd.handshake();
+  };
+  ambServerConnection.reload = function() {
+    cometd.reload();
+  };
+  ambServerConnection.abort = function() {
+    cometd.getTransport().abort();
+  };
+  ambServerConnection.disconnect = function() {
+    LOGGER.debug('Disconnecting from glide amb server..');
+    disconnecting = true;
+    cometd.disconnect();
+  };
+
+  function _initializeMetaChannelListeners() {
+    cometd.addListener('/meta/handshake', this, _metaHandshake);
+    cometd.addListener('/meta/connect', this, _metaConnect);
+  }
+
+  function _metaHandshake(message) {
+    setTimeout(function() {
+      if (message['successful'])
+        _connectionInitialized();
+    }, 0);
+  }
+
+  function applyAMBProperties(message) {
+    if (message.ext) {
+      if (message.ext['glide.amb.active'] === false) {
+        ambServerConnection.disconnect();
+      }
+      if (message.ext['glide.amb.client.log.level'] !== undefined &&
+        message.ext['glide.amb.client.log.level'] !== '') {
+        amb.properties.logLevel = message.ext['glide.amb.client.log.level'];
+        cometd.setLogLevel(amb.properties.logLevel);
+      }
+    }
+  }
+
+  function _metaConnect(message) {
+    applyAMBProperties(message);
+    if (disconnecting) {
+      setTimeout(function() {
+        connected = false;
+        _connectionClosed();
+      }, 0);
+      return;
+    }
+    var error = message['error'];
+    if (error)
+      lastError = error;
+    _sessionStatus(message);
+    var wasConnected = connected;
+    connected = (message['successful'] === true);
+    if (!wasConnected && connected)
+      _connectionOpened();
+    else if (wasConnected && !connected)
+      _connectionBroken();
+  }
+
+  function _connectionInitialized() {
+    LOGGER.debug('Connection initialized');
+    state = "initialized";
+    _publishEvent(eventManager.getEvents().CONNECTION_INITIALIZED);
+  }
+
+  function _connectionOpened() {
+    LOGGER.debug('Connection opened');
+    state = "opened";
+    _publishEvent(eventManager.getEvents().CONNECTION_OPENED);
+  }
+
+  function _connectionClosed() {
+    LOGGER.debug('Connection closed');
+    state = "closed";
+    _publishEvent(eventManager.getEvents().CONNECTION_CLOSED);
+  }
+
+  function _connectionBroken() {
+    LOGGER.addErrorMessage('Connection broken');
+    state = "broken";
+    _publishEvent(eventManager.getEvents().CONNECTION_BROKEN);
+  }
+
+  function _sessionStatus(message) {
+    var ext = message['ext'];
+    if (ext) {
+      var sessionStatus = ext['glide.session.status'];
+      loginWindowOverride = ext['glide.amb.login.window.override'] === true;
+      LOGGER.debug('session.status - ' + sessionStatus);
+      switch (sessionStatus) {
+        case 'session.logged.out':
+          if (loggedIn)
+            _logout();
+          break;
+        case 'session.logged.in':
+          if (!loggedIn)
+            _login();
+          break;
+        case 'session.invalidated':
+          if (loggedIn)
+            _invalidated();
+          break;
+        default:
+          LOGGER.debug("unknown session status - " + sessionStatus);
+          break;
+      }
+    }
+  }
+
+  function _login() {
+    loggedIn = true;
+    LOGGER.debug("LOGGED_IN event fire!");
+    _publishEvent(eventManager.getEvents().SESSION_LOGGED_IN);
+    ambServerConnection.loginHide();
+  }
+
+  function _logout() {
+    loggedIn = false;
+    LOGGER.debug("LOGGED_OUT event fire!");
+    _publishEvent(eventManager.getEvents().SESSION_LOGGED_OUT);
+    ambServerConnection.loginShow();
+  }
+
+  function _invalidated() {
+    loggedIn = false;
+    LOGGER.debug("INVALIDATED event fire!");
+    _publishEvent(eventManager.getEvents().SESSION_INVALIDATED);
+  }
+
+  function _publishEvent(event) {
+    try {
+      eventManager.publish(event);
+    } catch (e) {
+      LOGGER.addErrorMessage("error publishing '" + event + "' - " + e);
+    }
+  }
+  var modalContent = '<iframe src="/amb_login.do" frameborder="0" height="400px" width="405px" scrolling="no"></iframe>';
+  var modalTemplate = '<div id="amb_disconnect_modal" tabindex="-1" aria-hidden="true" class="modal" role="dialog">' +
+    '  <div class="modal-dialog small-modal" style="width:450px">' +
+    '     <div class="modal-content">' +
+    '        <header class="modal-header">' +
+    '           <h4 id="small_modal1_title" class="modal-title">Login</h4>' +
+    '        </header>' +
+    '        <div class="modal-body">' +
+    '        </div>' +
+    '     </div>' +
+    '  </div>' +
+    '</div>';
+
+  function _loginShow() {
+    LOGGER.debug("Show login window");
+    if (!loginWindowEnabled || loginWindowOverride)
+      return;
+    var dialog = new GlideModal('amb_disconnect_modal');
+    if (dialog['renderWithContent']) {
+      dialog.template = modalTemplate;
+      dialog.renderWithContent(modalContent);
+    } else {
+      dialog.setBody(modalContent);
+      dialog.render();
+    }
+    loginWindow = dialog;
+  }
+
+  function _loginHide() {
+    if (!loginWindow)
+      return;
+    loginWindow.destroy();
+    loginWindow = null;
+  }
+
+  function loginComplete() {
+    _login();
+  }
+
+  function _getRelativePath(uri) {
+    var relativePath = "";
+    for (var i = 0; i < window.location.pathname.match(/\//g).length - 1; i++) {
+      relativePath = "../" + relativePath;
+    }
+    return relativePath + uri;
+  }
+  ambServerConnection.getEvents = function() {
+    return eventManager.getEvents();
+  };
+  ambServerConnection.getConnectionState = function() {
+    return state;
+  };
+  ambServerConnection.getLastError = function() {
+    return lastError;
+  };
+  ambServerConnection.setLastError = function(error) {
+    lastError = error;
+  };
+  ambServerConnection.getErrorMessages = function() {
+    return errorMessages;
+  };
+  ambServerConnection.isLoggedIn = function() {
+    return loggedIn;
+  };
+  ambServerConnection.loginShow = function() {
+    _loginShow();
+  };
+  ambServerConnection.loginHide = function() {
+    _loginHide();
+  };
+  ambServerConnection.loginComplete = function() {
+    _login();
+  };
+  ambServerConnection.subscribeToEvent = function(event, callback) {
+    if (eventManager.getEvents().CONNECTION_OPENED == event && connected)
+      callback();
+    return eventManager.subscribe(event, callback);
+  };
+  ambServerConnection.unsubscribeFromEvent = function(id) {
+    eventManager.unsubscribe(id);
+  };
+  ambServerConnection.getConnectionState = function() {
+    return state;
+  };
+  ambServerConnection.isLoginWindowEnabled = function() {
+    return loginWindowEnabled;
+  };
+  ambServerConnection.isLoginWindowOverride = function() {
+    return loginWindowOverride;
+  }
+  return ambServerConnection;
+};;
+/*! RESOURCE: /scripts/amb.ChannelRedirect.js */
+amb.ChannelRedirect = function ChannelRedirect(cometd, serverConnection,
+  channelProvider) {
+  var initialized = false;
+  var _cometd = cometd;
+  var eventManager = new amb.EventManager({
+    CHANNEL_REDIRECT: 'channel.redirect'
+  });
+  var LOGGER = new amb.Logger('amb.ChannelRedirect');
+
+  function _onAdvice(advice) {
+    LOGGER.debug('_onAdvice:' + advice.data.clientId);
+    var fromChannel = channelProvider(advice.data.fromChannel);
+    var toChannel = channelProvider(advice.data.toChannel);
+    eventManager.publish(eventManager.getEvents().CHANNEL_REDIRECT, [fromChannel, toChannel]);
+    LOGGER.debug(
+      'published channel switch event, fromChannel:' + fromChannel.getName() +
+      ', toChannel:' + toChannel.getName());
+  }
+  return {
+    subscribeToEvent: function(event, callback) {
+      return eventManager.subscribe(event, callback);
+    },
+    unsubscribeToEvent: function(id) {
+      eventManager.unsubscribe(id);
+    },
+    getEvents: function() {
+      return eventManager.getEvents();
+    },
+    initialize: function() {
+      if (!initialized) {
+        var channelName = '/sn/meta/channel_redirect/' + _cometd.getClientId();
+        var metaChannel = channelProvider(channelName);
+        metaChannel.newListener(serverConnection, null).subscribe(_onAdvice);
+        LOGGER.debug("ChannelRedirect initialized: " + channelName);
+        initialized = true;
+      }
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.ChannelListener.js */
+amb.ChannelListener = function ChannelListener(channel, serverConnection,
+  channelRedirect) {
+  var id;
+  var subscriberCallback;
+  var LOGGER = new amb.Logger('amb.ChannelListener');
+  var channelRedirectId = null;
+  var connectOpenedEventId;
+  var currentChannel = channel;
+  return {
+    getCallback: function() {
+      return subscriberCallback;
+    },
+    getID: function() {
+      return id;
+    },
+    subscribe: function(callback) {
+      subscriberCallback = callback;
+      if (channelRedirect)
+        channelRedirectId = channelRedirect.subscribeToEvent(
+          channelRedirect.getEvents().CHANNEL_REDIRECT, this._switchToChannel.bind(this));
+      connectOpenedEventId = serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_OPENED, this._subscribeWhenReady.bind(this));
+      return this;
+    },
+    resubscribe: function() {
+      return this.subscribe(subscriberCallback);
+    },
+    _switchToChannel: function(fromChannel, toChannel) {
+      if (!fromChannel || !toChannel)
+        return;
+      if (fromChannel.getName() != currentChannel.getName())
+        return;
+      this.unsubscribe();
+      currentChannel = toChannel;
+      this.subscribe(subscriberCallback);
+    },
+    _subscribeWhenReady: function() {
+      LOGGER.debug("Subscribing to '" + currentChannel.getName() + "'...");
+      id = currentChannel.subscribe(this);
+    },
+    unsubscribe: function() {
+      channelRedirect.unsubscribeToEvent(channelRedirectId);
+      currentChannel.unsubscribe(this);
+      serverConnection.unsubscribeFromEvent(connectOpenedEventId);
+      LOGGER.debug("Unsubscribed from channel: " + currentChannel.getName());
+      return this;
+    },
+    publish: function(message) {
+      currentChannel.publish(message);
+    },
+    getName: function() {
+      return currentChannel.getName();
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.Channel.js */
+amb.Channel = function Channel(cometd, channelName, initialized) {
+  var subscription = null;
+  var listeners = [];
+  var LOGGER = new amb.Logger('amb.Channel');
+  var idCounter = 0;
+  var _initialized = initialized;
+
+  function _disconnected() {
+    var status = cometd.getStatus();
+    return status === 'disconnecting' || status === 'disconnected';
+  }
+  return {
+    newListener: function(serverConnection,
+      channelRedirect) {
+      return new amb.ChannelListener(this, serverConnection, channelRedirect);
+    },
+    subscribe: function(listener) {
+      if (_disconnected()) {
+        LOGGER.addErrorMessage('Illegal state: already disconnected');
+        return;
+      }
+      if (!listener.getCallback()) {
+        LOGGER.addErrorMessage('Cannot subscribe to channel: ' + channelName +
+          ', callback not provided');
+        return;
+      }
+      if (!subscription && _initialized) {
+        try {
+          this.subscribeToCometD();
+        } catch (e) {
+          LOGGER.addErrorMessage(e);
+          return;
+        }
+      }
+      for (var i = 0; i < listeners.length; i++) {
+        if (listeners[i] === listener) {
+          LOGGER.debug('Channel listener already in the list');
+          return listener.getID();
+        }
+      }
+      var id = idCounter++;
+      listeners.push(listener);
+      return id;
+    },
+    resubscribe: function() {
+      subscription = null;
+      for (var i = 0; i < listeners.length; i++)
+        listeners[i].resubscribe();
+    },
+    subscribeOnInitCompletion: function(redirect) {
+      _initialized = true;
+      subscription = null;
+      for (var i = 0; i < listeners.length; i++) {
+        listeners[i].subscribe();
+        LOGGER.debug('Successfully subscribed to channel: ' + channelName);
+      }
+    },
+    _handleResponse: function(message) {
+      for (var i = 0; i < listeners.length; i++)
+        listeners[i].getCallback()(message);
+    },
+    unsubscribe: function(listener) {
+      if (!listener) {
+        LOGGER.addErrorMessage('Cannot unsubscribe from channel: ' + channelName +
+          ', listener argument does not exist');
+        return;
+      }
+      for (var i = 0; i < listeners.length; i++) {
+        if (listeners[i].getID() == listener.getID())
+          listeners.splice(i, 1);
+      }
+      if (listeners.length < 1 && subscription && !_disconnected())
+        this.unsubscribeFromCometD();
+    },
+    publish: function(message) {
+      cometd.publish(channelName, message);
+    },
+    subscribeToCometD: function() {
+      subscription = cometd.subscribe(channelName, this._handleResponse.bind(this));
+      LOGGER.debug('Successfully subscribed to channel: ' + channelName);
+    },
+    unsubscribeFromCometD: function() {
+      if (!subscription)
+        return;
+      cometd.unsubscribe(subscription);
+      subscription = null;
+      LOGGER.debug('Successfully unsubscribed from channel: ' + channelName);
+    },
+    resubscribeToCometD: function() {
+      this.subscribeToCometD();
+    },
+    getName: function() {
+      return channelName;
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.MessageClient.js */
+(function() {
+  amb.MessageClient = function MessageClient() {
+    var cometd = new window.Cometd();
+    cometd.unregisterTransport('websocket');
+    cometd.unregisterTransport('callback-polling');
+    var serverConnection = new amb.ServerConnection(cometd);
+    var channels = {};
+    var LOGGER = new amb.Logger('amb.MessageClient');
+    var channelRedirect = null;
+    var connected = false;
+    var initialized = false;
+    var uninitializedChannels = [];
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_BROKEN, _connectionBroken);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_OPENED, _connectionOpened);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_INITIALIZED, _connectionInitialized);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_OUT, _unsubscribeAll);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_INVALIDATED, _unsubscribeAll);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_IN, _resubscribeAll);
+    var _connectionBrokenEvent = false;
+
+    function _connectionBroken() {
+      LOGGER.debug("connection broken!");
+      _connectionBrokenEvent = true;
+    }
+
+    function _connectionInitialized() {
+      initialized = true;
+      _initChannelRedirect();
+      channelRedirect.initialize();
+      LOGGER.debug("Connection initialized. Initializing " + uninitializedChannels.length + " channels.");
+      for (var i = 0; i < uninitializedChannels.length; i++) {
+        uninitializedChannels[i].subscribeOnInitCompletion();
+      }
+      uninitializedChannels = [];
+    }
+
+    function _connectionOpened() {
+      if (_connectionBrokenEvent) {
+        LOGGER.debug("connection opened!");
+        var sc = serverConnection;
+        if (sc.getLastError() !== sc.getErrorMessages().UNKNOWN_CLIENT)
+          return;
+        sc.setLastError(null);
+        LOGGER.debug("channel resubscribe!");
+        var request = new XMLHttpRequest();
+        request.open("GET", "/amb_session_setup.do", true);
+        request.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+        request.setRequestHeader("X-UserToken", window.g_ck);
+        request.send();
+        request.onload = function() {
+          if (this.status != 200) {
+            return;
+          }
+          _resubscribeAll();
+          _connectionBrokenEvent = false;
+        };
       }
     }
 
-    function LongPollingTransport() {
-      var _super = new org_cometd.LongPollingTransport();
-      var that = org_cometd.Transport.derive(_super);
-      that.xhrSend = function(packet) {
-          var request = new XMLHttpReque
+    function _unsubscribeAll() {
+      LOGGER.debug("Unsubscribing from all!");
+      for (var name in channels) {
+        var channel = channels[name];
+        channel.unsubscribeFromCometD();
+      }
+    }
+
+    function _resubscribeAll() {
+      LOGGER.debug("Resubscribing to all!");
+      for (var name in channels) {
+        var channel = channels[name];
+        channel.resubscribeToCometD();
+      }
+    }
+
+    function _initChannelRedirect() {
+      if (channelRedirect)
+        return;
+      channelRedirect = new amb.ChannelRedirect(cometd, serverConnection, _getChannel);
+    }
+
+    function _getChannel(channelName) {
+      if (channelName in channels)
+        return channels[channelName];
+      var channel = new amb.Channel(cometd, channelName, initialized);
+      channels[channelName] = channel;
+      if (!initialized)
+        uninitializedChannels.push(channel);
+      return channel;
+    }
+
+    function _removeChannel(channelName) {
+      delete channels[channelName];
+    }
+    return {
+      getServerConnection: function() {
+        return serverConnection;
+      },
+      isLoggedIn: function() {
+        return serverConnection.isLoggedIn();
+      },
+      loginComplete: function() {
+        serverConnection.loginComplete();
+      },
+      connect: function() {
+        if (connected) {
+          LOGGER.addInfoMessage(">>> connection exists, request satisfied");
+          return;
+        }
+        connected = true;
+        serverConnection.connect();
+      },
+      reload: function() {
+        connected = false;
+        serverConnection.reload();
+      },
+      abort: function() {
+        connected = false;
+        serverConnection.abort();
+      },
+      disconnect: function() {
+        connected = false;
+        serverConnection.disconnect();
+      },
+      getConnectionEvents: function() {
+        return serverConnection.getEvents();
+      },
+      subscribeToEvent: function(event, callback) {
+        return serverConnection.subscribeToEvent(event, callback);
+      },
+      unsubscribeFromEvent: function(id) {
+        serverConnection.unsubscribeFromEvent(id);
+      },
+      getConnectionState: function() {
+        return serverConnection.getConnectionState();
+      },
+      getClientId: function() {
+        return cometd.getClientId();
+      },
+      getChannel: function(channelName) {
+        _initChannelRedirect();
+        var channel = _getChannel(channelName);
+        return channel.newListener(serverConnection, channelRedirect);
+      },
+      registerExtension: function(extensionName, extension) {
+        cometd.registerExtension(extensionName, extension);
+      },
+      unregisterExtension: function(extensionName) {
+        cometd.unregisterExtension(extensionName);
+      },
+      batch: function(block) {
+        cometd.batch(block);
+      },
+      removeChannel: function(channelName) {
+        _removeChannel(channelName)
+      }
+    }
+  };
+})();;
+/*! RESOURCE: /scripts/amb.MessageClientBuilder.js */
+(function() {
+  'use strict';
+  amb.getClient = function() {
+    return getClient();
+  };
+
+  function getClient() {
+    var client = getParentAmbClient(window);
+    if (client) {
+      return wrapClient(client, window);
+    }
+    client = wrapClient(buildClient(), window);
+    setClient(client);
+    return client;
+  }
+
+  function getParentAmbClient(clientWindow) {
+    try {
+      if (!(clientWindow.MSInputMethodContext && clientWindow.document.documentMode)) {
+        while (clientWindow !== clientWindow.parent) {
+          if (clientWindow.g_ambClient) {
+            break;
+          }
+          clientWindow = clientWindow.parent;
+        }
+      }
+      if (clientWindow.g_ambClient) {
+        return clientWindow.g_ambClient;
+      }
+    } catch (e) {
+      console.log('AMB getClient() tried to access parent from an iFrame. Caught error: ' + e);
+    }
+    return null;
+  }
+
+  function wrapClient(client, clientWindow) {
+    if (typeof client.getClientWindow !== 'undefined') {
+      var context = client.getClientWindow();
+      if (context === clientWindow) {
+        return client;
+      }
+    }
+    var wrappedClient = clone({}, client);
+    wrappedClient.getChannel = function(channelName, overrideWindow) {
+      return client.getChannel(channelName, overrideWindow || clientWindow);
+    };
+    wrappedClient.subscribeToEvent = function(event, callback, overrideWindow) {
+      return client.subscribeToEvent(event, callback, overrideWindow || clientWindow);
+    };
+    wrappedClient.unsubscribeFromEvent = function(id, overrideWindow) {
+      return client.unsubscribeFromEvent(id, overrideWindow || clientWindow);
+    };
+    wrappedClient.getClientWindow = function() {
+      return clientWindow;
+    };
+    return wrappedClient;
+  }
+
+  function clone(dest, source) {
+    for (var prop in source) {
+      if (Object.prototype.hasOwnProperty.call(source, prop)) {
+        dest[prop] = source[prop];
+      }
+    }
+    return dest;
+  }
+
+  function setClient(client) {
+    var _window = window.self;
+    _window.g_ambClient = client;
+    _window.addEventListener("unload", function() {
+      _window.g_ambClient.disconnect();
+    });
+    var documentReadyState = _window.document ? _window.document.readyState : null;
+    if (documentReadyState === 'complete') {
+      autoConnect();
+    } else {
+      _window.addEventListener('load', autoConnect);
+    }
+    setTimeout(autoConnect, 10000);
+    var initiatedConnection = false;
+
+    function autoConnect() {
+      if (!initiatedConnection) {
+        initiatedConnection = true;
+        _window.g_ambClient.connect();
+      }
+    }
+  }
+
+  function buildClient() {
+    return (function() {
+      var ambClient = new amb.MessageClient();
+      var clientSubscriptions = buildClientSubscriptions();
+      return {
+        getServerConnection: function() {
+          return ambClient.getServerConnection();
+        },
+        connect: function() {
+          ambClient.connect();
+        },
+        abort: function() {
+          ambClient.abort();
+        },
+        disconnect: function() {
+          ambClient.disconnect();
+        },
+        getConnectionState: function() {
+          return ambClient.getConnectionState();
+        },
+        getState: function() {
+          return ambClient.getConnectionState();
+        },
+        getClientId: function() {
+          return ambClient.getClientId();
+        },
+        getChannel: function(channelName, windowContext) {
+          var channel = ambClient.getChannel(channelName);
+          var originalSubscribe = channel.subscribe;
+          var originalUnsubscribe = channel.unsubscribe;
+          windowContext = windowContext || window;
+          channel.subscribe = function(listener) {
+            clientSubscriptions.add(windowContext, channel, listener, function() {
+              channel.unsubscribe(listener);
+            });
+            windowContext.addEventListener('unload', function() {
+              ambClient.removeChannel(channelName);
+            });
+            originalSubscribe.call(channel, listener);
+            return channel;
+          };
+          channel.unsubscribe = function(listener) {
+            clientSubscriptions.remove(windowContext, channel, listener);
+            return originalUnsubscribe.call(channel, listener);
+          };
+          return channel;
+        },
+        getChannel0: function(channelName) {
+          return ambClient.getChannel(channelName);
+        },
+        registerExtension: function(extensionName, extension) {
+          ambClient.registerExtension(extensionName, extension);
+        },
+        unregisterExtension: function(extensionName) {
+          ambClient.unregisterExtension(extensionName);
+        },
+        batch: function(block) {
+          ambClient.batch(block);
+        },
+        subscribeToEvent: function(event, callback, windowContext) {
+          windowContext = windowContext || window;
+          var id = ambClient.subscribeToEvent(event, callback);
+          clientSubscriptions.add(windowContext, id, true, function() {
+            ambClient.unsubscribeFromEvent(id);
+          });
+          return id;
+        },
+        unsubscribeFromEvent: function(id, windowContext) {
+          windowContext = windowContext || window;
+          clientSubscriptions.remove(windowContext, id, true);
+          ambClient.unsubscribeFromEvent(id);
+        },
+        isLoggedIn: function() {
+          return ambClient.isLoggedIn();
+        },
+        getConnectionEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        getEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        loginComplete: function() {
+          ambClient.loginComplete();
+        }
+      };
+    })();
+
+    function buildClientSubscriptions() {
+      var contexts = [];
+
+      function addSubscription(clientWindow, id, callback, unsubscribe) {
+        if (!clientWindow || !callback || !unsubscribe) {
+          return;
+        }
+        removeSubscription(clientWindow, id, callback);
+        var context = getContext(clientWindow);
+        if (!context) {
+          context = createContext(clientWindow);
+        }
+        if (context.unloading) {
+          return;
+        }
+        context.subscriptions.push({
+          id: id,
+          callback: callback,
+          unsubscribe: unsubscribe
+        });
+      }
+
+      function removeSubscription(clientWindow, id, callback) {
+        if (!clientWindow || !callback) {
+          return;
+        }
+        var context = getContext(clientWindow);
+        if (!context) {
+          return;
+        }
+        var subscriptions = context.subscriptions;
+        for (var i = subscriptions.length - 1; i >= 0; i--) {
+          if (subscriptions[i].id === id && subscriptions[i].callback === callback) {
+            subscriptions.splice(i, 1);
+          }
+        }
+      }
+
+      function getContext(clientWindow) {
+        for (var i = 0, iM = contexts.length; i < iM; i++) {
+          if (contexts[i].window === clientWindow) {
+            return contexts[i];
+          }
+        }
+        return null;
+      }
+
+      function createContext(clientWindow) {
+        var context = {
+          window: clientWindow,
+          onUnload: function() {
+            context.unloading = true;
+            var subscriptions = context.subscriptions;
+            var subscription;
+            while (subscription = subscriptions.pop()) {
+              subscription.unsubscribe();
+            }
+            destroyContext(context);
+          },
+          unloading: false,
+          subscriptions: []
+        };
+        clientWindow.addEventListener('unload', context.onUnload);
+        contexts.push(context);
+        return context;
+      }
+
+      function destroyContext(context) {
+        for (var i = 0, iM = contexts.length; i < iM; i++) {
+          if (contexts[i].window === context.window) {
+            contexts.splice(i, 1);
+            break;
+          }
+        }
+        context.subscriptions = [];
+        context.window.removeEventListener('unload', context.onUnload);
+        context.onUnload = null;
+        context.window = null;
+      }
+      return {
+        add: addSubscription,
+        remove: removeSubscription
+      };
+    }
+  }
+})();;;
+/*! RESOURCE: /scripts/app.ng.amb/app.ng.amb.js */
+angular.module("ng.amb", ['sn.common.presence', 'sn.common.util'])
+  .value("ambLogLevel", 'info')
+  .value("ambServletURI", '/amb')
+  .value("cometd", angular.element.cometd)
+  .value("ambLoginWindow", 'true');;
+/*! RESOURCE: /scripts/app.ng.amb/service.AMB.js */
+angular.module("ng.amb").service("amb", function(AMBOverlay, $window, $q, $log, $rootScope, $timeout) {
+  "use strict";
+  var ambClient = null;
+  var _window = $window.self;
+  var loginWindow = null;
+  var sameScope = false;
+  ambClient = amb.getClient();
+  if (_window.g_ambClient) {
+    sameScope = true;
+  }
+  if (sameScope) {
+    var serverConnection = ambClient.getServerConnection();
+    serverConnection.loginShow = function() {
+      if (!serverConnection.isLoginWindowEnabled())
+        return;
+      if (loginWindow && loginWindow.isVisible())
+        return;
+      if (serverConnection.isLoginWindowOverride())
+        return;
+      loginWindow = new AMBOverlay();
+      loginWindow.render();
+      loginWindow.show();
+    };
+    serverConnection.loginHide = function() {
+      if (!loginWindow)
+        return;
+      loginWindow.hide();
+      loginWindow.destroy();
+      loginWindow = null;
+    }
+  }
+  var AUTO_CONNECT_TIMEOUT = 20 * 1000;
+  var connected = $q.defer();
+  var connectionInterrupted = false;
+  var monitorAMB = false;
+  $timeout(startMonitoringAMB, AUTO_CONNECT_TIMEOUT);
+  connected.promise.then(startMonitoringAMB);
+
+  function startMonitoringAMB() {
+    monitorAMB = true;
+  }
+
+  function ambInterrupted() {
+    var state = ambClient.getState();
+    return monitorAMB && state !== "opened" && state !== "initialized"
+  }
+  var interruptionTimeout;
+  var extendedInterruption = false;
+
+  function setInterrupted(eventName) {
+    connectionInterrupted = true;
+    $rootScope.$broadcast(eventName);
+    if (!interruptionTimeout) {
+      interruptionTimeout = $timeout(function() {
+        extendedInterruption = true;
+      }, 30 * 1000)
+    }
+    connected = $q.defer();
+  }
+  var connectOpenedEventId = ambClient.subscribeToEvent("connection.opened", function() {
+    $rootScope.$broadcast("amb.connection.opened");
+    if (interruptionTimeout) {
+      $timeout.cancel(interruptionTimeout);
+      interruptionTimeout = null;
+    }
+    extendedInterruption = false;
+    if (connectionInterrupted) {
+      connectionInterrupted = false;
+      $rootScope.$broadcast("amb.connection.recovered");
+    }
+    connected.resolve();
+  });
+  var connectClosedEventId = ambClient.subscribeToEvent("connection.closed", function() {
+    setInterrupted("amb.connection.closed");
+  });
+  var connectBrokenEventId = ambClient.subscribeToEvent("connection.broken", function() {
+    setInterrupted("amb.connection.broken");
+  });
+  var onUnloadWindow = function() {
+    ambClient.unsubscribeFromEvent(connectOpenedEventId);
+    ambClient.unsubscribeFromEvent(connectClosedEventId);
+    ambClient.unsubscribeFromEvent(connectBrokenEventId);
+    angular.element($window).off('unload', onUnloadWindow);
+  };
+  angular.element($window).on('unload', onUnloadWindow);
+  var documentReadyState = $window.document ? $window.document.readyState : null;
+  if (documentReadyState === 'complete') {
+    autoConnect();
+  } else {
+    angular.element($window).on('load', autoConnect);
+  }
+  $timeout(autoConnect, 10000);
+  var initiatedConnection = false;
+
+  function autoConnect() {
+    if (!initiatedConnection) {
+      initiatedConnection = true;
+      ambClient.connect();
+    }
+  }
+  return {
+    getServerConnection: function() {
+      return ambClient.getServerConnection();
+    },
+    connect: function() {
+      if (initiatedConnection) {
+        ambClient.connect();
+      }
+      return connected.promise;
+    },
+    get interrupted() {
+      return ambInterrupted();
+    },
+    get extendedInterruption() {
+      return extendedInterruption;
+    },
+    get connected() {
+      return connected.promise;
+    },
+    abort: function() {
+      ambClient.abort();
+    },
+    disconnect: function() {
+      ambClient.disconnect();
+    },
+    getConnectionState: function() {
+      return ambClient.getConnectionState();
+    },
+    getClientId: function() {
+      return ambClient.getClientId();
+    },
+    getChannel: function(channelName) {
+      return ambClient.getChannel(channelName);
+    },
+    registerExtension: function(extensionName, extension) {
+      ambClient.registerExtension(extensionName, extension);
+    },
+    unregisterExtension: function(extensionName) {
+      ambClient.unregisterExtension(extensionName);
+    },
+    batch: function(batch) {
+      ambClient.batch(batch);
+    },
+    getState: function() {
+      return ambClient.getState();
+    },
+    getFilterString: function(filter) {
+      filter = filter.
+      replace(/\^EQ/g, '').
+      replace(/\^ORDERBY(?:DESC)?[^^]*/g, '').
+      replace(/^GOTO/, '');
+      return btoa(filter).replace(/=/g, '-');
+    },
+    getChannelRW: function(table, filter) {
+      var t = '/rw/default/' + table + '/' + this.getFilterString(filter);
+      return this.getChannel(t);
+    },
+    isLoggedIn: function() {
+      return ambClient.isLoggedIn();
+    },
+    subscribeToEvent: function(event, callback) {
+      return ambClient.subscribeToEvent(event, callback);
+    },
+    getConnectionEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    getEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    loginComplete: function() {
+      ambClient.loginComplete();
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng.amb/controller.AMBRecordWatcher.js */
+angular.module("ng.amb").controller("AMBRecordWatcher", function($scope, $timeout, $window) {
+  "use strict";
+  var amb = $window.top.g_ambClient;
+  $scope.messages = [];
+  var lastFilter;
+  var watcherChannel;
+  var watcher;
+
+  function onMessage(message) {
+    $scope.messages.push(message.data);
+  }
+  $scope.getState = function() {
+    return amb.getState();
+  };
+  $scope.initWatcher = function() {
+    angular.element(":focus").blur();
+    if (!$scope.filter || $scope.filter === lastFilter)
+      return;
+    lastFilter = $scope.filter;
+    console.log("initiating watcher on " + $scope.filter);
+    $scope.messages = [];
+    if (watcher) {
+      watcher.unsubscribe();
+    }
+    var base64EncodeQuery = btoa($scope.filter).replace(/=/g, '-');
+    var channelId = '/rw/' + base64EncodeQuery;
+    watcherChannel = amb.getChannel(channelId)
+    watcher = watcherChannel.subscribe(onMessage);
+  };
+  amb.connect();
+});
+/*! RESOURCE: /scripts/app.ng.amb/factory.snRecordWatcher.js */
+angular.module("ng.amb").factory('snRecordWatcher', function($rootScope, amb, $timeout, snPresence, $log, urlTools) {
+      "use strict";
+      var watcherChannel;
+      var connected = false;
+      var diagnosticL

@@ -886,90 +886,467 @@ GlideFilterSection.prototype = {
 };
 var GlideSectionCondition = Class.create();
 GlideSectionCondition.prototype = {
-    initialize: function(section, queryID) {
-      this.section = section;
-      this.filter = section.getFilter();
+  initialize: function(section, queryID) {
+    this.section = section;
+    this.filter = section.getFilter();
+    this.queryID = queryID;
+    this.id = guid();
+    this.wantOR = true;
+    this.subConditions = new Array();
+    this.field = null;
+    this.oper = null;
+    this.value = null;
+  },
+  destroy: function() {
+    this.section = null;
+    this.filter = null;
+    this.row = null;
+    this.tbody.conditionObject = null;
+    this.tbody = null;
+    this.conditionRow.destroy();
+    this.actionRow = null;
+    for (var i = 0; i < this.subConditions.length; i++)
+      this.subConditions[i].destroy();
+  },
+  build: function(parent) {
+    trNew = celQuery('tr', parent, this.queryID);
+    this.row = trNew;
+    trNew.className = "filter_row";
+    trNew.basePart = 'true';
+    trNew.conditionObject = this;
+    trNew.setAttribute("mapping_support", this.filter.elementSupportsMapping);
+    var td = celQuery('td', trNew, this.queryID);
+    td.style.width = "100%";
+    var table = celQuery('table', td, this.queryID);
+    if (!this.filter.getConditionsWanted())
+      table.className = "wide";
+    this.tbody = celQuery('TBODY', table, this.queryID);
+    this.tbody.conditionObject = this;
+    var first = this.section.firstCondition(this) && !this.isPlaceHolder();
+    this.conditionRow = new GlideConditionRow(this, this.queryID, this.wantOR, first);
+    var tr = this.conditionRow.getRow();
+    this.tbody.appendChild(tr);
+    this.actionRow = tr;
+    tr.conditionObject = this;
+  },
+  buildRow: function(parent, field, oper, value) {
+    this.field = field;
+    this.oper = oper;
+    if (value)
+      this.value = value.replace(/&amp;/g, '&');
+    else
+      this.value = value;
+    this.build(parent);
+    this.conditionRow.build(this.field, this.oper, this.value);
+  },
+  addNewSubCondition: function(field, oper, value) {
+    if (field == null || typeof(field) == "undefined") {
+      field = this.conditionRow.getField();
+      oper = this.conditionRow.getOper();
+    }
+    var sub = new GlideSubCondition(this, this.queryID);
+    sub.buildRow(this.tbody, field, oper, value);
+    this.subConditions[this.subConditions.length] = sub;
+    var $select = $j(sub.getFieldSelect());
+    $select.css("margin-left", "10px").css("display", "inline-block").css("width", "inherit");
+  },
+  addLeftButtons: function() {
+    this.conditionRow.addLeftButtons();
+  },
+  getRow: function() {
+    return this.row;
+  },
+  getBody: function() {
+    return this.tbody;
+  },
+  getActionRow: function() {
+    return this.actionRow;
+  },
+  setAsRunRow: function() {
+    this.conditionRow.setAsRunRow();
+  },
+  setOrWanted: function(b) {
+    this.wantOR = b;
+  },
+  remove: function() {
+    if (this.conditionRow)
+      this.conditionRow.destroy();
+    this.section.removeCondition(this.id);
+    this.section.filter.setSectionClasses();
+  },
+  removeSub: function(id) {
+    var i = findInArray(this.subConditions, id);
+    if (i == null)
+      return;
+    var orc = this.subConditions[i];
+    clearNodes(orc.getRow());
+    this.tbody.removeChild(orc.getRow());
+    this.subConditions.splice(i, 1);
+  },
+  getID: function() {
+    return this.id;
+  },
+  getFilter: function() {
+    return this.filter;
+  },
+  isFirst: function() {
+    return this.section.firstCondition(this);
+  },
+  makeFirst: function() {
+    this.conditionRow.makeFirst();
+  },
+  getName: function() {
+    return this.section.getName();
+  },
+  setPlaceHolder: function(b) {
+    this.placeHolder = b;
+  },
+  isPlaceHolder: function() {
+    return this.placeHolder;
+  },
+  removePlaceHolder: function() {
+    if (this.section)
+      this.section.removePlaceHolder();
+  },
+  newPlaceHolder: function() {
+    if (this.section)
+      this.section.newPlaceHolder();
+  },
+  clearPlaceHolder: function() {
+    if (this.section)
+      this.section.clearPlaceHolder();
+  },
+  refreshSelectList: function() {
+    if (this.conditionRow)
+      this.conditionRow.refreshSelectList();
+  },
+  z: null
+};
+var GlideSubCondition = Class.create();
+GlideSubCondition.prototype = {
+  initialize: function(condition, queryID) {
+    this.condition = condition;
+    this.filter = condition.getFilter();
+    this.queryID = queryID;
+    this.id = guid();
+  },
+  destroy: function() {
+    this.filter = null;
+    this.condition = null;
+    if (this.row)
+      this.row.destroy();
+  },
+  buildRow: function(parent, field, oper, value) {
+    this.field = field;
+    this.oper = oper;
+    if (value)
+      this.value = value.replace(/&amp;/g, '&');
+    else
+      this.value = value;
+    this.row = new GlideConditionRow(this.condition, queryID, false, false);
+    var tr = this.row.getRow();
+    parent.appendChild(tr);
+    tr.conditionObject = this;
+    this.row.build(field, oper, this.value)
+  },
+  getNameTD: function() {
+    return this.row.getNameTD();
+  },
+  getFieldSelect: function() {
+    return this.row.getFieldSelect();
+  },
+  getRow: function() {
+    return this.row.getRow();
+  },
+  getID: function() {
+    return this.id;
+  },
+  isPlaceHolder: function() {
+    return this.condition.isPlaceHolder();
+  },
+  remove: function() {
+    this.condition.removeSub(this.id);
+  },
+  z: null
+};
+var GlideConditionRow = Class.create();
+GlideConditionRow.prototype = {
+    initialize: function(condition, queryID, wantOr, first) {
+      this.condition = condition;
+      this.filter = condition.getFilter();
+      this.first = first;
+      this.wantOr = wantOr;
+      this.tableName = this.condition.getName();
       this.queryID = queryID;
-      this.id = guid();
-      this.wantOR = true;
-      this.subConditions = new Array();
-      this.field = null;
-      this.oper = null;
-      this.value = null;
+      this.currentText = [];
+      var tr = celQuery('tr', null, queryID);
+      tr.conditionObject = this.condition;
+      tr.rowObject = this;
+      tr.className = "filter_row_condition";
+      tr.style.display = "table";
+      this.row = tr;
+      tr.conditionRow = this;
+      this.addAndOrTextCell();
+      td = this.addTD(tr, queryID);
+      this.tdName = td;
+      if (this.filter.listCollectorId)
+        td.id = this.filter.listCollectorId + "_field";
+      else
+        td.id = "field";
+      td.className += " condition-row__field-cell";
+      tr.tdField = td;
+      td = this.addTD(tr, queryID);
+      this.tdOper = td;
+      if (this.filter.listCollectorId)
+        td.id = this.filter.listCollectorId + "_oper";
+      else
+        td.id = "oper";
+      td.className += " condition-row__operator-cell";
+      tr.tdOper = td;
+      if (!this.filter.getOpsWanted())
+        td.style.display = "none";
+      td.style.width = "auto";
+      td = this.addTD(tr, queryID);
+      this.tdValue = td;
+      if (this.filter.listCollectorId)
+        td.id = this.filter.listCollectorId + "_value";
+      else
+        td.id = "value";
+      td.noWrap = true;
+      tr.tdValue = td;
+      td.className += " form-inline condition-row__value-cell";
+      if (this.filter.elementSupportsMapping) {
+        this.addMappingTd(tr);
+      }
+      if (this.filter.getTextAreasWanted())
+        td.style.width = "90%";
+      this.addPlusImageCell();
+      this.addRemoveButtonCell();
+      this.answer = getMessages(MESSAGES_FILTER_BUTTONS);
     },
     destroy: function() {
-      this.section = null;
+      this.filter.clearFieldUsed(this.getField(), this.condition);
       this.filter = null;
+      this.condition = null;
+      this.rowCondition = null;
+      if (this.row.handler)
+        this.row.handler.destroy();
+      this.row.tdOper = null;
+      this.row.tdValue = null;
+      this.row.tdField = null;
+      this.row.conditionObject = null;
+      this.row.rowObject = null;
       this.row = null;
-      this.tbody.conditionObject = null;
-      this.tbody = null;
-      this.conditionRow.destroy();
-      this.actionRow = null;
-      for (var i = 0; i < this.subConditions.length; i++)
-        this.subConditions[i].destroy();
+      this.tdOper = null;
+      this.tdValue = null;
+      this.tdName = null;
+      if (this.fieldSelect) {
+        this.fieldSelect.onchange = null;
+        this.fieldSelect = null;
+      }
+      this.tdOrButton = null;
+      this.tdRemoveButton.conditionObject = null;
+      this.tdRemoveButton = null;
+      this.tdAndOrText = null;
     },
-    build: function(parent) {
-      trNew = celQuery('tr', parent, this.queryID);
-      this.row = trNew;
-      trNew.className = "filter_row";
-      trNew.basePart = 'true';
-      trNew.conditionObject = this;
-      trNew.setAttribute("mapping_support", this.filter.elementSupportsMapping);
-      var td = celQuery('td', trNew, this.queryID);
+    setAsRunRow: function(field) {
+      this.build(field);
+      this.tdName.style.visibility = 'hidden';
+      this.tdOper.style.visibility = 'hidden';
+      this.tdAndOrText.style.visibility = 'hidden';
+      this.row.removeChild(this.tdValue);
+      this.row.removeChild(this.tdOrButton);
+      this.row.removeChild(this.tdRemoveButton);
+      clearNodes(this.tdValue);
+      clearNodes(this.tdOrButton);
+      clearNodes(this.tdRemoveButton);
+      var td = celQuery('td', this.row, this.queryID);
       td.style.width = "100%";
-      var table = celQuery('table', td, this.queryID);
-      if (!this.filter.getConditionsWanted())
-        table.className = "wide";
-      this.tbody = celQuery('TBODY', table, this.queryID);
-      this.tbody.conditionObject = this;
-      var first = this.section.firstCondition(this) && !this.isPlaceHolder();
-      this.conditionRow = new GlideConditionRow(this, this.queryID, this.wantOR, first);
-      var tr = this.conditionRow.getRow();
-      this.tbody.appendChild(tr);
-      this.actionRow = tr;
-      tr.conditionObject = this;
+      td.style.paddingBottom = "4px";
+      td.filterObject = this.filter;
+      var runCode = "runThisFilter(this);";
+      if (this.filter.runCode)
+        runCode = this.filter.runCode;
+      td.innerHTML = this.buildRunButton(runCode);
     },
-    buildRow: function(parent, field, oper, value) {
+    addAndOrTextCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      td.className += " condition-row__and-or-text-cell";
+      this.tdAndOrText = td;
+      td.style.textAlign = "right";
+      if (!this.filter.getConditionsWanted())
+        td.style.display = "none";
+    },
+    addPlusImageCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      td.style.whiteSpace = "nowrap";
+      td.className += " condition_buttons_cell";
+      this.tdOrButton = td;
+      this.row.tdOrButton = td;
+      if (!this.filter.getConditionsWanted())
+        td.style.display = "none";
+    },
+    addRemoveButtonCell: function() {
+      var td = this.addTD(this.row, this.queryID);
+      this.tdRemoveButton = td;
+      this.row.tdRemoveButton = td;
+      td.conditionObject = this.condition;
+      td.className += " condition-row__remove-cell";
+      if (this.wantOr)
+        td.hasOrButton = 'true';
+    },
+    addTD: function(row, queryID) {
+      var td = celQuery('td', row, queryID);
+      $j(td).addClass("sn-filter-top");
+      return td;
+    },
+    addMappingTd: function(tr) {
+      var mappingTd = cel("td");
+      mappingTd.className = "condition-row__sys-mapping-cell form-inline";
+      tr.appendChild(mappingTd);
+      tr.tdMapping = mappingTd;
+    },
+    build: function(field, oper, value) {
       this.field = field;
       this.oper = oper;
-      if (value)
-        this.value = value.replace(/&amp;/g, '&');
-      else
-        this.value = value;
-      this.build(parent);
-      this.conditionRow.build(this.field, this.oper, this.value);
-    },
-    addNewSubCondition: function(field, oper, value) {
-      if (field == null || typeof(field) == "undefined") {
-        field = this.conditionRow.getField();
-        oper = this.conditionRow.getOper();
+      this.value = value;
+      var tableName = this.getName();
+      var tds = this.row.getElementsByTagName("td");
+      this.fieldSelect = _createFilterSelect();
+      this.fieldSelect.onchange = this.fieldOnChange.bind(this);
+      var sname = tableName.split(".")[0];
+      if (this.field != null)
+        sname = sname + "." + field;
+      this.filter.setFieldUsed(field);
+      addFirstLevelFields(this.fieldSelect, sname, field, this.filter.filterFields.bind(this.filter), null, this.filter, this.filter);
+      if (!this.tdName) {
+        return [];
       }
-      var sub = new GlideSubCondition(this, this.queryID);
-      sub.buildRow(this.tbody, field, oper, value);
-      this.subConditions[this.subConditions.length] = sub;
-      var $select = $j(sub.getFieldSelect());
-      $select.css("margin-left", "10px").css("display", "inline-block").css("width", "inherit");
+      this.tdName.appendChild(this.fieldSelect);
+      updateFields(tableName, this.fieldSelect, oper, value, this.filter.getIncludeExtended(), this.filter);
+      if (this.filter.isProtectedField(field))
+        this._setReadOnly();
+      if (this.filter.fieldName == "sys_template.template" || this.filter.isTemplate)
+        this.addHelpText();
+      currentTable = tableName;
+      this.addLeftButtons();
+      return tds;
     },
-    addLeftButtons: function() {
-      this.conditionRow.addLeftButtons();
+    _setReadOnly: function() {
+      this.filter._hideClass(this.row, "filerTableAction", true);
+      this.filter._disableClass(this.row, "filerTableSelect", true);
+      this.filter._disableClass(this.row, "filerTableInput", true);
+    },
+    fieldOnChange: function() {
+      this.filter.setFieldUsed(this.getField());
+      this.filter.clearFieldUsed(this.field, this.condition);
+      this.field = this.getField();
+      var b = this.condition.isPlaceHolder();
+      this.condition.setPlaceHolder(false);
+      updateFields(this.getName(), this.fieldSelect, null, null, this.filter.getIncludeExtended(), this.filter);
+      if (b) {
+        this.condition.setPlaceHolder(false);
+        this.showFields();
+        this.condition.clearPlaceHolder();
+        if (this.condition.isFirst())
+          this.makeFirst();
+      }
+      this.filter.refreshSelectList();
+      if (this.filter.fieldName == "sys_template.template" || this.filter.isTemplate)
+        this.addHelpText();
+      var form = this.getFieldSelect().up('form');
+      if (form) {
+        var nameWithoutTablePrefix = this.getName().substring(this.getName().indexOf(".") + 1);
+        form.fire("glideform:onchange", {
+          id: nameWithoutTablePrefix,
+          value: unescape(getFilter(this.getName())),
+          modified: true
+        });
+      }
+    },
+    addHelpText: function() {
+      this.fieldElements = this.condition.actionRow.getAttribute("type");
+      if (this.fieldElements) {
+        switch (this.fieldElements) {
+          case "color":
+            this.helpText("Insert HTML color name or hex value");
+            break;
+          case "glide_list":
+          case "slushbucket":
+          case "user_roles":
+            this.helpText("Separate individual references with a comma");
+            break;
+          case "composite_name":
+            this.helpText("Use the following format: TableName.FieldName");
+            break;
+          case "days_of_week":
+            this.helpText("1 for Monday, 2 for Tuesday, etc. Multiple values can be entered, like '135' for Monday, Wednesday, and Friday");
+            break;
+          case "html":
+          case "translated_html":
+            this.helpText("Enter text in HTML format");
+            break;
+          default:
+            this.removeHelpText();
+        }
+      }
+    },
+    helpText: function(text) {
+      this.removeHelpText();
+      var newDiv = document.createElement("div");
+      var newContent = document.createTextNode(text);
+      newDiv.appendChild(newContent);
+      newDiv.id = this.fieldElements;
+      newDiv.className = 'fieldmsg';
+      var currentDiv = this.condition.tbody;
+      currentDiv.insertBefore(newDiv, null);
+      this.currentText.push(this.fieldElements);
+    },
+    removeHelpText: function() {
+      for (i = 0; i < this.currentText.length; i++) {
+        var parNode = gel(this.currentText[i]).parentElement;
+        var chilNode = parNode.childNodes;
+        chilNode[1].remove();
+        this.currentText.splice(i, 1);
+      }
+    },
+    getNameTD: function() {
+      return this.tdName;
+    },
+    getFieldSelect: function() {
+      return this.fieldSelect;
+    },
+    getField: function() {
+      var select = getSelectedOption(this.fieldSelect);
+      if (select != null)
+        return select.value;
+      return null;
+    },
+    getOper: function() {
+      var s = this.getOperSelect();
+      return getSelectedOption(s).value;
+    },
+    getOperSelect: function() {
+      return this.tdOper.getElementsByTagName("select")[0];
+    },
+    getValueInput: function() {
+      return this.tdValue.getElementsByTagName("input")[0];
     },
     getRow: function() {
       return this.row;
     },
-    getBody: function() {
-      return this.tbody;
+    getName: function() {
+      return this.tableName;
     },
-    getActionRow: function() {
-      return this.actionRow;
+    showFields: function() {
+      this.tdRemoveButton.style.visibility = 'visible';
+      this.tdOrButton.style.visibility = 'visible';
+      if (!this.first)
+        this.tdAndOrText.style.visibility = 'visible';
+      this.getOperSelect().disabled = false;
+      var cel = this.getValueInput();
+      if (cel)
+        cel.disabled = false;
     },
-    setAsRunRow: function() {
-      this.conditionRow.setAsRunRow();
-    },
-    setOrWanted: function(b) {
-      this.wantOR = b;
-    },
-    remove: function() {
-        if (this.conditionRow)
-          this.conditionRow.destroy();
-        this.section.removeCondition(this.id);
-        this.section.
+    addLeftButtons: function() {
+        if

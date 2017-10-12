@@ -4073,71 +4073,14 @@ org.cometd.WebSocketTransport = function() {
       var messageIds = [];
       for (var i = 0; i < envelope.messages.length; ++i) {
         (function() {
-          var message = envelope.messages[i];
-          if (message.id) {
-            messageIds.push(message.id);
-            _timeouts[message.id] = this.setTimeout(function() {
-              self._debug('Transport', self.getType(), 'timing out message', message.id, 'after', delay, 'on', webSocket);
-              var event = {
-                code: 1000,
-                reason: 'Message Timeout'
-              };
-              self.webSocketClose(webSocket, event.code, event.reason);
-              self.onClose(webSocket, event);
-            }, delay);
-          }
-        })();
-      }
-      this._debug('Transport', this.getType(), 'waiting at most', delay, 'ms for messages', messageIds, 'maxNetworkDelay', maxDelay, ', timeouts:', _timeouts);
-    }
-
-    function _send(webSocket, envelope, metaConnect) {
-      try {
-        if (webSocket === null) {
-          _websocketConnect.call(this);
-        } else {
-          _webSocketSend.call(this, webSocket, envelope, metaConnect);
-        }
-      } catch (x) {
-        this.setTimeout(function() {
-          envelope.onFailure(webSocket, envelope.messages, {
-            exception: x
-          });
-        }, 0);
-      }
-    }
-    _self.onOpen = function(webSocket) {
-      this._debug('Transport', this.getType(), 'opened', webSocket);
-      _webSocket = webSocket;
-      _webSocketConnected = true;
-      this._debug('Sending pending messages', _envelopes);
-      for (var key in _envelopes) {
-        var element = _envelopes[key];
-        var envelope = element[0];
-        var metaConnect = element[1];
-        _successCallback = envelope.onSuccess;
-        _webSocketSend.call(this, webSocket, envelope, metaConnect);
-      }
-    };
-    _self.onMessage = function(webSocket, wsMessage) {
-        this._debug('Transport', this.getType(), 'received websocket message', wsMessage, webSocket);
-        var close = false;
-        var messages = this.convertToMessages(wsMessage.data);
-        var messageIds = [];
-        for (var i = 0; i < messages.length; ++i) {
-          var message = messages[i];
-          if (/^\/meta\//.test(message.channel) || message.successful !== undefined) {
+            var message = envelope.messages[i];
             if (message.id) {
               messageIds.push(message.id);
-              var timeout = _timeouts[message.id];
-              if (timeout) {
-                this.clearTimeout(timeout);
-                delete _timeouts[message.id];
-                this._debug('Transport', this.getType(), 'removed timeout for message', message.id, ', timeouts', _timeouts);
-              }
-            }
-          }
-          if ('/meta/connect' === message.channel) {
-            _connected = false;
-          }
-          if ('/meta/disconnect
+              _timeouts[message.id] = this.setTimeout(function() {
+                    self._debug('Transport', self.getType(), 'timing out message', message.id, 'after', delay, 'on', webSocket);
+                    var event = {
+                      code: 1000,
+                      reason: 'Message Timeout'
+                    };
+                    self.webSocketClose(webSocket, event.code, event.reason);
+                    self.onClo

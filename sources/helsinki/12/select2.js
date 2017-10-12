@@ -1826,176 +1826,63 @@
             return (this.container) ? this.container.hasClass("select2-dropdown-open") : false;
           },
           positionDropdown: function() {
-            var $dropdown = this.dropdown,
-              offset = this.container.offset(),
-              height = this.container.outerHeight(false),
-              width = this.container.outerWidth(false),
-              dropHeight = $dropdown.outerHeight(false),
-              $window = $(window),
-              windowWidth = $window.width(),
-              windowHeight = $window.height(),
-              viewPortRight = $window.scrollLeft() + windowWidth,
-              viewportBottom = $window.scrollTop() + windowHeight,
-              dropTop = offset.top + height,
-              dropLeft = offset.left,
-              enoughRoomBelow = dropTop + dropHeight <= viewportBottom,
-              enoughRoomAbove = (offset.top - dropHeight) >= $window.scrollTop(),
-              dropWidth = $dropdown.outerWidth(false),
-              enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight,
-              aboveNow = $dropdown.hasClass("select2-drop-above"),
-              bodyOffset,
-              above,
-              changeDirection,
-              css,
-              resultsListNode;
-            if (aboveNow) {
-              above = true;
-              if (!enoughRoomAbove && enoughRoomBelow) {
-                changeDirection = true;
-                above = false;
-              }
-            } else {
-              above = false;
-              if (!enoughRoomBelow && enoughRoomAbove) {
-                changeDirection = true;
+              var $dropdown = this.dropdown,
+                offset = this.container.offset(),
+                height = this.container.outerHeight(false),
+                width = this.container.outerWidth(false),
+                dropHeight = $dropdown.outerHeight(false),
+                $window = $(window),
+                windowWidth = $window.width(),
+                windowHeight = $window.height(),
+                viewPortRight = $window.scrollLeft() + windowWidth,
+                viewportBottom = $window.scrollTop() + windowHeight,
+                dropTop = offset.top + height,
+                dropLeft = offset.left,
+                enoughRoomBelow = dropTop + dropHeight <= viewportBottom,
+                enoughRoomAbove = (offset.top - dropHeight) >= $window.scrollTop(),
+                dropWidth = $dropdown.outerWidth(false),
+                enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight,
+                aboveNow = $dropdown.hasClass("select2-drop-above"),
+                bodyOffset,
+                above,
+                changeDirection,
+                css,
+                resultsListNode;
+              if (aboveNow) {
                 above = true;
-              }
-            }
-            if (changeDirection) {
-              $dropdown.hide();
-              offset = this.container.offset();
-              height = this.container.outerHeight(false);
-              width = this.container.outerWidth(false);
-              dropHeight = $dropdown.outerHeight(false);
-              viewPortRight = $window.scrollLeft() + windowWidth;
-              viewportBottom = $window.scrollTop() + windowHeight;
-              dropTop = offset.top + height;
-              dropLeft = offset.left;
-              dropWidth = $dropdown.outerWidth(false);
-              enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight;
-              $dropdown.show();
-              this.focusSearch();
-            }
-            if (this.opts.dropdownAutoWidth) {
-              resultsListNode = $('.select2-results', $dropdown)[0];
-              $dropdown.addClass('select2-drop-auto-width');
-              $dropdown.css('width', '');
-              dropWidth = $dropdown.outerWidth(false) + (resultsListNode.scrollHeight === resultsListNode.clientHeight ? 0 : scrollBarDimensions.width);
-              dropWidth > width ? width = dropWidth : dropWidth = width;
-              dropHeight = $dropdown.outerHeight(false);
-              enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight;
-            } else {
-              this.container.removeClass('select2-drop-auto-width');
-            }
-            if (this.body.css('position') !== 'static') {
-              bodyOffset = this.body.offset();
-              dropTop -= bodyOffset.top;
-              dropLeft -= bodyOffset.left;
-            }
-            if (!enoughRoomOnRight) {
-              dropLeft = offset.left + this.container.outerWidth(false) - dropWidth;
-            }
-            css = {
-              left: dropLeft,
-              width: width
-            };
-            if (above) {
-              css.top = offset.top - dropHeight;
-              css.bottom = 'auto';
-              this.container.addClass("select2-drop-above");
-              $dropdown.addClass("select2-drop-above");
-            } else {
-              css.top = dropTop;
-              css.bottom = 'auto';
-              this.container.removeClass("select2-drop-above");
-              $dropdown.removeClass("select2-drop-above");
-            }
-            css = $.extend(css, evaluate(this.opts.dropdownCss, this.opts.element));
-            $dropdown.css(css);
-          },
-          shouldOpen: function() {
-            var event;
-            if (this.opened()) return false;
-            if (this._enabled === false || this._readonly === true) return false;
-            event = $.Event("select2-opening");
-            this.opts.element.trigger(event);
-            return !event.isDefaultPrevented();
-          },
-          clearDropdownAlignmentPreference: function() {
-            this.container.removeClass("select2-drop-above");
-            this.dropdown.removeClass("select2-drop-above");
-          },
-          open: function() {
-            if (!this.shouldOpen()) return false;
-            this.opening();
-            $document.on("mousemove.select2Event", function(e) {
-              lastMousePosition.x = e.pageX;
-              lastMousePosition.y = e.pageY;
-            });
-            return true;
-          },
-          opening: function() {
-            var cid = this.containerEventName,
-              scroll = "scroll." + cid,
-              resize = "resize." + cid,
-              orient = "orientationchange." + cid,
-              mask;
-            this.container.addClass("select2-dropdown-open").addClass("select2-container-active");
-            this.clearDropdownAlignmentPreference();
-            if (this.dropdown[0] !== this.body.children().last()[0]) {
-              this.dropdown.detach().appendTo(this.body);
-            }
-            mask = $("#select2-drop-mask");
-            if (mask.length == 0) {
-              mask = $(document.createElement("div"));
-              mask.attr("id", "select2-drop-mask").attr("class", "select2-drop-mask");
-              mask.hide();
-              mask.appendTo(this.body);
-              mask.on("mousedown touchstart click", function(e) {
-                reinsertElement(mask);
-                var dropdown = $("#select2-drop"),
-                  self;
-                if (dropdown.length > 0) {
-                  self = dropdown.data("select2");
-                  if (self.opts.selectOnBlur) {
-                    self.selectHighlighted({
-                      noFocus: true
-                    });
-                  }
-                  self.close();
-                  e.preventDefault();
-                  e.stopPropagation();
+                if (!enoughRoomAbove && enoughRoomBelow) {
+                  changeDirection = true;
+                  above = false;
                 }
-              });
-            }
-            if (this.dropdown.prev()[0] !== mask[0]) {
-              this.dropdown.before(mask);
-            }
-            $("#select2-drop").removeAttr("id");
-            this.dropdown.attr("id", "select2-drop");
-            mask.show();
-            this.positionDropdown();
-            this.dropdown.show();
-            this.positionDropdown();
-            this.dropdown.addClass("select2-drop-active");
-            var that = this;
-            this.container.parents().add(window).each(function() {
-              $(this).on(resize + " " + scroll + " " + orient, function(e) {
-                if (that.opened()) that.positionDropdown();
-              });
-            });
-          },
-          close: function() {
-              if (!this.opened()) return;
-              var cid = this.containerEventName,
-                scroll = "scroll." + cid,
-                resize = "resize." + cid,
-                orient = "orientationchange." + cid;
-              this.container.parents().add(window).each(function() {
-                $(this).off(scroll).off(resize).off(orient);
-              });
-              this.clearDropdownAlignmentPreference();
-              $("#select2-drop-mask").hide();
-              this.dropdown.removeAttr("id");
-              this.dropdown.hide();
-              this.container.removeClass("select2-dropdown-open").removeClass("select2-container-act
+              } else {
+                above = false;
+                if (!enoughRoomBelow && enoughRoomAbove) {
+                  changeDirection = true;
+                  above = true;
+                }
+              }
+              if (changeDirection) {
+                $dropdown.hide();
+                offset = this.container.offset();
+                height = this.container.outerHeight(false);
+                width = this.container.outerWidth(false);
+                dropHeight = $dropdown.outerHeight(false);
+                viewPortRight = $window.scrollLeft() + windowWidth;
+                viewportBottom = $window.scrollTop() + windowHeight;
+                dropTop = offset.top + height;
+                dropLeft = offset.left;
+                dropWidth = $dropdown.outerWidth(false);
+                enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight;
+                $dropdown.show();
+                this.focusSearch();
+              }
+              if (this.opts.dropdownAutoWidth) {
+                resultsListNode = $('.select2-results', $dropdown)[0];
+                $dropdown.addClass('select2-drop-auto-width');
+                $dropdown.css('width', '');
+                dropWidth = $dropdown.outerWidth(false) + (resultsListNode.scrollHeight === resultsListNode.clientHeight ? 0 : scrollBarDimensions.width);
+                dropWidth > width ? width = dropWidth : dropWidth = width;
+                dropHeight = $dropdown.outerHeight(false);
+                enoughRoomOnRight = dropLeft + dropWidth <= viewPortRight;
+              } else {
+                this.container.removeClass('select2-drop-a

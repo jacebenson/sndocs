@@ -1377,4 +1377,163 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
       $scope.expandMentions = function(text) {
         return stream.expandMentions(text, mentionMap)
       };
-      $scope.reduceMentio
+      $scope.reduceMentions = function(text) {
+        if (!text)
+          return text;
+        var regexMentionParts = /[\w\d\s/\']+/gi;
+        text = text.replace(/@\[[\w\d\s]+:[\w\d\s/\']+\]/gi, function(mention) {
+          var mentionParts = mention.match(regexMentionParts);
+          if (mentionParts.length === 2) {
+            var name = mentionParts[1];
+            mentionMap[name] = mentionParts[0];
+            return "@[" + name + "]";
+          }
+          return mentionParts;
+        });
+        return text;
+      };
+      $scope.parseMentions = function(entry) {
+        var regexMentionParts = /[\w\d\s/\']+/gi;
+        entry = entry.replace(/@\[[\w\d\s]+:[\w\d\s/\']+\]/gi, function(mention) {
+          var mentionParts = mention.match(regexMentionParts);
+          if (mentionParts.length === 2) {
+            return '<a class="at-mention at-mention-user-' + mentionParts[0] + '">@' + mentionParts[1] + '</a>';
+          }
+          return mentionParts;
+        });
+        return entry;
+      };
+      $scope.parseLinks = function(text) {
+        var regexLinks = /@L\[([^|]+?)\|([^\]]*)]/gi;
+        return text.replace(regexLinks, "<a href='$1' target='_blank'>$2</a>");
+      };
+      $scope.parseSpecial = function(text) {
+        var parsedText = $scope.parseLinks($sanitize(text));
+        parsedText = $scope.parseMentions(parsedText);
+        return $sce.trustAsHtml(parsedText);
+      };
+      $scope.getFullEntryValue = function(entry, event) {
+        event.stopPropagation();
+        var index = getEntryIndex(entry);
+        var journal = $scope.entries[index].entries.journal[0];
+        journal.loading = true;
+        $http.get('/api/now/ui/stream_entry/full_entry', {
+          params: {
+            sysparm_sys_id: journal.sys_id
+          }
+        }).then(function(response) {
+          journal.new_value = response.data.result.replace(/\n/g, '<br/>');
+          journal.is_truncated = false;
+          journal.loading = false;
+          journal.showMore = true;
+        });
+      };
+
+      function getEntryIndex(entry) {
+        for (var i = 0, l = $scope.entries.length; i < l; i++) {
+          if (entry === $scope.entries[i]) {
+            return i;
+          }
+        }
+      }
+      $scope.$watch('active', function(n, o) {
+        if (n === o)
+          return;
+        if ($scope.active)
+          startPolling();
+        else
+          cancelStream();
+      });
+      $scope.defaultControls = {
+        getTitle: function(entry) {
+          if (entry && entry.short_description) {
+            return entry.short_description;
+          } else if (entry && entry.shortDescription) {
+            return entry.shortDescription;
+          }
+        },
+        showCreatedBy: function() {
+          return true;
+        },
+        hideCommentLabel: function() {
+          return false;
+        },
+        showRecord: function($event, entry) {},
+        showRecordLink: function() {
+          return true;
+        }
+      };
+      if ($scope.controls) {
+        for (var attr in $scope.controls)
+          $scope.defaultControls[attr] = $scope.controls[attr];
+      }
+      $scope.controls = $scope.defaultControls;
+      if ($scope.showCommentsAndWorkNotes === undefined) {
+        $scope.showCommentsAndWorkNotes = $scope.defaultShowCommentsAndWorkNotes;
+      }
+      snCustomEvent.observe('sn.stream.change_input_display', function(table, display) {
+        if (table != $scope.table)
+          return;
+        $scope.showCommentsAndWorkNotes = display;
+        $scope.$apply();
+      });
+      $scope.$on("$destroy", function() {
+        cancelStream();
+      });
+      $scope.$on('sn.stream.interval', function($event, time) {
+        interval = time;
+        reschedulePoll();
+      });
+      $scope.$on("sn.stream.tap", function() {
+        if (stream)
+          stream.tap();
+        else
+          startPolling();
+      });
+      $scope.$on('window_visibility_change', function($event, hidden) {
+        interval = (hidden) ? 120000 : undefined;
+        reschedulePoll();
+      });
+      $scope.$on("sn.stream.refresh", function(event, data) {
+        stream._successCallback(data.response);
+      });
+      $scope.$on("sn.stream.reload", function() {
+        startPolling();
+      });
+      $scope.$on('sn.stream.input_value', function(otherScope, type, value) {
+        if (!$scope.multipleInputs) {
+          $scope.inputType = type;
+          $scope.inputTypeValue = value;
+        }
+      });
+      $scope.$watchCollection('[table, query, sysId]', startPolling);
+      $scope.changeInputType = function(field) {
+        if (!primaryJournalField) {
+          angular.forEach($scope.fields, function(item) {
+            if (item.isPrimary)
+              primaryJournalField = item.name;
+          });
+        }
+        $scope.inputType = field.checked ? field.name : primaryJournalField;
+        userPreferences.setPreference('glide.ui.' + $scope.table + '.stream_input', $scope.inputType);
+      };
+      $scope.selectedInputType = function(value) {
+        if (angular.isDefined(value)) {
+          $scope.inputType = value;
+          userPreferences.setPreference('glide.ui.' + $scope.table + '.stream_input', $scope.inputType);
+        }
+        return $scope.inputType;
+      };
+      $scope.$watch('inputType', function() {
+        if (!$scope.inputType || !$scope.preferredInput)
+          return;
+        $scope.preferredInput = $scope.inputType;
+      });
+      $scope.submitCheck = function(event) {
+        var key = event.keyCode || event.which;
+        if (key === 13) {
+          $scope.postJournalEntryForCurrent(event);
+        }
+      };
+      $scope.postJournalEntry = function(type, entry, event) {
+          t

@@ -10215,131 +10215,771 @@
  License: MIT
 */
 (function(p, c, C) {
-    'use strict';
+  'use strict';
 
-    function v(r, h, g) {
-      return {
-        restrict: "ECA",
-        terminal: !0,
-        priority: 400,
-        transclude: "element",
-        link: function(a, f, b, d, y) {
-          function z() {
-            k && (g.cancel(k), k = null);
-            l && (l.$destroy(), l = null);
-            m && (k = g.leave(m), k.then(function() {
-              k = null
-            }), m = null)
-          }
-
-          function x() {
-            var b = r.current && r.current.locals;
-            if (c.isDefined(b && b.$template)) {
-              var b = a.$new(),
-                d = r.current;
-              m = y(b, function(b) {
-                g.enter(b, null, m || f).then(function() {
-                  !c.isDefined(t) || t && !a.$eval(t) || h()
-                });
-                z()
-              });
-              l = d.scope = b;
-              l.$emit("$viewContentLoaded");
-              l.$eval(w)
-            } else z()
-          }
-          var l, m, k, t = b.autoscroll,
-            w = b.onload || "";
-          a.$on("$routeChangeSuccess", x);
-          x()
+  function v(r, h, g) {
+    return {
+      restrict: "ECA",
+      terminal: !0,
+      priority: 400,
+      transclude: "element",
+      link: function(a, f, b, d, y) {
+        function z() {
+          k && (g.cancel(k), k = null);
+          l && (l.$destroy(), l = null);
+          m && (k = g.leave(m), k.then(function() {
+            k = null
+          }), m = null)
         }
-      }
-    }
 
-    function A(c, h, g) {
-      return {
-        restrict: "ECA",
-        priority: -400,
-        link: function(a, f) {
-          var b = g.current,
-            d = b.locals;
-          f.html(d.$template);
-          var y = c(f.contents());
-          b.controller && (d.$scope = a, d = h(b.controller, d), b.controllerAs && (a[b.controllerAs] = d), f.data("$ngControllerController", d), f.children().data("$ngControllerController", d));
-          y(a)
-        }
-      }
-    }
-    p = c.module("ngRoute", ["ng"]).provider("$route", function() {
-          function r(a, f) {
-            return c.extend(Object.create(a),
-              f)
-          }
-
-          function h(a, c) {
-            var b = c.caseInsensitiveMatch,
-              d = {
-                originalPath: a,
-                regexp: a
-              },
-              g = d.keys = [];
-            a = a.replace(/([().])/g, "\\$1").replace(/(\/)?:(\w+)([\?\*])?/g, function(a, c, b, d) {
-              a = "?" === d ? d : null;
-              d = "*" === d ? d : null;
-              g.push({
-                name: b,
-                optional: !!a
+        function x() {
+          var b = r.current && r.current.locals;
+          if (c.isDefined(b && b.$template)) {
+            var b = a.$new(),
+              d = r.current;
+            m = y(b, function(b) {
+              g.enter(b, null, m || f).then(function() {
+                !c.isDefined(t) || t && !a.$eval(t) || h()
               });
-              c = c || "";
-              return "" + (a ? "" : c) + "(?:" + (a ? c : "") + (d && "(.+?)" || "([^/]+)") + (a || "") + ")" + (a || "")
-            }).replace(/([\/$\*])/g, "\\$1");
-            d.regexp = new RegExp("^" + a + "$", b ? "i" : "");
-            return d
-          }
-          var g = {};
-          this.when = function(a, f) {
-            var b = c.copy(f);
-            c.isUndefined(b.reloadOnSearch) && (b.reloadOnSearch = !0);
-            c.isUndefined(b.caseInsensitiveMatch) && (b.caseInsensitiveMatch = this.caseInsensitiveMatch);
-            g[a] = c.extend(b, a && h(a, b));
-            if (a) {
-              var d = "/" == a[a.length - 1] ? a.substr(0, a.length - 1) : a + "/";
-              g[d] = c.extend({
-                redirectTo: a
-              }, h(d, b))
-            }
-            return this
-          };
-          this.caseInsensitiveMatch = !1;
-          this.otherwise = function(a) {
-            "string" === typeof a && (a = {
-              redirectTo: a
+              z()
             });
-            this.when(null, a);
-            return this
-          };
-          this.$get = ["$rootScope", "$location", "$routeParams", "$q", "$injector", "$templateRequest", "$sce", function(a, f, b, d, h, p, x) {
-                function l(b) {
-                  var e = s.current;
-                  (v = (n = k()) && e && n.$$route === e.$$route && c.equals(n.pathParams, e.pathParams) && !n.reloadOnSearch && !w) || !e && !n || a.$broadcast("$routeChangeStart", n, e).defaultPrevented && b && b.preventDefault()
-                }
+            l = d.scope = b;
+            l.$emit("$viewContentLoaded");
+            l.$eval(w)
+          } else z()
+        }
+        var l, m, k, t = b.autoscroll,
+          w = b.onload || "";
+        a.$on("$routeChangeSuccess", x);
+        x()
+      }
+    }
+  }
 
-                function m() {
-                  var u = s.current,
-                    e = n;
-                  if (v) u.params = e.params, c.copy(u.params, b), a.$broadcast("$routeUpdate", u);
-                  else if (e || u) w = !1, (s.current = e) && e.redirectTo && (c.isString(e.redirectTo) ? f.path(t(e.redirectTo, e.params)).search(e.params).replace() : f.url(e.redirectTo(e.pathParams, f.path(), f.search())).replace()), d.when(e).then(function() {
-                      if (e) {
-                        var a =
-                          c.extend({}, e.resolve),
-                          b, f;
-                        c.forEach(a, function(b, e) {
-                          a[e] = c.isString(b) ? h.get(b) : h.invoke(b, null, null, e)
-                        });
-                        c.isDefined(b = e.template) ? c.isFunction(b) && (b = b(e.params)) : c.isDefined(f = e.templateUrl) && (c.isFunction(f) && (f = f(e.params)), c.isDefined(f) && (e.loadedTemplateUrl = x.valueOf(f), b = p(f)));
-                        c.isDefined(b) && (a.$template = b);
-                        return d.all(a)
-                      }
-                    }).then(function(f) {
-                        e == s.current && (e && (e.locals = f, c.copy(e.params, b)), a.$broadcast("$routeChangeSuccess", e, u))
-                      }, fun
+  function A(c, h, g) {
+    return {
+      restrict: "ECA",
+      priority: -400,
+      link: function(a, f) {
+        var b = g.current,
+          d = b.locals;
+        f.html(d.$template);
+        var y = c(f.contents());
+        b.controller && (d.$scope = a, d = h(b.controller, d), b.controllerAs && (a[b.controllerAs] = d), f.data("$ngControllerController", d), f.children().data("$ngControllerController", d));
+        y(a)
+      }
+    }
+  }
+  p = c.module("ngRoute", ["ng"]).provider("$route", function() {
+    function r(a, f) {
+      return c.extend(Object.create(a),
+        f)
+    }
+
+    function h(a, c) {
+      var b = c.caseInsensitiveMatch,
+        d = {
+          originalPath: a,
+          regexp: a
+        },
+        g = d.keys = [];
+      a = a.replace(/([().])/g, "\\$1").replace(/(\/)?:(\w+)([\?\*])?/g, function(a, c, b, d) {
+        a = "?" === d ? d : null;
+        d = "*" === d ? d : null;
+        g.push({
+          name: b,
+          optional: !!a
+        });
+        c = c || "";
+        return "" + (a ? "" : c) + "(?:" + (a ? c : "") + (d && "(.+?)" || "([^/]+)") + (a || "") + ")" + (a || "")
+      }).replace(/([\/$\*])/g, "\\$1");
+      d.regexp = new RegExp("^" + a + "$", b ? "i" : "");
+      return d
+    }
+    var g = {};
+    this.when = function(a, f) {
+      var b = c.copy(f);
+      c.isUndefined(b.reloadOnSearch) && (b.reloadOnSearch = !0);
+      c.isUndefined(b.caseInsensitiveMatch) && (b.caseInsensitiveMatch = this.caseInsensitiveMatch);
+      g[a] = c.extend(b, a && h(a, b));
+      if (a) {
+        var d = "/" == a[a.length - 1] ? a.substr(0, a.length - 1) : a + "/";
+        g[d] = c.extend({
+          redirectTo: a
+        }, h(d, b))
+      }
+      return this
+    };
+    this.caseInsensitiveMatch = !1;
+    this.otherwise = function(a) {
+      "string" === typeof a && (a = {
+        redirectTo: a
+      });
+      this.when(null, a);
+      return this
+    };
+    this.$get = ["$rootScope", "$location", "$routeParams", "$q", "$injector", "$templateRequest", "$sce", function(a, f, b, d, h, p, x) {
+      function l(b) {
+        var e = s.current;
+        (v = (n = k()) && e && n.$$route === e.$$route && c.equals(n.pathParams, e.pathParams) && !n.reloadOnSearch && !w) || !e && !n || a.$broadcast("$routeChangeStart", n, e).defaultPrevented && b && b.preventDefault()
+      }
+
+      function m() {
+        var u = s.current,
+          e = n;
+        if (v) u.params = e.params, c.copy(u.params, b), a.$broadcast("$routeUpdate", u);
+        else if (e || u) w = !1, (s.current = e) && e.redirectTo && (c.isString(e.redirectTo) ? f.path(t(e.redirectTo, e.params)).search(e.params).replace() : f.url(e.redirectTo(e.pathParams, f.path(), f.search())).replace()), d.when(e).then(function() {
+          if (e) {
+            var a =
+              c.extend({}, e.resolve),
+              b, f;
+            c.forEach(a, function(b, e) {
+              a[e] = c.isString(b) ? h.get(b) : h.invoke(b, null, null, e)
+            });
+            c.isDefined(b = e.template) ? c.isFunction(b) && (b = b(e.params)) : c.isDefined(f = e.templateUrl) && (c.isFunction(f) && (f = f(e.params)), c.isDefined(f) && (e.loadedTemplateUrl = x.valueOf(f), b = p(f)));
+            c.isDefined(b) && (a.$template = b);
+            return d.all(a)
+          }
+        }).then(function(f) {
+          e == s.current && (e && (e.locals = f, c.copy(e.params, b)), a.$broadcast("$routeChangeSuccess", e, u))
+        }, function(b) {
+          e == s.current && a.$broadcast("$routeChangeError",
+            e, u, b)
+        })
+      }
+
+      function k() {
+        var a, b;
+        c.forEach(g, function(d, g) {
+          var q;
+          if (q = !b) {
+            var h = f.path();
+            q = d.keys;
+            var l = {};
+            if (d.regexp)
+              if (h = d.regexp.exec(h)) {
+                for (var k = 1, m = h.length; k < m; ++k) {
+                  var n = q[k - 1],
+                    p = h[k];
+                  n && p && (l[n.name] = p)
+                }
+                q = l
+              } else q = null;
+            else q = null;
+            q = a = q
+          }
+          q && (b = r(d, {
+            params: c.extend({}, f.search(), a),
+            pathParams: a
+          }), b.$$route = d)
+        });
+        return b || g[null] && r(g[null], {
+          params: {},
+          pathParams: {}
+        })
+      }
+
+      function t(a, b) {
+        var d = [];
+        c.forEach((a || "").split(":"), function(a, c) {
+          if (0 === c) d.push(a);
+          else {
+            var f = a.match(/(\w+)(?:[?*])?(.*)/),
+              g = f[1];
+            d.push(b[g]);
+            d.push(f[2] || "");
+            delete b[g]
+          }
+        });
+        return d.join("")
+      }
+      var w = !1,
+        n, v, s = {
+          routes: g,
+          reload: function() {
+            w = !0;
+            a.$evalAsync(function() {
+              l();
+              m()
+            })
+          },
+          updateParams: function(a) {
+            if (this.current && this.current.$$route) a = c.extend({}, this.current.params, a), f.path(t(this.current.$$route.originalPath, a)), f.search(a);
+            else throw B("norout");
+          }
+        };
+      a.$on("$locationChangeStart", l);
+      a.$on("$locationChangeSuccess", m);
+      return s
+    }]
+  });
+  var B = c.$$minErr("ngRoute");
+  p.provider("$routeParams", function() {
+    this.$get = function() {
+      return {}
+    }
+  });
+  p.directive("ngView", v);
+  p.directive("ngView", A);
+  v.$inject = ["$route", "$anchorScroll", "$animate"];
+  A.$inject = ["$compile", "$controller", "$route"]
+})(window, window.angular);
+/*! RESOURCE: /scripts/angular_1.4.8/angular-touch.min.js */
+/*
+ AngularJS v1.4.8
+ (c) 2010-2015 Google, Inc. http://angularjs.org
+ License: MIT
+*/
+(function(x, s, y) {
+  'use strict';
+
+  function t(f, k, p) {
+    n.directive(f, ["$parse", "$swipe", function(c, e) {
+      return function(l, m, g) {
+        function h(a) {
+          if (!b) return !1;
+          var d = Math.abs(a.y - b.y);
+          a = (a.x - b.x) * k;
+          return r && 75 > d && 0 < a && 30 < a && .3 > d / a
+        }
+        var d = c(g[f]),
+          b, r, a = ["touch"];
+        s.isDefined(g.ngSwipeDisableMouse) || a.push("mouse");
+        e.bind(m, {
+          start: function(a, d) {
+            b = a;
+            r = !0
+          },
+          cancel: function(a) {
+            r = !1
+          },
+          end: function(a, b) {
+            h(a) && l.$apply(function() {
+              m.triggerHandler(p);
+              d(l, {
+                $event: b
+              })
+            })
+          }
+        }, a)
+      }
+    }])
+  }
+  var n = s.module("ngTouch", []);
+  n.factory("$swipe", [function() {
+    function f(c) {
+      c = c.originalEvent || c;
+      var e = c.touches && c.touches.length ? c.touches : [c];
+      c = c.changedTouches && c.changedTouches[0] || e[0];
+      return {
+        x: c.clientX,
+        y: c.clientY
+      }
+    }
+
+    function k(c, e) {
+      var l = [];
+      s.forEach(c, function(c) {
+        (c = p[c][e]) && l.push(c)
+      });
+      return l.join(" ")
+    }
+    var p = {
+      mouse: {
+        start: "mousedown",
+        move: "mousemove",
+        end: "mouseup"
+      },
+      touch: {
+        start: "touchstart",
+        move: "touchmove",
+        end: "touchend",
+        cancel: "touchcancel"
+      }
+    };
+    return {
+      bind: function(c, e, l) {
+        var m, g, h, d, b = !1;
+        l = l || ["mouse", "touch"];
+        c.on(k(l, "start"), function(a) {
+          h =
+            f(a);
+          b = !0;
+          g = m = 0;
+          d = h;
+          e.start && e.start(h, a)
+        });
+        var r = k(l, "cancel");
+        if (r) c.on(r, function(a) {
+          b = !1;
+          e.cancel && e.cancel(a)
+        });
+        c.on(k(l, "move"), function(a) {
+          if (b && h) {
+            var c = f(a);
+            m += Math.abs(c.x - d.x);
+            g += Math.abs(c.y - d.y);
+            d = c;
+            10 > m && 10 > g || (g > m ? (b = !1, e.cancel && e.cancel(a)) : (a.preventDefault(), e.move && e.move(c, a)))
+          }
+        });
+        c.on(k(l, "end"), function(a) {
+          b && (b = !1, e.end && e.end(f(a), a))
+        })
+      }
+    }
+  }]);
+  n.config(["$provide", function(f) {
+    f.decorator("ngClickDirective", ["$delegate", function(k) {
+      k.shift();
+      return k
+    }])
+  }]);
+  n.directive("ngClick", ["$parse", "$timeout", "$rootElement", function(f, k, p) {
+    function c(d, b, c) {
+      for (var a = 0; a < d.length; a += 2) {
+        var e = d[a + 1],
+          g = c;
+        if (25 > Math.abs(d[a] - b) && 25 > Math.abs(e - g)) return d.splice(a, a + 2), !0
+      }
+      return !1
+    }
+
+    function e(d) {
+      if (!(2500 < Date.now() - m)) {
+        var b = d.touches && d.touches.length ? d.touches : [d],
+          e = b[0].clientX,
+          b = b[0].clientY;
+        if (!(1 > e && 1 > b || h && h[0] === e && h[1] === b)) {
+          h && (h = null);
+          var a = d.target;
+          "label" === s.lowercase(a.nodeName || a[0] && a[0].nodeName) && (h = [e, b]);
+          c(g, e, b) || (d.stopPropagation(), d.preventDefault(), d.target &&
+            d.target.blur && d.target.blur())
+        }
+      }
+    }
+
+    function l(d) {
+      d = d.touches && d.touches.length ? d.touches : [d];
+      var b = d[0].clientX,
+        c = d[0].clientY;
+      g.push(b, c);
+      k(function() {
+        for (var a = 0; a < g.length; a += 2)
+          if (g[a] == b && g[a + 1] == c) {
+            g.splice(a, a + 2);
+            break
+          }
+      }, 2500, !1)
+    }
+    var m, g, h;
+    return function(d, b, h) {
+      var a = f(h.ngClick),
+        k = !1,
+        q, n, t, v;
+      b.on("touchstart", function(a) {
+        k = !0;
+        q = a.target ? a.target : a.srcElement;
+        3 == q.nodeType && (q = q.parentNode);
+        b.addClass("ng-click-active");
+        n = Date.now();
+        a = a.originalEvent || a;
+        a = (a.touches && a.touches.length ? a.touches : [a])[0];
+        t = a.clientX;
+        v = a.clientY
+      });
+      b.on("touchcancel", function(a) {
+        k = !1;
+        b.removeClass("ng-click-active")
+      });
+      b.on("touchend", function(a) {
+        var d = Date.now() - n,
+          f = a.originalEvent || a,
+          u = (f.changedTouches && f.changedTouches.length ? f.changedTouches : f.touches && f.touches.length ? f.touches : [f])[0],
+          f = u.clientX,
+          u = u.clientY,
+          w = Math.sqrt(Math.pow(f - t, 2) + Math.pow(u - v, 2));
+        k && 750 > d && 12 > w && (g || (p[0].addEventListener("click", e, !0), p[0].addEventListener("touchstart", l, !0), g = []), m = Date.now(), c(g, f, u), q && q.blur(), s.isDefined(h.disabled) &&
+          !1 !== h.disabled || b.triggerHandler("click", [a]));
+        k = !1;
+        b.removeClass("ng-click-active")
+      });
+      b.onclick = function(a) {};
+      b.on("click", function(b, c) {
+        d.$apply(function() {
+          a(d, {
+            $event: c || b
+          })
+        })
+      });
+      b.on("mousedown", function(a) {
+        b.addClass("ng-click-active")
+      });
+      b.on("mousemove mouseup", function(a) {
+        b.removeClass("ng-click-active")
+      })
+    }
+  }]);
+  t("ngSwipeLeft", -1, "swipeleft");
+  t("ngSwipeRight", 1, "swiperight")
+})(window, window.angular);
+/*! RESOURCE: /scripts/angular_1.4.8/angular-cookies.min.js */
+/*
+ AngularJS v1.4.8
+ (c) 2010-2015 Google, Inc. http://angularjs.org
+ License: MIT
+*/
+(function(p, c, n) {
+  'use strict';
+
+  function l(b, a, g) {
+    var d = g.baseHref(),
+      k = b[0];
+    return function(b, e, f) {
+      var g, h;
+      f = f || {};
+      h = f.expires;
+      g = c.isDefined(f.path) ? f.path : d;
+      c.isUndefined(e) && (h = "Thu, 01 Jan 1970 00:00:00 GMT", e = "");
+      c.isString(h) && (h = new Date(h));
+      e = encodeURIComponent(b) + "=" + encodeURIComponent(e);
+      e = e + (g ? ";path=" + g : "") + (f.domain ? ";domain=" + f.domain : "");
+      e += h ? ";expires=" + h.toUTCString() : "";
+      e += f.secure ? ";secure" : "";
+      f = e.length + 1;
+      4096 < f && a.warn("Cookie '" + b + "' possibly not set or overflowed because it was too large (" +
+        f + " > 4096 bytes)!");
+      k.cookie = e
+    }
+  }
+  c.module("ngCookies", ["ng"]).provider("$cookies", [function() {
+    var b = this.defaults = {};
+    this.$get = ["$$cookieReader", "$$cookieWriter", function(a, g) {
+      return {
+        get: function(d) {
+          return a()[d]
+        },
+        getObject: function(d) {
+          return (d = this.get(d)) ? c.fromJson(d) : d
+        },
+        getAll: function() {
+          return a()
+        },
+        put: function(d, a, m) {
+          g(d, a, m ? c.extend({}, b, m) : b)
+        },
+        putObject: function(d, b, a) {
+          this.put(d, c.toJson(b), a)
+        },
+        remove: function(a, k) {
+          g(a, n, k ? c.extend({}, b, k) : b)
+        }
+      }
+    }]
+  }]);
+  c.module("ngCookies").factory("$cookieStore", ["$cookies", function(b) {
+    return {
+      get: function(a) {
+        return b.getObject(a)
+      },
+      put: function(a, c) {
+        b.putObject(a, c)
+      },
+      remove: function(a) {
+        b.remove(a)
+      }
+    }
+  }]);
+  l.$inject = ["$document", "$log", "$browser"];
+  c.module("ngCookies").provider("$$cookieWriter", function() {
+    this.$get = l
+  })
+})(window, window.angular);
+/*! RESOURCE: /scripts/angular_1.4.8/angular-aria.min.js */
+/*
+ AngularJS v1.4.8
+ (c) 2010-2015 Google, Inc. http://angularjs.org
+ License: MIT
+*/
+(function(u, n, v) {
+  'use strict';
+  var r = "BUTTON A INPUT TEXTAREA SELECT DETAILS SUMMARY".split(" "),
+    p = function(a, c) {
+      if (-1 !== c.indexOf(a[0].nodeName)) return !0
+    };
+  n.module("ngAria", ["ng"]).provider("$aria", function() {
+    function a(a, f, l, m) {
+      return function(d, e, b) {
+        var g = b.$normalize(f);
+        !c[g] || p(e, l) || b[g] || d.$watch(b[a], function(b) {
+          b = m ? !b : !!b;
+          e.attr(f, b)
+        })
+      }
+    }
+    var c = {
+      ariaHidden: !0,
+      ariaChecked: !0,
+      ariaDisabled: !0,
+      ariaRequired: !0,
+      ariaInvalid: !0,
+      ariaMultiline: !0,
+      ariaValue: !0,
+      tabindex: !0,
+      bindKeypress: !0,
+      bindRoleForClick: !0
+    };
+    this.config = function(a) {
+      c = n.extend(c, a)
+    };
+    this.$get = function() {
+      return {
+        config: function(a) {
+          return c[a]
+        },
+        $$watchExpr: a
+      }
+    }
+  }).directive("ngShow", ["$aria", function(a) {
+    return a.$$watchExpr("ngShow", "aria-hidden", [], !0)
+  }]).directive("ngHide", ["$aria", function(a) {
+    return a.$$watchExpr("ngHide", "aria-hidden", [], !1)
+  }]).directive("ngModel", ["$aria", function(a) {
+    function c(c, m, d) {
+      return a.config(m) && !d.attr(c)
+    }
+
+    function k(a, c) {
+      return !c.attr("role") && c.attr("type") === a && "INPUT" !== c[0].nodeName
+    }
+
+    function f(a, c) {
+      var d =
+        a.type,
+        e = a.role;
+      return "checkbox" === (d || e) || "menuitemcheckbox" === e ? "checkbox" : "radio" === (d || e) || "menuitemradio" === e ? "radio" : "range" === d || "progressbar" === e || "slider" === e ? "range" : "textbox" === (d || e) || "TEXTAREA" === c[0].nodeName ? "multiline" : ""
+    }
+    return {
+      restrict: "A",
+      require: "?ngModel",
+      priority: 200,
+      compile: function(l, m) {
+        var d = f(m, l);
+        return {
+          pre: function(a, b, c, h) {
+            "checkbox" === d && "checkbox" !== c.type && (h.$isEmpty = function(b) {
+              return !1 === b
+            })
+          },
+          post: function(e, b, g, h) {
+            function f() {
+              return h.$modelValue
+            }
+
+            function m() {
+              return q ?
+                (q = !1, function(a) {
+                  a = g.value == h.$viewValue;
+                  b.attr("aria-checked", a);
+                  b.attr("tabindex", 0 - !a)
+                }) : function(a) {
+                  b.attr("aria-checked", g.value == h.$viewValue)
+                }
+            }
+
+            function l() {
+              b.attr("aria-checked", !h.$isEmpty(h.$viewValue))
+            }
+            var q = c("tabindex", "tabindex", b) && !p(b, r);
+            switch (d) {
+              case "radio":
+              case "checkbox":
+                k(d, b) && b.attr("role", d);
+                c("aria-checked", "ariaChecked", b) && e.$watch(f, "radio" === d ? m() : l);
+                q && b.attr("tabindex", 0);
+                break;
+              case "range":
+                k(d, b) && b.attr("role", "slider");
+                if (a.config("ariaValue")) {
+                  var n = !b.attr("aria-valuemin") &&
+                    (g.hasOwnProperty("min") || g.hasOwnProperty("ngMin")),
+                    s = !b.attr("aria-valuemax") && (g.hasOwnProperty("max") || g.hasOwnProperty("ngMax")),
+                    t = !b.attr("aria-valuenow");
+                  n && g.$observe("min", function(a) {
+                    b.attr("aria-valuemin", a)
+                  });
+                  s && g.$observe("max", function(a) {
+                    b.attr("aria-valuemax", a)
+                  });
+                  t && e.$watch(f, function(a) {
+                    b.attr("aria-valuenow", a)
+                  })
+                }
+                q && b.attr("tabindex", 0);
+                break;
+              case "multiline":
+                c("aria-multiline", "ariaMultiline", b) && b.attr("aria-multiline", !0)
+            }
+            h.$validators.required && c("aria-required", "ariaRequired",
+              b) && e.$watch(function() {
+              return h.$error.required
+            }, function(a) {
+              b.attr("aria-required", !!a)
+            });
+            c("aria-invalid", "ariaInvalid", b) && e.$watch(function() {
+              return h.$invalid
+            }, function(a) {
+              b.attr("aria-invalid", !!a)
+            })
+          }
+        }
+      }
+    }
+  }]).directive("ngDisabled", ["$aria", function(a) {
+    return a.$$watchExpr("ngDisabled", "aria-disabled", [])
+  }]).directive("ngMessages", function() {
+    return {
+      restrict: "A",
+      require: "?ngMessages",
+      link: function(a, c, k, f) {
+        c.attr("aria-live") || c.attr("aria-live", "assertive")
+      }
+    }
+  }).directive("ngClick", ["$aria", "$parse",
+    function(a, c) {
+      return {
+        restrict: "A",
+        compile: function(k, f) {
+          var l = c(f.ngClick, null, !0);
+          return function(c, d, e) {
+            if (!p(d, r) && (a.config("bindRoleForClick") && !d.attr("role") && d.attr("role", "button"), a.config("tabindex") && !d.attr("tabindex") && d.attr("tabindex", 0), a.config("bindKeypress") && !e.ngKeypress)) d.on("keypress", function(a) {
+              function d() {
+                l(c, {
+                  $event: a
+                })
+              }
+              var e = a.which || a.keyCode;
+              32 !== e && 13 !== e || c.$apply(d)
+            })
+          }
+        }
+      }
+    }
+  ]).directive("ngDblclick", ["$aria", function(a) {
+    return function(c, k, f) {
+      !a.config("tabindex") ||
+        k.attr("tabindex") || p(k, r) || k.attr("tabindex", 0)
+    }
+  }])
+})(window, window.angular);
+/*! RESOURCE: /scripts/app/base/_module.js */
+angular.module('sn.base', ['sn.common.auth']);
+window.countWatchers = window.countWatchers || function(root) {
+  var watchers = [];
+  var f = function(element) {
+    angular.forEach(['$scope', '$isolateScope'], function(scopeProperty) {
+      if (element.data() && element.data().hasOwnProperty(scopeProperty)) {
+        angular.forEach(element.data()[scopeProperty].$$watchers, function(watcher) {
+          watchers.push(watcher);
+        });
+      }
+    });
+    angular.forEach(element.children(), function(childElement) {
+      f(angular.element(childElement));
+    });
+  };
+  f(root);
+  var watchersWithoutDuplicates = [];
+  angular.forEach(watchers, function(item) {
+    if (watchersWithoutDuplicates.indexOf(item) < 0) {
+      watchersWithoutDuplicates.push(item);
+    }
+  });
+  console.log(watchersWithoutDuplicates.length);
+};;
+/*! RESOURCE: /scripts/sn/common/auth/_module.js */
+angular.module('sn.common.auth', []);
+angular.module('sn.auth', ['sn.common.auth']);;
+/*! RESOURCE: /scripts/sn/common/auth/service.authInterceptor.js */
+angular.module('sn.common.auth').config(function($httpProvider) {
+  $httpProvider.interceptors.push(function($rootScope, $q, $injector, $window, $log) {
+    var LOG_PREFIX = '(authIntercepter) ';
+
+    function error(response) {
+      var status = response.status;
+      if (status == 401) {
+        var newPromise = handle401(response);
+        if (newPromise)
+          return newPromise;
+      }
+      return $q.reject(response);
+    }
+
+    function handle401(response) {
+      if (canResendRequest(response)) {
+        var deferredAgain = $q.defer();
+        var $http = $injector.get('$http');
+        $http(response.config).then(function success(newResponse) {
+          deferredAgain.resolve(newResponse);
+        }, function error(newResponse) {
+          deferredAgain.reject(newResponse);
+        });
+        return deferredAgain.promise;
+      }
+      $log.info(LOG_PREFIX + 'User has been logged out');
+      $rootScope.$broadcast("@page.login");
+      return null;
+    }
+
+    function canResendRequest(response) {
+      var headers = response.headers();
+      var requestToken = response.config.headers['X-UserToken'];
+      if (!requestToken) {
+        requestToken = headers['x-usertoken-request'];
+      }
+      if ($window.g_ck && (requestToken !== $window.g_ck)) {
+        $log.info(LOG_PREFIX + 'Token refreshed since request -- retrying');
+        response.config.headers['X-UserToken'] = $window.g_ck;
+        return true;
+      }
+      if (headers['x-sessionloggedin'] != 'true')
+        return false;
+      if (headers['x-usertoken-allowresubmit'] == 'false')
+        return false;
+      var token = headers['x-usertoken-response'];
+      if (token) {
+        $log.info(LOG_PREFIX + 'Received new token -- retrying');
+        response.config.headers['X-UserToken'] = token;
+        setToken(token);
+        return true;
+      }
+      return false;
+    }
+
+    function setToken(token) {
+      $window.g_ck = token;
+      if (!token) {
+        $httpProvider.defaults.headers.common["X-UserToken"] = 'token_intentionally_left_blank';
+      } else {
+        $httpProvider.defaults.headers.common["X-UserToken"] = token;
+      }
+      if ($window.jQuery) {
+        jQuery.ajaxSetup({
+          headers: {
+            'X-UserToken': token
+          }
+        });
+      }
+      if ($window.Zepto) {
+        if (!Zepto.ajaxSettings.headers)
+          Zepto.ajaxSettings.headers = {};
+        Zepto.ajaxSettings.headers['X-UserToken'] = token;
+      }
+    }
+    setToken($window.g_ck);
+    return {
+      responseError: error
+    }
+  });
+});;;

@@ -1507,4 +1507,688 @@ org.cometd.Cometd = function(name) {
       _failConnect(message);
     }
 
-    function _failDisconnect(message)
+    function _failDisconnect(message) {
+      _disconnect(true);
+      _handleCallback(message);
+      _notifyListeners('/meta/disconnect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _disconnectResponse(message) {
+      if (message.successful) {
+        _disconnect(false);
+        _handleCallback(message);
+        _notifyListeners('/meta/disconnect', message);
+      } else {
+        _failDisconnect(message);
+      }
+    }
+
+    function _disconnectFailure(message) {
+      _failDisconnect(message);
+    }
+
+    function _failSubscribe(message) {
+      var subscriptions = _listeners[message.subscription];
+      if (subscriptions) {
+        for (var i = subscriptions.length - 1; i >= 0; --i) {
+          var subscription = subscriptions[i];
+          if (subscription && !subscription.listener) {
+            delete subscriptions[i];
+            _cometd._debug('Removed failed subscription', subscription);
+            break;
+          }
+        }
+      }
+      _handleCallback(message);
+      _notifyListeners('/meta/subscribe', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _subscribeResponse(message) {
+      if (message.successful) {
+        _handleCallback(message);
+        _notifyListeners('/meta/subscribe', message);
+      } else {
+        _failSubscribe(message);
+      }
+    }
+
+    function _subscribeFailure(message) {
+      _failSubscribe(message);
+    }
+
+    function _failUnsubscribe(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/unsubscribe', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _unsubscribeResponse(message) {
+      if (message.successful) {
+        _handleCallback(message);
+        _notifyListeners('/meta/unsubscribe', message);
+      } else {
+        _failUnsubscribe(message);
+      }
+    }
+
+    function _unsubscribeFailure(message) {
+      _failUnsubscribe(message);
+    }
+
+    function _failMessage(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/publish', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _messageResponse(message) {
+      if (message.successful === undefined) {
+        if (message.data !== undefined) {
+          _notifyListeners(message.channel, message);
+        } else {
+          _cometd._warn('Unknown Bayeux Message', message);
+        }
+      } else {
+        if (message.successful) {
+          _handleCallback(message);
+          _notifyListeners('/meta/publish', message);
+        } else {
+          _failMessage(message);
+        }
+      }
+    }
+
+    function _messageFailure(failure) {
+      _failMessage(failure);
+    }
+
+    function _receive(message) {
+      message = _applyIncomingExtensions(message);
+      if (message === undefined || message === null) {
+        return;
+      }
+      _updateAdvice(message.advice);
+      var channel = message.channel;
+      switch (channel) {
+        case '/meta/handshake':
+          _handshakeResponse(message);
+          break;
+        case '/meta/connect':
+          _connectResponse(message);
+          break;
+        caseage);
+          break;
+        case '/meta/unsubscribe':
+          failureMessage.subscription = message.subscription;
+          _unsubscribeFailure(failureMessage);
+          break;
+        default:
+          _messageFailure(failureMessage);
+          break;
+      }
+    }
+  };
+
+  function _hasSubscriptions(channel) {
+    var subscriptions = _listeners[channel];
+    if (subscriptions) {
+      for (var i = 0; i < subscriptions.length; ++i) {
+        if (subscriptions[i]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function _resolveScopedCallback(scope, callback) {
+    var delegate = {
+      scope: scope,
+      method: callback
+    };
+    if (_isFunction(scope)) {
+      delegate.scope = undefined;
+      delegate.method = scope;
+    } else {
+      if (_isString(callback)) {
+        if (!scope) {
+          throw 'Invalid scope ' + scope;
+        }
+        delegate.method = scope[callback];
+        if (!_isFunction(delegate.method)) {
+          throw 'Invalid callback ' + callback + ' for scope ' + scope;
+        }
+      } else if (!_isFunction(callback)) {
+        throw 'Invalid callback ' + callback;
+      }
+    }
+    return delegate;
+  }
+
+  function _addListener(channel, scope, callback, isListener) {
+    var delegate = _resolveScopedCallback(scope, callback);
+    _cometd._debug('Adding', isListener ? 'listener' : 'subscription', 'on', channel, 'with scope', delegate.scope, 'and callback', delegate.method);
+    var subscription = {
+      channel: channel,
+      scope: delegate.scope,
+      callback: delegate.method,
+      listener: isListener
+    };
+    var subscriptions = _listeners[channel];
+    if (!subscriptions) {
+      subscriptions = [];
+      _listeners[channel] = subscriptions;
+    }
+    subscription.id = subscriptions.push(subscription) - 1;
+    _cometd._debug('Added', isListener ? 'listener' : 'subscription', subscription);
+    subscription[0] = channel;
+    subscription[1] = subscription.id;
+    return subscription;
+  }
+  this.registerTransport = function(type, transport, index) {
+    var result = _transports.add(type, transport, index);
+    if (result) {
+      this._debug('Registered transport', type);
+      if (_isFunction(transport.registered)) {
+        transport.registered(type, this);
+      }
+    }
+    return result;
+  };
+  this.getTransportTypes = function() {
+    return _transports.getTransportTypes();
+  };
+  this.unregisterTransport = function(type) {
+    var transport = _transports.remove(type);
+    if (transport !== null) {
+      this._debug('Unregistered transport', type);
+      if (_isFunction(transport.unregistered)) {
+        transport.unregistered();
+      }
+    }
+    return transport;
+  };
+  this.unregisterTransports = function() {
+    _transports.clear();
+  };
+  this.findTransport = function(name) {
+    return _transports.find(name);
+  };
+  this.configure = function(configuration) {
+    _configure.call(this, configuration);
+  };
+  this.init = function(configuration, handshakeProps) {
+    this.configure(configuration);
+    this.handshake(handshakeProps);
+  };
+  this.handshake = function(handshakeProps, handshakeCallback) {
+    _setStatus('disconnected');
+    _reestablish = false;
+    _handshake(handshakeProps, handshakeCallback);
+  };
+  this.disconnect = function(sync, disconnectProps, disconnectCallback) {
+    if (_isDisconnected()) {
+      return;
+    }
+    if (typeof sync !== 'boolean') {
+      disconnectCallback = disconnectProps;
+      disconnectProps = sync;
+      sync = false;
+    }
+    if (_isFunction(disconnectProps)) {
+      disconnectCallback = disconnectProps;
+      disconnectProps = undefined;
+    }
+    var bayeuxMessage = {
+      channel: '/meta/disconnect',
+      _callback: disconnectCallback
+    };
+    var message = this._mixin(false, {}, disconnectProps, bayeuxMessage);
+    _setStatus('disconnecting');
+    _send(sync === true, [message], false, 'disconnect');
+  };
+  this.startBatch = function() {
+    _startBatch();
+  };
+  this.endBatch = function() {
+    _endBatch();
+  };
+  this.batch = function(scope, callback) {
+    var delegate = _resolveScopedCallback(scope, callback);
+    this.startBatch();
+    try {
+      delegate.method.call(delegate.scope);
+      this.endBatch();
+    } catch (x) {
+      this._info('Exception during execution of batch', x);
+      this.endBatch();
+      throw x;
+    }
+  };
+  this.addListener = function(channel, scope, callback) {
+    if (arguments.length < 2) {
+      throw 'Illegal arguments number: required 2, got ' + arguments.length;
+    }
+    if (!_isString(channel)) {
+      throw 'Illegal argument type: channel must be a string';
+    }
+    return _addListener(channel, scope, callback, true);
+  };
+  this.removeListener = function(subscription) {
+    if (!subscription || !subscription.channel || !("id" in subscription)) {
+      throw 'Invalid argument: expected subscription, not ' + subscription;
+    }
+    _removeListener(subscription);
+  };
+  this.clearListeners = function() {
+    _listeners = {};
+  };
+  this.subscribe = function(channel, scope, callback, subscribeProps, subscribeCallback) {
+    if (arguments.length < 2) {
+      throw 'Illegal arguments number: required 2, got ' + arguments.length;
+    }
+    if (!_isString(channel)) {
+      throw 'Illegal argument type: channel must be a string';
+    }
+    if (_isDisconnected()) {
+      throw 'Illegal state: already disconnected';
+    }
+    if (_isFunction(scope)) {
+      subscribeCallback = subscribeProps;
+      subscribeProps = callback;
+      callback = scope;
+      scope = undefined;
+    }
+    if (_isFunction(subscribeProps)) {
+      subscribeCallback = subscribeProps;
+      subscribeProps = undefined;
+    }
+    var send = !_hasSubscriptions(channel);
+    var subscription = _addListener(channel, scope, callback, false);
+    if (send) {
+      var bayeuxMessage = {
+        channel: '/meta/subscribe',
+        subscription: channel,
+        _callback: subscribeCallback
+      };
+      var message = this._mixin(false, {}, subscribeProps, bayeuxMessage);
+      _queueSend(message);
+    }
+    return subscription;
+  };
+  this.unsubscribe = function(subscription, unsubscribeProps, unsubscribeCallback) {
+    if (arguments.length < 1) {
+      throw 'Illegal arguments number: required 1, got ' + arguments.length;
+    }
+    if (_isDisconnected()) {
+      throw 'Illegal state: already disconnected';
+    }
+    if (_isFunction(unsubscribeProps)) {
+      unsubscribeCallback = unsubscribeProps;
+      unsubscribeProps = undefined;
+    }
+    this.removeListener(subscription);
+    var channel = subscription.channel;
+    if (!_hasSubscriptions(channel)) {
+      var bayeuxMessage = {
+        channel: '/meta/unsubscribe',
+        subscription: channel,
+        _callback: unsubscribeCallback
+      };
+      var message = this._mixin(false, {}, unsubscribeProps, bayeuxMessage);
+      _queueSend(message);
+    }
+  };
+  this.resubscribe = function(subscription, subscribeProps) {
+    _removeSubscription(subscription);
+    if (subscription) {
+      return this.subscribe(subscription.channel, subscription.scope, subscription.callback, subscribeProps);
+    }
+    return undefined;
+  };
+  this.clearSubscriptions = function() {
+    _clearSubscriptions();
+  };
+  this.publish = function(channel, content, publishProps, publishCallback) {
+    if (arguments.length < 1) {
+      throw 'Illegal arguments number: required 1, got ' + arguments.length;
+    }
+    if (!_isString(channel)) {
+      throw 'Illegal argument type: channel must be a string';
+    }
+    if (/^\/meta\//.test(channel)) {
+      throw 'Illegal argument: cannot publish to meta channels';
+    }
+    if (_isDisconnected()) {
+      throw 'Illegal state: already disconnected';
+    }
+    if (_isFunction(content)) {
+      publishCallback = content;
+      content = publishProps = {};
+    } else if (_isFunction(publishProps)) {
+      publishCallback = publishProps;
+      publishProps = {};
+    }
+    var bayeuxMessage = {
+      channel: channel,
+      data: content,
+      _callback: publishCallback
+    };
+    var message = this._mixin(false, {}, publishProps, bayeuxMessage);
+    _queueSend(message);
+  };
+  this.getStatus = function() {
+    return _status;
+  };
+  this.isDisconnected = _isDisconnected;
+  this.setBackoffIncrement = function(period) {
+    _config.backoffIncrement = period;
+  };
+  this.getBackoffIncrement = function() {
+    return _config.backoffIncrement;
+  };
+  this.getBackoffPeriod = function() {
+    return _backoff;
+  };
+  this.setLogLevel = function(level) {
+    _config.logLevel = level;
+  };
+  this.registerExtension = function(name, extension) {
+    if (arguments.length < 2) {
+      throw 'Illegal arguments number: required 2, got ' + arguments.length;
+    }
+    if (!_isString(name)) {
+      throw 'Illegal argument type: extension name must be a string';
+    }
+    var existing = false;
+    for (var i = 0; i < _extensions.length; ++i) {
+      var existingExtension = _extensions[i];
+      if (existingExtension.name === name) {
+        existing = true;
+        break;
+      }
+    }
+    if (!existing) {
+      _extensions.push({
+        name: name,
+        extension: extension
+      });
+      this._debug('Registered extension', name);
+      if (_isFunction(extension.registered)) {
+        extension.registered(name, this);
+      }
+      return true;
+    } else {
+      this._info('Could not register extension with name', name, 'since another extension with the same name already exists');
+      return false;
+    }
+  };
+  this.unregisterExtension = function(name) {
+    if (!_isString(name)) {
+      throw 'Illegal argument type: extension name must be a string';
+    }
+    var unregistered = false;
+    for (var i = 0; i < _extensions.length; ++i) {
+      var extension = _extensions[i];
+      if (extension.name === name) {
+        _extensions.splice(i, 1);
+        unregistered = true;
+        this._debug('Unregistered extension', name);
+        var ext = extension.extension;
+        if (_isFunction(ext.unregistered)) {
+          ext.unregistered();
+        }
+        break;
+      }
+    }
+    return unregistered;
+  };
+  this.getExtension = function(name) {
+    for (var i = 0; i < _extensions.length; ++i) {
+      var extension = _extensions[i];
+      if (extension.name === name) {
+        return extension.extension;
+      }
+    }
+    return null;
+  };
+  this.getName = function() {
+    return _name;
+  };
+  this.getClientId = function() {
+    return _clientId;
+  };
+  this.getURL = function() {
+    if (_transport && typeof _config.urls === 'object') {
+      var url = _config.urls[_transport.getType()];
+      if (url) {
+        return url;
+      }
+    }
+    return _config.url;
+  };
+  this.getTransport = function() {
+    return _transport;
+  };
+  this.getConfiguration = function() {
+    return this._mixin(true, {}, _config);
+  };
+  this.getAdvice = function() {
+    return this._mixin(true, {}, _advice);
+  };
+  org.cometd.WebSocket = window.WebSocket;
+  if (!org.cometd.WebSocket) {
+    org.cometd.WebSocket = window.MozWebSocket;
+  }
+};
+if (typeof define === 'function' && define.amd) {
+  define(function() {
+    return org.cometd;
+  });
+};
+/*! RESOURCE: /scripts/thirdparty/cometd/jquery/jquery.cometd.js */
+(function() {
+  function bind($, org_cometd) {
+    org_cometd.JSON.toJSON = (window.JSON && JSON.stringify) || (window.jaredJSON && window.jaredJSON.stringify);
+    org_cometd.JSON.fromJSON = (window.JSON && JSON.parse) || (window.jaredJSON && window.jaredJSON.parse);
+
+    function _setHeaders(xhr, headers) {
+      if (headers) {
+        for (var headerName in headers) {
+          if (headerName.toLowerCase() === 'content-type') {
+            continue;
+          }
+          xhr.setRequestHeader(headerName, headers[headerName]);
+        }
+      }
+    }
+
+    function LongPollingTransport() {
+      var _super = new org_cometd.LongPollingTransport();
+      var that = org_cometd.Transport.derive(_super);
+      that.xhrSend = function(packet) {
+        return $.ajax({
+          url: packet.url,
+          async: packet.sync !== true,
+          type: 'POST',
+          contentType: 'application/json;charset=UTF-8',
+          data: packet.body,
+          xhrFields: {
+            withCredentials: true
+          },
+          beforeSend: function(xhr) {
+            _setHeaders(xhr, packet.headers);
+            return true;
+          },
+          success: packet.onSuccess,
+          error: function(xhr, reason, exception) {
+            packet.onError(reason, exception);
+          }
+        });
+      };
+      return that;
+    }
+
+    function CallbackPollingTransport() {
+      var _super = new org_cometd.CallbackPollingTransport();
+      var that = org_cometd.Transport.derive(_super);
+      that.jsonpSend = function(packet) {
+        $.ajax({
+          url: packet.url,
+          async: packet.sync !== true,
+          type: 'GET',
+          dataType: 'jsonp',
+          jsonp: 'jsonp',
+          data: {
+            message: packet.body
+          },
+          beforeSend: function(xhr) {
+            _setHeaders(xhr, packet.headers);
+            return true;
+          },
+          success: packet.onSuccess,
+          error: function(xhr, reason, exception) {
+            packet.onError(reason, exception);
+          }
+        });
+      };
+      return that;
+    }
+    $.Cometd = function(name) {
+      var cometd = new org_cometd.Cometd(name);
+      if (org_cometd.WebSocket) {
+        cometd.registerTransport('websocket', new org_cometd.WebSocketTransport());
+      }
+      cometd.registerTransport('long-polling', new LongPollingTransport());
+      cometd.registerTransport('callback-polling', new CallbackPollingTransport());
+      return cometd;
+    };
+    $.cometd = new $.Cometd();
+    return $.cometd;
+  }
+  if (typeof define === 'function' && define.amd) {
+    define(['jquery', 'org/cometd'], bind);
+  } else {
+    bind(window.jQuery || window.Zepto, org.cometd);
+  }
+})();;
+/*! RESOURCE: /scripts/amb_properties.js */
+var amb = amb || {
+  properties: {
+    servletURI: 'amb/',
+    logLevel: 'info',
+    loginWindow: 'true'
+  }
+};;
+/*! RESOURCE: /scripts/amb.Logger.js */
+amb['Logger'] = function(callerType) {
+  var _debugEnabled = amb['properties']['logLevel'] == 'debug';
+
+  function print(message) {
+    if (window.console)
+      console.log(callerType + ' ' + message);
+  }
+  return {
+    debug: function(message) {
+      if (_debugEnabled)
+        print('[DEBUG] ' + message);
+    },
+    addInfoMessage: function(message) {
+      print('[INFO] ' + message);
+    },
+    addErrorMessage: function(message) {
+      print('[ERROR] ' + message);
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.EventManager.js */
+amb.EventManager = function EventManager(events) {
+  var _subscriptions = [];
+  var _idCounter = 0;
+
+  function _getSubscriptions(event) {
+    var subscriptions = [];
+    for (var i = 0; i < _subscriptions.length; i++) {
+      if (_subscriptions[i].event == event)
+        subscriptions.push(_subscriptions[i]);
+    }
+    return subscriptions;
+  }
+  return {
+    subscribe: function(event, callback) {
+      var id = _idCounter++;
+      _subscriptions.push({
+        event: event,
+        callback: callback,
+        id: id
+      });
+      return id;
+    },
+    unsubscribe: function(id) {
+      for (var i = 0; i < _subscriptions.length; i++)
+        if (id == _subscriptions[i].id)
+          _subscriptions.splice(i, 1);
+    },
+    publish: function(event, args) {
+      var subscriptions = _getSubscriptions(event);
+      for (var i = 0; i < subscriptions.length; i++)
+        subscriptions[i].callback.apply(null, args);
+    },
+    getEvents: function() {
+      return events;
+    }
+  }
+};;
+/*! RESOURCE: /scripts/amb.ServerConnection.js */
+amb.ServerConnection = function ServerConnection(cometd) {
+    var connected = false;
+    var disconnecting = false;
+    var eventManager = new amb.EventManager({
+      CONNECTION_INITIALIZED: 'connection.initialized',
+      CONNECTION_OPENED: 'connection.opened',
+      CONNECTION_CLOSED: 'connection.closed',
+      CONNECTION_BROKEN: 'connection.broken',
+      SESSION_LOGGED_IN: 'session.logged.in',
+      SESSION_LOGGED_OUT: 'session.logged.out',
+      SESSION_INVALIDATED: 'session.invalidated'
+    });
+    var state = "closed";
+    var LOGGER = new amb.Logger('amb.ServerConnection');
+    _initializeMetaChannelListeners();
+    var loggedIn = true;
+    var loginWindow = null;
+    var loginWindowEnabled = amb.properties['loginWindow'] === 'true';
+    var lastError = null;
+    var errorMessages = {
+      'UNKNOWN_CLIENT': '402::Unknown client'
+    };
+    var loginWindowOverride = false;
+    var ambServerConnection = {};
+    ambServerConnection.connect = function() {
+      if (connected) {
+        console.log(">>> connection exists, request satisfied");
+        return;
+      }
+      LOGGER.debug('Connecting to glide amb server -> ' + amb['properties']['servletURI']);
+      cometd.configure({
+        url: _getRelativePath(amb['properties']['servletURI']),
+        logLevel: amb['properties']['logLevel']
+      });
+      cometd.handshake();
+    };
+    ambServerConnection.reload = function() {
+      cometd.reload();
+    };
+    ambServerConnection.abort = function() {
+      cometd.getTransport().abort();
+    };
+    ambServerConnection.disconnect = function() {
+      LOGGER.debug('Disconnecting from glide amb server..');
+      disconnecting = true;
+      cometd.disconnect();
+    };
+
+    function _initializeMetaChannelListeners() {
+      cometd.addListener('/met

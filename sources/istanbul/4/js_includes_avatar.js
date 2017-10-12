@@ -2766,28 +2766,534 @@ amb.Channel = function Channel(cometd, channelName, initialized) {
 })(window.jQuery || window.Zepto);;
 /*! RESOURCE: /scripts/amb.MessageClientBuilder.js */
 (function($) {
-    amb.getClient = function() {
-      return getClient();
-    }
+  amb.getClient = function() {
+    return getClient();
+  }
 
-    function getClient() {
-      var _window = window.self;
-      try {
-        if (!(window.MSInputMethodContext && document.documentMode)) {
-          while (_window != _window.parent) {
-            if (_window.g_ambClient)
-              break;
-            _window = _window.parent;
-          }
+  function getClient() {
+    var _window = window.self;
+    try {
+      if (!(window.MSInputMethodContext && document.documentMode)) {
+        while (_window != _window.parent) {
+          if (_window.g_ambClient)
+            break;
+          _window = _window.parent;
         }
-        if (_window.g_ambClient)
-          return _window.g_ambClient;
-      } catch (e) {
-        console.log("AMB getClient() tried to access parent from an iFrame. Caught error: " + e);
       }
-      var client = buildClient();
-      setClient(client);
-      return client;
+      if (_window.g_ambClient)
+        return _window.g_ambClient;
+    } catch (e) {
+      console.log("AMB getClient() tried to access parent from an iFrame. Caught error: " + e);
+    }
+    var client = buildClient();
+    setClient(client);
+    return client;
+  }
+
+  function setClient(client) {
+    var _window = window.self;
+    _window.g_ambClient = client;
+    $(_window).unload(function() {
+      _window.g_ambClient.disconnect();
+    });
+    _window.g_ambClient.connect();
+  }
+
+  function buildClient() {
+    return (function() {
+      var ambClient = new amb.MessageClient();
+      return {
+        getServerConnection: function() {
+          return ambClient.getServerConnection();
+        },
+        connect: function() {
+          ambClient.connect();
+        },
+        abort: function() {
+          ambClient.abort();
+        },
+        disconnect: function() {
+          ambClient.disconnect();
+        },
+        getConnectionState: function() {
+          return ambClient.getConnectionState();
+        },
+        getState: function() {
+          return ambClient.getConnectionState();
+        },
+        getClientId: function() {
+          return ambClient.getClientId();
+        },
+        getChannel: function(channelName) {
+          var channel = ambClient.getChannel(channelName);
+          var originalSubscribe = channel.subscribe;
+          var originalUnsubscribe = channel.unsubscribe;
+          channel.subscribe = function(listener) {
+            originalSubscribe.call(channel, listener);
+            $(window).unload(function(event) {
+              originalUnsubscribe.call(channel);
+            });
+            return channel;
+          };
+          return channel;
+        },
+        getChannel0: function(channelName) {
+          return ambClient.getChannel(channelName);
+        },
+        registerExtension: function(extensionName, extension) {
+          ambClient.registerExtension(extensionName, extension);
+        },
+        unregisterExtension: function(extensionName) {
+          ambClient.unregisterExtension(extensionName);
+        },
+        batch: function(block) {
+          ambClient.batch(block);
+        },
+        subscribeToEvent: function(event, callback) {
+          return ambClient.subscribeToEvent(event, callback);
+        },
+        unsubscribeFromEvent: function(id) {
+          ambClient.unsubscribeFromEvent(id);
+        },
+        isLoggedIn: function() {
+          return ambClient.isLoggedIn();
+        },
+        getConnectionEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        getEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        loginComplete: function() {
+          ambClient.loginComplete();
+        }
+      };
+    })();
+  }
+})(window.jQuery || window.Zepto);;;
+/*! RESOURCE: /scripts/app.ng.amb/app.ng.amb.js */
+angular.module("ng.amb", ['sn.common.presence', 'sn.common.util'])
+  .value("ambLogLevel", 'info')
+  .value("ambServletURI", '/amb')
+  .value("cometd", angular.element.cometd)
+  .value("ambLoginWindow", 'true');;
+/*! RESOURCE: /scripts/app.ng.amb/service.AMB.js */
+angular.module("ng.amb").service("amb", function(AMBOverlay, $window, $q, $log, $rootScope, $timeout) {
+  "use strict";
+  var ambClient = null;
+  var _window = $window.self;
+  var loginWindow = null;
+  var sameScope = false;
+  ambClient = amb.getClient();
+  if (_window.g_ambClient) {
+    sameScope = true;
+  }
+  if (sameScope) {
+    var serverConnection = ambClient.getServerConnection();
+    serverConnection.loginShow = function() {
+      if (!serverConnection.isLoginWindowEnabled())
+        return;
+      if (loginWindow && loginWindow.isVisible())
+        return;
+      if (serverConnection.isLoginWindowOverride())
+        return;
+      loginWindow = new AMBOverlay();
+      loginWindow.render();
+      loginWindow.show();
+    };
+    serverConnection.loginHide = function() {
+      if (!loginWindow)
+        return;
+      loginWindow.hide();
+      loginWindow.destroy();
+      loginWindow = null;
+    }
+  }
+  var connected = $q.defer();
+  var connectionInterrupted = false;
+  var monitorAMB = false;
+  $timeout(function() {
+    monitorAMB = true;
+  }, 5 * 1000);
+
+  function ambInterrupted() {
+    var state = ambClient.getState();
+    return monitorAMB && state !== "opened" && state !== "initialized"
+  }
+  var interruptionTimeout;
+  var extendedInterruption = false;
+
+  function setInterrupted(eventName) {
+    connectionInterrupted = true;
+    $rootScope.$broadcast(eventName);
+    if (!interruptionTimeout) {
+      interruptionTimeout = $timeout(function() {
+        extendedInterruption = true;
+      }, 30 * 1000)
+    }
+    connected = $q.defer();
+  }
+  var connectOpenedEventId = ambClient.subscribeToEvent("connection.opened", function() {
+    $rootScope.$broadcast("amb.connection.opened");
+    if (interruptionTimeout) {
+      $timeout.cancel(interruptionTimeout);
+      interruptionTimeout = null;
+    }
+    extendedInterruption = false;
+    if (connectionInterrupted) {
+      connectionInterrupted = false;
+      $rootScope.$broadcast("amb.connection.recovered");
+    }
+    connected.resolve();
+  });
+  var connectClosedEventId = ambClient.subscribeToEvent("connection.closed", function() {
+    setInterrupted("amb.connection.closed");
+  });
+  var connectBrokenEventId = ambClient.subscribeToEvent("connection.broken", function() {
+    setInterrupted("amb.connection.broken");
+  });
+  jQuery(window).unload(function fixMemoryLeakInGlobalAMBEventManager(event) {
+    ambClient.unsubscribeFromEvent(connectOpenedEventId);
+    ambClient.unsubscribeFromEvent(connectClosedEventId);
+    ambClient.unsubscribeFromEvent(connectBrokenEventId);
+    jQuery(this).unbind(event);
+  });
+  ambClient.connect();
+  return {
+    getServerConnection: function() {
+      return ambClient.getServerConnection();
+    },
+    connect: function() {
+      ambClient.connect();
+      return connected.promise;
+    },
+    get interrupted() {
+      return ambInterrupted();
+    },
+    get extendedInterruption() {
+      return extendedInterruption;
+    },
+    get connected() {
+      return connected.promise;
+    },
+    abort: function() {
+      ambClient.abort();
+    },
+    disconnect: function() {
+      ambClient.disconnect();
+    },
+    getConnectionState: function() {
+      return ambClient.getConnectionState();
+    },
+    getClientId: function() {
+      return ambClient.getClientId();
+    },
+    getChannel: function(channelName) {
+      var channel = ambClient.getChannel0(channelName);
+      var originalSubscribe = channel.subscribe;
+      var originalUnsubscribe = channel.unsubscribe;
+      channel.subscribe = function(listener) {
+        originalSubscribe.call(channel, listener);
+        jQuery(window).unload(function() {
+          originalUnsubscribe.call(channel);
+        });
+        return channel;
+      };
+      return channel;
+    },
+    registerExtension: function(extensionName, extension) {
+      ambClient.registerExtension(extensionName, extension);
+    },
+    unregisterExtension: function(extensionName) {
+      ambClient.unregisterExtension(extensionName);
+    },
+    batch: function(batch) {
+      ambClient.batch(batch);
+    },
+    getState: function() {
+      return ambClient.getState();
+    },
+    getFilterString: function(filter) {
+      filter = filter.
+      replace(/\^EQ/g, '').
+      replace(/\^ORDERBY(?:DESC)?[^^]*/g, '').
+      replace(/^GOTO/, '');
+      return btoa(filter).replace(/=/g, '-');
+    },
+    getChannelRW: function(table, filter) {
+      var t = '/rw/default/' + table + '/' + this.getFilterString(filter);
+      return this.getChannel(t);
+    },
+    isLoggedIn: function() {
+      return ambClient.isLoggedIn();
+    },
+    subscribeToEvent: function(event, callback) {
+      ambClient.subscribeToEvent(event, callback);
+    },
+    getConnectionEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    getEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    loginComplete: function() {
+      ambClient.loginComplete();
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng.amb/controller.AMBRecordWatcher.js */
+angular.module("ng.amb").controller("AMBRecordWatcher", function($scope, $timeout, $window) {
+  "use strict";
+  var amb = $window.top.g_ambClient;
+  $scope.messages = [];
+  var lastFilter;
+  var watcherChannel;
+  var watcher;
+
+  function onMessage(message) {
+    $scope.messages.push(message.data);
+  }
+  $scope.getState = function() {
+    return amb.getState();
+  };
+  $scope.initWatcher = function() {
+    angular.element(":focus").blur();
+    if (!$scope.filter || $scope.filter === lastFilter)
+      return;
+    lastFilter = $scope.filter;
+    console.log("initiating watcher on " + $scope.filter);
+    $scope.messages = [];
+    if (watcher) {
+      watcher.unsubscribe();
+    }
+    var base64EncodeQuery = btoa($scope.filter).replace(/=/g, '-');
+    var channelId = '/rw/' + base64EncodeQuery;
+    watcherChannel = amb.getChannel(channelId)
+    watcher = watcherChannel.subscribe(onMessage);
+  };
+  amb.connect();
+});
+/*! RESOURCE: /scripts/app.ng.amb/factory.snRecordWatcher.js */
+angular.module("ng.amb").factory('snRecordWatcher', function($rootScope, amb, $timeout, snPresence, $log, urlTools) {
+  "use strict";
+  var watcherChannel;
+  var connected = false;
+  var diagnosticLog = true;
+
+  function initWatcher(table, sys_id, query) {
+    if (!table)
+      return;
+    if (sys_id)
+      var filter = "sys_id=" + sys_id;
+    else
+      filter = query;
+    if (!filter)
+      return;
+    return initChannel(table, filter);
+  }
+
+  function initList(table, query) {
+    if (!table)
+      return;
+    query = query || "sys_idISNOTEMPTY";
+    return initChannel(table, query);
+  }
+
+  function initTaskList(list, prevChannel) {
+    if (prevChannel)
+      prevChannel.unsubscribe();
+    var sys_ids = list.toString();
+    var filter = "sys_idIN" + sys_ids;
+    return initChannel("task", filter);
+  }
+
+  function initChannel(table, filter) {
+    if (isBlockedTable(table)) {
+      $log.log("Blocked from watching", table);
+      return null;
+    }
+    if (diagnosticLog)
+      log(">>> init " + table + "?" + filter);
+    watcherChannel = amb.getChannelRW(table, filter);
+    watcherChannel.subscribe(onMessage);
+    amb.connect();
+    return watcherChannel;
+  }
+
+  function onMessage(message) {
+    var r = message.data;
+    var c = message.channel;
+    if (diagnosticLog)
+      log(">>> record " + r.operation + ": " + r.table_name + "." + r.sys_id + " " + r.display_value);
+    $rootScope.$broadcast('record.updated', r);
+    $rootScope.$broadcast("sn.stream.tap");
+    $rootScope.$broadcast('list.updated', r, c);
+  }
+
+  function log(message) {
+    $log.log(message);
+  }
+
+  function isBlockedTable(table) {
+    return table == 'sys_amb_message' || table.startsWith('sys_rw');
+  }
+  return {
+    initTaskList: initTaskList,
+    initChannel: initChannel,
+    init: function() {
+      var location = urlTools.parseQueryString(window.location.search);
+      var table = location['table'] || location['sysparm_table'];
+      var sys_id = location['sys_id'] || location['sysparm_sys_id'];
+      var query = location['sysparm_query'];
+      initWatcher(table, sys_id, query);
+      snPresence.init(table, sys_id, query);
+    },
+    initList: initList,
+    initRecord: function(table, sysId) {
+      initWatcher(table, sysId, null);
+      snPresence.initWithDocument(table, sysId);
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng.amb/factory.AMBOverlay.js */
+angular.module("ng.amb").factory("AMBOverlay", function($templateCache, $compile, $rootScope) {
+  "use strict";
+  var showCallbacks = [],
+    hideCallbacks = [],
+    isRendered = false,
+    modal,
+    modalScope,
+    modalOptions;
+  var defaults = {
+    backdrop: 'static',
+    keyboard: false,
+    show: true
+  };
+
+  function AMBOverlay(config) {
+    config = config || {};
+    if (angular.isFunction(config.onShow))
+      showCallbacks.push(config.onShow);
+    if (angular.isFunction(config.onHide))
+      hideCallbacks.push(config.onHide);
+
+    function lazyRender() {
+      if (!angular.element('html')['modal']) {
+        var bootstrapInclude = "/scripts/bootstrap3/bootstrap.js";
+        ScriptLoader.getScripts([bootstrapInclude], renderModal);
+      } else
+        renderModal();
     }
 
-    function set
+    function renderModal() {
+      if (isRendered)
+        return;
+      modalScope = angular.extend($rootScope.$new(), config);
+      modal = $compile($templateCache.get("amb_disconnect_modal.xml"))(modalScope);
+      angular.element("body").append(modal);
+      modal.on("shown.bs.modal", function(e) {
+        for (var i = 0, len = showCallbacks.length; i < len; i++)
+          showCallbacks[i](e);
+      });
+      modal.on("hidden.bs.modal", function(e) {
+        for (var i = 0, len = hideCallbacks.length; i < len; i++)
+          hideCallbacks[i](e);
+      });
+      modalOptions = angular.extend({}, defaults, config);
+      modal.modal(modalOptions);
+      isRendered = true;
+    }
+
+    function showModal() {
+      if (isRendered)
+        modal.modal('show');
+    }
+
+    function hideModal() {
+      if (isRendered)
+        modal.modal('hide');
+    }
+
+    function destroyModal() {
+      if (!isRendered)
+        return;
+      modal.modal('hide');
+      modal.remove();
+      modalScope.$destroy();
+      modalScope = void(0);
+      isRendered = false;
+      var pos = showCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        showCallbacks.splice(pos, 1);
+      pos = hideCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        hideCallbacks.splice(pos, 1);
+    }
+    return {
+      render: lazyRender,
+      destroy: destroyModal,
+      show: showModal,
+      hide: hideModal,
+      isVisible: function() {
+        if (!isRendered)
+          false;
+        return modal.visible();
+      }
+    }
+  }
+  $templateCache.put('amb_disconnect_modal.xml',
+    '<div id="amb_disconnect_modal" tabindex="-1" aria-hidden="true" class="modal" role="dialog">' +
+    '	<div class="modal-dialog small-modal" style="width:450px">' +
+    '		<div class="modal-content">' +
+    '			<header class="modal-header">' +
+    '				<h4 id="small_modal1_title" class="modal-title">{{title || "Login"}}</h4>' +
+    '			</header>' +
+    '			<div class="modal-body">' +
+    '			<iframe class="concourse_modal" ng-src=\'{{iframe || "/amb_login.do"}}\' frameborder="0" scrolling="no" height="400px" width="405px"></iframe>' +
+    '			</div>' +
+    '		</div>' +
+    '	</div>' +
+    '</div>'
+  );
+  return AMBOverlay;
+});;;
+/*! RESOURCE: /scripts/sn/common/presence/_module.js */
+angular.module('sn.common.presence', ['ng.amb', 'sn.common.glide']).config(function($provide) {
+  "use strict";
+  $provide.constant("PRESENCE_DISABLED", "false" === "true");
+});;
+/*! RESOURCE: /scripts/sn/common/presence/factory.snPresence.js */
+angular.module("sn.common.presence").factory('snPresence', function($rootScope, $window, $log, amb, $timeout, $http, snRecordPresence, snTabActivity, urlTools, PRESENCE_DISABLED) {
+      "use strict";
+      var REST = {
+        PRESENCE: "/api/now/ui/presence"
+      };
+      var databaseInterval = ($window.NOW.presence_interval || 15) * 1000;
+      var initialized = false;
+      var primary = false;
+      var presenceArray = [];
+      var serverTimeMillis;
+      var skew = 0;
+      var st = 0;
+
+      function init() {
+        var location = urlTools.parseQueryString(window.location.search);
+        var table = location['table'] || location['sysparm_table'];
+        var sys_id = location['sys_id'] || location['sysparm_sys_id'];
+        var query = location['sysparm_query'];
+        initPresence(table, sys_id, query);
+      }
+
+      function initPresence(t, id) {
+        if (PRESENCE_DISABLED)
+          return;
+        if (!initialized) {
+          initialized = true;
+          initRootScopes();
+          if (!primary) {
+            CustomEvent.observe('sn.presence', onPresenceEvent);
+            CustomEvent.fireTop('sn.presence.ping');
+          } else {
+            presenceArray = getLocalPresence();
+            if (presenceArray)
+              $timeout(schedulePre

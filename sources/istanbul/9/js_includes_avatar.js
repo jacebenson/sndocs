@@ -3695,97 +3695,866 @@ angular.module('sn.common.presence').directive('snComposing', function(getTempla
 });;
 /*! RESOURCE: /scripts/sn/common/presence/service.snComposingPresence.js */
 angular.module('sn.common.presence').service('snComposingPresence', function(i18n) {
-      "use strict";
-      var viewing = {};
-      var typing = {};
-      var allStrings = {};
-      var shortStrings = {};
-      var typing1 = "{0} is typing",
-        typing2 = "{0} and {1} are typing",
-        typingMore = "{0}, {1}, and {2} more are typing",
-        viewing1 = "{0} is viewing",
-        viewing2 = "{0} and {1} are viewing",
-        viewingMore = "{0}, {1}, and {2} more are viewing";
-      i18n.getMessages(
-        [
-          typing1,
-          typing2,
-          typingMore,
-          viewing1,
-          viewing2,
-          viewingMore
-        ],
-        function(results) {
-          typing1 = results[typing1];
-          typing2 = results[typing2];
-          typingMore = results[typingMore];
-          viewing1 = results[viewing1];
-          viewing2 = results[viewing2];
-          viewingMore = results[viewingMore];
-        });
+  "use strict";
+  var viewing = {};
+  var typing = {};
+  var allStrings = {};
+  var shortStrings = {};
+  var typing1 = "{0} is typing",
+    typing2 = "{0} and {1} are typing",
+    typingMore = "{0}, {1}, and {2} more are typing",
+    viewing1 = "{0} is viewing",
+    viewing2 = "{0} and {1} are viewing",
+    viewingMore = "{0}, {1}, and {2} more are viewing";
+  i18n.getMessages(
+    [
+      typing1,
+      typing2,
+      typingMore,
+      viewing1,
+      viewing2,
+      viewingMore
+    ],
+    function(results) {
+      typing1 = results[typing1];
+      typing2 = results[typing2];
+      typingMore = results[typingMore];
+      viewing1 = results[viewing1];
+      viewing2 = results[viewing2];
+      viewingMore = results[viewingMore];
+    });
 
-      function set(conversationID, newPresenceValues) {
-        if (newPresenceValues.viewing)
-          viewing[conversationID] = newPresenceValues.viewing;
-        if (newPresenceValues.typing)
-          typing[conversationID] = newPresenceValues.typing;
-        generateAllString(conversationID, {
-          viewing: viewing[conversationID],
-          typing: typing[conversationID]
-        });
-        generateShortString(conversationID, {
-          viewing: viewing[conversationID],
-          typing: typing[conversationID]
-        });
-        return {
-          viewing: viewing[conversationID],
-          typing: typing[conversationID]
+  function set(conversationID, newPresenceValues) {
+    if (newPresenceValues.viewing)
+      viewing[conversationID] = newPresenceValues.viewing;
+    if (newPresenceValues.typing)
+      typing[conversationID] = newPresenceValues.typing;
+    generateAllString(conversationID, {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    });
+    generateShortString(conversationID, {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    });
+    return {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    }
+  }
+
+  function get(conversationID) {
+    return {
+      viewing: viewing[conversationID] || [],
+      typing: typing[conversationID] || []
+    }
+  }
+
+  function generateAllString(conversationID, members) {
+    var result = "";
+    var typingLength = members.typing.length;
+    var viewingLength = members.viewing.length;
+    if (typingLength < 4 && viewingLength < 4)
+      return "";
+    switch (typingLength) {
+      case 0:
+        break;
+      case 1:
+        result += i18n.format(typing1, members.typing[0].name);
+        break;
+      case 2:
+        result += i18n.format(typing2, members.typing[0].name, members.typing[1].name);
+        break;
+      default:
+        var allButLastTyper = "";
+        for (var i = 0; i < typingLength; i++) {
+          if (i < typingLength - 2)
+            allButLastTyper += members.typing[i].name + ", ";
+          else if (i === typingLength - 2)
+            allButLastTyper += members.typing[i].name + ",";
+          else
+            result += i18n.format(typing2, allButLastTyper, members.typing[i].name);
         }
-      }
-
-      function get(conversationID) {
-        return {
-          viewing: viewing[conversationID] || [],
-          typing: typing[conversationID] || []
+    }
+    if (viewingLength > 0 && typingLength > 0)
+      result += "\n\n";
+    switch (viewingLength) {
+      case 0:
+        break;
+      case 1:
+        result += i18n.format(viewing1, members.viewing[0].name);
+        break;
+      case 2:
+        result += i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
+        break;
+      default:
+        var allButLastViewer = "";
+        for (var i = 0; i < viewingLength; i++) {
+          if (i < viewingLength - 2)
+            allButLastViewer += members.viewing[i].name + ", ";
+          else if (i === viewingLength - 2)
+            allButLastViewer += members.viewing[i].name + ",";
+          else
+            result += i18n.format(viewing2, allButLastViewer, members.viewing[i].name);
         }
-      }
+    }
+    allStrings[conversationID] = result;
+  }
 
-      function generateAllString(conversationID, members) {
-        var result = "";
-        var typingLength = members.typing.length;
-        var viewingLength = members.viewing.length;
-        if (typingLength < 4 && viewingLength < 4)
-          return "";
-        switch (typingLength) {
-          case 0:
-            break;
-          case 1:
-            result += i18n.format(typing1, members.typing[0].name);
-            break;
-          case 2:
-            result += i18n.format(typing2, members.typing[0].name, members.typing[1].name);
-            break;
-          default:
-            var allButLastTyper = "";
-            for (var i = 0; i < typingLength; i++) {
-              if (i < typingLength - 2)
-                allButLastTyper += members.typing[i].name + ", ";
-              else if (i === typingLength - 2)
-                allButLastTyper += members.typing[i].name + ",";
-              else
-                result += i18n.format(typing2, allButLastTyper, members.typing[i].name);
+  function generateShortString(conversationID, members) {
+    var typingLength = members.typing.length;
+    var viewingLength = members.viewing.length;
+    var typingString = "",
+      viewingString = "";
+    var inBetween = " ";
+    switch (typingLength) {
+      case 0:
+        break;
+      case 1:
+        typingString = i18n.format(typing1, members.typing[0].name);
+        break;
+      case 2:
+        typingString = i18n.format(typing2, members.typing[0].name, members.typing[1].name);
+        break;
+      case 3:
+        typingString = i18n.format(typing2, members.typing[0].name + ", " + members.typing[1].name + ",", members.typing[2].name);
+        break;
+      default:
+        typingString = i18n.format(typingMore, members.typing[0].name, members.typing[1].name, (typingLength - 2));
+    }
+    if (viewingLength > 0 && typingLength > 0)
+      inBetween = ". ";
+    switch (viewingLength) {
+      case 0:
+        break;
+      case 1:
+        viewingString = i18n.format(viewing1, members.viewing[0].name);
+        break;
+      case 2:
+        viewingString = i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
+        break;
+      case 3:
+        viewingString = i18n.format(viewing2, members.viewing[0].name + ", " + members.viewing[1].name + ",", members.viewing[2].name);
+        break;
+      default:
+        viewingString = i18n.format(viewingMore, members.viewing[0].name, members.viewing[1].name, (viewingLength - 2));
+    }
+    shortStrings[conversationID] = typingString + inBetween + viewingString;
+  }
+
+  function getAllString(conversationID) {
+    if ((viewing[conversationID] && viewing[conversationID].length > 3) ||
+      (typing[conversationID] && typing[conversationID].length > 3))
+      return allStrings[conversationID];
+    return "";
+  }
+
+  function getShortString(conversationID) {
+    return shortStrings[conversationID];
+  }
+
+  function remove(conversationID) {
+    delete viewing[conversationID];
+  }
+  return {
+    set: set,
+    get: get,
+    generateAllString: generateAllString,
+    getAllString: getAllString,
+    generateShortString: generateShortString,
+    getShortString: getShortString,
+    remove: remove
+  }
+});;;
+/*! RESOURCE: /scripts/sn/common/user_profile/js_includes_user_profile.js */
+/*! RESOURCE: /scripts/sn/common/user_profile/_module.js */
+angular.module("sn.common.user_profile", ['sn.common.ui']);;
+/*! RESOURCE: /scripts/sn/common/user_profile/directive.snUserProfile.js */
+angular.module('sn.common.user_profile').directive('snUserProfile', function(getTemplateUrl, snCustomEvent, $window, avatarProfilePersister, $timeout, $http) {
+  "use strict";
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snUserProfile.xml'),
+    scope: {
+      profile: "=",
+      showDirectMessagePrompt: "="
+    },
+    link: function(scope) {
+      scope.showDirectMessagePromptFn = function() {
+        if (scope.showDirectMessagePrompt) {
+          var activeUserID = $window.NOW.user_id || "";
+          return !(!scope.profile ||
+            activeUserID === scope.profile.sysID ||
+            (scope.profile.document && activeUserID === scope.profile.document));
+        } else {
+          return false;
+        }
+      };
+    },
+    controller: function($scope, snConnectService) {
+      if ($scope.profile && $scope.profile.userID && avatarProfilePersister.getAvatar($scope.profile.userID)) {
+        $scope.profile = avatarProfilePersister.getAvatar($scope.profile.userID);
+        $scope.$emit("sn-user-profile.ready");
+      } else {
+        $http.get('/api/now/live/profiles/sys_user.' + $scope.profile.userID).then(function(response) {
+          angular.merge($scope.profile, response.data.result);
+          avatarProfilePersister.setAvatar($scope.profile.userID, $scope.profile);
+          $scope.$emit("sn-user-profile.ready");
+        })
+      }
+      $scope.openDirectMessageConversation = function(evt) {
+        if (evt.keyCode === 9)
+          return;
+        $timeout(function() {
+          snConnectService.openWithProfile($scope.profile);
+        }, 0, false);
+        angular.element('.popover').each(function() {
+          angular.element('body').off('click.snUserAvatarPopoverClose');
+          angular.element(this).popover('hide');
+        });
+      };
+    }
+  }
+});;;
+/*! RESOURCE: /scripts/sn/common/avatar/_module.js */
+angular.module('sn.common.avatar', ['sn.common.presence', 'sn.common.messaging', 'sn.common.user_profile']).config(function($provide) {
+  $provide.value("liveProfileID", '');
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snAvatarPopover.js */
+angular.module('sn.common.avatar').directive('snAvatarPopover', function($http, $compile, getTemplateUrl, avatarProfilePersister, $injector) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_avatar_popover.xml'),
+    replace: true,
+    transclude: true,
+    scope: {
+      members: '=',
+      primary: '=?',
+      showPresence: '=?',
+      enableContextMenu: '=?',
+      enableTooltip: '=?',
+      enableBindOnce: '@',
+      displayMemberCount: "=?",
+      groupAvatar: "@",
+      nopopover: "=",
+      directconversation: '@',
+      conversation: '=',
+      primaryNonAssign: '=?'
+    },
+    compile: function(tElement) {
+      var template = tElement.html();
+      return function(scope, element, attrs, controller, transcludeFn) {
+        if (scope.directconversation) {
+          if (scope.directconversation === "true")
+            scope.directconversation = true;
+          else
+            scope.directconversation = false;
+          scope.showdirectconversation = !scope.directconversation;
+        } else {
+          scope.showdirectconversation = true;
+        }
+        if ($injector.has('inSupportClient') && $injector.get('inSupportClient'))
+          scope.showdirectconversation = false;
+        if (scope.primaryNonAssign) {
+          scope.primary = angular.extend({}, scope.primary, scope.primaryNonAssign);
+          if (scope.users && scope.users[0])
+            scope.users[0] = scope.primary;
+        }
+
+        function recompile() {
+          if (scope.primaryNonAssign) {
+            scope.primary = angular.extend({}, scope.primary, scope.primaryNonAssign);
+            if (scope.users && scope.users[0])
+              scope.users[0] = scope.primary;
+          }
+          var newElement = $compile(template, transcludeFn)(scope);
+          element.html(newElement);
+          if (scope.enableTooltip) {
+            element.tooltip({
+              placement: 'auto top',
+              container: 'body'
+            }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+            if (element.hideFix)
+              element.hideFix();
+          }
+        }
+        if (attrs.enableBindOnce === 'false') {
+          scope.$watch('primary', recompile);
+          scope.$watch('primaryNonAssign', recompile);
+          scope.$watch('members', recompile);
+        }
+        if (scope.enableTooltip && scope.nopopover) {
+          var usersWatch = scope.$watch('users', function() {
+            if (scope.users && scope.users.length === 1 && scope.users[0] && scope.users[0].name) {
+              element.tooltip({
+                placement: 'auto top',
+                container: 'body'
+              }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+              if (element.hideFix)
+                element.hideFix();
+              usersWatch();
             }
+          });
         }
-        if (viewingLength > 0 && typingLength > 0)
-          result += "\n\n";
-        switch (viewingLength) {
-          case 0:
-            break;
-          case 1:
-            result += i18n.format(viewing1, members.viewing[0].name);
-            break;
-          case 2:
-            result += i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
-            break;
-          default:
-            var
+      };
+    },
+    controller: function($scope, liveProfileID, $timeout, $element, $document, snCustomEvent) {
+      $scope.randId = Math.random();
+      $scope.loadEvent = 'sn-user-profile.ready';
+      $scope.closeEvent = ['chat:open_conversation', 'snAvatar.closePopover', 'body_clicked'];
+      $scope.popoverConfig = {
+        template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
+      };
+      $scope.displayMemberCount = $scope.displayMemberCount || false;
+      $scope.liveProfileID = liveProfileID;
+      if ($scope.primaryNonAssign) {
+        $scope.primary = angular.extend({}, $scope.primary, $scope.primaryNonAssign);
+        if ($scope.users && $scope.users[0])
+          $scope.users[0] = $scope.primary;
+      }
+      $scope.$watch('members', function(newVal, oldVal) {
+        if (newVal === oldVal)
+          return;
+        if ($scope.members)
+          buildAvatar();
+      });
+      $scope.noPopover = function() {
+        $scope.popoverCursor = ($scope.nopopover || ($scope.members && $scope.members.length > 2)) ? "default" : "pointer";
+        return ($scope.nopopover || ($scope.members && $scope.members.length > 2));
+      }
+      $scope.avatarType = function() {
+        var result = [];
+        if ($scope.groupAvatar || !$scope.users)
+          return result;
+        if ($scope.users.length > 1)
+          result.push("group")
+        if ($scope.users.length === 2)
+          result.push("avatar-duo")
+        if ($scope.users.length === 3)
+          result.push("avatar-trio")
+        if ($scope.users.length >= 4)
+          result.push("avatar-quad")
+        return result;
+      }
+      $scope.getBackgroundStyle = function(user) {
+        var avatar = (user ? user.avatar : '');
+        if ($scope.groupAvatar)
+          avatar = $scope.groupAvatar;
+        if (avatar && avatar !== '')
+          return {
+            'background-image': 'url(' + avatar + ')'
+          };
+        if (user && user.name)
+          return '';
+        return void(0);
+      };
+      $scope.stopPropCheck = function(evt) {
+        $scope.$broadcast("snAvatar.closeOtherPopovers", $scope.randId);
+        if (!$scope.nopopover) {
+          evt.stopPropagation();
+        }
+      };
+      $scope.$on("snAvatar.closeOtherPopovers", function(id) {
+        if (id !== $scope.randId)
+          snCustomEvent.fireTop('snAvatar.closePopover');
+      });
+      $scope.maxStringWidth = function() {
+        var paddedWidth = parseInt($scope.avatarWidth * 0.8, 10);
+        return $scope.users.length === 1 ? paddedWidth : paddedWidth / 2;
+      };
+
+      function buildInitials(name) {
+        if (!name)
+          return "--";
+        var initials = name.split(" ").map(function(word) {
+          return word.toUpperCase();
+        }).filter(function(word) {
+          return word.match(/^[A-Z]/);
+        }).map(function(word) {
+          return word.substring(0, 1);
+        }).join("");
+        return (initials.length > 3) ?
+          initials.substr(0, 3) :
+          initials;
+      }
+      $scope.avatartooltip = function() {
+        if (!$scope.enableTooltip) {
+          return '';
+        }
+        if (!$scope.users) {
+          return '';
+        }
+        var names = [];
+        $scope.users.forEach(function(user) {
+          if (!user) {
+            return;
+          }
+          names.push(user.name);
+        });
+        return names.join(', ');
+      };
+
+      function buildAvatar() {
+        if (typeof $scope.primary === 'string') {
+          $http.get('/api/now/live/profiles/sys_user.' + $scope.primary).then(function(response) {
+            $scope.users = [{
+              userID: $scope.primary,
+              name: response.data.result.name,
+              initials: buildInitials(response.data.result.name),
+              avatar: response.data.result.avatar
+            }];
+          });
+          return;
+        }
+        if ($scope.primary) {
+          if ($scope.primary.userImage)
+            $scope.primary.avatar = $scope.primary.userImage;
+          if (!$scope.primary.userID && $scope.primary.sys_id)
+            $scope.primary.userID = $scope.primary.sys_id;
+        }
+        $scope.isGroup = $scope.conversation && $scope.conversation.isGroup;
+        $scope.users = [$scope.primary];
+        if ($scope.primary && (!$scope.members || $scope.members.length <= 0) && ($scope.primary.avatar || $scope.primary.initials) && $scope.isDocument) {
+          $scope.users = [$scope.primary];
+        } else if ($scope.members && $scope.members.length > 0) {
+          $scope.users = buildCompositeAvatar($scope.members);
+        }
+        $scope.presenceEnabled = $scope.showPresence && !$scope.isGroup && $scope.users.length === 1;
+      }
+
+      function buildCompositeAvatar(members) {
+        var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+        var users = angular.isArray(members) ? members.slice() : [members];
+        users = users.sort(function(a, b) {
+          var aID = a.userID || a.document;
+          var bID = b.userID || b.document;
+          if (a.table === "chat_queue_entry")
+            return 1;
+          if (aID === currentUser)
+            return 1;
+          else if (bID === currentUser)
+            return -1;
+          return 0;
+        });
+        if (users.length === 2)
+          users = [users[0]];
+        if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+          var index = -1;
+          angular.forEach(users, function(user, i) {
+            if (user.sys_id === $scope.primary.sys_id) {
+              index = i;
+            }
+          });
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+          users.splice(1, 0, $scope.primary);
+        }
+        return users;
+      }
+      buildAvatar();
+      $scope.loadFullProfile = function() {
+        if ($scope.primary && !$scope.primary.sys_id && !avatarProfilePersister.getAvatar($scope.primary.userID)) {
+          $http.get('/api/now/live/profiles/' + $scope.primary.userID).then(
+            function(response) {
+              try {
+                angular.extend($scope.primary, response.data.result);
+                avatarProfilePersister.setAvatar($scope.primary.userID, $scope.primary);
+              } catch (e) {}
+            });
+        }
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snAvatar.js */
+angular.module('sn.common.avatar').directive('snAvatar', function($http, $compile, getTemplateUrl, snCustomEvent, snConnectService) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_avatar.xml'),
+    replace: true,
+    transclude: true,
+    scope: {
+      members: '=',
+      primary: '=',
+      showPresence: '=?',
+      enableContextMenu: '=?',
+      enableTooltip: '=?',
+      enableBindOnce: '@',
+      displayMemberCount: "=?",
+      groupAvatar: "@"
+    },
+    compile: function(tElement) {
+      var template = tElement.html();
+      return function(scope, element, attrs, controller, transcludeFn) {
+        function recompile() {
+          var newElement = $compile(template, transcludeFn)(scope);
+          element.html(newElement);
+          if (scope.enableTooltip) {
+            element.tooltip({
+              placement: 'auto top',
+              container: 'body'
+            }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+            if (element.hideFix)
+              element.hideFix();
+          }
+        }
+        if (attrs.enableBindOnce === 'false') {
+          scope.$watch('primary', recompile);
+          scope.$watch('members', recompile);
+        }
+        if (scope.enableTooltip) {
+          var usersWatch = scope.$watch('users', function() {
+            if (scope.users && scope.users.length === 1 && scope.users[0] && scope.users[0].name) {
+              element.tooltip({
+                placement: 'auto top',
+                container: 'body'
+              }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+              if (element.hideFix)
+                element.hideFix();
+              usersWatch();
+            }
+          });
+        }
+        if (scope.enableContextMenu !== false) {
+          scope.contextOptions = [];
+          var gUser = null;
+          try {
+            gUser = g_user;
+          } catch (err) {}
+          if (scope.users && scope.users.length === 1 && scope.users[0] && (scope.users[0].userID || scope.users[0].sys_id)) {
+            scope.contextOptions = [
+              ["Open user's profile", function() {
+                if (scope.users && scope.users.length > 0) {
+                  window.open('/nav_to.do?uri=' + encodeURIComponent('sys_user.do?sys_id=' + scope.users[0].userID), '_blank');
+                }
+              }]
+            ];
+            if ((gUser && scope.users[0].userID && scope.users[0].userID !== gUser.userID) ||
+              (scope.liveProfileID && scope.users[0] && scope.users[0].sysID !== scope.liveProfileID)) {
+              scope.contextOptions.push(["Open a new chat", function() {
+                snConnectService.openWithProfile(scope.users[0]);
+              }]);
+            }
+          }
+        } else {
+          scope.contextOptions = [];
+        }
+      };
+    },
+    controller: function($scope, liveProfileID) {
+      $scope.displayMemberCount = $scope.displayMemberCount || false;
+      $scope.liveProfileID = liveProfileID;
+      $scope.$watch('primary', function(newValue, oldValue) {
+        if ($scope.primary && newValue !== oldValue) {
+          buildAvatar();
+          if ($scope.contextOptions.length > 0) {
+            $scope.contextOptions = [
+              ["Open user's profile", function() {
+                if ($scope.users && $scope.users.length > 0) {
+                  window.location.href = 'sys_user.do?sys_id=' + $scope.users[0].userID || $scope.users[0].userID;
+                }
+              }]
+            ];
+            var gUser = null;
+            try {
+              gUser = g_user;
+            } catch (err) {}
+            if ((!gUser && !liveProfileID) || ($scope.users && $scope.users.length === 1 && $scope.users[0])) {
+              if ((gUser && $scope.users[0].userID && $scope.users[0].userID !== gUser.userID) ||
+                ($scope.liveProfileID && $scope.users[0] && $scope.users[0].sysID !== $scope.liveProfileID)) {
+                $scope.contextOptions.push(["Open a new chat", function() {
+                  snConnectService.openWithProfile($scope.users[0]);
+                }]);
+              }
+            }
+          }
+        }
+      });
+      $scope.$watch('members', function() {
+        if ($scope.members)
+          buildAvatar();
+      });
+      $scope.avatarType = function() {
+        var result = [];
+        if ($scope.groupAvatar || !$scope.users)
+          return result;
+        if ($scope.users.length > 1)
+          result.push("group");
+        if ($scope.users.length === 2)
+          result.push("avatar-duo");
+        if ($scope.users.length === 3)
+          result.push("avatar-trio");
+        if ($scope.users.length >= 4)
+          result.push("avatar-quad");
+        return result;
+      };
+      $scope.getBackgroundStyle = function(user) {
+        var avatar = (user ? user.avatar : '');
+        if ($scope.groupAvatar)
+          avatar = $scope.groupAvatar;
+        if (avatar && avatar !== '')
+          return {
+            'background-image': 'url(' + avatar + ')'
+          };
+        if (user && user.name)
+          return '';
+        return void(0);
+      };
+      $scope.maxStringWidth = function() {
+        var paddedWidth = parseInt($scope.avatarWidth * 0.8, 10);
+        return $scope.users.length === 1 ? paddedWidth : paddedWidth / 2;
+      };
+
+      function buildInitials(name) {
+        if (!name)
+          return "--";
+        var initials = name.split(" ").map(function(word) {
+          return word.toUpperCase();
+        }).filter(function(word) {
+          return word.match(/^[A-Z]/);
+        }).map(function(word) {
+          return word.substring(0, 1);
+        }).join("");
+        return (initials.length > 3) ?
+          initials.substr(0, 3) :
+          initials;
+      }
+      $scope.avatartooltip = function() {
+        if (!$scope.enableTooltip) {
+          return '';
+        }
+        if (!$scope.users) {
+          return '';
+        }
+        var names = [];
+        $scope.users.forEach(function(user) {
+          if (!user) {
+            return;
+          }
+          names.push(user.name);
+        });
+        return names.join(', ');
+      };
+
+      function buildAvatar() {
+        if (typeof $scope.primary === 'string') {
+          $http.get('/api/now/live/profiles/sys_user.' + $scope.primary).then(function(response) {
+            $scope.users = [{
+              userID: $scope.primary,
+              name: response.data.result.name,
+              initials: buildInitials(response.data.result.name),
+              avatar: response.data.result.avatar
+            }];
+            $scope.presenceEnabled = $scope.showPresence && !$scope.isDocument && $scope.users.length === 1;
+          });
+          return;
+        }
+        if ($scope.primary) {
+          if ($scope.primary.userImage)
+            $scope.primary.avatar = $scope.primary.userImage;
+          if (!$scope.primary.userID && $scope.primary.sys_id)
+            $scope.primary.userID = $scope.primary.sys_id;
+        }
+        $scope.isDocument = $scope.primary && $scope.primary.table && $scope.primary.table !== "sys_user" && $scope.primary.table !== "chat_queue_entry";
+        $scope.users = [$scope.primary];
+        if ($scope.primary && (!$scope.members || $scope.members.length <= 0) && ($scope.primary.avatar || $scope.primary.initials) && $scope.isDocument) {
+          $scope.users = [$scope.primary];
+        } else if ($scope.members && $scope.members.length > 0) {
+          $scope.users = buildCompositeAvatar($scope.members);
+        }
+        $scope.presenceEnabled = $scope.showPresence && !$scope.isDocument && $scope.users.length === 1;
+      }
+
+      function buildCompositeAvatar(members) {
+        var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+        var users = angular.isArray(members) ? members.slice() : [members];
+        users = users.sort(function(a, b) {
+          var aID = a.userID || a.document;
+          var bID = b.userID || b.document;
+          if (a.table === "chat_queue_entry")
+            return 1;
+          if (aID === currentUser)
+            return 1;
+          else if (bID === currentUser)
+            return -1;
+          return 0;
+        });
+        if (users.length === 2)
+          users = [users[0]];
+        if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+          var index = -1;
+          angular.forEach(users, function(user, i) {
+            if (user.sys_id === $scope.primary.sys_id) {
+              index = i;
+            }
+          });
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+          users.splice(1, 0, $scope.primary);
+        }
+        return users;
+      }
+      buildAvatar();
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/service.avatarProfilePersister.js */
+angular.module('sn.common.avatar').service('avatarProfilePersister', function() {
+  "use strict";
+  var avatars = {};
+
+  function setAvatar(id, payload) {
+    avatars[id] = payload;
+  }
+
+  function getAvatar(id) {
+    return avatars[id];
+  }
+  return {
+    setAvatar: setAvatar,
+    getAvatar: getAvatar
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snUserAvatar.js */
+angular.module('sn.common.avatar').directive('snUserAvatar', function(getTemplateUrl) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_user_avatar.xml'),
+    replace: true,
+    scope: {
+      profile: '=?',
+      userId: '=?',
+      avatarUrl: '=?',
+      initials: '=?',
+      enablePresence: '@',
+      disablePopover: '=?',
+      directConversationButton: '=?'
+    },
+    link: function(scope, element) {
+      scope.evaluatedProfile = undefined;
+      scope.backgroundStyle = undefined;
+      scope.enablePresence = scope.enablePresence !== 'false';
+      if (scope.profile) {
+        scope.evaluatedProfile = scope.profile;
+        scope.userId = scope.profile.userID || "";
+        scope.avatarUrl = scope.profile.avatar || "";
+        scope.initials = scope.profile.initials || "";
+        scope.backgroundStyle = scope.getBackgroundStyle();
+      } else if (scope.userId || scope.avatarUrl || scope.initials) {
+        scope.evaluatedProfile = scope.profile = {
+          'userID': scope.userId || "",
+          'avatar': scope.avatarUrl || "",
+          'initials': scope.initials || ""
+        }
+        scope.backgroundStyle = scope.getBackgroundStyle();
+      } else {
+        var unwatch = scope.$watch('profile', function(newVal) {
+          if (newVal) {
+            scope.evaluatedProfile = newVal;
+            scope.backgroundStyle = scope.getBackgroundStyle();
+            unwatch();
+          }
+        })
+      }
+      scope.directConversationButton = scope.directConversationButton !== 'false' && scope.directConversationButton !== false;
+      scope.template = '<sn-user-profile profile="evaluatedProfile" show-direct-message-prompt="::directConversationButton" class="avatar-popover avatar-popover-padding"></sn-user-profile>';
+    },
+    controller: function($scope) {
+      $scope.getBackgroundStyle = function() {
+        if (($scope.avatarUrl && $scope.avatarUrl !== '') || $scope.evaluatedProfile && $scope.evaluatedProfile.avatar !== '')
+          return {
+            "background-image": 'url(' + ($scope.avatarUrl || $scope.evaluatedProfile.avatar) + ')'
+          };
+        return {
+          "background-image": ""
+        };
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snGroupAvatar.js */
+angular.module('sn.common.avatar').directive('snGroupAvatar', function($http, $compile, getTemplateUrl, avatarProfilePersister) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_group_avatar.xml'),
+    replace: true,
+    transclude: true,
+    scope: {
+      members: '=',
+      primary: '=?',
+      groupAvatar: "@"
+    },
+    controller: function($scope, liveProfileID) {
+      $scope.liveProfileID = liveProfileID;
+      $scope.$watch('members', function(newVal, oldVal) {
+        if (newVal === oldVal)
+          return;
+        if ($scope.members)
+          $scope.users = buildCompositeAvatar($scope.members);
+      });
+      $scope.avatarType = function() {
+        var result = [];
+        if ($scope.groupAvatar || !$scope.users)
+          return result;
+        if ($scope.users.length > 1)
+          result.push("group")
+        if ($scope.users.length === 2)
+          result.push("sn-avatar_duo")
+        if ($scope.users.length === 3)
+          result.push("sn-avatar_trio")
+        if ($scope.users.length >= 4)
+          result.push("sn-avatar_quad")
+        return result;
+      };
+      $scope.getBackgroundStyle = function(user) {
+        var avatar = (user ? user.avatar : '');
+        if ($scope.groupAvatar)
+          avatar = $scope.groupAvatar;
+        if (avatar && avatar !== '')
+          return {
+            "background-image": "url(" + avatar + ")"
+          };
+        return {};
+      };
+      $scope.users = buildCompositeAvatar($scope.members);
+
+      function buildCompositeAvatar(members) {
+        var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+        var users = angular.isArray(members) ? members.slice() : [members];
+        users = users.sort(function(a, b) {
+          var aID = a.userID || a.document;
+          var bID = b.userID || b.document;
+          if (a.table === "chat_queue_entry")
+            return 1;
+          if (aID === currentUser)
+            return 1;
+          else if (bID === currentUser)
+            return -1;
+          return 0;
+        });
+        if (users.length === 2)
+          users = [users[0]];
+        if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+          var index = -1;
+          angular.forEach(users, function(user, i) {
+            if (user.sys_id === $scope.primary.sys_id) {
+              index = i;
+            }
+          });
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+          users.splice(1, 0, $scope.primary);
+        }
+        return users;
+      }
+    }
+  }
+});;;

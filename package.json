@@ -17,6 +17,7 @@
   },
   "homepage": "https://gitlab.com/jacebenson/SNDocs#readme",
   "dependencies": {
+    "async": "^2.5.0",
     "js-beautify": "^1.7.4"
   }
 }

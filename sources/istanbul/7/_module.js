@@ -1,9 +1,11 @@
-/*! RESOURCE: /scripts/sn/common/stream/_module.js */
-angular.module("sn.common.stream", ['sn.base', 'ng.amb', 'sn.messaging', 'sn.common.glide', 'ngSanitize',
-  'sn.common.avatar', 'sn.common.ui.popover', 'mentio', 'sn.common.controls', 'sn.common.user_profile',
-  'sn.common.datetime', 'sn.common.mention', 'sn.common.ui'
-]);
-angular.module("sn.stream.direct", ['sn.common.stream']);;ment.data()[scopeProperty].$$watchers, function(watcher) {
+/*! RESOURCE: /scripts/app/base/_module.js */
+angular.module('sn.base', ['sn.common.auth']);
+window.countWatchers = window.countWatchers || function(root) {
+  var watchers = [];
+  var f = function(element) {
+    angular.forEach(['$scope', '$isolateScope'], function(scopeProperty) {
+      if (element.data() && element.data().hasOwnProperty(scopeProperty)) {
+        angular.forEach(element.data()[scopeProperty].$$watchers, function(watcher) {
           watchers.push(watcher);
         });
       }

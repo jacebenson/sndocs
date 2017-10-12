@@ -36,65 +36,7 @@ GlideList2.getIdByElement = function(element) {
   return div.id;
 }
 GlideList2.getByName = function(name) {
-  for (var id in GlideLists2) {
-    var list = GlideLists2[id];
-    if (list.getListName() == name)
-      return list;
-  }
-  return null;
-}
-GlideList2.getListsForTable = function(table) {
-  var lists = [];
-  for (var id in GlideLists2) {
-    var list = GlideLists2[id];
-    if (list.getTableName() == table)
-      lists.push(list);
-  }
-  return lists;
-}
-GlideList2._getByElement = function(element) {
-  var id = this.getIdByElement(element);
-  if (!id)
-    return null;
-  return GlideLists2[id];
-}
-GlideList2.breakGroupHeader = function(checkedFlag) {
-  var breakStyle = "auto";
-  if (checkedFlag)
-    breakStyle = "always";
-  var tds = document.getElementsByTagName("td");
-  var len = tds.length;
-  var first = true;
-  for (var i = 0; i < len; i++) {
-    var td = tds[i];
-    if (getAttributeValue(td, "group_row_td") != "true")
-      continue;
-    if (first)
-      first = false;
-    else
-      td.style.pageBreakBefore = breakStyle;
-  }
-  return false;
-}
-GlideList2.toggleAll = function(expandFlag) {
-  for (var id in GlideLists2) {
-    var list = GlideLists2[id];
-    list.showHideList(expandFlag);
-  }
-}
-GlideList2.updateCellContents = function(cell, data) {
-  $(cell).setStyle({
-    backgroundColor: '',
-    cssText: data.getAttribute('style')
-  });
-  var work = document.createElement('div');
-  cell.innerHTML = '';
-  for (var child = data.firstChild; child; child = child.nextSibling) {
-    work.innerHTML = getXMLString(child);
-    if (work.firstChild !== null)
-      cell.appendChild(work.firstChild);
-  }
-  cell.innerHTML.evalScripts(true);
-  cell.removeClassName('list_edit_dirty');
-  CustomEvent.fire("list_cell_changed", cell);
-};
+    for (var id in GlideLists2) {
+      var list = GlideLists2[id];
+      if (list.getListName() == name)
+        return list;

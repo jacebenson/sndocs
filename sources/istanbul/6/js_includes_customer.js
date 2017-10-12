@@ -1,180 +1,312 @@
 /*! RESOURCE: /scripts/js_includes_customer.js */
-/*! RESOURCE: ScrumReleaseImportGroupDialog */
-var ScrumReleaseImportGroupDialog = Class.create();
-ScrumReleaseImportGroupDialog.prototype = {
-  initialize: function() {
-    this.setUpFacade();
-  },
-  setUpFacade: function() {
-    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-    this._mstrDlg = new dialogClass("task_window");
-    this._mstrDlg.setTitle(getMessage("Add Members From Group"));
-    this._mstrDlg.setBody(this.getMarkUp(), false, false);
-  },
-  setUpEvents: function() {
-    var self = this,
-      dialog = this._mstrDlg;
-    var okButton = $("ok");
-    if (okButton) {
-      okButton.on("click", function() {
-        var mapData = {};
-        if (self.fillDataMap(mapData)) {
-          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
-          for (var strKey in mapData) {
-            processor.addParam(strKey, mapData[strKey]);
-          }
-          self.showStatus(getMessage("Adding group users..."));
-          processor.getXML(function() {
-            self.refresh();
-            dialog.destroy();
-          });
-        } else {
-          dialog.destroy();
-        }
-      });
-    }
-    var cancelButton = $("cancel");
-    if (cancelButton) {
-      cancelButton.on("click", function() {
-        dialog.destroy();
-      });
-    }
-    var okNGButton = $("okNG");
-    if (okNGButton) {
-      okNGButton.on("click", function() {
-        dialog.destroy();
-      });
-    }
-    var cancelNGButton = $("cancelNG");
-    if (cancelNGButton) {
-      cancelNGButton.on("click", function() {
-        dialog.destroy();
-      });
-    }
-  },
-  refresh: function() {
-    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
-  },
-  getScrumReleaseTeamSysId: function() {
-    return g_form.getUniqueValue() + "";
-  },
-  getUserChosenGroupSysIds: function() {
-    return $F('groupId') + "";
-  },
-  showStatus: function(strMessage) {
-    $("task_controls").update(strMessage);
-  },
-  display: function(bIsVisible) {
-    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-  },
-  getRoleIds: function() {
-    var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
-    var arrRoleIds = [];
-    var record = new GlideRecord("sys_user_role");
-    record.addQuery("name", "IN", arrRoleNames.join(","));
-    record.query();
-    while (record.next())
-      arrRoleIds.push(record.sys_id + "");
-    return arrRoleIds;
-  },
-  hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
-    for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
-      if (arrScrumRoleSysIds[index] == "" + roleSysId)
-        return true;
-    var record = new GlideRecord("sys_user_role_contains");
-    record.addQuery("role", roleSysId);
-    record.query();
-    while (record.next())
-      if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
-        return true;
-    return false;
-  },
-  getGroupIds: function() {
-    var arrScrumRoleIds = this.getRoleIds();
-    var arrGroupIds = [];
-    var record = new GlideRecord("sys_group_has_role");
-    record.query();
-    while (record.next())
-      if (this.hasScrumRole(record.role, arrScrumRoleIds))
-        arrGroupIds.push(record.group + "");
-    return arrGroupIds;
-  },
-  getGroupInfo: function() {
-    var mapGroupInfo = {};
-    var arrRoleIds = this.getRoleIds();
-    var arrGroupIds = this.getGroupIds(arrRoleIds);
-    var record = new GlideRecord("sys_user_group");
-    record.addQuery("sys_id", "IN", arrGroupIds.join(","));
-    record.query();
-    while (record.next()) {
-      var strName = record.name + "";
-      var strSysId = record.sys_id + "";
-      mapGroupInfo[strName] = {
-        name: strName,
-        sysid: strSysId
-      };
-    }
-    return mapGroupInfo;
-  },
-  getMarkUp: function() {
-    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
-    groupAjax.addParam('sysparm_name', 'getGroupInfo');
-    groupAjax.getXML(this.generateMarkUp.bind(this));
-  },
-  generateMarkUp: function(response) {
-    var mapGroupInfo = {};
-    var groupData = response.responseXML.getElementsByTagName("group");
-    var strName, strSysId;
-    for (var i = 0; i < groupData.length; i++) {
-      strName = groupData[i].getAttribute("name");
-      strSysId = groupData[i].getAttribute("sysid");
-      mapGroupInfo[strName] = {
-        name: strName,
-        sysid: strSysId
-      };
-    }
-    var arrGroupNames = [];
-    for (var strGroupName in mapGroupInfo) {
-      arrGroupNames.push(strGroupName + "");
-    }
-    arrGroupNames.sort();
-    var strMarkUp = "";
-    if (arrGroupNames.length > 0) {
-      var strTable = "<div class='row'><div class='form-group'><span class='col-sm-12'><select class='form-control' id='groupId'>";
-      for (var nSlot = 0; nSlot < arrGroupNames.length; ++nSlot) {
-        strName = arrGroupNames[nSlot];
-        strSysId = mapGroupInfo[strName].sysid;
-        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+/*! RESOURCE: N helper */
+var N = {};
+N.logs = true;
+N.l = function(msg, append) {
+  if (!this.logs) {
+    return;
+  }
+  var str = (append) ? append + ": " : this.type + ": ";
+  msg = str + msg;
+  if (!this.nil(window.console) && !this.nil(window.console.log)) {
+    console.log(msg);
+  }
+  try {
+    var path = window.self.location.pathname;
+    var src = path.substring(path.lastIndexOf('/') + 1);
+    if (window.self.opener && window != window.self.opener) {
+      if (window.self.opener.jslog) {
+        window.self.opener.jslog(msg, src);
       }
-      strTable += "</select></span></div></div>";
-      strMarkUp = "<div id='task_controls'>" + strTable +
-        "<div style='text-align:right;padding-top:20px;'>" +
-        "<button id='cancel' class='btn btn-default' type='button'>" + getMessage("Cancel") + "</button>" +
-        "&nbsp;&nbsp;<button id='ok' class='btn btn-primary' type='button'>" + getMessage("OK") + "</button>" +
-        "</div></div>";
-    } else {
-      strMarkUp = "<div id='task_controls'><p>No groups with scrum_user role found</p>" +
-        "<div style='text-align: right;padding-top:20px;'>" +
-        "<button id='cancelNG' class='btn btn-default' type='button'>" + getMessage("Cancel") + "</button>" +
-        "&nbsp;&nbsp;<button id='okNG' class='btn btn-primary' type='button'>" + getMessage("OK") + "</button>" +
-        "</div></div>";
+    } else if (parent && parent.jslog && jslog != parent.jslog) {
+      parent.jslog(msg, src);
     }
-    this._mstrDlg.setBody(strMarkUp, false, false);
-    this.setUpEvents();
-    this.display(true);
-  },
-  fillDataMap: function(mapData) {
-    var strChosenGroupSysId = this.getUserChosenGroupSysIds();
-    if (strChosenGroupSysId) {
-      mapData.sysparm_name = "createReleaseTeamMembers";
-      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
-      mapData.sysparm_groups = strChosenGroupSysId;
+  } catch (e) {}
+};
+N.nil = function(given) {
+  try {
+    if (typeof given == 'undefined') {
       return true;
+    } else if (given === null || given == '' || given == 0 || given == false) {
+      return true;
+    }
+  } catch (e) {
+    return true;
+  }
+  return false;
+};
+N.isNil = function(given) {
+  return this.nil(given);
+};
+N.notNil = function(given) {
+  return !this.nil(given);
+};
+N.isNotNil = function(given) {
+  return !this.nil(given);
+};
+N.getRefID = function(table, field, relField, callback) {
+  if (arguments.length < 3) {
+    this.l("Missing required inputs", "N.getRefID");
+    return false;
+  }
+  var fieldValue = g_form.getValue(field);
+  if (this.nil(fieldValue)) {
+    fieldValue = field + '';
+  }
+  if (arguments.length == 3) {
+    callback = relField;
+    N._ajax('getRefID', table, field, callback);
+  } else {
+    N._ajax('getRefID', table, field, relField, callback);
+  }
+};
+N.getDuration = function(startField, endField, warn) {
+  var startTimeField = startField;
+  var endTimeField = endField;
+  if (!g_form) {
+    return '';
+  }
+  var endTimeFieldLabel = g_form.getLabel(endTimeField).innerHTML.split(':').join('');
+  var startTimeFieldLabel = g_form.getLabel(startTimeField).innerHTML.split(':').join('');
+  var msg = 'The ' + endTimeFieldLabel + ' time  cannot be prior to the ' + startTimeFieldLabel + '.';
+  var endTime = g_form.getValue(endTimeField);
+  var endTimeObj = this.dff(endTime);
+  var startTime = g_form.getValue(startTimeField);
+  var startTimeObj = this.dff(startTime);
+  var diff = endTimeObj - startTimeObj;
+  var afterToday = (new Date() - startTimeObj) > 0;
+  if (diff <= 0) {
+    if (warn && ((endTime && !afterToday) || (startTime && endTime))) {
+      g_form.showErrorBox(endTimeField, msg);
+      g_form.setValue(endTimeField, '');
+    }
+    return '';
+  }
+  var dateDur = new Date(diff);
+  var days = dateDur.getUTCDate() - 1;
+  var hours = dateDur.getUTCHours();
+  var mins = dateDur.getUTCMinutes();
+  var secs = dateDur.getUTCSeconds();
+  return days + " " + this._two(hours) + ":" + this._two(mins) + ":" + this._two(secs);
+};
+N.isAfterToday = function(start) {
+  return this.isAfterDate(start);
+};
+N.isBeforeToday = function(start) {
+  return !this.isAfterDate(start);
+};
+N.isAfter = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfter called with no start");
+    return;
+  }
+  start = this.dff(start);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  if (start < end) {
+    return true;
+  }
+  return false;
+};
+N.isBefore = function(start, end) {
+  return !this.isAfter(start, end);
+};
+N.isAfterDate = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfterDate called with no start");
+    return;
+  }
+  start = this.dff(start, true);
+  var startMS = start.setHours(23, 59, 59, 999);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  return start < end;
+};
+N.isBeforeDate = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfterDate called with no start");
+    return;
+  }
+  start = this.dff(start);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  var endMS = end.setHours(0, 0, 0, 0);
+  return start < end;
+};
+N.dff = function(d, obj) {
+  if (this.nil(d)) {
+    this.l("N.dff called with no input");
+    return;
+  }
+  if (this.nil(d.getTime)) {
+    if (/ /.test(d)) {
+      d = getDateFromFormat(d, g_user_date_time_format);
     } else {
-      return false;
+      d = getDateFromFormat(d, g_user_date_format);
+    }
+  }
+  return (obj) ? new Date(d) : d + 0;
+};
+N.showSection = function(sectName, bool) {
+  var section = $$('span[tab_caption="' + sectName + '"]')[0].select('span[id*=section.]')[0];
+  var sectHead = this._getSectHead(sectName);
+  if (bool) {
+    sectHead.show();
+    section.show();
+  } else {
+    section.hide();
+    sectHead.hide();
+  }
+};
+N.showRelatedPopup = function(refFieldElID, title, table, column, value) {
+  var s = (refFieldElID == null) ? '' : refFieldElID.split('.');
+  var encQ;
+  title = (this.notNil(title)) ? title : "Related records";
+  table = (this.notNil(table)) ? table : $('sys_display.' + s.join('.')).readAttribute('data-table') + '';
+  if (this.notNil(column) && this.nil(value)) {
+    encQ = column + '';
+  }
+  column = (this.notNil(column)) ? column : s[1] + '';
+  value = (this.notNil(value)) ? value : g_form.getValue(s[1]);
+  var referenceField = s[1] + '';
+  var v = g_form.getValue(referenceField);
+  var w = new GlideDialogWindow('show_list');
+  w.setTitle(title);
+  w.setPreference('table', table + '_list');
+  if (this.notNil(encQ)) {
+    w.setPreference('sysparm_query', encQ);
+  } else {
+    w.setPreference('sysparm_query', "sys_id!=" + g_form.getUniqueValue() + "^" + column + "=" + value);
+  }
+  w.render();
+};
+N.selectRelatedList = function(title, scroll) {
+  var rlHeader = this._getRelatedListHeader(title);
+  if (rlHeader) {
+    rlHeader.click();
+    if (this.notNil(scroll)) {
+      g_form._scrollToElementTR(rlHeader.up("tr"));
+    }
+  } else {
+    this.l("Couldn't find Related List with title " + title, "N.SelectRelatedList");
+  }
+};
+N.saveOptions = function(fieldName) {
+  if (this.nil(g_scratchpad) || this.nil(g_scratchpad[fieldName])) {
+    return;
+  }
+  try {
+    var ctrl = $(g_form.getTableName() + '.' + fieldName);
+    var opts = ctrl.childElements();
+    var optArr = [];
+    for (var i = 0; i < opts.length; i++) {
+      optArr.push({
+        value: opts[i].value + '',
+        label: opts[i].innerHTML + ''
+      });
+    }
+    g_scratchpad[fieldName] = optArr;
+  } catch (e) {
+    this.l("N.saveOptions errored with: " + e, "N.saveOptions");
+  }
+};
+N.restoreOptions = function(fieldName) {
+  g_form.clearOptions(fieldName);
+  var optArr = g_scratchpad[fieldName];
+  try {
+    for (var i = 0; i < optArr.length; i++) {
+      g_form.addOption(fieldName, optArr[i].value, optArr[i].label);
+    }
+  } catch (e) {
+    jslog('restoreOptions did not have any options to restore');
+  }
+};
+N.getProperty = function(propName, defaultVal) {
+  var propVal = N._ajaxWait("getProperty", propName);
+  if (this.notNil(propVal)) {
+    return propVal;
+  }
+  if (this.notNil(defaultVal)) {
+    return defaultVal;
+  }
+  return '';
+};
+N.setStyle = function(fieldName, styleAttr, styleValue) {
+  var fldCtrl;
+  if (arguments.length < 2) {
+    return;
+  } else if (arguments.length == 2) {
+    styleValue = styleAttr + '';
+    styleAttr = 'width';
+  }
+  try {
+    fldCtrl = g_form.getControl(fieldName);
+  } catch (e) {
+    this.l("N.setStyle failed with: " + e);
+  }
+  if (this.notNil(fldCtrl)) {
+    if (this.notNil(fldCtrl.style)) {
+      fldCtrl.style[styleAttr] = styleValue + '';
     }
   }
 };
+N._getSectHead = function(sectName) {
+  var sectNameNBSP = sectName.replace(/ /g, "&nbsp;");
+  var tabs = $$('span.tab_caption_text');
+  for (var i = 0; i < tabs.length; i++) {
+    if (tabs[i].innerHTML == sectName || tabs[i].innerHTML == sectNameNBSP) {
+      return $(tabs[i]).up('h3');
+    }
+  }
+  return;
+};
+N._getRelatedListHeader = function(title) {
+  title = title.toString().toLowerCase();
+  var elArr = $$('span.tab_caption_text');
+  for (var i = 0; i < elArr.length; i++) {
+    var eln = elArr[i].innerHTML.toString().toLowerCase();
+    eln = eln.replace(/&nbsp;/gi, " ");
+    if (eln.indexOf(title) >= 0) {
+      return elArr[i];
+    }
+  }
+  return false;
+};
+N._ajaxWait = function(funcName) {
+  var ga = new GlideAjax('NAjax');
+  ga.addParam('sysparm_name', funcName);
+  for (var i = 1; i < arguments.length; i++) {
+    ga.addParam("sysparm_arg" + i, arguments[i]);
+  }
+  ga.getXMLWait();
+  var ans = ga.getAnswer();
+  if (this.nil(ans)) {
+    this.l("Response for NAjax call " + funcName + " is nil", "N._ajaxWait");
+    return null;
+  }
+  return ans;
+};
+N._ajax = function(funcName) {
+  var ga = new GlideAjax('NAjax');
+  ga.addParam('sysparm_name', funcName);
+  for (var i = 1; i < arguments.length - 1; i++) {
+    ga.addParam("sysparm_arg" + i, arguments[i]);
+  }
+  ga.getXMLAnswer(arguments[arguments.length - 1]);
+};
+N._two = function(x) {
+  return ((x > 9) ? "" : "0") + x;
+};
+N.type = "N Helper - UI Script";
 /*! RESOURCE: Validate Client Script Functions */
 function validateFunctionDeclaration(fieldName, functionName) {
   var code = g_form.getValue(fieldName);
@@ -274,589 +406,132 @@ function removeNewlinesFromClientScript(code) {
   var pattern = /[\r\n]*/g;
   return code.replace(pattern, "");
 }
-/*! RESOURCE: SNC auto refresh iframes for Chrome */
-if (isChrome) {
-  try {
-    if (!window.self.frameElement) {
-      if (window.addLateLoadEvent) {
-        addLateLoadEvent(function() {
-          reloadFrameForChrome($('gsft_nav'));
-          reloadFrameForChrome($('gsft_main'));
+/*! RESOURCE: Stop Impersonation button */
+addLoadEvent(addUnimpersonateButton);
 
-          function reloadFrameForChrome(iframe) {
-            if (!iframe)
-              return;
-            Event.observe(iframe, 'load', function() {
-              if (iframe.contentWindow.location.href != iframe.src && iframe.contentWindow.location.href.indexOf("blank") >= 0)
-                iframe.contentWindow.location.href = iframe.src;
-            });
-          }
-        });
-      }
+function addUnimpersonateButton() {
+  try {
+    if ($('impersonating_toggle_id').value != '') {
+      $('impersonate_span').insert({
+        after: '<span id="unimpersonate_span"><img onclick="unimpersonateMe();" title="End impersonation" src="images/icons/stop.gifx" style="cursor:pointer;cursor:hand"></img></span>'
+      });
     }
   } catch (e) {}
 }
-/*! RESOURCE: ScrumTaskDialog */
-var ScrumTaskDialog = Class.create(GlideDialogWindow, {
-  initialize: function() {
-    if (typeof g_list != "undefined")
-      this.list = g_list;
-    else
-      this.list = null;
-    this.storyID = typeof rowSysId == 'undefined' ? (gel('sys_uniqueValue') ? gel('sys_uniqueValue').value : "") : rowSysId;
-    this.setUpFacade();
-    this.setUpEvents();
-    this.display(true);
-    this.checkOKButton();
-    this.setWidth(155);
-  },
-  toggleOKButton: function(visible) {
-    $("ok").style.display = (visible ? "inline" : "none");
-  },
-  setUpFacade: function() {
-    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-    this.setTitle(getMessage("Add Scrum Tasks"));
-    var mapCount = this.getTypeCounts();
-    this.setBody(this.getMarkUp(mapCount), false, false);
-  },
-  checkOKButton: function() {
-    var visible = false;
-    var thisDialog = this;
-    this.container.select("select").each(function(elem) {
-      if (elem.value + "" != "0")
-        visible = true;
-      if (!elem.onChangeAdded) {
-        elem.onChangeAdded = true;
-        elem.on("change", function() {
-          thisDialog.checkOKButton();
-        });
-      }
-    });
-    this.toggleOKButton(visible);
-  },
-  getTypeCounts: function() {
-    var mapLabel = this.getLabels("rm_scrum_task", "type");
-    var mapCount = {};
-    for (var strKey in mapLabel) {
-      mapCount[strKey] = getPreference("com.snc.sdlc.scrum.pp.tasks." + strKey, 0);
-    }
-    return mapCount;
-  },
-  setUpEvents: function() {
-    var dialog = this;
-    $("ok").on("click", function() {
-      var mapTaskData = {};
-      if (dialog.fillDataMap(mapTaskData)) {
-        var taskProducer = new GlideAjax("ScrumAjaxTaskProducer");
-        for (var strKey in mapTaskData) {
-          taskProducer.addParam("sysparm_" + strKey, mapTaskData[strKey]);
-        }
-        dialog.showStatus("Adding tasks...");
-        taskProducer.getXML(function() {
-          dialog.refresh();
-          dialog._onCloseClicked();
-        });
-      } else {
-        dialog._onCloseClicked();
-      }
-    });
-    $("cancel").on("click", function() {
-      dialog._onCloseClicked();
-    });
-  },
-  refresh: function() {
-    if (this.list)
-      this.list.refresh();
-    else
-      this.reloadList("rm_story.rm_scrum_task.story");
-  },
-  getSysID: function() {
-    return this.storyID;
-  },
-  fillDataMap: function(mapTaskData) {
-    var bTasksRequired = false;
-    mapTaskData.name = "createTasks";
-    mapTaskData.sys_id = this.getSysID();
-    var mapDetails = this.getLabels("rm_scrum_task", "type");
-    var arrTaskTypes = [];
-    for (var key in mapDetails) {
-      arrTaskTypes.push(key);
-    }
-    for (var nSlot = 0; nSlot < arrTaskTypes.length; ++nSlot) {
-      var strTaskType = arrTaskTypes[nSlot];
-      var strTaskData = $(strTaskType).getValue();
-      mapTaskData[strTaskType] = strTaskData;
-      setPreference("com.snc.sdlc.scrum.pp.tasks." + strTaskType, strTaskData);
-      if (strTaskData != "0") {
-        bTasksRequired = true;
-      }
-    }
-    return bTasksRequired;
-  },
-  getMarkUp: function(mapCounts) {
-    function getSelectMarkUp(strFieldId, nValue) {
-      var strMarkUp = "<select id='" + strFieldId + "'>";
-      for (var nSlot = 0; nSlot <= 10; nSlot++) {
-        if (nValue != 0 && nValue == nSlot) {
-          strMarkUp += "<option value='" + nSlot + "' + " + "selected='selected'" + ">" + nSlot + "</choice>";
-        } else {
-          strMarkUp += "<option value='" + nSlot + "'>" + nSlot + "</choice>";
-        }
-      }
-      strMarkUp += "</select>";
-      return strMarkUp;
-    }
 
-    function buildRow(strMessage, strLabel, nValue) {
-      return "<tr><td><label for='" + strLabel + "'>" + getMessage(strMessage) + "</label></td><td>" + getSelectMarkUp(strLabel, nValue) + "</td></tr>";
+function unimpersonateMe() {
+  top.location.href = 'ui_page_process.do?sys_id=b071b5dc0a0a0a7900846d21db8e4db6&sys_user=' + $('impersonating_toggle_id').value;
+}
+/*! RESOURCE: HR_Utils_UI */
+var HR_Utils_UI = Class.create();
+HR_Utils_UI.prototype = {
+  initialize: function() {},
+  validatePhoneNumberForField: function(number, isLoading, phoneField) {
+    if (isLoading || !number) {
+      g_form.hideFieldMsg(phoneField, true);
+      return;
     }
-
-    function buildTable(mapDetails, mapCounts) {
-      var arrDetails = [];
-      for (var strKey in mapDetails) {
-        arrDetails.push(strKey + "");
-      }
-      arrDetails.sort();
-      var strBuf = "<table>";
-      for (var index = 0; index < arrDetails.length; ++index) {
-        var strTitleCase = arrDetails[index].charAt(0).toString().toUpperCase() + arrDetails[index].substring(1);
-        var nCount = mapCounts[arrDetails[index]];
-        strBuf += buildRow(strTitleCase, arrDetails[index], nCount);
-      }
-      strBuf += "</table>";
-      return strBuf;
-    }
-    var mapLabels = this.getLabels("rm_scrum_task", "type");
-    return "<div id='task_controls'>" + buildTable(mapLabels, mapCounts) +
-      "<button id='ok' type='button'>" + getMessage('OK') + "</button>" +
-      "<button id='cancel' type='button'>" + getMessage('Cancel') + "</button></div>";
-  },
-  reloadForm: function() {
-    document.location.href = document.location.href;
-  },
-  reloadList: function(strListName) {
-    GlideList2.get(strListName).refresh();
-  },
-  showStatus: function(strMessage) {
-    $("task_controls").update("Loading...");
-  },
-  display: function(bIsVisible) {
-    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-  },
-  getLabels: function(strTable, strAttribute) {
-    var taskProducer = new GlideAjax("ScrumAjaxTaskProducer");
-    taskProducer.addParam("sysparm_name", "getLabels");
-    taskProducer.addParam("sysparm_table", strTable);
-    taskProducer.addParam("sysparm_attribute", strAttribute);
-    var result = taskProducer.getXMLWait();
-    return this._parseResponse(result);
-  },
-  _parseResponse: function(resultXML) {
-    var jsonStr = resultXML.documentElement.getAttribute("answer");
-    var map = (isMSIE7 || isMSIE8) ? eval("(" + jsonStr + ")") : JSON.parse(jsonStr);
-    return map;
-  }
-});
-/*! RESOURCE: tm_AssignDefect */
-var tm_AssignDefect = Class.create({
-  initialize: function(gr) {
-    this._gr = gr;
-    this._isList = (gr.type + "" == "GlideList2");
-    this._sysId = this._gr.getUniqueValue();
-    this._tableName = this._gr.getTableName();
-    this._redirect = false;
-    this._testCaseInstance = 'tm_test_case_instance';
-    this._prmErr = [];
-    if (this._tableName == 'tm_test_instance') {
-      this._sysId = this._gr.getValue('tm_test_case_instance');
-    }
-    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-    this._mstrDlg = new dialogClass("tm_ref_choose_dialog");
-    var titleMsg = getMessage("Assign Defect to Test Case");
-    this._mstrDlg.setTitle(titleMsg);
-    this._mstrDlg.setPreference("sysparam_reference_table", "rm_defect");
-    this._mstrDlg.setPreference("sysparam_query", "");
-    this._mstrDlg.setPreference("sysparam_field_label", getMessage("Defect"));
-    this._mstrDlg.setPreference("handler", this);
-  },
-  showLoadingDialog: function() {
-    this.loadingDialog = new GlideDialogWindow("dialog_loading", true, 300);
-    this.loadingDialog.setPreference('table', 'loading');
-    this.loadingDialog.render();
-  },
-  hideLoadingDialog: function() {
-    this.loadingDialog && this.loadingDialog.destroy();
-  },
-  showDialog: function() {
-    this._mstrDlg.render();
-  },
-  onSubmit: function() {
-    this.defectId = this._getValue('rm_defect_ref');
-    this.defectLabel = this._getDisplayValue('rm_defect_ref');
-    if (!this._validate()) {
-      return false;
-    }
-    this._mstrDlg.destroy();
-    if (this.defectId) {
-      var ga = new GlideAjax("tm_AjaxProcessor");
-      ga.addParam('sysparm_name', 'mapDefectToTestCase');
-      ga.addParam('sysparm_sysId', this._sysId);
-      ga.addParam('sysparm_defect', this.defectId);
-      ga.addParam('sysparm_tn', this._testCaseInstance);
-      this.showLoadingDialog();
-      ga.getXML(this.callback.bind(this));
-    }
-    return false;
-  },
-  callback: function(response) {
-    this.hideLoadingDialog();
-    var resp = response.responseXML.getElementsByTagName("result");
-    if (resp[0] && resp[0].getAttribute("status") == "success") {
-      if (this._tableName == this._testCaseInstance) {
-        var list = GlideList2.get(g_form.getTableName() + '.REL:5da20971872121003706db5eb2e3ec0b');
-        if (list)
-          list.setFilterAndRefresh('');
+    var ajax = new GlideAjax('hr_CaseAjax');
+    ajax.addParam('sysparm_name', 'isPhoneNumberValid');
+    ajax.addParam('sysparm_phoneNumber', number);
+    ajax.setWantSessionMessages(false);
+    ajax.getXMLAnswer(function(answer) {
+      var result = answer.evalJSON();
+      if (result.valid) {
+        if (number != result.number) {
+          g_form.setValue(phoneField, result.number);
+        }
       } else {
-        this._displayInfoMessage(resp[0]);
+        g_form.hideFieldMsg(phoneField, true);
+        g_form.showErrorBox(phoneField, getMessage('Invalid phone number'));
+        return;
       }
+      g_form.hideFieldMsg(phoneField, true);
+    });
+  },
+  validatePhoneNumberForFieldSynchronously: function(number, phoneField) {
+    if (!number) {
+      g_form.hideFieldMsg(phoneField, true);
+      return;
+    }
+    var isValid = false;
+    var ajax = new GlideAjax('hr_CaseAjax');
+    ajax.addParam('sysparm_name', 'isPhoneNumberValid');
+    ajax.addParam('sysparm_phoneNumber', number);
+    ajax.setWantSessionMessages(false);
+    ajax.getXMLWait();
+    var answer = ajax.getAnswer();
+    var result = answer.evalJSON();
+    if (result.valid) {
+      if (number != result.number) {
+        g_form.setValue(phoneField, result.number);
+      }
+      g_form.hideFieldMsg(phoneField, true);
+      isValid = true;
     } else {
-      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-      this._createError = new dialogClass("tm_error_dialog");
-      this._createError.setTitle(getMessage("Error while assigning defect."));
-      this._createError.render();
+      g_form.hideFieldMsg(phoneField, true);
+      g_form.showErrorBox(phoneField, getMessage('Invalid phone number'));
+      isValid = false;
     }
+    return isValid;
   },
-  _validate: function() {
-    this._prmErr = [];
-    this._removeAllError('tm_ref_choose_dialog');
-    if (this._getValue('rm_defect_ref') == 'undefined' || this._getValue('rm_defect_ref').trim() == "") {
-      this._prmErr.push(getMessage("Select the defect."));
-      this._showFieldError('ref_test_suite_field', getMessage(this._prmErr[0]));
-      return false;
-    }
-    return this._checkForDuplicateEntry();
-  },
-  _getValue: function(inptNm) {
-    return gel(inptNm).value;
-  },
-  _getDisplayValue: function(inputNm) {
-    return gel('display_hidden.' + inputNm).value;
-  },
-  _displayInfoMessage: function(result) {
-    var infoMessage = result.textContent;
-    this._gr.addInfoMessage(infoMessage);
-  },
-  _checkForDuplicateEntry: function() {
-    this.defectId = this._getValue('rm_defect_ref');
-    this._testCaseInstance;
-    var ga = new GlideAjax("tm_AjaxProcessor");
-    ga.addParam('sysparm_name', 'hasAssociation');
-    ga.addParam('sysparm_testcaseinstance', this._sysId);
-    ga.addParam('sysparm_defect', this._getValue('rm_defect_ref'));
-    this.showLoadingDialog();
-    var responseXML = ga.getXMLWait();
-    return this._parseResponse(responseXML);
-  },
-  _parseResponse: function(responseXML) {
-    this.hideLoadingDialog();
-    var resp = responseXML.getElementsByTagName("result");
-    if (resp[0] && resp[0].getAttribute("status") == "success") {
-      var isDuplicate = responseXML.documentElement.getAttribute("answer");
-      this._removeAllError('tm_ref_choose_dialog');
-      if (isDuplicate == 'true') {
-        this._showFieldError('ref_test_suite_field', getMessage('Already assigned'));
-        return false;
+  populateContextualSearch: function(searchField) {
+    function triggerKnowledgeSearch() {
+      if (!window.NOW || !window.NOW.cxs_searchService) {
+        window.setTimeout(triggerKnowledgeSearch, 500);
+        return;
       }
+      var key = document.createEvent('Events');
+      key.initEvent('keyup', true, true);
+      key.keyCode = 13;
+      g_form.getElement(searchField).dispatchEvent(key);
+      g_form.setDisplay(searchField, false);
     }
-    return true;
-  },
-  _removeAllError: function(dialogName) {
-    $$('#' + dialogName + ' .form-group.has-error').each(function(item) {
-      $(item).removeClassName('has-error');
-      $(item).down('.help-block').setStyle({
-        'display': 'none'
-      });
+    var gr = new GlideAjax('hr_CaseAjax');
+    gr.addParam('sysparm_name', 'getCatalogProperties');
+    gr.addParam('sysparm_catalogId', g_form.getParameter('id'));
+    gr.getXMLAnswer(function(answer) {
+      var result = answer.evalJSON();
+      if (result && result[searchField]) {
+        g_form.setValue(searchField, result[searchField]);
+        window.setTimeout(triggerKnowledgeSearch, 100);
+      }
     });
   },
-  _showFieldError: function(groupId, message) {
-    var $group = $(groupId);
-    var $helpBlock = $group.down('.help-block');
-    if (!$group.hasClassName('has-error'))
-      $group.addClassName('has-error');
-    if ($helpBlock.getStyle('display') != 'inline-block') {
-      $helpBlock.update(message);
-      $helpBlock.setStyle({
-        'display': 'inline-block'
+  catalogAdjustPriorityClientScript: function(control, oldValue, newValue, isLoading) {
+    if (!newValue)
+      return;
+    var userInfo = g_form.getReference('opened_for');
+    var gr;
+    if (userInfo.hasOwnProperty('vip') && userInfo.vip == 'true') {
+      gr = new GlideAjax('hr_CaseAjax');
+      gr.addParam('sysparm_name', 'getDefaultVIPPriority');
+      gr.getXMLAnswer(function(answer) {
+        if (answer)
+          g_form.setValue('priority', answer);
+        else
+          g_form.setValue('priority', '2');
       });
-    }
-  },
-  type: "tm_AssignDefect"
-});
-/*! RESOURCE: tm_AddToTestPlanHandler */
-var tm_AddToTestPlanHandler = Class.create({
-  initialize: function(gr) {
-    this._gr = gr;
-    this._isList = (gr.type + "" == "GlideList2");
-    this._tableName = this._gr.getTableName();
-    this._prmErr = [];
-    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-    this._mstrDlg = new dialogClass("tm_ref_choose_dialog");
-    var titleMsg = '';
-    if (this._gr.getTableName() == 'tm_test_case') {
-      titleMsg = getMessage("Add Case(s) to Test Plan");
-    } else if (this._gr.getTableName() == 'tm_test_suite') {
-      titleMsg = getMessage("Add Suite(s) to Test Plan");
-    }
-    this._mstrDlg.setTitle(titleMsg);
-    this._mstrDlg.setPreference("sysparam_field_label", getMessage("Test Plan"));
-    this._mstrDlg.setPreference("sysparam_reference_table", "tm_test_plan");
-    this._mstrDlg.setPreference("sysparam_query", "active=true");
-    this._mstrDlg.setPreference("handler", this);
-  },
-  showDialog: function() {
-    this._mstrDlg.render();
-  },
-  onSubmit: function() {
-    var testPlanId = this._getValue('tm_test_plan_ref');
-    if (!this._validate()) {
-      return false;
-    }
-    this._mstrDlg.destroy();
-    if (testPlanId) {
-      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-      this._plsWtDlg = new dialogClass("tm_wait_dialog");
-      this._plsWtDlg.setTitle(getMessage("Working.  Please wait."));
-      this._plsWtDlg.render();
-      var ga = new GlideAjax("tm_AjaxProcessor");
-      ga.addParam('sysparm_name', 'addToTestPlan');
-      ga.addParam('sysparm_sys_id', this._isList ? this._gr.getChecked() : this._gr.getUniqueValue());
-      ga.addParam('sysparm_tm_test_plan', testPlanId);
-      ga.addParam('sysparm_tn', this._tableName);
-      ga.getXML(this.callback.bind(this));
-    }
-    return false;
-  },
-  callback: function(response) {
-    this._plsWtDlg.destroy();
-    var resp = response.responseXML.getElementsByTagName("result");
-    if (resp[0] && resp[0].getAttribute("status") == "success") {
-      return false;
     } else {
-      var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-      this._createError = new dialogClass("tm_error_dialog");
-      this._createError.setTitle(getMessage("Error while adding Test Cases from selected Test Suite."));
-      this._createError.render();
-    }
-  },
-  _refreshRelatedList: function() {
-    this._gForm.setFilterAndRefresh('');
-  },
-  _validate: function() {
-    var valid = true;
-    this._prmErr = [];
-    if (!this._isList)
-      this._removeAllError('tm_ref_choose_dialog');
-    if (this._getValue('tm_test_plan_ref') == 'undefined' || this._getValue('tm_test_plan_ref').trim() == "") {
-      this._prmErr.push(getMessage("Select Test Plan"));
-      if (!this._isList)
-        this._showFieldError('ref_test_suite_field', this._prmErr[0]);
-      valid = false;
-    }
-    return valid;
-  },
-  _removeAllError: function(dialogName) {
-    $$('#' + dialogName + ' .form-group.has-error').each(function(item) {
-      $(item).removeClassName('has-error');
-      $(item).down('.help-block').setStyle({
-        'display': 'none'
-      });
-    });
-  },
-  _showFieldError: function(groupId, message) {
-    var $group = $(groupId);
-    var $helpBlock = $group.down('.help-block');
-    if (!$group.hasClassName('has-error'))
-      $group.addClassName('has-error');
-    if ($helpBlock.getStyle('display') != 'inline-block') {
-      $helpBlock.update(message);
-      $helpBlock.setStyle({
-        'display': 'inline-block'
+      gr = new GlideAjax('hr_CaseAjax');
+      gr.addParam('sysparm_name', 'getCatalogProperties');
+      gr.addParam('sysparm_catalogId', g_form.getParameter('id'));
+      gr.getXMLAnswer(function(answer) {
+        var result = answer.evalJSON();
+        if (result && result.priority)
+          g_form.setValue('priority', result.priority);
+        else
+          g_form.setValue('priority', '4');
       });
     }
   },
-  _getValue: function(inptNm) {
-    return gel(inptNm).value;
+  catalogOpenedForClientScript: function() {
+    if (g_user.hasRole('hr_case_writer'))
+      g_form.setReadonly('opened_for', false);
+    else
+      g_form.setReadonly('opened_for', true);
   },
-  type: "tm_AddToTestPlanHandler"
-});
-/*! RESOURCE: AddScrumTask */
-var AddScrumTask = Class.create();
-AddScrumTask.prototype = {
-  initialize: function() {
-    this.list = (typeof g_list != "undefined") ? g_list : null;
-    this.storyID = typeof rowSysId == 'undefined' ? (gel('sys_uniqueValue') ? gel('sys_uniqueValue').value : "") : rowSysId;
-    this.setUpFacade();
-    this.setUpEvents();
-    this.display(true);
-    this.checkOKButton();
-  },
-  toggleOKButton: function(visible) {
-    $("ok").style.display = (visible ? "inline" : "none");
-  },
-  setUpFacade: function() {
-    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-    this.dialog = new dialogClass("task_window");
-    this.dialog.setTitle(getMessage("Add Scrum Tasks"));
-    var mapCount = this.getTypeCounts();
-    this.dialog.setBody(this.getMarkUp(mapCount), false, false);
-  },
-  checkOKButton: function() {
-    var visible = false;
-    var self = this;
-    $('task_window').select("select").each(function(elem) {
-      if (elem.value + "" != "0") visible = true;
-      if (!elem.onChangeAdded) {
-        elem.onChangeAdded = true;
-        elem.on("change", function() {
-          self.checkOKButton();
-        });
-      }
-    });
-    this.toggleOKButton(visible);
-  },
-  getTypeCounts: function() {
-    var mapLabel = this.getLabels("rm_scrum_task", "type");
-    var mapCount = {};
-    for (var strKey in mapLabel) {
-      mapCount[strKey] = getPreference("com.snc.sdlc.scrum.pp.tasks." + strKey, 0);
-    }
-    return mapCount;
-  },
-  setUpEvents: function() {
-    var self = this,
-      dialog = this.dialog;
-    $("ok").on("click", function() {
-      var mapTaskData = {};
-      if (self.fillDataMap(mapTaskData)) {
-        var taskProducer = new GlideAjax("ScrumAjaxTaskProducer");
-        for (var strKey in mapTaskData) {
-          taskProducer.addParam("sysparm_" + encodeURIComponent(strKey), mapTaskData[strKey]);
-        }
-        self.showStatus("Adding tasks...");
-        taskProducer.getXML(function() {
-          self.refresh();
-          dialog.destroy();
-        });
-      } else {
-        dialog.destroy();
-      }
-    });
-    $("cancel").on("click", function() {
-      dialog.destroy();
-    });
-  },
-  refresh: function() {
-    if (this.list) this.list.refresh();
-    else this.reloadList("rm_story.rm_scrum_task.story");
-  },
-  getSysID: function() {
-    return this.storyID;
-  },
-  fillDataMap: function(mapTaskData) {
-    var bTasksRequired = false;
-    mapTaskData.name = "createTasks";
-    mapTaskData.sys_id = this.getSysID();
-    var mapDetails = this.getLabels("rm_scrum_task", "type");
-    var arrTaskTypes = [];
-    for (var key in mapDetails) {
-      arrTaskTypes.push(key);
-    }
-    for (var nSlot = 0; nSlot < arrTaskTypes.length; ++nSlot) {
-      var strTaskType = arrTaskTypes[nSlot];
-      var strTaskData = $(strTaskType).getValue();
-      mapTaskData[strTaskType] = strTaskData;
-      setPreference("com.snc.sdlc.scrum.pp.tasks." + strTaskType, strTaskData);
-      if (strTaskData != "0") {
-        bTasksRequired = true;
-      }
-    }
-    return bTasksRequired;
-  },
-  getMarkUp: function(mapCounts) {
-    function getSelectMarkUp(strFieldId, nValue) {
-      var strMarkUp = '<select class="form-control select2" id="' + strFieldId + '" name="' + strFieldId + '">';
-      for (var nSlot = 0; nSlot <= 10; nSlot++) {
-        if (nValue != 0 && nValue == nSlot) {
-          strMarkUp += '<option value="' + nSlot + '" selected="selected">' + nSlot + '</option>';
-        } else {
-          strMarkUp += '<option value="' + nSlot + '">' + nSlot + '</option>';
-        }
-      }
-      strMarkUp += "</select>";
-      return strMarkUp;
-    }
-
-    function buildRow(strMessage, nValue) {
-      var row = '';
-      row += '<div class="row" style="padding-top:10px;">';
-      row += '<div class="form-group">';
-      row += '<label class="control-label col-sm-3" for="' + strMessage + '" style="white-space:nowrap;">';
-      row += getMessage(strMessage);
-      row += '</label>';
-      row += '<span class="col-sm-9">';
-      row += getSelectMarkUp(strMessage, nValue);
-      row += '</span>';
-      row += '</div>';
-      row += '</div>';
-      return row;
-    }
-
-    function buildTable(mapDetails, mapCounts) {
-      var arrDetails = [];
-      for (var strKey in mapDetails) {
-        arrDetails.push(strKey + "");
-      }
-      arrDetails.sort();
-      var strBuf = '';
-      for (var index = 0; index < arrDetails.length; ++index) {
-        var nCount = mapCounts[arrDetails[index]];
-        strBuf += buildRow(arrDetails[index], nCount);
-      }
-      strBuf += '';
-      return strBuf;
-    }
-    var mapLabels = this.getLabels("rm_scrum_task", "type");
-    return buildTable(mapLabels, mapCounts) + "<div id='task_controls' style='text-align:right;padding-top:20px;'>" +
-      "<button id='cancel' type='button' class='btn btn-default'>" + getMessage('Cancel') + "</button>" +
-      "&nbsp;&nbsp;<button id='ok' type='button' class='btn btn-primary'>" + getMessage('OK') + "</button></div>";
-  },
-  reloadForm: function() {
-    document.location.href = document.location.href;
-  },
-  reloadList: function(strListName) {
-    var list = GlideList2.get(strListName);
-    if (list)
-      list.refresh();
-  },
-  showStatus: function(strMessage) {
-    $("task_controls").update("Loading...");
-  },
-  display: function(bIsVisible) {
-    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-  },
-  getLabels: function(strTable, strAttribute) {
-    var taskProducer = new GlideAjax("ScrumAjaxTaskProducer");
-    taskProducer.addParam("sysparm_name", "getLabels");
-    taskProducer.addParam("sysparm_table", strTable);
-    taskProducer.addParam("sysparm_attribute", strAttribute);
-    var result = taskProducer.getXMLWait();
-    return this._parseResponse(result);
-  },
-  _parseResponse: function(resultXML) {
-    var jsonStr = resultXML.documentElement.getAttribute("answer");
-    var map = JSON.parse(jsonStr);
-    return map;
-  }
+  type: 'HR_Utils_UI'
 };
 /*! RESOURCE: UI Action Context Menu */
 function showUIActionContext(event) {
@@ -877,374 +552,25 @@ addLoadEvent(function() {
     showUIActionContext(evt);
   });
 });
-/*! RESOURCE: AddMembersFromGroup */
-var AddMembersFromGroup = Class.create(GlideDialogWindow, {
-  initialize: function() {
-    this.setUpFacade();
-  },
-  setUpFacade: function() {
-    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-    this.setTitle(getMessage("Add Members From Group"));
-    this.setBody(this.getMarkUp(), false, false);
-  },
-  setUpEvents: function() {
-    var dialog = this;
-    var okButton = $("ok");
-    if (okButton) {
-      okButton.on("click", function() {
-        var mapData = {};
-        if (dialog.fillDataMap(mapData)) {
-          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
-          for (var strKey in mapData) {
-            processor.addParam(strKey, mapData[strKey]);
-          }
-          dialog.showStatus(getMessage("Adding group users..."));
-          processor.getXML(function() {
-            dialog.refresh();
-            dialog._onCloseClicked();
-          });
-        } else {
-          dialog._onCloseClicked();
-        }
-      });
+/*! RESOURCE: Redirect ESS Users to CMS portal */
+addLoadEvent(function() {
+  try {
+    if (g_user.hasRole("admin") || g_user.hasRole("itil") || g_user.hasRole("ui_access") || document.URL.indexOf('reset_password') >= 0) {} else if (!g_user.hasRoles() && document.URL.indexOf('ess') == -1) {
+      top.window.location = '/ess_portal/home.do';
+    } else if (g_user.hasRoles() && document.URL.indexOf('ess') == -1 && top.document.referrer.indexOf('ess') == -1) {
+      top.window.location = '/ess_portal/home.do';
     }
-    var cancelButton = $("cancel");
-    if (cancelButton) {
-      cancelButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-    var okNGButton = $("okNG");
-    if (okNGButton) {
-      okNGButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-    var cancelNGButton = $("cancelNG");
-    if (cancelNGButton) {
-      cancelNGButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-  },
-  refresh: function() {
-    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
-  },
-  getScrumReleaseTeamSysId: function() {
-    return g_form.getUniqueValue() + "";
-  },
-  getUserChosenGroupSysIds: function() {
-    return $F('groupId') + "";
-  },
-  showStatus: function(strMessage) {
-    $("task_controls").update(strMessage);
-  },
-  display: function(bIsVisible) {
-    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-  },
-  getRoleIds: function() {
-    var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
-    var arrRoleIds = [];
-    var record = new GlideRecord("sys_user_role");
-    record.addQuery("name", "IN", arrRoleNames.join(","));
-    record.query();
-    while (record.next())
-      arrRoleIds.push(record.sys_id + "");
-    return arrRoleIds;
-  },
-  hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
-    for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
-      if (arrScrumRoleSysIds[index] == "" + roleSysId)
-        return true;
-    var record = new GlideRecord("sys_user_role_contains");
-    record.addQuery("role", roleSysId);
-    record.query();
-    while (record.next())
-      if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
-        return true;
-    return false;
-  },
-  getGroupIds: function() {
-    var arrScrumRoleIds = this.getRoleIds();
-    var arrGroupIds = [];
-    var record = new GlideRecord("sys_group_has_role");
-    record.query();
-    while (record.next())
-      if (this.hasScrumRole(record.role, arrScrumRoleIds))
-        arrGroupIds.push(record.group + "");
-    return arrGroupIds;
-  },
-  getGroupInfo: function() {
-    var mapGroupInfo = {};
-    var arrRoleIds = this.getRoleIds();
-    var arrGroupIds = this.getGroupIds(arrRoleIds);
-    var record = new GlideRecord("sys_user_group");
-    record.addQuery("sys_id", "IN", arrGroupIds.join(","));
-    record.query();
-    while (record.next()) {
-      var strName = record.name + "";
-      var strSysId = record.sys_id + "";
-      mapGroupInfo[strName] = {
-        name: strName,
-        sysid: strSysId
-      };
-    }
-    return mapGroupInfo;
-  },
-  getMarkUp: function() {
-    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
-    groupAjax.addParam('sysparm_name', 'getGroupInfo');
-    groupAjax.getXML(this.generateMarkUp.bind(this));
-  },
-  generateMarkUp: function(response) {
-    var mapGroupInfo = {};
-    var groupData = response.responseXML.getElementsByTagName("group");
-    var strName, strSysId;
-    for (var i = 0; i < groupData.length; i++) {
-      strName = groupData[i].getAttribute("name");
-      strSysId = groupData[i].getAttribute("sysid");
-      mapGroupInfo[strName] = {
-        name: strName,
-        sysid: strSysId
-      };
-    }
-    var arrGroupNames = [];
-    for (var strGroupName in mapGroupInfo) {
-      arrGroupNames.push(strGroupName + "");
-    }
-    arrGroupNames.sort();
-    var strMarkUp = "";
-    if (arrGroupNames.length > 0) {
-      var strTable = "<table><tr><td><label for='groupId'><select id='groupId'>";
-      for (var nSlot = 0; nSlot < arrGroupNames.length; ++nSlot) {
-        strName = arrGroupNames[nSlot];
-        strSysId = mapGroupInfo[strName].sysid;
-        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
-      }
-      strTable += "</select></label></td></tr></table>";
-      strMarkUp = "<div id='task_controls'>" + strTable +
-        "<div style='text-align: right;'>" +
-        "<button id='ok' type='button'>" + getMessage("OK") + "</button>" +
-        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></div></div>";
-    } else {
-      strMarkUp = "<div id='task_controls'><p>No groups with scrum_user role found</p>" +
-        "<div style='text-align: right;'>" +
-        "<button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
-        "<button id='cancelNG' type='button'>" + getMessage("Cancel") +
-        "</button></div></div>";
-    }
-    this.setBody(strMarkUp, false, false);
-    this.setUpEvents();
-    this.display(true);
-    this.setWidth(180);
-  },
-  fillDataMap: function(mapData) {
-    var strChosenGroupSysId = this.getUserChosenGroupSysIds();
-    if (strChosenGroupSysId) {
-      mapData.sysparm_name = "createReleaseTeamMembers";
-      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
-      mapData.sysparm_groups = strChosenGroupSysId;
-      return true;
-    } else {
-      return false;
-    }
-  }
+  } catch (err) {}
 });
-/*! RESOURCE: AddTeamMembers */
-var AddTeamMembers = Class.create(GlideDialogWindow, {
-  initialize: function() {
-    this.setUpFacade();
-  },
-  setUpFacade: function() {
-    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-    this.setTitle(getMessage("Add Team Members"));
-    this.setBody(this.getMarkUp(), false, false);
-  },
-  setUpEvents: function() {
-    var dialog = this;
-    var okButton = $("ok");
-    if (okButton) {
-      okButton.on("click", function() {
-        var mapData = {};
-        if (dialog.fillDataMap(mapData)) {
-          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
-          for (var strKey in mapData) {
-            processor.addParam(strKey, mapData[strKey]);
-          }
-          dialog.showStatus(getMessage("Adding team members..."));
-          processor.getXML(function() {
-            dialog.refresh();
-            dialog._onCloseClicked();
-          });
-        } else {
-          dialog._onCloseClicked();
-        }
-      });
-    }
-    var cancelButton = $("cancel");
-    if (cancelButton) {
-      cancelButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-    var okNGButton = $("okNG");
-    if (okNGButton) {
-      okNGButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-    var cancelNGButton = $("cancelNG");
-    if (cancelNGButton) {
-      cancelNGButton.on("click", function() {
-        dialog._onCloseClicked();
-      });
-    }
-    var teamCombo = $("teamId");
-    if (teamCombo) {
-      teamCombo.on("change", function() {
-        dialog.updateMembers();
-      });
-    }
-  },
-  updateMembers: function() {
-    var arrMemberInfo = [];
-    var teamCombo = $("teamId");
-    if (teamCombo) {
-      var strTeamSysId = teamCombo.value;
-      var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
-      recTeamMember.addQuery("team", strTeamSysId);
-      recTeamMember.query();
-      while (recTeamMember.next()) {
-        var recSysUser = new GlideRecord("sys_user");
-        recSysUser.addQuery("sys_id", recTeamMember.name);
-        recSysUser.query();
-        var strName = recSysUser.next() ? recSysUser.name : "";
-        var strPoints = recTeamMember.default_sprint_points + "";
-        arrMemberInfo.push({
-          name: strName,
-          points: strPoints
-        });
-      }
-    }
-    if (arrMemberInfo.length > 0) {
-      var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
-        "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
-      for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
-        var strMemberName = arrMemberInfo[nSlot].name + "";
-        var strMemberPoints = arrMemberInfo[nSlot].points + "";
-        strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
-          "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
-      }
-      $("memberId").update(strHtml);
-    } else {
-      $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
-    }
-  },
-  refresh: function() {
-    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
-  },
-  getScrumReleaseTeamSysId: function() {
-    return g_form.getUniqueValue() + "";
-  },
-  getUserChosenTeamSysIds: function() {
-    return $F('teamId') + "";
-  },
-  showStatus: function(strMessage) {
-    $("task_controls").update(strMessage);
-  },
-  display: function(bIsVisible) {
-    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-  },
-  getMarkUp: function() {
-    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
-    groupAjax.addParam('sysparm_name', 'getTeamInfo');
-    groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
-    groupAjax.getXML(this.generateMarkUp.bind(this));
-  },
-  generateMarkUp: function(response) {
-    var mapTeamInfo = {};
-    var teamData = response.responseXML.getElementsByTagName("team");
-    var strName, strSysId;
-    for (var i = 0; i < teamData.length; i++) {
-      strName = teamData[i].getAttribute("name");
-      strSysId = teamData[i].getAttribute("sysid");
-      mapTeamInfo[strName] = {
-        name: strName,
-        sysid: strSysId
-      };
-    }
-    var arrTeamNames = [];
-    for (var strTeamName in mapTeamInfo) {
-      arrTeamNames.push(strTeamName + "");
-    }
-    arrTeamNames.sort();
-    var strMarkUp = "";
-    if (arrTeamNames.length > 0) {
-      var strTable = "<table><tr><td><label for='teamId'>" + getMessage("Team") + "</label>&nbsp;<select id='teamId'>";
-      for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
-        strName = arrTeamNames[nSlot];
-        strSysId = mapTeamInfo[strName].sysid;
-        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
-      }
-      strTable += "</select></label></td></tr></table>";
-      var strTable2 = "<table style='width: 100%;'><tr><td style='width: 50%;'></td><td><table id='memberId'></table></td><td style='width: 50%;'></td></tr></table>";
-      strMarkUp = "<div id='task_controls' style='overflow: auto;>" + strTable + strTable2 +
-        "</div><table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='ok' type='button'>" + getMessage("OK") + "</button>" +
-        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></td></tr></table>";
-    } else {
-      strMarkUp = "<div id='task_controls'><p>No release teams found</p>" +
-        "<table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
-        "<button id='cancelNG' type='button'>" + getMessage("Cancel") + "</button></td></tr></table></div>";
-    }
-    this.setBody(strMarkUp, false, false);
-    this.setUpEvents();
-    this.display(true);
-    this.setWidth(280);
-  },
-  fillDataMap: function(mapData) {
-    var strChosenTeamSysId = this.getUserChosenTeamSysIds();
-    if (strChosenTeamSysId) {
-      mapData.sysparm_name = "createReleaseTeamMembers";
-      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
-      mapData.sysparm_teams = strChosenTeamSysId;
-      return true;
-    } else {
-      return false;
-    }
+/*! RESOURCE: /scripts/lib/jquery/jquery_clean.js */
+(function() {
+  if (!window.jQuery)
+    return;
+  if (!window.$j_glide)
+    window.$j = jQuery.noConflict();
+  if (window.$j_glide && jQuery != window.$j_glide) {
+    if (window.$j_glide)
+      jQuery.noConflict(true);
+    window.$j = window.$j_glide;
   }
-});
-/*! RESOURCE: ScrumAddSprints */
-var ScrumAddSprints = Class.create({
-      initialize: function(gr) {
-        this._gr = gr;
-        this._prmNms = ["spName", "spDuration", "spStartDate", "spStartNum", "spNum", "_tn", "_sys_id"];
-        this._dateFN = ["spStartDate"];
-        this._refObs = [];
-        this._prmVls = [];
-        for (var i = 0; i < this._prmNms.length; i++) {
-          this._prmVls[this._prmNms[i]] = "";
-        }
-        this._prmErr = [];
-        var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
-        this._crtDlg = new dialogClass("scrum_add_sprints_dialog");
-        this._crtDlg.setTitle("Add Sprints");
-        this._crtDlg.setPreference("_tn", this._gr.getTableName());
-        this._crtDlg.setPreference("_sys_id", (this._gr.getUniqueValue()));
-        this._crtDlg.setPreference("handler", this);
-      },
-      showDialog: function() {
-        this._crtDlg.render();
-      },
-      onSubmit: function() {
-          this._readFormValues();
-          if (!this._validate()) {
-            var errMsg = "Before you submit:";
-            for (var i = 0; i < this._prmErr.length; i++) {
-              errMsg += "\n * " + this._prmErr[i];
-            }
-            alert(errMsg);
-            return false;
-          }
-          this._crtDlg.destroy();
-          var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
-          ga.addPara
+})();;;

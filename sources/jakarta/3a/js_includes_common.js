@@ -10464,120 +10464,1245 @@ angular.module("sn.common.util").directive("snCloak", function() {
 });
 /*! RESOURCE: /scripts/sn/common/util/service.md5.js */
 angular.module('sn.common.util').factory('md5', function() {
-      'use strict';
-      var md5cycle = function(x, k) {
-        var a = x[0],
-          b = x[1],
-          c = x[2],
-          d = x[3];
-        a = ff(a, b, c, d, k[0], 7, -680876936);
-        d = ff(d, a, b, c, k[1], 12, -389564586);
-        c = ff(c, d, a, b, k[2], 17, 606105819);
-        b = ff(b, c, d, a, k[3], 22, -1044525330);
-        a = ff(a, b, c, d, k[4], 7, -176418897);
-        d = ff(d, a, b, c, k[5], 12, 1200080426);
-        c = ff(c, d, a, b, k[6], 17, -1473231341);
-        b = ff(b, c, d, a, k[7], 22, -45705983);
-        a = ff(a, b, c, d, k[8], 7, 1770035416);
-        d = ff(d, a, b, c, k[9], 12, -1958414417);
-        c = ff(c, d, a, b, k[10], 17, -42063);
-        b = ff(b, c, d, a, k[11], 22, -1990404162);
-        a = ff(a, b, c, d, k[12], 7, 1804603682);
-        d = ff(d, a, b, c, k[13], 12, -40341101);
-        c = ff(c, d, a, b, k[14], 17, -1502002290);
-        b = ff(b, c, d, a, k[15], 22, 1236535329);
-        a = gg(a, b, c, d, k[1], 5, -165796510);
-        d = gg(d, a, b, c, k[6], 9, -1069501632);
-        c = gg(c, d, a, b, k[11], 14, 643717713);
-        b = gg(b, c, d, a, k[0], 20, -373897302);
-        a = gg(a, b, c, d, k[5], 5, -701558691);
-        d = gg(d, a, b, c, k[10], 9, 38016083);
-        c = gg(c, d, a, b, k[15], 14, -660478335);
-        b = gg(b, c, d, a, k[4], 20, -405537848);
-        a = gg(a, b, c, d, k[9], 5, 568446438);
-        d = gg(d, a, b, c, k[14], 9, -1019803690);
-        c = gg(c, d, a, b, k[3], 14, -187363961);
-        b = gg(b, c, d, a, k[8], 20, 1163531501);
-        a = gg(a, b, c, d, k[13], 5, -1444681467);
-        d = gg(d, a, b, c, k[2], 9, -51403784);
-        c = gg(c, d, a, b, k[7], 14, 1735328473);
-        b = gg(b, c, d, a, k[12], 20, -1926607734);
-        a = hh(a, b, c, d, k[5], 4, -378558);
-        d = hh(d, a, b, c, k[8], 11, -2022574463);
-        c = hh(c, d, a, b, k[11], 16, 1839030562);
-        b = hh(b, c, d, a, k[14], 23, -35309556);
-        a = hh(a, b, c, d, k[1], 4, -1530992060);
-        d = hh(d, a, b, c, k[4], 11, 1272893353);
-        c = hh(c, d, a, b, k[7], 16, -155497632);
-        b = hh(b, c, d, a, k[10], 23, -1094730640);
-        a = hh(a, b, c, d, k[13], 4, 681279174);
-        d = hh(d, a, b, c, k[0], 11, -358537222);
-        c = hh(c, d, a, b, k[3], 16, -722521979);
-        b = hh(b, c, d, a, k[6], 23, 76029189);
-        a = hh(a, b, c, d, k[9], 4, -640364487);
-        d = hh(d, a, b, c, k[12], 11, -421815835);
-        c = hh(c, d, a, b, k[15], 16, 530742520);
-        b = hh(b, c, d, a, k[2], 23, -995338651);
-        a = ii(a, b, c, d, k[0], 6, -198630844);
-        d = ii(d, a, b, c, k[7], 10, 1126891415);
-        c = ii(c, d, a, b, k[14], 15, -1416354905);
-        b = ii(b, c, d, a, k[5], 21, -57434055);
-        a = ii(a, b, c, d, k[12], 6, 1700485571);
-        d = ii(d, a, b, c, k[3], 10, -1894986606);
-        c = ii(c, d, a, b, k[10], 15, -1051523);
-        b = ii(b, c, d, a, k[1], 21, -2054922799);
-        a = ii(a, b, c, d, k[8], 6, 1873313359);
-        d = ii(d, a, b, c, k[15], 10, -30611744);
-        c = ii(c, d, a, b, k[6], 15, -1560198380);
-        b = ii(b, c, d, a, k[13], 21, 1309151649);
-        a = ii(a, b, c, d, k[4], 6, -145523070);
-        d = ii(d, a, b, c, k[11], 10, -1120210379);
-        c = ii(c, d, a, b, k[2], 15, 718787259);
-        b = ii(b, c, d, a, k[9], 21, -343485551);
-        x[0] = add32(a, x[0]);
-        x[1] = add32(b, x[1]);
-        x[2] = add32(c, x[2]);
-        x[3] = add32(d, x[3]);
-      };
-      var cmn = function(q, a, b, x, s, t) {
-        a = add32(add32(a, q), add32(x, t));
-        return add32((a << s) | (a >>> (32 - s)), b);
-      };
-      var ff = function(a, b, c, d, x, s, t) {
-        return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-      };
-      var gg = function(a, b, c, d, x, s, t) {
-        return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-      };
-      var hh = function(a, b, c, d, x, s, t) {
-        return cmn(b ^ c ^ d, a, b, x, s, t);
-      };
-      var ii = function(a, b, c, d, x, s, t) {
-        return cmn(c ^ (b | (~d)), a, b, x, s, t);
-      };
-      var md51 = function(s) {
-        var txt = '';
-        var n = s.length,
-          state = [1732584193, -271733879, -1732584194, 271733878],
-          i;
-        for (i = 64; i <= s.length; i += 64) {
-          md5cycle(state, md5blk(s.substring(i - 64, i)));
+  'use strict';
+  var md5cycle = function(x, k) {
+    var a = x[0],
+      b = x[1],
+      c = x[2],
+      d = x[3];
+    a = ff(a, b, c, d, k[0], 7, -680876936);
+    d = ff(d, a, b, c, k[1], 12, -389564586);
+    c = ff(c, d, a, b, k[2], 17, 606105819);
+    b = ff(b, c, d, a, k[3], 22, -1044525330);
+    a = ff(a, b, c, d, k[4], 7, -176418897);
+    d = ff(d, a, b, c, k[5], 12, 1200080426);
+    c = ff(c, d, a, b, k[6], 17, -1473231341);
+    b = ff(b, c, d, a, k[7], 22, -45705983);
+    a = ff(a, b, c, d, k[8], 7, 1770035416);
+    d = ff(d, a, b, c, k[9], 12, -1958414417);
+    c = ff(c, d, a, b, k[10], 17, -42063);
+    b = ff(b, c, d, a, k[11], 22, -1990404162);
+    a = ff(a, b, c, d, k[12], 7, 1804603682);
+    d = ff(d, a, b, c, k[13], 12, -40341101);
+    c = ff(c, d, a, b, k[14], 17, -1502002290);
+    b = ff(b, c, d, a, k[15], 22, 1236535329);
+    a = gg(a, b, c, d, k[1], 5, -165796510);
+    d = gg(d, a, b, c, k[6], 9, -1069501632);
+    c = gg(c, d, a, b, k[11], 14, 643717713);
+    b = gg(b, c, d, a, k[0], 20, -373897302);
+    a = gg(a, b, c, d, k[5], 5, -701558691);
+    d = gg(d, a, b, c, k[10], 9, 38016083);
+    c = gg(c, d, a, b, k[15], 14, -660478335);
+    b = gg(b, c, d, a, k[4], 20, -405537848);
+    a = gg(a, b, c, d, k[9], 5, 568446438);
+    d = gg(d, a, b, c, k[14], 9, -1019803690);
+    c = gg(c, d, a, b, k[3], 14, -187363961);
+    b = gg(b, c, d, a, k[8], 20, 1163531501);
+    a = gg(a, b, c, d, k[13], 5, -1444681467);
+    d = gg(d, a, b, c, k[2], 9, -51403784);
+    c = gg(c, d, a, b, k[7], 14, 1735328473);
+    b = gg(b, c, d, a, k[12], 20, -1926607734);
+    a = hh(a, b, c, d, k[5], 4, -378558);
+    d = hh(d, a, b, c, k[8], 11, -2022574463);
+    c = hh(c, d, a, b, k[11], 16, 1839030562);
+    b = hh(b, c, d, a, k[14], 23, -35309556);
+    a = hh(a, b, c, d, k[1], 4, -1530992060);
+    d = hh(d, a, b, c, k[4], 11, 1272893353);
+    c = hh(c, d, a, b, k[7], 16, -155497632);
+    b = hh(b, c, d, a, k[10], 23, -1094730640);
+    a = hh(a, b, c, d, k[13], 4, 681279174);
+    d = hh(d, a, b, c, k[0], 11, -358537222);
+    c = hh(c, d, a, b, k[3], 16, -722521979);
+    b = hh(b, c, d, a, k[6], 23, 76029189);
+    a = hh(a, b, c, d, k[9], 4, -640364487);
+    d = hh(d, a, b, c, k[12], 11, -421815835);
+    c = hh(c, d, a, b, k[15], 16, 530742520);
+    b = hh(b, c, d, a, k[2], 23, -995338651);
+    a = ii(a, b, c, d, k[0], 6, -198630844);
+    d = ii(d, a, b, c, k[7], 10, 1126891415);
+    c = ii(c, d, a, b, k[14], 15, -1416354905);
+    b = ii(b, c, d, a, k[5], 21, -57434055);
+    a = ii(a, b, c, d, k[12], 6, 1700485571);
+    d = ii(d, a, b, c, k[3], 10, -1894986606);
+    c = ii(c, d, a, b, k[10], 15, -1051523);
+    b = ii(b, c, d, a, k[1], 21, -2054922799);
+    a = ii(a, b, c, d, k[8], 6, 1873313359);
+    d = ii(d, a, b, c, k[15], 10, -30611744);
+    c = ii(c, d, a, b, k[6], 15, -1560198380);
+    b = ii(b, c, d, a, k[13], 21, 1309151649);
+    a = ii(a, b, c, d, k[4], 6, -145523070);
+    d = ii(d, a, b, c, k[11], 10, -1120210379);
+    c = ii(c, d, a, b, k[2], 15, 718787259);
+    b = ii(b, c, d, a, k[9], 21, -343485551);
+    x[0] = add32(a, x[0]);
+    x[1] = add32(b, x[1]);
+    x[2] = add32(c, x[2]);
+    x[3] = add32(d, x[3]);
+  };
+  var cmn = function(q, a, b, x, s, t) {
+    a = add32(add32(a, q), add32(x, t));
+    return add32((a << s) | (a >>> (32 - s)), b);
+  };
+  var ff = function(a, b, c, d, x, s, t) {
+    return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+  };
+  var gg = function(a, b, c, d, x, s, t) {
+    return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+  };
+  var hh = function(a, b, c, d, x, s, t) {
+    return cmn(b ^ c ^ d, a, b, x, s, t);
+  };
+  var ii = function(a, b, c, d, x, s, t) {
+    return cmn(c ^ (b | (~d)), a, b, x, s, t);
+  };
+  var md51 = function(s) {
+    var txt = '';
+    var n = s.length,
+      state = [1732584193, -271733879, -1732584194, 271733878],
+      i;
+    for (i = 64; i <= s.length; i += 64) {
+      md5cycle(state, md5blk(s.substring(i - 64, i)));
+    }
+    s = s.substring(i - 64);
+    var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+    tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+    if (i > 55) {
+      md5cycle(state, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
+    }
+    tail[14] = n * 8;
+    md5cycle(state, tail);
+    return state;
+  };
+  var md5blk = function(s) {
+    var md5blks = [],
+      i;
+    for (i = 0; i < 64; i += 4) {
+      md5blks[i >> 2] = s.charCodeAt(i) +
+        (s.charCodeAt(i + 1) << 8) +
+        (s.charCodeAt(i + 2) << 16) +
+        (s.charCodeAt(i + 3) << 24);
+    }
+    return md5blks;
+  };
+  var hex_chr = '0123456789abcdef'.split('');
+  var rhex = function(n) {
+    var s = '',
+      j = 0;
+    for (; j < 4; j++)
+      s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] +
+      hex_chr[(n >> (j * 8)) & 0x0F];
+    return s;
+  };
+  var hex = function(x) {
+    for (var i = 0; i < x.length; i++)
+      x[i] = rhex(x[i]);
+    return x.join('');
+  };
+  var add32 = function(a, b) {
+    return (a + b) & 0xFFFFFFFF;
+  };
+  return function(s) {
+    return hex(md51(s));
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.priorityQueue.js */
+angular.module('sn.common.util').factory('priorityQueue', function() {
+  'use strict';
+  return function(comparator) {
+    var items = [];
+    var compare = comparator || function(a, b) {
+      return a - b;
+    };
+    var swap = function(a, b) {
+      var temp = items[a];
+      items[a] = items[b];
+      items[b] = temp;
+    };
+    var bubbleUp = function(pos) {
+      var parent;
+      while (pos > 0) {
+        parent = (pos - 1) >> 1;
+        if (compare(items[pos], items[parent]) >= 0)
+          break;
+        swap(parent, pos);
+        pos = parent;
+      }
+    };
+    var bubbleDown = function(pos) {
+      var left, right, min, last = items.length - 1;
+      while (true) {
+        left = (pos << 1) + 1;
+        right = left + 1;
+        min = pos;
+        if (left <= last && compare(items[left], items[min]) < 0)
+          min = left;
+        if (right <= last && compare(items[right], items[min]) < 0)
+          min = right;
+        if (min === pos)
+          break;
+        swap(min, pos);
+        pos = min;
+      }
+    };
+    return {
+      add: function(item) {
+        items.push(item);
+        bubbleUp(items.length - 1);
+      },
+      poll: function() {
+        var first = items[0],
+          last = items.pop();
+        if (items.length > 0) {
+          items[0] = last;
+          bubbleDown(0);
         }
-        s = s.substring(i - 64);
-        var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (i = 0; i < s.length; i++)
-          tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
-        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-        if (i > 55) {
-          md5cycle(state, tail);
-          for (i = 0; i < 16; i++) tail[i] = 0;
-        }
-        tail[14] = n * 8;
-        md5cycle(state, tail);
-        return state;
+        return first;
+      },
+      peek: function() {
+        return items[0];
+      },
+      clear: function() {
+        items = [];
+      },
+      inspect: function() {
+        return angular.toJson(items, true);
+      },
+      get size() {
+        return items.length;
+      },
+      get all() {
+        return items;
+      },
+      set comparator(fn) {
+        compare = fn;
+      }
+    };
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snResource.js */
+angular.module('sn.common.util').factory('snResource', function($http, $q, priorityQueue, md5) {
+  'use strict';
+  var methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'jsonp', 'trace'],
+    queue = priorityQueue(function(a, b) {
+      return a.timestamp - b.timestamp;
+    }),
+    resource = {},
+    pendingRequests = [],
+    inFlightRequests = [];
+  return function() {
+    var requestInterceptors = $http.defaults.transformRequest,
+      responseInterceptors = $http.defaults.transformResponse;
+    var next = function() {
+      var request = queue.peek();
+      pendingRequests.shift();
+      inFlightRequests.push(request.hash);
+      $http(request.config).then(function(response) {
+        request.deferred.resolve(response);
+      }, function(reason) {
+        request.deferred.reject(reason);
+      }).finally(function() {
+        queue.poll();
+        inFlightRequests.shift();
+        if (queue.size > 0)
+          next();
+      });
+    };
+    angular.forEach(methods, function(method) {
+      resource[method] = function(url, data) {
+        var deferredRequest = $q.defer(),
+          promise = deferredRequest.promise,
+          deferredAbort = $q.defer(),
+          config = {
+            method: method,
+            url: url,
+            data: data,
+            transformRequest: requestInterceptors,
+            transformResponse: responseInterceptors,
+            timeout: deferredAbort.promise
+          },
+          hash = md5(JSON.stringify(config));
+        pendingRequests.push(hash);
+        queue.add({
+          config: config,
+          deferred: deferredRequest,
+          timestamp: Date.now(),
+          hash: hash
+        });
+        if (queue.size === 1)
+          next();
+        promise.abort = function() {
+          deferredAbort.resolve('Request cancelled');
+        };
+        return promise;
       };
-      var md5blk = function(s) {
-          var md5blks = [],
-            i;
-          for (i = 0; i < 64; i += 4) {
-            md5blks[i >> 2]
+    });
+    resource.addRequestInterceptor = function(fn) {
+      requestInterceptors = requestInterceptors.concat([fn]);
+    };
+    resource.addResponseInterceptor = function(fn) {
+      responseInterceptors = responseInterceptors.concat([fn]);
+    };
+    resource.queueSize = function() {
+      return queue.size;
+    };
+    resource.queuedRequests = function() {
+      return queue.all;
+    };
+    return resource;
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snConnect.js */
+angular.module("sn.common.util").service("snConnectService", function($http, snCustomEvent) {
+  "use strict";
+  var connectPaths = ["/$c.do", "/$chat.do"];
+
+  function canOpenInFrameset() {
+    return window.top.NOW.collaborationFrameset;
+  }
+
+  function isInConnect() {
+    var parentPath = getParentPath();
+    return connectPaths.some(function(path) {
+      return parentPath == path;
+    });
+  }
+
+  function getParentPath() {
+    try {
+      return window.top.location.pathname;
+    } catch (IGNORED) {
+      return "";
+    }
+  }
+
+  function openWithProfile(profile) {
+    if (isInConnect() || canOpenInFrameset())
+      snCustomEvent.fireTop('chat:open_conversation', profile);
+    else
+      window.open("$c.do#/with/" + profile.sys_id, "_blank");
+  }
+  return {
+    openWithProfile: openWithProfile
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/snPolyfill.js */
+(function() {
+  "use strict";
+  polyfill(String.prototype, 'startsWith', function(prefix) {
+    return this.indexOf(prefix) === 0;
+  });
+  polyfill(String.prototype, 'endsWith', function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  });
+  polyfill(Number, 'isNaN', function(value) {
+    return value !== value;
+  });
+  polyfill(window, 'btoa', function(input) {
+    var str = String(input);
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    for (
+      var block, charCode, idx = 0, map = chars, output = ''; str.charAt(idx | 0) || (map = '=', idx % 1); output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+      charCode = str.charCodeAt(idx += 3 / 4);
+      if (charCode > 0xFF) {
+        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+      }
+      block = block << 8 | charCode;
+    }
+    return output;
+  });
+
+  function polyfill(obj, slot, fn) {
+    if (obj[slot] === void(0)) {
+      obj[slot] = fn;
+    }
+  }
+  window.console = window.console || {
+    log: function() {}
+  };
+})();;
+/*! RESOURCE: /scripts/sn/common/util/directive.snFocus.js */
+angular.module('sn.common.util').directive('snFocus', function($timeout) {
+  'use strict';
+  return function(scope, element, attrs) {
+    scope.$watch(attrs.snFocus, function(value) {
+      if (value !== true)
+        return;
+      $timeout(function() {
+        element[0].focus();
+      });
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snResizeHeight.js */
+angular.module('sn.common.util').directive('snResizeHeight', function($timeout, $window) {
+  "use strict";
+  return {
+    restrict: 'A',
+    link: function(scope, elem, attrs) {
+      var typographyStyles = [
+        'fontFamily',
+        'fontSize',
+        'fontWeight',
+        'fontStyle',
+        'letterSpacing',
+        'textTransform',
+        'wordSpacing',
+        'textIndent'
+      ];
+      var maxHeight = parseInt(elem.css('max-height'), 10) || 0;
+      var offset = 0;
+      var IS_EDGE = $window.navigator.userAgent.indexOf("Edge") > -1;
+      if (elem.css('box-sizing') === 'border-box' || elem.css('-moz-box-sizing') === 'border-box' || elem.css('-webkit-box-sizing') === 'border-box')
+        offset = elem.outerHeight() - elem.height();
+      var styles = {};
+      angular.forEach(typographyStyles, function(val) {
+        styles[val] = elem.css(val);
+      });
+      var $clone = angular.element('<textarea rows="1" tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"></textarea>');
+      $clone.css(styles);
+      $timeout(function() {
+        angular.element(document.body).append($clone);
+        if (elem[0].value) {
+          reSize();
+        }
+      }, 0, false);
+
+      function _fixValueForEdge(value) {
+        if (typeof value === "undefined" || !value) {
+          return "";
+        }
+        var valueWithoutReturns = value.replace(/\r?\n|\r/gm, "").length;
+        if (valueWithoutReturns === 0) {
+          return value + '&nbsp';
+        }
+        return value;
+      }
+
+      function reSize() {
+        var elemValue;
+        if (!isVisible(elem[0]) || !setWidth())
+          return;
+        if (IS_EDGE) {
+          elemValue = _fixValueForEdge(elem[0].value);
+        } else {
+          elemValue = elem[0].value;
+        }
+        if (!elem[0].value && attrs['placeholder'])
+          $clone[0].value = attrs['placeholder'] || '';
+        else
+          $clone[0].value = elemValue;
+        $clone[0].scrollTop = 0;
+        $clone[0].scrollTop = 9e4;
+        var newHeight = $clone[0].scrollTop;
+        if (maxHeight && newHeight > maxHeight) {
+          newHeight = maxHeight;
+          elem[0].style.overflow = "auto";
+        } else
+          elem[0].style.overflow = "hidden";
+        newHeight += offset;
+        elem[0].style.height = newHeight + "px";
+      }
+      var style, bordersAndPadding;
+
+      function setWidth() {
+        style = style || window.getComputedStyle(elem[0], null);
+        var width = elem[0].getBoundingClientRect().width;
+        if (width === 0 || typeof width !== 'number')
+          width = parseInt(style.width, 10);
+        if (width === 0 || typeof width !== 'number') {
+          if (style.width.length && style.width[style.width.length - 1] === '%') {
+            $timeout(reSize, 0, false);
+            return false;
+          }
+          width = parseInt(style.width, 10);
+        }
+        if (!bordersAndPadding) {
+          bordersAndPadding = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce(function(acc, val) {
+            return acc + parseInt(style[val], 10);
+          }, 0);
+        }
+        $clone[0].style.width = (width - bordersAndPadding) + 'px';
+        return true;
+      }
+      scope.$watch(
+        function() {
+          return elem[0].value
+        },
+        function watchBinding(newValue, oldValue) {
+          if (newValue === oldValue)
+            return;
+          reSize();
+        }
+      );
+      elem.on('input.resize', reSize);
+      if (attrs['snResizeHeight'] == "trim") {
+        elem.on('blur', function() {
+          elem.val(elem.val().trim());
+          reSize();
+        });
+      }
+      scope.$on('$destroy', function() {
+        $clone.remove();
+      });
+
+      function isVisible(elem) {
+        return !!elem.offsetParent;
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snBlurOnEnter.js */
+angular.module('sn.common.util').directive('snBlurOnEnter', function() {
+  'use strict';
+  return function(scope, element) {
+    element.bind("keydown keypress", function(event) {
+      if (event.which !== 13)
+        return;
+      element.blur();
+      event.preventDefault();
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snStickyHeaders.js */
+angular.module('sn.common.util').directive('snStickyHeaders', function() {
+  "use strict";
+  return {
+    restrict: 'A',
+    transclude: false,
+    replace: false,
+    link: function(scope, element, attrs) {
+      element.addClass('sticky-headers');
+      var containers;
+      var scrollContainer = element.find('[sn-sticky-scroll-container]');
+      scrollContainer.addClass('sticky-scroll-container');
+
+      function refreshHeaders() {
+        if (attrs.snStickyHeaders !== 'false') {
+          angular.forEach(containers, function(container) {
+            var stickyContainer = angular.element(container);
+            var stickyHeader = stickyContainer.find('[sn-sticky-header]');
+            var stickyOffset = stickyContainer.position().top + stickyContainer.outerHeight();
+            stickyContainer.addClass('sticky-container');
+            if (stickyOffset < stickyContainer.outerHeight() && stickyOffset > -stickyHeader.outerHeight()) {
+              stickyContainer.css('padding-top', stickyHeader.outerHeight());
+              stickyHeader.css('width', stickyHeader.outerWidth());
+              stickyHeader.removeClass('sticky-header-disabled').addClass('sticky-header-enabled');
+            } else {
+              stickyContainer.css('padding-top', '');
+              stickyHeader.css('width', '');
+              stickyHeader.removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+            }
+          });
+        } else {
+          element.find('[sn-sticky-container]').removeClass('sticky-container');
+          element.find('[sn-sticky-container]').css('padding-top', '');
+          element.find('[sn-sticky-header]').css('width', '');
+          element.find('[sn-sticky-header]').removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+        }
+      }
+      scope.$watch(function() {
+        scrollContainer.find('[sn-sticky-header]').addClass('sticky-header');
+        containers = element.find('[sn-sticky-container]');
+        return attrs.snStickyHeaders;
+      }, refreshHeaders);
+      scope.$watch(function() {
+        return scrollContainer[0].scrollHeight;
+      }, refreshHeaders);
+      scrollContainer.on('scroll', refreshHeaders);
+    }
+  };
+});;;
+/*! RESOURCE: /scripts/sn/common/ui/js_includes_ui.js */
+/*! RESOURCE: /scripts/sn/common/ui/_module.js */
+angular.module('sn.common.ui', ['sn.common.messaging']);;
+/*! RESOURCE: /scripts/sn/common/ui/popover/js_includes_ui_popover.js */
+/*! RESOURCE: /scripts/sn/common/ui/popover/_module.js */
+angular.module('sn.common.ui.popover', []);;
+/*! RESOURCE: /scripts/sn/common/ui/popover/directive.snBindPopoverSelection.js */
+angular.module('sn.common.ui.popover').directive('snBindPopoverSelection', function(snCustomEvent) {
+  "use strict";
+  return {
+    restrict: "A",
+    controller: function($scope, $element, $attrs, snCustomEvent) {
+      snCustomEvent.observe('list.record_select', recordSelectDataHandler);
+
+      function recordSelectDataHandler(data, event) {
+        if (!data || !event)
+          return;
+        event.stopPropagation();
+        var ref = ($scope.field) ? $scope.field.ref : $attrs.ref;
+        if (data.ref === ref) {
+          if (window.g_form) {
+            if ($attrs.addOption) {
+              addGlideListChoice('select_0' + $attrs.ref, data.value, data.displayValue);
+            } else {
+              var fieldValue = typeof $attrs.ref === 'undefined' ? data.ref : $attrs.ref;
+              window.g_form._setValue(fieldValue, data.value, data.displayValue);
+              clearDerivedFields(data.value);
+            }
+          }
+          if ($scope.field) {
+            $scope.field.value = data.value;
+            $scope.field.displayValue = data.displayValue;
+          }
+        }
+      }
+
+      function clearDerivedFields(value) {
+        if (window.DerivedFields) {
+          var df = new DerivedFields($scope.field ? $scope.field.ref : $attrs.ref);
+          df.clearRelated();
+          df.updateRelated(value);
+        }
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/ui/popover/directive.snComplexPopover.js */
+angular.module('sn.common.ui.popover').directive('snComplexPopover', function(getTemplateUrl, $q, $http, $templateCache, $compile, $timeout) {
+  "use strict";
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: function(elem, attrs) {
+      return getTemplateUrl(attrs.buttonTemplate);
+    },
+    controller: function($scope, $element, $attrs, $q, $document, snCustomEvent, snComplexPopoverService) {
+      $scope.type = $attrs.complexPopoverType || "complex_popover";
+      if ($scope.closeEvent) {
+        snCustomEvent.observe($scope.closeEvent, destroyPopover);
+        $scope.$on($scope.closeEvent, destroyPopover);
+      }
+      $scope.$parent.$on('$destroy', destroyPopover);
+      var newScope;
+      var open;
+      var popover;
+      var content;
+      var popoverDefaults = {
+        container: 'body',
+        html: true,
+        placement: 'auto',
+        trigger: 'manual',
+        template: '<div class="complex_popover popover" role="dialog"><div class="arrow"></div><div class="popover-content"></div></div>'
+      };
+      var popoverConfig = angular.extend(popoverDefaults, $scope.popoverConfig);
+      $scope.loading = false;
+      $scope.initialized = false;
+      $scope.togglePopover = function(event) {
+        if (!open) {
+          showPopover(event);
+        } else {
+          destroyPopover();
+        }
+      };
+
+      function showPopover(e) {
+        if ($scope.loading)
+          return;
+        $scope.$toggleButton = angular.element(e.target);
+        $scope.loading = true;
+        $scope.$emit('list.toggleLoadingState', true);
+        _getTemplate()
+          .then(_insertTemplate)
+          .then(_createPopover)
+          .then(_bindHtml)
+          .then(function() {
+            $scope.initialized = true;
+            if (!$scope.loadEvent)
+              _openPopover();
+          });
+      }
+
+      function destroyPopover() {
+        if (!newScope)
+          return;
+        $scope.$toggleButton.on('hidden.bs.popover', function() {
+          open = false;
+          $scope.$toggleButton.data('bs.popover').$element.removeData('bs.popover').off('.popover');
+          $scope.$toggleButton = null;
+          snCustomEvent.fire('hidden.complexpopover.' + $scope.ref);
+        });
+        $scope.$toggleButton.popover('hide');
+        snCustomEvent.fire('hide.complexpopover.' + $scope.ref, $scope.$toggleButton);
+        newScope.$broadcast('$destroy');
+        newScope.$destroy();
+        newScope = null;
+        $scope.initialized = false;
+        angular.element(window).off({
+          'click': complexHtmlHandler,
+          'keydown': keyDownHandler
+        });
+      }
+
+      function _getTemplate() {
+        return snComplexPopoverService.getTemplate(getTemplateUrl($attrs.template));
+      }
+
+      function _createPopover() {
+        $scope.$toggleButton.popover(popoverConfig);
+        return $q.when(true);
+      }
+
+      function _insertTemplate(response) {
+        newScope = $scope.$new();
+        if ($scope.loadEvent)
+          newScope.$on($scope.loadEvent, _openPopover);
+        content = $compile(response.data)(newScope);
+        popoverConfig.content = content;
+        newScope.open = true;
+        snCustomEvent.fire('inserted.complexpopover.' + $scope.ref, $scope.$toggleButton);
+        return $q.when(true);
+      }
+
+      function _bindHtml() {
+        angular.element(window).on({
+          'click': complexHtmlHandler,
+          'keydown': keyDownHandler
+        });
+        return $q.when(true);
+      }
+
+      function complexHtmlHandler(e) {
+        var parentComplexPopoverScope = angular.element(e.target).parents('.popover-content').children().scope();
+        if (parentComplexPopoverScope && (parentComplexPopoverScope.type = "complex_popover") && $scope.type === "complex_popover")
+          return;
+        if (!open || angular.element(e.target).parents('html').length === 0)
+          return;
+        if ($scope.initialized && !$scope.loading && !$scope.$toggleButton.is(e.target) && content.parents('.popover').has(angular.element(e.target)).length === 0) {
+          _eventClosePopover(e);
+          destroyPopover(e);
+        }
+      }
+
+      function keyDownHandler(e) {
+        if (e.keyCode != 27)
+          return;
+        if (!open || angular.element(e.target).parents('html').length === 0)
+          return;
+        if ($scope.initialized && !$scope.loading && !$scope.$toggleButton.is(e.target) && content.parents('.popover').has(angular.element(e.target)).length > 0) {
+          _eventClosePopover(e);
+          destroyPopover();
+        }
+      }
+
+      function _eventClosePopover(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      function createAndActivateFocusTrap(popover) {
+        var deferred = $q.defer();
+        if (!window.focusTrap) {
+          deferred.reject('Focus trap not found');
+        } else {
+          if (!$scope.focusTrap) {
+            $scope.focusTrap = window.focusTrap(popover, {
+              clickOutsideDeactivates: true
+            });
+          }
+          try {
+            $scope.focusTrap.activate({
+              onActivate: function() {
+                deferred.resolve();
+              }
+            });
+          } catch (e) {
+            console.warn("Unable to activate focus trap", e);
+          }
+        }
+        return deferred.promise;
+      }
+
+      function deactivateAndDestroyFocusTrap() {
+        var deferred = $q.defer();
+        if (!$scope.focusTrap) {
+          deferred.reject("Focus trap not found");
+        } else {
+          try {
+            $scope.focusTrap.deactivate({
+              returnFocus: false,
+              onDeactivate: function() {
+                deferred.resolve();
+              }
+            });
+          } catch (e) {
+            console.warn("Unable to deactivate focus trap", e);
+          }
+          $scope.focusTrap = null;
+        }
+        return deferred.promise;
+      }
+
+      function _openPopover() {
+        if (open) {
+          return;
+        }
+        open = true;
+        $timeout(function() {
+          $scope.$toggleButton.popover('show');
+          $scope.loading = false;
+          snCustomEvent.fire('show.complexpopover.' + $scope.ref, $scope.$toggleButton);
+          $scope.$toggleButton.on('shown.bs.popover', function(evt) {
+            var popoverObject = angular.element(evt.target).data('bs.popover'),
+              $tooltip,
+              popover;
+            $tooltip = popoverObject && popoverObject.$tip;
+            popover = $tooltip && $tooltip[0];
+            if (popover) {
+              createAndActivateFocusTrap(popover);
+            }
+            snCustomEvent.fire('shown.complexpopover.' + $scope.ref, $scope.$toggleButton);
+          });
+          $scope.$toggleButton.on('hide.bs.popover', function() {
+            deactivateAndDestroyFocusTrap().finally(function() {
+              $scope.$toggleButton.focus();
+            });
+          });
+        }, 0);
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/ui/popover/service.snComplexPopoverService.js */
+angular.module('sn.common.ui.popover').service('snComplexPopoverService', function($http, $q, $templateCache) {
+  "use strict";
+  return {
+    getTemplate: getTemplate
+  };
+
+  function getTemplate(template) {
+    return $http.get(template, {
+      cache: $templateCache
+    });
+  }
+});;;
+/*! RESOURCE: /scripts/sn/common/ui/directive.snConfirmModal.js */
+angular.module('sn.common.ui').directive('snConfirmModal', function(getTemplateUrl) {
+  return {
+    templateUrl: getTemplateUrl('sn_confirm_modal.xml'),
+    restrict: 'E',
+    replace: true,
+    transclude: true,
+    scope: {
+      config: '=?',
+      modalName: '@',
+      title: '@?',
+      message: '@?',
+      cancelButton: '@?',
+      okButton: '@?',
+      alertButton: '@?',
+      cancel: '&?',
+      ok: '&?',
+      alert: '&?'
+    },
+    link: function(scope, element) {
+      element.find('.modal').remove();
+    },
+    controller: function($scope, $rootScope) {
+      $scope.config = $scope.config || {};
+
+      function Button(fn, text) {
+        return {
+          fn: fn,
+          text: text
+        }
+      }
+      var buttons = {
+        'cancelButton': new Button('cancel', 'Cancel'),
+        'okButton': new Button('ok', 'OK'),
+        'alertButton': new Button('alert', 'Close'),
+        getText: function(type) {
+          var button = this[type];
+          if (button && $scope.get(button.fn))
+            return button.text;
+        }
+      };
+      $scope.get = function(type) {
+        if ($scope.config[type])
+          return $scope.config[type];
+        if (!$scope[type]) {
+          var text = buttons.getText(type);
+          if (text)
+            return $scope.config[type] = text;
+        }
+        return $scope.config[type] = $scope[type];
+      };
+      if (!$scope.get('modalName'))
+        $scope.config.modalName = 'confirm-modal';
+
+      function call(type) {
+        var action = $scope.get(type);
+        if (action) {
+          if (angular.isFunction(action))
+            action();
+          return true;
+        }
+        return !!buttons.getText(type);
+      }
+      $scope.cancelPressed = close('cancel');
+      $scope.okPressed = close('ok');
+      $scope.alertPressed = close('alert');
+
+      function close(type) {
+        return function() {
+          actionClosed = true;
+          $rootScope.$broadcast('dialog.' + $scope.config.modalName + '.close');
+          call(type);
+        }
+      }
+      var actionClosed;
+      $scope.$on('dialog.' + $scope.get('modalName') + '.opened', function() {
+        actionClosed = false;
+      });
+      $scope.$on('dialog.' + $scope.get('modalName') + '.closed', function() {
+        if (actionClosed)
+          return;
+        if (call('cancel'))
+          return;
+        if (call('alert'))
+          return;
+        call('ok');
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/ui/directive.snContextMenu.js */
+angular.module('sn.common.ui').directive('contextMenu', function($document, $window, snCustomEvent) {
+  var $contextMenu, $ul;
+  var scrollHeight = angular.element("body").get(0).scrollHeight;
+  var contextMenuItemHeight = 0;
+  var $triggeringElement;
+  var _focusTrap;
+
+  function setContextMenuPosition(event, $ul) {
+    if (!event.pageX && event.originalEvent.changedTouches)
+      event = event.originalEvent.changedTouches[0];
+    if (contextMenuItemHeight === 0)
+      contextMenuItemHeight = 24;
+    var cmWidth = 150;
+    var cmHeight = contextMenuItemHeight * $ul.children().length;
+    var pageX = event.pageX;
+    var pageY = event.pageY;
+    if (!pageX) {
+      var rect = event.target.getBoundingClientRect();
+      pageX = rect.left + angular.element(event.target).width();
+      pageY = rect.top + angular.element(event.target).height();
+    }
+    var startX = pageX + cmWidth >= $window.innerWidth ? pageX - cmWidth : pageX;
+    var startY = pageY + cmHeight >= $window.innerHeight ? pageY - cmHeight : pageY;
+    $ul.css({
+      display: 'block',
+      position: 'absolute',
+      left: startX,
+      top: startY
+    });
+  }
+
+  function renderContextMenuItems($scope, event, options) {
+    $ul.empty();
+    angular.forEach(options, function(item) {
+      var $li = angular.element('<li role="presentation">');
+      if (item === null) {
+        $li.addClass('divider');
+      } else {
+        var $a = angular.element('<a role="menuitem" href="javascript:void(0)">');
+        $a.text(typeof item[0] == 'string' ? item[0] : item[0].call($scope, $scope));
+        $li.append($a);
+        $li.on('click', function($event) {
+          $event.preventDefault();
+          $scope.$apply(function() {
+            _clearContextMenus(event);
+            item[1].call($scope, $scope);
+          });
+        });
+      }
+      $ul.append($li);
+    });
+    setContextMenuPosition(event, $ul);
+  }
+  var renderContextMenu = function($scope, event, options) {
+    angular.element(event.currentTarget).addClass('context');
+    $contextMenu = angular.element('<div>', {
+      'class': 'dropdown clearfix context-dropdown open'
+    });
+    $contextMenu.on('click', function(e) {
+      if (angular.element(e.target).hasClass('dropdown')) {
+        _clearContextMenus(event);
+      }
+    });
+    $contextMenu.on('contextmenu', function(event) {
+      event.preventDefault();
+      _clearContextMenus(event);
+    });
+    $contextMenu.on('keydown', function(event) {
+      if (event.keyCode != 27 && event.keyCode != 9)
+        return;
+      event.preventDefault();
+      _clearContextMenus(event);
+    });
+    $contextMenu.css({
+      position: 'absolute',
+      top: 0,
+      height: scrollHeight,
+      left: 0,
+      right: 0,
+      zIndex: 9999
+    });
+    $document.find('body').append($contextMenu);
+    $ul = angular.element('<ul>', {
+      'class': 'dropdown-menu',
+      'role': 'menu'
+    });
+    renderContextMenuItems($scope, event, options);
+    $contextMenu.append($ul);
+    $triggeringElement = document.activeElement;
+    activateFocusTrap();
+    $contextMenu.data('resizeHandler', function() {
+      scrollHeight = angular.element("body").get(0).scrollHeight;
+      $contextMenu.css('height', scrollHeight);
+    });
+    snCustomEvent.observe('partial.page.reload', $contextMenu.data('resizeHandler'));
+  };
+
+  function _clearContextMenus(event) {
+    if (!event)
+      return;
+    angular.element(event.currentTarget).removeClass('context');
+    var els = angular.element(".context-dropdown");
+    angular.forEach(els, function(el) {
+      snCustomEvent.un('partial.page.reload', angular.element(el).data('resizeHandler'));
+      angular.element(el).remove();
+    });
+    deactivateFocusTrap();
+  }
+
+  function activateFocusTrap() {
+    if (_focusTrap || !window.focusTrap)
+      return;
+    _focusTrap = focusTrap($contextMenu[0], {
+      focusOutsideDeactivates: true,
+      clickOutsideDeactivates: true
+    });
+    _focusTrap.activate();
+  }
+
+  function deactivateFocusTrap() {
+    if (!_focusTrap || !window.focusTrap)
+      return;
+    _focusTrap.deactivate();
+    _focusTrap = null;
+  }
+  return function(scope, element, attrs) {
+    element.on('contextmenu', function(event) {
+      if (event.ctrlKey)
+        return;
+      if (angular.element(element).attr('context-type'))
+        return;
+      showMenu(event);
+    });
+    element.on('click', handleClick);
+    element.on('keydown', function(event) {
+      if (event.keyCode == 32) {
+        handleSpace(event);
+      } else if (event.keyCode === 13) {
+        handleClick(event);
+      }
+    });
+    var doubleTapTimeout,
+      doubleTapActive = false,
+      doubleTapStartPosition;
+    element.on('touchstart', function(event) {
+      doubleTapStartPosition = {
+        x: event.originalEvent.changedTouches[0].screenX,
+        y: event.originalEvent.changedTouches[0].screenY
+      };
+    });
+    element.on('touchend', function(event) {
+      var distX = Math.abs(event.originalEvent.changedTouches[0].screenX - doubleTapStartPosition.x);
+      var distY = Math.abs(event.originalEvent.changedTouches[0].screenY - doubleTapStartPosition.y);
+      if (distX > 15 || distY > 15) {
+        doubleTapStartPosition = null;
+        return;
+      }
+      if (doubleTapActive) {
+        doubleTapActive = false;
+        clearTimeout(doubleTapTimeout);
+        showMenu(event);
+        event.preventDefault();
+        return;
+      }
+      doubleTapActive = true;
+      event.preventDefault();
+      doubleTapTimeout = setTimeout(function() {
+        doubleTapActive = false;
+        if (event.target)
+          event.target.click();
+      }, 300);
+    });
+
+    function handleSpace(evt) {
+      var $target = angular.element(evt.target);
+      if ($target.is('button, [role=button]')) {
+        handleClick(evt);
+        return;
+      }
+      if (!$target.hasClass('list-edit-cursor'))
+        return;
+      showMenu(evt);
+    }
+
+    function handleClick(event) {
+      var $el = angular.element(element);
+      var $target = angular.element(event.target);
+      if (!$el.attr('context-type') && !$target.hasClass('context-menu-click'))
+        return;
+      showMenu(event);
+    }
+
+    function showMenu(evt) {
+      scope.$apply(function() {
+        applyMenu(evt);
+        clearWindowSelection();
+      });
+    }
+
+    function clearWindowSelection() {
+      if (window.getSelection)
+        if (window.getSelection().empty)
+          window.getSelection().empty();
+        else if (window.getSelection().removeAllRanges)
+        window.getSelection().removeAllRanges();
+      else if (document.selection)
+        document.selection.empty();
+    }
+
+    function applyMenu(event) {
+      var tagName = event.target.tagName;
+      if (tagName == 'INPUT' || tagName == 'SELECT' || tagName == 'BUTTON') {
+        return;
+      }
+      var menu = scope.$eval(attrs.contextMenu, {
+        event: event
+      });
+      if (menu instanceof Array) {
+        if (menu.length > 0) {
+          event.stopPropagation();
+          event.preventDefault();
+          scope.$watch(function() {
+            return menu;
+          }, function(newValue, oldValue) {
+            if (newValue !== oldValue) renderContextMenuItems(scope, event, menu);
+          }, true);
+          renderContextMenu(scope, event, menu);
+        }
+      } else if (typeof menu !== 'undefined' && typeof menu.then === 'function') {
+        event.stopPropagation();
+        event.preventDefault();
+        menu.then(function(response) {
+          var contextMenu = response;
+          if (contextMenu.length > 0) {
+            scope.$watch(function() {
+              return contextMenu;
+            }, function(newValue, oldValue) {
+              if (newValue !== oldValue)
+                renderContextMenuItems(scope, event, contextMenu);
+            }, true);
+            renderContextMenu(scope, event, contextMenu);
+          } else {
+            throw '"' + attrs.contextMenu + '" is not an array or promise';
+          }
+        });
+      } else {
+        throw '"' + attrs.contextMenu + '" is not an array or promise';
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/ui/directive.snDialog.js */
+angular.module("sn.common.ui").directive("snDialog", function($timeout, $rootScope, $document) {
+      "use strict";
+      return {
+        restrict: "AE",
+        transclude: true,
+        scope: {
+          modal: "=?",
+          disableAutoFocus: "=?",
+          classCheck: "="
+        },
+        replace: true,
+        template: '<dialog ng-keyup="escape($event)"><div ng-click="onClickClose()" title="Close" class="close-button icon-button icon-cross"></div></dialog>',
+        link: function(scope, element, attrs, ctrl, transcludeFn) {
+            var transcludeScope = {};
+            scope.isOpen = function() {
+              return element[0].open;
+            };
+            transcludeFn(element.scope().$new(), function(a, b) {
+              element.append(a);
+              transcludeScope = b;
+            });
+            element.click(function(event) {
+              event.stopPropagation();
+              if (event.offsetX < 0 || event.offsetX > element[0].offsetWidth || event.offsetY < 0 || event.offsetY > element[0].offsetHeight)
+                if (!scope.classCheck)
+                  scope.onClickClose();
+                else {
+                  var classes = scope.classCheck.split(",");
+                  var found = false;
+                  for (var i = 0; i < classes.length; i++)
+                    if (angular.element(event.srcElement).closest(classes[i]).length > 0)
+                      found = true;
+                  if (!found)
+                    scope.onClickClose();
+                }
+            });
+            scope.show = function() {
+              var d = element[0];
+              if (!d.showModal || true) {
+                dialogPolyfill.registerDialog(d);
+                d.setDisableAutoFocus(scope.disableAutoFocus);
+              }
+              if (scope.modal)
+                d.showModal();
+              else
+                d.show();
+              if (!angular.element(d).hasClass('sn-alert')) {
+                $timeout(function() {
+                  if (d.dialogPolyfillInfo && d.dialogPolyfillInfo.backdrop) {
+                    angular.element(d.dialogPolyfillInfo.backdrop).one('click', function(event) {
+                      if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
+                        scope.onClickClose();
+                    })
+                  } else {
+                    $document.on('click', function(event) {
+                      if (!scope.classCheck || angular.element(event.srcElement).closest(scope.classCheck).length == 0)
+                        scope.onClickClose();
+                    })
+                  }
+                });
+              }
+              element.find('.btn-primary').eq(0).focus();
+            };
+            scope.setPosition = function(data) {
+              var contextData = scope.getContextData(data);
+              if (contextData && element && element[0]) {
+                if (contextData.position) {
+                  element[0].style.top = contextData.position.top + "px";
+                  element[0].style.left = contextData.position.left + "px";
+                  element[0].style.margin = "0px";
+                }
+                if (contextData.dimensions) {
+                  element[0].style.width = contextData.dimensions.width + "px";
+                  element[0].style.height = contextData.dimensions.height + "px";
+                }
+              }
+            }
+            scope.$on("dialog." + attrs.name + ".move", function(event, data) {
+              scope.setPosition(data);
+            })
+            scope.$on("dialog." + attrs.name + ".show", function(event, data) {
+                  scope.setPosition(data);
+                  scope.setK

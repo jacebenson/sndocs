@@ -1054,95 +1054,401 @@ addLoadEvent(function() {
 });
 /*! RESOURCE: AddMembersFromGroup */
 var AddMembersFromGroup = Class.create(GlideDialogWindow, {
-      initialize: function() {
-        this.setUpFacade();
-      },
-      setUpFacade: function() {
-        GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
-        this.setTitle(getMessage("Add Members From Group"));
-        this.setBody(this.getMarkUp(), false, false);
-      },
-      setUpEvents: function() {
-        var dialog = this;
-        var okButton = $("ok");
-        if (okButton) {
-          okButton.on("click", function() {
-            var mapData = {};
-            if (dialog.fillDataMap(mapData)) {
-              var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
-              for (var strKey in mapData) {
-                processor.addParam(strKey, mapData[strKey]);
-              }
-              dialog.showStatus(getMessage("Adding group users..."));
-              processor.getXML(function() {
-                dialog.refresh();
-                dialog._onCloseClicked();
-              });
-            } else {
-              dialog._onCloseClicked();
-            }
-          });
-        }
-        var cancelButton = $("cancel");
-        if (cancelButton) {
-          cancelButton.on("click", function() {
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
+    this.setTitle(getMessage("Add Members From Group"));
+    this.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (dialog.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembersProcessor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          dialog.showStatus(getMessage("Adding group users..."));
+          processor.getXML(function() {
+            dialog.refresh();
             dialog._onCloseClicked();
           });
+        } else {
+          dialog._onCloseClicked();
         }
-        var okNGButton = $("okNG");
-        if (okNGButton) {
-          okNGButton.on("click", function() {
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenGroupSysIds: function() {
+    return $F('groupId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getRoleIds: function() {
+    var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
+    var arrRoleIds = [];
+    var record = new GlideRecord("sys_user_role");
+    record.addQuery("name", "IN", arrRoleNames.join(","));
+    record.query();
+    while (record.next())
+      arrRoleIds.push(record.sys_id + "");
+    return arrRoleIds;
+  },
+  hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
+    for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
+      if (arrScrumRoleSysIds[index] == "" + roleSysId)
+        return true;
+    var record = new GlideRecord("sys_user_role_contains");
+    record.addQuery("role", roleSysId);
+    record.query();
+    while (record.next())
+      if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
+        return true;
+    return false;
+  },
+  getGroupIds: function() {
+    var arrScrumRoleIds = this.getRoleIds();
+    var arrGroupIds = [];
+    var record = new GlideRecord("sys_group_has_role");
+    record.query();
+    while (record.next())
+      if (this.hasScrumRole(record.role, arrScrumRoleIds))
+        arrGroupIds.push(record.group + "");
+    return arrGroupIds;
+  },
+  getGroupInfo: function() {
+    var mapGroupInfo = {};
+    var arrRoleIds = this.getRoleIds();
+    var arrGroupIds = this.getGroupIds(arrRoleIds);
+    var record = new GlideRecord("sys_user_group");
+    record.addQuery("sys_id", "IN", arrGroupIds.join(","));
+    record.query();
+    while (record.next()) {
+      var strName = record.name + "";
+      var strSysId = record.sys_id + "";
+      mapGroupInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    return mapGroupInfo;
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getGroupInfo');
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapGroupInfo = {};
+    var groupData = response.responseXML.getElementsByTagName("group");
+    var strName, strSysId;
+    for (var i = 0; i < groupData.length; i++) {
+      strName = groupData[i].getAttribute("name");
+      strSysId = groupData[i].getAttribute("sysid");
+      mapGroupInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrGroupNames = [];
+    for (var strGroupName in mapGroupInfo) {
+      arrGroupNames.push(strGroupName + "");
+    }
+    arrGroupNames.sort();
+    var strMarkUp = "";
+    if (arrGroupNames.length > 0) {
+      var strTable = "<table><tr><td><label for='groupId'><select id='groupId'>";
+      for (var nSlot = 0; nSlot < arrGroupNames.length; ++nSlot) {
+        strName = arrGroupNames[nSlot];
+        strSysId = mapGroupInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></label></td></tr></table>";
+      strMarkUp = "<div id='task_controls'>" + strTable +
+        "<div style='text-align: right;'>" +
+        "<button id='ok' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></div></div>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No groups with scrum_user role found</p>" +
+        "<div style='text-align: right;'>" +
+        "<button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancelNG' type='button'>" + getMessage("Cancel") +
+        "</button></div></div>";
+    }
+    this.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+    this.setWidth(180);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenGroupSysId = this.getUserChosenGroupSysIds();
+    if (strChosenGroupSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_groups = strChosenGroupSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+/*! RESOURCE: AddTeamMembers */
+var AddTeamMembers = Class.create(GlideDialogWindow, {
+  initialize: function() {
+    this.setUpFacade();
+  },
+  setUpFacade: function() {
+    GlideDialogWindow.prototype.initialize.call(this, "task_window", false);
+    this.setTitle(getMessage("Add Team Members"));
+    this.setBody(this.getMarkUp(), false, false);
+  },
+  setUpEvents: function() {
+    var dialog = this;
+    var okButton = $("ok");
+    if (okButton) {
+      okButton.on("click", function() {
+        var mapData = {};
+        if (dialog.fillDataMap(mapData)) {
+          var processor = new GlideAjax("ScrumAjaxAddReleaseTeamMembers2Processor");
+          for (var strKey in mapData) {
+            processor.addParam(strKey, mapData[strKey]);
+          }
+          dialog.showStatus(getMessage("Adding team members..."));
+          processor.getXML(function() {
+            dialog.refresh();
             dialog._onCloseClicked();
           });
+        } else {
+          dialog._onCloseClicked();
         }
-        var cancelNGButton = $("cancelNG");
-        if (cancelNGButton) {
-          cancelNGButton.on("click", function() {
-            dialog._onCloseClicked();
-          });
+      });
+    }
+    var cancelButton = $("cancel");
+    if (cancelButton) {
+      cancelButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var okNGButton = $("okNG");
+    if (okNGButton) {
+      okNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var cancelNGButton = $("cancelNG");
+    if (cancelNGButton) {
+      cancelNGButton.on("click", function() {
+        dialog._onCloseClicked();
+      });
+    }
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      teamCombo.on("change", function() {
+        dialog.updateMembers();
+      });
+    }
+  },
+  updateMembers: function() {
+    var arrMemberInfo = [];
+    var teamCombo = $("teamId");
+    if (teamCombo) {
+      var strTeamSysId = teamCombo.value;
+      var recTeamMember = new GlideRecord("scrum_pp_release_team_member");
+      recTeamMember.addQuery("team", strTeamSysId);
+      recTeamMember.query();
+      while (recTeamMember.next()) {
+        var recSysUser = new GlideRecord("sys_user");
+        recSysUser.addQuery("sys_id", recTeamMember.name);
+        recSysUser.query();
+        var strName = recSysUser.next() ? recSysUser.name : "";
+        var strPoints = recTeamMember.default_sprint_points + "";
+        arrMemberInfo.push({
+          name: strName,
+          points: strPoints
+        });
+      }
+    }
+    if (arrMemberInfo.length > 0) {
+      var strHtml = "<tr><th style='text-align: left; white-space: nowrap'>" +
+        "Member</th><th style='text-align: left; white-space: nowrap'>Sprint Points</th><tr>";
+      for (var nSlot = 0; nSlot < arrMemberInfo.length; ++nSlot) {
+        var strMemberName = arrMemberInfo[nSlot].name + "";
+        var strMemberPoints = arrMemberInfo[nSlot].points + "";
+        strHtml += "<tr><td  style='text-align: left; white-space: nowrap'>" + strMemberName +
+          "</td><td style='text-align: left; white-space: nowrap'>" + strMemberPoints + "</td></tr>";
+      }
+      $("memberId").update(strHtml);
+    } else {
+      $("memberId").update("<tr><td style='font-weight: bold'>" + getMessage("No team members") + "</td></tr>");
+    }
+  },
+  refresh: function() {
+    GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+  },
+  getScrumReleaseTeamSysId: function() {
+    return g_form.getUniqueValue() + "";
+  },
+  getUserChosenTeamSysIds: function() {
+    return $F('teamId') + "";
+  },
+  showStatus: function(strMessage) {
+    $("task_controls").update(strMessage);
+  },
+  display: function(bIsVisible) {
+    $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
+  },
+  getMarkUp: function() {
+    var groupAjax = new GlideAjax('ScrumUserGroupsAjax');
+    groupAjax.addParam('sysparm_name', 'getTeamInfo');
+    groupAjax.addParam('sysparm_scrum_team_sysid', this.getScrumReleaseTeamSysId());
+    groupAjax.getXML(this.generateMarkUp.bind(this));
+  },
+  generateMarkUp: function(response) {
+    var mapTeamInfo = {};
+    var teamData = response.responseXML.getElementsByTagName("team");
+    var strName, strSysId;
+    for (var i = 0; i < teamData.length; i++) {
+      strName = teamData[i].getAttribute("name");
+      strSysId = teamData[i].getAttribute("sysid");
+      mapTeamInfo[strName] = {
+        name: strName,
+        sysid: strSysId
+      };
+    }
+    var arrTeamNames = [];
+    for (var strTeamName in mapTeamInfo) {
+      arrTeamNames.push(strTeamName + "");
+    }
+    arrTeamNames.sort();
+    var strMarkUp = "";
+    if (arrTeamNames.length > 0) {
+      var strTable = "<table><tr><td><label for='teamId'>" + getMessage("Team") + "</label>&nbsp;<select id='teamId'>";
+      for (var nSlot = 0; nSlot < arrTeamNames.length; ++nSlot) {
+        strName = arrTeamNames[nSlot];
+        strSysId = mapTeamInfo[strName].sysid;
+        strTable += "<option value='" + strSysId + "'>" + strName + "</option>";
+      }
+      strTable += "</select></label></td></tr></table>";
+      var strTable2 = "<table style='width: 100%;'><tr><td style='width: 50%;'></td><td><table id='memberId'></table></td><td style='width: 50%;'></td></tr></table>";
+      strMarkUp = "<div id='task_controls' style='overflow: auto;>" + strTable + strTable2 +
+        "</div><table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='ok' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancel' type='button'>" + getMessage("Cancel") + "</button></td></tr></table>";
+    } else {
+      strMarkUp = "<div id='task_controls'><p>No release teams found</p>" +
+        "<table style='width: 100%'><tr><td style='white-space: nowrap; text-align: right;'><button id='okNG' type='button'>" + getMessage("OK") + "</button>" +
+        "<button id='cancelNG' type='button'>" + getMessage("Cancel") + "</button></td></tr></table></div>";
+    }
+    this.setBody(strMarkUp, false, false);
+    this.setUpEvents();
+    this.display(true);
+    this.setWidth(280);
+  },
+  fillDataMap: function(mapData) {
+    var strChosenTeamSysId = this.getUserChosenTeamSysIds();
+    if (strChosenTeamSysId) {
+      mapData.sysparm_name = "createReleaseTeamMembers";
+      mapData.sysparm_sys_id = this.getScrumReleaseTeamSysId();
+      mapData.sysparm_teams = strChosenTeamSysId;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+/*! RESOURCE: ScrumAddSprints */
+var ScrumAddSprints = Class.create({
+      initialize: function(gr) {
+        this._gr = gr;
+        this._prmNms = ["spName", "spDuration", "spStartDate", "spStartNum", "spNum", "_tn", "_sys_id"];
+        this._dateFN = ["spStartDate"];
+        this._refObs = [];
+        this._prmVls = [];
+        for (var i = 0; i < this._prmNms.length; i++) {
+          this._prmVls[this._prmNms[i]] = "";
         }
+        this._prmErr = [];
+        var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+        this._crtDlg = new dialogClass("scrum_add_sprints_dialog");
+        this._crtDlg.setTitle("Add Sprints");
+        this._crtDlg.setPreference("_tn", this._gr.getTableName());
+        this._crtDlg.setPreference("_sys_id", (this._gr.getUniqueValue()));
+        this._crtDlg.setPreference("handler", this);
       },
-      refresh: function() {
-        GlideList2.get("scrum_pp_team.scrum_pp_release_team_member.team").refresh();
+      showDialog: function() {
+        this._crtDlg.render();
       },
-      getScrumReleaseTeamSysId: function() {
-        return g_form.getUniqueValue() + "";
-      },
-      getUserChosenGroupSysIds: function() {
-        return $F('groupId') + "";
-      },
-      showStatus: function(strMessage) {
-        $("task_controls").update(strMessage);
-      },
-      display: function(bIsVisible) {
-        $("task_window").style.visibility = (bIsVisible ? "visible" : "hidden");
-      },
-      getRoleIds: function() {
-        var arrRoleNames = ["scrum_user", "scrum_admin", "scrum_release_planner", "scrum_sprint_planner", "scrum_story_creator"];
-        var arrRoleIds = [];
-        var record = new GlideRecord("sys_user_role");
-        record.addQuery("name", "IN", arrRoleNames.join(","));
-        record.query();
-        while (record.next())
-          arrRoleIds.push(record.sys_id + "");
-        return arrRoleIds;
-      },
-      hasScrumRole: function(roleSysId, arrScrumRoleSysIds) {
-        for (var index = 0; index < arrScrumRoleSysIds.length; ++index)
-          if (arrScrumRoleSysIds[index] == "" + roleSysId)
-            return true;
-        var record = new GlideRecord("sys_user_role_contains");
-        record.addQuery("role", roleSysId);
-        record.query();
-        while (record.next())
-          if (this.hasScrumRole(record.contains, arrScrumRoleSysIds))
-            return true;
+      onSubmit: function() {
+        this._readFormValues();
+        if (!this._validate()) {
+          var errMsg = "Before you submit:";
+          for (var i = 0; i < this._prmErr.length; i++) {
+            errMsg += "\n * " + this._prmErr[i];
+          }
+          alert(errMsg);
+          $j('#spName').focus();
+          return false;
+        }
+        this._crtDlg.destroy();
+        var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+        ga.addParam("sysparm_name", "checkDuration");
+        for (var i = 0; i < this._prmNms.length; i++) {
+          ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+        }
+        ga.getXML(this.checkComplete.bind(this));
         return false;
       },
-      getGroupIds: function() {
-          var arrScrumRoleIds = this.getRoleIds();
-          var arrGroupIds = [];
-          var record = new GlideRecord("sys_group_has_role");
-          record.query();
-          while (record.next())
-            if (this.hasScrumRo
+      checkComplete: function(response) {
+        var resp = response.responseXML.getElementsByTagName("item");
+        if (resp[0].getAttribute("result") == "success") {
+          var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+          this._plsWtDlg = new dialogClass("scrum_please_wait");
+          this._plsWtDlg.setTitle("Working.  Please wait.");
+          this._plsWtDlg.render();
+          var ga = new GlideAjax("ScrumAddSprintsAjaxProcessor");
+          ga.addParam("sysparm_name", "addSprints");
+          for (var i = 0; i < this._prmNms.length; i++) {
+            ga.addParam(this._prmNms[i], this._prmVls[this._prmNms[i]]);
+          }
+          ga.getXML(this.createComplete.bind(this));
+          return false;
+        }
+        var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+        this._rlsPshDlg = new dialogClass("scrum_release_push_confirm_dialog");
+        this._rlsPshDlg.setTitle("Modify Release Dates");
+        this._rlsPshDlg.setPreference("handler", this);
+        this._rlsPshDlg.render();
+      },
+      confirmReleasePush: functi

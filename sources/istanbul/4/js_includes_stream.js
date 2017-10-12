@@ -1444,3 +1444,110 @@ angular.module("sn.common.stream").directive("snStream", function(getTemplateUrl
               for (var attr in $scope.controls) {
                 $scope.defaultControls[attr] = $scope.controls[attr];
               }
+            }
+            $scope.controls = $scope.defaultControls;
+            if ($scope.showCommentsAndWorkNotes === undefined) {
+              $scope.showCommentsAndWorkNotes = $scope.defaultShowCommentsAndWorkNotes;
+            }
+            snCustomEvent.observe('sn.stream.change_input_display', function(table, display) {
+              if (table != $scope.table)
+                return;
+              $scope.showCommentsAndWorkNotes = display;
+              $scope.$apply();
+            });
+            $scope.$on("$destroy", function() {
+              cancelStream();
+            });
+            $scope.$on('sn.stream.interval', function($event, time) {
+              interval = time;
+              reschedulePoll();
+            });
+            $scope.$on("sn.stream.tap", function() {
+              if (stream)
+                stream.tap();
+              else
+                startPolling();
+            });
+            $scope.$on('window_visibility_change', function($event, hidden) {
+              interval = (hidden) ? 120000 : undefined;
+              reschedulePoll();
+            });
+            $scope.$on("sn.stream.refresh", function(event, data) {
+              stream._successCallback(data.response);
+            });
+            $scope.$on("sn.stream.reload", function() {
+              startPolling();
+            });
+            $scope.$on('sn.stream.input_value', function(otherScope, value) {
+              $scope.inputTypeValue = value;
+            });
+            $scope.$watchCollection('[table, query, sysId]', startPolling);
+            $scope.changeInputType = function(field) {
+              $scope.inputType = field.checked ? field.name : primaryJournalField;
+              userPreferences.setPreference('glide.ui.' + $scope.table + '.stream_input', $scope.inputType);
+            };
+            $scope.$watch('inputType', function() {
+              if (!$scope.inputType || !$scope.preferredInput)
+                return;
+              $scope.preferredInput = $scope.inputType;
+            });
+            $scope.submitCheck = function(event) {
+              var key = event.keyCode || event.which;
+              if (key === 13) {
+                $scope.postJournalEntryForCurrent(event);
+              }
+            };
+            $scope.postJournalEntry = function(type, entry, event) {
+              type = type || primaryJournalFieldOrder[0];
+              event.stopPropagation();
+              var requestTable = $scope.table || "board:" + $scope.board.sys_id;
+              stream.insertForEntry(type, entry.journalText, requestTable, entry.document_id);
+              entry.journalText = "";
+              entry.commentBoxVisible = false;
+              snRecordPresence.termPresence();
+            };
+            $scope.postJournalEntryForCurrent = function(event) {
+              event.stopPropagation();
+              var entries = [];
+              if ($scope.multipleInputs) {
+                angular.forEach($scope.fields, function(item) {
+                  if (!item.value)
+                    return;
+                  entries.push({
+                    field: item.name,
+                    text: item.value
+                  });
+                })
+              } else {
+                entries.push({
+                  field: $scope.inputType,
+                  text: $scope.inputTypeValue
+                })
+              }
+              var request = stream.insertEntries(entries, $scope.table, $scope.sysId, mentionMap);
+              if (request) {
+                request.then(function() {
+                  for (var i = 0; i < entries.length; i++) {
+                    fireInsertEvent(entries[i].field, entries[i].text);
+                  }
+                });
+              }
+              clearInputs();
+              return false;
+            };
+
+            function fireInsertEvent(name, value) {
+              snCustomEvent.fire('sn.stream.insert', name, value);
+            }
+
+            function clearInputs() {
+              $scope.inputTypeValue = "";
+              angular.forEach($scope.fields, function(item) {
+                if (item.value)
+                  item.filled = true;
+                item.value = "";
+              });
+            }
+            $scope.showCommentBox = function(entry, event) {
+                event.stopPropagation();
+                if (entry !== $scope.selectedEntry)

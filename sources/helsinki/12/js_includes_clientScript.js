@@ -1559,4 +1559,97 @@
           _dirtyFields[field.name] = true;
         }
         field.value = value;
-        if (field.type ===
+        if (field.type === 'reference') {
+          if (!skipDerivedFieldUpdate) {
+            _updateDerivedFields(g_form, field);
+          }
+          if (!skipDisplayValueUpdate && glideFormFieldFactory.hasValue(field) && !displayValue) {
+            field.displayValue = '';
+            g_form.getReference(field.name, function(gr) {
+              var displayValue = gr.getDisplayValue();
+              field.value = oldValue;
+              _setValue(g_form, field, value, displayValue, true, true);
+            });
+            return;
+          }
+        }
+        field.displayValue = typeof displayValue !== 'undefined' && displayValue != null ? displayValue : value;
+        var fields = _getDependentFields(field.name);
+        fields.forEach(function(field) {
+          if (field.dependentValue !== value) {
+            field.dependentValue = value;
+          }
+          if (field.ed && field.ed.dependent_value !== value)
+            field.ed.dependent_value = value;
+        });
+        _fireValueChange(field, oldValue, value);
+      }
+
+      function _getRelatedList(listTableName) {
+        if (!_options.relatedLists) {
+          return null;
+        }
+        var foundList = null;
+        _options.relatedLists.forEach(function(list) {
+          if (foundList) {
+            return;
+          }
+          if (listTableName === _getRelatedListName(list)) {
+            foundList = list;
+            return;
+          }
+          if (listTableName === list.table || listTableName === list.field) {
+            foundList = list;
+            return;
+          }
+        });
+        return foundList;
+      }
+
+      function _getRelatedListName(list) {
+        return list.table + '.' + list.field;
+      }
+
+      function _getSection(sectionName) {
+        if (!_options.sections) {
+          return null;
+        }
+        var foundSection = null;
+        _options.sections.forEach(function(section) {
+          if (foundSection) {
+            return;
+          }
+          var name = _getSectionName(section);
+          if (name === sectionName) {
+            foundSection = section;
+            return;
+          }
+        });
+        return foundSection;
+      }
+
+      function _getSectionName(section) {
+        var sectionName = section.caption;
+        if (!sectionName) {
+          return null;
+        }
+        return sectionName.toLowerCase().replace(" ", "_").replace(/[^0-9a-z_]/gi, "");
+      }
+
+      function _fireValueChange(field, oldValue, value) {
+        if (_onChangeHandlers.length > 0) {
+          _valueCalls++;
+          _onChangeHandlers.forEach(function(fn) {
+            fn.call(fn, field.name, oldValue, value);
+          });
+          _valueCalls--;
+        }
+        if (_options.getMappedFieldName) {
+          var mappedName = _options.getMappedFieldName(field.name);
+          _valueCalls++;
+          _onChangeHandlers.forEach(function(fn) {
+            fn.call(fn, mappedName, oldValue, value);
+          });
+          _valueCalls--;
+        }
+        if ((_valueCalls == 0) && _onChangedHandlers.length > 0

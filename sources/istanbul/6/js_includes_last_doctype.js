@@ -3250,95 +3250,558 @@ GlideFilter.prototype = {
     fUsageContext: "default",
     fUseVariable: true,
     initialize: function(name, query, fDiv, runnable, synchronous, callback, originalQuery) {
-        "use strict";
-        this.synchronous = false;
-        if (typeof synchronous != 'undefined')
-          this.synchronous = synchronous;
-        if (typeof query === 'function') {
-          callback = query;
-          query = null;
-        }
-        this.callback = callback;
-        this.query = query;
-        this.maintainPlaceHolder = false;
-        this.conditionsWanted = !noConditionals;
-        this.opsWanted = !noOps;
-        this.defaultPlaceHolder = true;
-        this.runable = runnable;
-        this.textAreasWanted = useTextareas;
-        this.tableName = name;
-        this.restrictedFields = null;
-        this.ignoreFields = null;
-        this.onlyRestrictedFields = false;
-        this.includeExtended = false;
-        this.divName = "gcond_filters";
-        this.filterReadOnly = false;
-        this.isTemplate = false;
-        if (fDiv != null)
-          this.divName = fDiv + "gcond_filters";
-        this.fDiv = getThing(this.tableName, this.divName);
-        if (this.fDiv.filterObject) {
-          this.fDiv.filterObject.destroy();
-          this.fDiv.filterObject = null;
-          this.fDiv = null;
-        }
-        this.fDiv = getThing(this.tableName, this.divName);
-        this.fDiv.filterObject = this;
-        this.fDiv.initialQuery = query;
-        var mappingId = this.mappingId = this.fDiv.id.replace(/gcond_filters$/, "");
-        this.elementSupportsMapping = !!gel("sys_mapping." + this.mappingId);
-        this.sortElement = $('gcond_sort_order');
-        if (this.sortElement)
-          this.sortElement.filterObject = this;
-        else
-          this.sortElement = this.fDiv;
-        this.sections = [];
-        this.disabledFilter = false;
-        this.originalQuery = originalQuery;
-        var mappingRows = [];
+      "use strict";
+      this.synchronous = false;
+      if (typeof synchronous != 'undefined')
+        this.synchronous = synchronous;
+      if (typeof query === 'function') {
+        callback = query;
+        query = null;
+      }
+      this.callback = callback;
+      this.query = query;
+      this.maintainPlaceHolder = false;
+      this.conditionsWanted = !noConditionals;
+      this.opsWanted = !noOps;
+      this.defaultPlaceHolder = true;
+      this.runable = runnable;
+      this.textAreasWanted = useTextareas;
+      this.tableName = name;
+      this.restrictedFields = null;
+      this.ignoreFields = null;
+      this.onlyRestrictedFields = false;
+      this.includeExtended = false;
+      this.divName = "gcond_filters";
+      this.filterReadOnly = false;
+      this.isTemplate = false;
+      if (fDiv != null)
+        this.divName = fDiv + "gcond_filters";
+      this.fDiv = getThing(this.tableName, this.divName);
+      if (this.fDiv.filterObject) {
+        this.fDiv.filterObject.destroy();
+        this.fDiv.filterObject = null;
+        this.fDiv = null;
+      }
+      this.fDiv = getThing(this.tableName, this.divName);
+      this.fDiv.filterObject = this;
+      this.fDiv.initialQuery = query;
+      var mappingId = this.mappingId = this.fDiv.id.replace(/gcond_filters$/, "");
+      this.elementSupportsMapping = !!gel("sys_mapping." + this.mappingId);
+      this.sortElement = $('gcond_sort_order');
+      if (this.sortElement)
+        this.sortElement.filterObject = this;
+      else
+        this.sortElement = this.fDiv;
+      this.sections = [];
+      this.disabledFilter = false;
+      this.originalQuery = originalQuery;
+      var mappingRows = [];
 
-        function cleanMappingFields() {
-          for (var i = 0; mappingRows.length > i; i++) {
-            var handler = mappingRows[i];
-            if (!$j.contains(document.body, handler.tr)) {
-              destroyHandler(handler);
-              mappingRows.splice(i, 1);
-              i--;
-            }
+      function cleanMappingFields() {
+        for (var i = 0; mappingRows.length > i; i++) {
+          var handler = mappingRows[i];
+          if (!$j.contains(document.body, handler.tr)) {
+            destroyHandler(handler);
+            mappingRows.splice(i, 1);
+            i--;
           }
         }
+      }
 
-        function initMapHandler(handler) {
-          mappingRows.push(handler);
-          CachedEvent.after("sys_mapping:loaded", function(mAPI) {
-            mAPI.initOperand(handler, mappingId);
-          });
+      function initMapHandler(handler) {
+        mappingRows.push(handler);
+        CachedEvent.after("sys_mapping:loaded", function(mAPI) {
+          mAPI.initOperand(handler, mappingId);
+        });
+        cleanMappingFields();
+      }
+
+      function destroyHandler(handler) {
+        CachedEvent.after("sys_mapping:loaded", function(mAPI) {
+          mAPI.destroyOperand(handler, mappingId);
+        });
+      }
+      var currentMapState = "";
+
+      function syncMappingStatus() {
+        var active = false;
+        for (var i = 0, l = mappingRows.length; l > i; i++) {
+          if (mappingRows[i]._isMappingEnabled) {
+            active = true;
+            break;
+          }
+        }
+        var status = active ? "partial" : "inactive";
+        if (currentMapState !== status) {
+          currentMapState = status;
+          CustomEvent.fire("sys_mapping:set_field_state::" + mappingId, status);
+        }
+      }
+      this.mappingMgr = {
+        initElement: initMapHandler,
+        destroyElement: function() {
           cleanMappingFields();
+          syncMappingStatus();
+        },
+        notifyStateChange: function() {
+          cleanMappingFields();
+          syncMappingStatus();
         }
-
-        function destroyHandler(handler) {
-          CachedEvent.after("sys_mapping:loaded", function(mAPI) {
-            mAPI.destroyOperand(handler, mappingId);
-          });
+      };
+      this.initMessageCache();
+    },
+    init2: function() {
+      if (typeof this.query != 'undefined') {
+        if (this.synchronous)
+          this.setQuery(this.query);
+        else
+          this.setQueryAsync(this.query);
+      } else {
+        this.reset();
+      }
+      this.setOptionsFromParmsElement(this.tableName);
+      if (this.callback) {
+        this.callback(this);
+      }
+    },
+    setValue: function(value) {
+      this.setQuery(value);
+    },
+    _setValue: function(value) {
+      this.setQuery(value);
+    },
+    setSectionClasses: function() {
+      var tbody = $(this.getDiv() || getThing(this.tableName, this.divName));
+      tbody.removeClassName('sn-filter-multi-clause');
+      tbody.removeClassName('sn-filter-multi-condition');
+      tbody.removeClassName('sn-filter-empty');
+      if (!this.conditionsWanted)
+        return;
+      var showOr = false;
+      $j("button.new-or-button").hide();
+      var sections = this.sections;
+      if (sections.length == 1) {
+        var i = sections[0].conditions.length;
+        if (i == 0)
+          tbody.addClassName('sn-filter-empty');
+        else if (i == 1)
+          showOr = true;
+        else if (i > 1) {
+          tbody.addClassName('sn-filter-multi-condition');
+          showOr = true;
         }
-        var currentMapState = "";
-
-        function syncMappingStatus() {
-          var active = false;
-          for (var i = 0, l = mappingRows.length; l > i; i++) {
-            if (mappingRows[i]._isMappingEnabled) {
-              active = true;
-              break;
+      } else if (sections.length > 1) {
+        tbody.addClassName('sn-filter-multi-clause');
+        showOr = true;
+      }
+      if (sections.length > 0)
+        $j((sections[sections.length - 1]).table).addClass('sn-animate-filter-clause');
+      if (showOr)
+        $j("button.new-or-button").show();
+    },
+    setOptionsFromParmsElement: function(name) {
+      var p = name.split(".");
+      var elem = gel(p[1] + "." + p[2]);
+      if (!elem)
+        return;
+      var ut = elem.getAttribute("data-usage_context");
+      if (ut)
+        this.setUsageContext(ut);
+      var uv = elem.getAttribute("data-use-variables");
+      if (uv)
+        this.setUseVariables(uv);
+      var rf = elem.getAttribute('data-restricted_fields');
+      if (rf) {
+        this.setRestrictedFields(rf);
+        this.setOnlyRestrictedFields(true);
+      }
+      var eo = elem.getAttribute("data-extended_operators");
+      if (eo)
+        this.setIncludeExtended(eo);
+    },
+    setUsageContext: function(usage) {
+      this.fUsageContext = usage;
+      if (usage == "element_conditions") {
+        this.addExtendedOperator("MATCH_PAT");
+        this.addExtendedOperator("MATCH_RGX");
+        this.ignoreVariables();
+      }
+    },
+    getUsageContext: function() {
+      return this.fUsageContext;
+    },
+    setUseVariables: function(useVariables) {
+      this.fUseVariable = useVariables === 'true';
+    },
+    getUseVariables: function() {
+      return this.fUseVariable;
+    },
+    destroy: function() {
+      this.destroyed = true;
+      if (this.fDiv) {
+        this.fDiv.filterObject = null;
+        this.fDiv = null;
+      }
+      this._clearSections();
+    },
+    _clearSections: function() {
+      for (var i = 0; i < this.sections.length; i++)
+        this.sections[i].destroy();
+      if (this.sortSection)
+        this.sortSection.destroy();
+      this.sections = [];
+      this.sortSection = null;
+    },
+    initMessageCache: function() {
+      "use strict"
+      var all = {};
+      for (var key in sysvalues) {
+        var values = sysvalues[key];
+        var keys = buildMap(values, 0);
+        for (var i = 0; i < keys.length; i++)
+          all[keys[i]] = 't';
+      }
+      for (key in sysopers) {
+        var values = sysopers[key];
+        var keys = buildMap(values, 1);
+        for (var i = 0; i < keys.length; i++)
+          all[keys[i]] = 't';
+      }
+      var m = new Array();
+      m = m.concat(MESSAGES_FILTER_BUTTONS, MESSAGES_FILTER_MISC, MESSAGES_CONDITION_RELATED_FILES);
+      for (var i = 0; i < m.length; i++)
+        all[m[i]] = 't';
+      var send = [];
+      for (key in all)
+        send.push(key);
+      NOW.msg.fetch(send, this.init2.bind(this));
+    },
+    setRestrictedFields: function(fields) {
+      jslog("Received restricted fields " + fields);
+      var fa = fields.split(",");
+      if (fa.length == 0)
+        return;
+      this.restrictedFields = {};
+      for (var i = 0; i < fa.length; i++)
+        this.restrictedFields[fa[i]] = fa[i];
+    },
+    ignoreVariables: function(params) {
+      var variables = params || ['variables', 'questions', 'sys_tags'];
+      this.addIgnoreFields(variables.join(','));
+    },
+    addIgnoreFields: function(fields) {
+      var fa = fields.split(",");
+      if (fa.length == 0)
+        return;
+      if (!this.ignoreFields)
+        this.ignoreFields = {};
+      for (var i = 0; i < fa.length; i++)
+        this.ignoreFields[fa[i]] = fa[i];
+    },
+    setOnlyRestrictedFields: function(only) {
+      this.onlyRestrictedFields = only;
+    },
+    getIncludeExtended: function() {
+      return this.fIncludedExtendedOperators;
+    },
+    setIncludeExtended: function(include) {
+      var ops = include.split(";");
+      for (var x = 0; x < ops.length; x++) {
+        this.addExtendedOperator(ops[x]);
+      }
+    },
+    addExtendedOperator: function(oper) {
+      this.fIncludedExtendedOperators[oper] = true;
+    },
+    filterFields: function(item) {
+      var name = item.getName();
+      if (!this.restrictedFields) {
+        if (!this.ignoreFields)
+          return true;
+        if (this.ignoreFields[name])
+          return false;
+        return true;
+      }
+      if (name.indexOf(".") > -1)
+        return false;
+      if (this.restrictedFields[name])
+        return true;
+      return false;
+    },
+    setFieldUsed: function(name) {},
+    clearFieldUsed: function(name) {},
+    refreshSelectList: function() {},
+    isTemplatable: function() {
+      return false;
+    },
+    setQuery: function(query) {
+      jslog("setQuery Synchronously:  " + query);
+      this.glideQuery = new GlideEncodedQuery(this.tableName, query);
+      this.glideQuery.parse();
+      this.reset();
+      this.build();
+    },
+    setQueryAsync: function(query, defaultVal) {
+      this.addLoadingIcon();
+      this.glideQuery = new GlideEncodedQuery(this.tableName, query, this.setQueryCallback.bind(this));
+      if (defaultVal)
+        this.defaultVal = defaultVal.split(",");
+      this.glideQuery.parse();
+      this.queryProcessed = true;
+    },
+    setQueryCallback: function() {
+      if (this.destroyed)
+        return;
+      this.reset();
+      this.build();
+      if (this.getFilterReadOnly()) {
+        this.setReadOnly(true);
+      }
+      CustomEvent.fire('filter:' + this.type + '-done', true);
+    },
+    setRunable: function(b) {
+      this.runable = b;
+    },
+    isRunable: function() {
+      return this.runable;
+    },
+    setDefaultPlaceHolder: function(b) {
+      this.defaultPlaceHolder = b;
+    },
+    setMaintainPlaceHolder: function(b) {
+      this.maintainPlaceHolder = true;
+    },
+    getMaintainPlaceHolder: function() {
+      return this.maintainPlaceHolder;
+    },
+    setFilterReadOnly: function(b) {
+      this.filterReadOnly = b;
+    },
+    getFilterReadOnly: function() {
+      return this.filterReadOnly;
+    },
+    setRunCode: function(code) {
+      this.runCode = code;
+    },
+    reset: function() {
+      var e = this.fDiv;
+      if (!e)
+        return;
+      if (e.tagName == 'TBODY') {
+        var toRemove = [];
+        for (var i = 0; i < e.childNodes.length; i++) {
+          var tr = e.childNodes[i];
+          if ($(tr).hasClassName('no_remove'))
+            continue;
+          toRemove.unshift(i);
+        }
+        for (i = 0; i < toRemove.length; i++)
+          e.removeChild(e.childNodes[toRemove[i]]);
+      } else {
+        clearNodes(this.fDiv);
+      }
+      this._clearSections();
+    },
+    getXML: function() {
+      return this.glideQuery.getXML();
+    },
+    build: function() {
+      this.queryProcessed = true;
+      this.terms = this.glideQuery.getTerms();
+      this.buildQuery();
+      this.buildOrderBy();
+    },
+    buildOrderBy: function() {
+      var orderArray = this.glideQuery.getOrderBy();
+      if (orderArray.length == 0)
+        return;
+      for (var i = 0; i < orderArray.length; i++) {
+        var order = orderArray[i];
+        if (order.isAscending())
+          this.addSortRow(order.getName(), 'ascending');
+        else
+          this.addSortRow(order.getName(), 'descending');
+      }
+    },
+    buildQuery: function() {
+      "use strict"
+      this._loadTablesForQuery();
+      this.preQuery();
+      var partCount = 0;
+      var section = this.addSection();
+      var queryID = section.getQueryID();
+      this.removeLoadingIcon();
+      for (var i = 0; i < this.terms.length; i++) {
+        var qp = this.terms[i];
+        if (!qp.isValid())
+          continue;
+        partCount += 1;
+        if (qp.isNewQuery()) {
+          var section = this.addSection();
+          queryID = section.getQueryID();
+        }
+        var field = qp.getField();
+        var operator = qp.getOperator();
+        var operands = qp.getValue();
+        if (this.isHaslabelQuery(field, operator, operands)) {
+          operands = operands.substring(1);
+          field = "sys_tags";
+          operator = this.OPERATOR_EQUALS;
+        }
+        if (this.defaultVal) {
+          for (var n = 0; n < this.defaultVal.length; n++) {
+            var fieldIsDefault = false;
+            var defaultQuery = this.defaultVal[n].split("=");
+            var defaultField = defaultQuery[0];
+            if (defaultField == field) {
+              fieldIsDefault = true;
+              this.defaultVal.splice(n, 1);
+              n = this.defaultVal.length;
             }
           }
-          var status = active ? "partial" : "inactive";
-          if (currentMapState !== status) {
-            currentMapState = status;
-            CustomEvent.fire("sys_mapping:set_field_state::" + mappingId, status);
-          }
         }
-        this.mappingMgr = {
-            initElement: initMapHandler,
-            destroyElement: function() {
-                cleanMappingFields();
-                syncMapping
+        gotoPart = qp.isGoTo();
+        if (qp.isOR())
+          this.currentCondition.addNewSubCondition(field, operator, operands);
+        else
+          this.addConditionRow(queryID, field, operator, operands, fieldIsDefault);
+      }
+      if (partCount == 0 && this.defaultPlaceHolder)
+        this.addConditionRow(queryID);
+      gotoPart = false;
+    },
+    addLoadingIcon: function() {
+      var templateFilter = gel(this.fieldName + "filters_table");
+      if (templateFilter && templateFilter.className !== 'filter_load_icon') {
+        this.filterClasses = templateFilter.getAttribute("class");
+        templateFilter.className = 'filter_load_icon';
+      }
+    },
+    removeLoadingIcon: function() {
+      var templateFilter = gel(this.fieldName + "filters_table");
+      if (templateFilter && templateFilter.className === 'filter_load_icon')
+        templateFilter.className = this.filterClasses;
+    },
+    isHaslabelQuery: function(field, operator, operands) {
+      return field == this.VARIABLES &&
+        operator == this.LABELS_QUERY &&
+        operands.length > 1;
+    },
+    preQuery: function() {},
+    isProtectedField: function(name) {
+      return false;
+    },
+    _loadTablesForQuery: function() {
+      for (var i = 0; i < this.terms.length; i++) {
+        var qp = this.terms[i];
+        if (!qp.isValid())
+          continue;
+        var field = qp.getField();
+        this._loadTablesForField(field);
+      }
+    },
+    _loadTablesForField: function(fieldName) {
+      if (!fieldName)
+        return;
+      var tableName = this.tableName.split(".")[0];
+      var parts = fieldName.split(".");
+      for (var i = 0; i < parts.length; i++) {
+        var tableDef = loadFilterTableReference(tableName, this.isTemplate);
+        if (!tableDef)
+          return;
+        var edef = tableDef.getElement(parts[i]);
+        if (edef == null && tableDef.glide_var)
+          edef = tableDef.getElement(parts[i] + "." + parts[++i]);
+        if (edef == null)
+          return;
+        if (!edef.isReference())
+          return;
+        tableName = edef.getReference();
+      }
+    },
+    addSortRow: function(field, oper) {
+      if (this.sortSection == null)
+        this.sortSection = new GlideSortSection(this);
+      this.sortSection.addField(field, oper);
+      this.addRunButton();
+    },
+    addConditionRowToFirstSection: function() {
+      if (this.sections.length == 0)
+        this.addSection();
+      var section = this.sections[0];
+      this.addConditionRow(section.getQueryID());
+    },
+    addConditionRow: function(queryID, field, oper, value, defaultField) {
+      var section = null;
+      if (queryID) {
+        var i = findInArray(this.sections, queryID);
+        if (i != null)
+          section = this.sections[i];
+      }
+      if (!section)
+        section = this.addSection();
+      var condition = section.addCondition(true, field, oper, value);
+      if (defaultField) {
+        condition.actionRow.className += " modal_template_icon";
+      }
+      this.setSectionClasses();
+      if (!condition)
+        return null;
+      this.currentCondition = condition;
+      return condition.getRow();
+    },
+    addSection: function() {
+      var section = new GlideFilterSection(this);
+      queryID = section._setup(this.sortSection == null, this.sections.length == 0);
+      this.sections[this.sections.length] = section;
+      if (this.sortSection != null && this.sortElement == this.fDiv) {
+        var sortRow = this.sortSection.getSection().getRow();
+        this.fDiv.insertBefore(section.getRow(), sortRow);
+      }
+      this.addRunButton();
+      this.setSectionClasses();
+      return section;
+    },
+    removeSection: function(queryID) {
+      if (this.sortSection) {
+        if (this.sortSection.getID() == queryID) {
+          clearNodes(this.sortSection.getSection().getRow());
+          fDiv = this.fDiv;
+          var e = $('gcond_sort_order');
+          if (e)
+            fDiv = e;
+          fDiv.removeChild(this.sortSection.getSection().getRow());
+          this.sortSection = null;
+          this.addRunButton();
+          return;
+        }
+      }
+      var i = findInArray(this.sections, queryID);
+      if (i == null)
+        return;
+      var section = this.sections[i];
+      this.sections.splice(i, 1);
+      clearNodes(section.getRow());
+      this.fDiv.removeChild(section.getRow());
+      if (i == 0) {
+        if (this.sections.length > 0)
+          this.sections[0].setFirst(this.sections.length);
+        else {
+          if (this.defaultPlaceHolder)
+            this.addConditionRow();
+        }
+      }
+      this.addRunButton();
+      this.updateDBValue();
+      this.setSectionClasses();
+    },
+    singleCondition: function() {
+      if (this.sections.length > 1)
+        return false;
+      var section = this.sections[0];
+      count = section.getConditionCount();
+      return count == 1;
+    },
+    runFilter: function() {
+        var filter = getFilter(this.tableName, true);
+        if (runFi

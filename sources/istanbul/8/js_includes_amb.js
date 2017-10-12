@@ -1445,4 +1445,42 @@ org.cometd.Cometd = function(name) {
       var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
       var newTransport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
       if (!newTransport) {
-        _notifyTransportFailure(oldTransport.getType(), null, me
+        _notifyTransportFailure(oldTransport.getType(), null, message.failure);
+        _cometd._warn('Could not negotiate transport; client=[' + transportTypes + ']');
+        _transport.reset();
+        _failHandshake(message);
+      } else {
+        _cometd._debug('Transport', oldTransport.getType(), '->', newTransport.getType());
+        _notifyTransportFailure(oldTransport.getType(), newTransport.getType(), message.failure);
+        _failHandshake(message);
+        _transport = newTransport;
+      }
+    }
+
+    function _failConnect(message) {
+      _notifyListeners('/meta/connect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var action = _isDisconnected() ? 'none' : _advice.reconnect;
+      switch (action) {
+        case 'retry':
+          _delayedConnect();
+          _increaseBackoff();
+          break;
+        case 'handshake':
+          _transports.reset();
+          _resetBackoff();
+          _delayedHandshake();
+          break;
+        case 'none':
+          _disconnect(false);
+          break;
+        default:
+          throw 'Unrecognized advice action' + action;
+      }
+    }
+
+    function _connectResponse(message) {
+      _connected = message.successful;
+      if (_connected) {
+        _notifyListeners('/meta/connect', message);
+        var action = _isDisco

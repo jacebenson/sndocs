@@ -1264,490 +1264,65 @@ angular.module('sn.common.attachments').directive('nowAttachmentsList', function
 });;
 /*! RESOURCE: /scripts/angularjs-1.4/sn/common/attachments/factory.snAttachmentHandler.js */
 angular.module('sn.common.attachments').factory('snAttachmentHandler', function(urlTools, $http, $upload, $window, $q) {
-  "use strict";
-  return {
-    getViewUrl: getViewUrl,
-    create: createAttachmentHandler,
-    deleteAttachment: deleteAttachmentBySysID,
-    renameAttachment: renameAttachmentBySysID
-  };
-
-  function getViewUrl(sysId) {
-    return '/sys_attachment.do?sys_id=' + sysId;
-  }
-
-  function deleteAttachmentBySysID(sysID) {
-    var url = urlTools.getURL('ngk_attachments', {
-      action: 'delete',
-      sys_id: sysID
-    });
-    return $http.get(url);
-  }
-
-  function renameAttachmentBySysID(sysID, newName) {
-    var url = urlTools.getURL('ngk_attachments', {
-      action: 'rename',
-      sys_id: sysID,
-      new_name: newName
-    });
-    return $http.post(url);
-  }
-
-  function createAttachmentHandler(tableName, sysID) {
-    var _tableName = tableName;
-    var _sysID = sysID;
-    var _files = [];
-
-    function getTableName() {
-      return _tableName;
-    }
-
-    function getSysID() {
-      return _sysID;
-    }
-
-    function getAttachments() {
-      var url = urlTools.getURL('ngk_attachments', {
-        action: 'list',
-        sys_id: _sysID,
-        table: _tableName
-      });
-      return $http.get(url).then(function(response) {
-        var files = response.data.files;
-        if (_files.length == 0) {
-          files.forEach(function(file) {
-            _transformFileResponse(file);
-            _files.push(file);
-          })
-        } else {
-          _files = files;
-        }
-        return _files;
-      });
-    }
-
-    function addAttachment(attachment) {
-      _files.unshift(attachment);
-    }
-
-    function deleteAttachment(attachment) {
-      var index = _files.indexOf(attachment);
-      if (index !== -1) {
-        return deleteAttachmentBySysID(attachment.sys_id).then(function() {
-          _files.splice(index, 1);
-        });
-      }
-    }
-
-    function uploadAttachments(files, uploadFields) {
-      var defer = $q.defer();
-      var promises = [];
-      var fileData = [];
-      angular.forEach(files, function(file) {
-        promises.push(uploadAttachment(file, uploadFields).then(function(response) {
-          fileData.push(response);
-        }));
-      });
-      $q.all(promises).then(function() {
-        defer.resolve(fileData);
-      });
-      return defer.promise;
-    }
-
-    function uploadAttachment(file, uploadFields, uploadMethods) {
-      var url = urlTools.getURL('ngk_attachments', {
-        action: 'add',
-        sys_id: _sysID,
-        table: _tableName,
-        load_attachment_record: 'true'
-      });
-      var fields = {
-        attachments_modified: 'true',
-        sysparm_table: _tableName,
-        sysparm_sys_id: _sysID,
-        sysparm_nostack: 'yes',
-        sysparm_encryption_context: ''
+      "use strict";
+      return {
+        getViewUrl: getViewUrl,
+        create: createAttachmentHandler,
+        deleteAttachment: deleteAttachmentBySysID,
+        renameAttachment: renameAttachmentBySysID
       };
-      if (typeof $window.g_ck !== 'undefined') {
-        fields['sysparm_ck'] = $window.g_ck;
-      }
-      if (uploadFields) {
-        angular.extend(fields, uploadFields);
-      }
-      var upload = $upload.upload({
-        url: url,
-        fields: fields,
-        fileFormDataName: 'attachFile',
-        file: file
-      });
-      if (uploadMethods !== undefined) {
-        if (uploadMethods.hasOwnProperty('progress')) {
-          upload.progress(uploadMethods.progress);
-        }
-        if (uploadMethods.hasOwnProperty('success')) {
-          upload.success(uploadMethods.success);
-        }
-        if (uploadMethods.hasOwnProperty('error')) {
-          upload.error(uploadMethods.error);
-        }
-      }
-      return upload.then(function(response) {
-        var sysFile = response.data;
-        if (sysFile.error) {
-          return $q.reject("Exception when adding attachment: " + sysFile.error);
-        }
-        _transformFileResponse(sysFile);
-        addAttachment(sysFile);
-        return sysFile;
-      });
-    }
 
-    function _transformFileResponse(file) {
-      file.isImage = false;
-      file.canPreview = false;
-      if (file.content_type.indexOf('image') !== -1) {
-        file.isImage = true;
-        if (!file.thumbSrc) {} else if (file.thumbSrc[0] !== '/') {
-          file.thumbSrc = '/' + file.thumbSrc;
-        }
-        file.canPreview = file.content_type.indexOf('tiff') === -1;
+      function getViewUrl(sysId) {
+        return '/sys_attachment.do?sys_id=' + sysId;
       }
-      file.viewUrl = getViewUrl(file.sys_id);
-    }
-    return {
-      getSysID: getSysID,
-      getTableName: getTableName,
-      getAttachments: getAttachments,
-      addAttachment: addAttachment,
-      deleteAttachment: deleteAttachment,
-      uploadAttachment: uploadAttachment,
-      uploadAttachments: uploadAttachments
-    };
-  }
-});;
-/*! RESOURCE: /scripts/angularjs-1.4/sn/common/attachments/directive.snFileUploadInput.js */
-angular.module('sn.common.attachments').directive('snFileUploadInput', function(cabrillo, $document) {
-  'use strict';
-  return {
-    restrict: 'E',
-    scope: {
-      attachmentHandler: '='
-    },
-    template: function() {
-      var inputTemplate;
-      if (cabrillo.isNative()) {
-        inputTemplate = '<button class="{{classNames}}" ng-click="showAttachOptions($event)"><span class="upload-label">{{:: "Add Attachment" | translate}}</span></button>';
-      } else {
-        inputTemplate = '<button class="{{classNames}}" ng-file-select="onFileSelect($files)"><span class="upload-label">{{:: "Add Attachment" | translate}}</span></button>';
-      }
-      return [
-        '<div class="file-upload-input">',
-        inputTemplate,
-        '</div>'
-      ].join('');
-    },
-    controller: function($element, $scope) {
-      $scope.classNames = 'btn btn-icon attachment-btn icon-paperclip';
-      $scope.showAttachOptions = function($event) {
-        var handler = $scope.attachmentHandler;
-        var target = angular.element($event.currentTarget);
-        var elRect = target[0].getBoundingClientRect();
-        var body = $document[0].body;
-        var rect = {
-          x: elRect.left + body.scrollLeft,
-          y: elRect.top + body.scrollTop,
-          width: elRect.width,
-          height: elRect.height
-        };
-        var options = {
-          sourceRect: rect
-        };
-        cabrillo.attachments.addFile(
-          handler.getTableName(),
-          handler.getSysID(),
-          null,
-          options
-        ).then(function(data) {
-          console.log('Attached new file', data);
-          handler.addAttachment(data);
-        }, function() {
-          console.log('Failed to attach new file');
-        });
-      };
-      $scope.onFileSelect = function($files) {
-        $scope.attachmentHandler.uploadAttachments($files);
-      };
-      $scope.showFileSelector = function($event) {
-        $event.stopPropagation();
-        var target = angular.element($event.currentTarget);
-        var input = target.parent().find('input');
-        input.triggerHandler('click');
-      };
-    }
-  }
-});;
-/*! RESOURCE: /scripts/angularjs-1.4/sn/common/attachments/directive.snPasteImageHandler.js */
-angular.module('sn.common.attachments').directive('snPasteImageHandler', function($parse) {
-  'use strict';
-  return {
-    restrict: 'A',
-    replace: true,
-    link: function(scope, element, attrs) {
-      var handleFiles = $parse(attrs.snPasteImageHandler);
-      element.bind("paste", function(e) {
-        e = e.originalEvent || e;
-        var item = e.clipboardData.items[0];
-        if (!item.kind)
-          return;
-        if (item.kind !== "file")
-          return;
-        var file = item.getAsFile();
-        file.name = "Pasted File - " + new Date();
-        handleFiles(scope, {
-          file: file
-        });
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    }
-  };
-});;
-/*! RESOURCE: /scripts/angularjs-1.4/sn/common/attachments/directive.snAttachmentList.js */
-angular.module('sn.common.attachments').directive('snAttachmentList', function(getTemplateUrl, snAttachmentHandler, $rootScope, $window, $timeout, $q) {
-    'use strict';
-    return {
-      restrict: 'E',
-      replace: true,
-      templateUrl: getTemplateUrl("sn_attachment_list.xml"),
-      scope: {
-        tableName: "=?",
-        sysID: "=?sysId",
-        attachmentList: "=?",
-        uploadFileFn: "&",
-        deleteFileFn: "=?",
-        canEdit: "=?",
-        canRemove: "=?",
-        canAdd: "=?",
-        canDownload: "=?",
-        showHeader: "=?",
-        clickImageFn: "&?",
-        confirmDelete: "=?"
-      },
-      controller: function($scope) {
-        $scope.canEdit = $scope.canEdit || false;
-        $scope.canDownload = $scope.canDownload || false;
-        $scope.canRemove = $scope.canRemove || false;
-        $scope.canAdd = $scope.canAdd || false;
-        $scope.showHeader = $scope.showHeader || false;
-        $scope.clickImageFn = $scope.clickImageFn || function() {};
-        $scope.confirmDelete = $scope.confirmDelete || false;
-        $scope.filesInProgress = {};
-        $scope.attachmentToDelete = null;
 
-        function refreshResources() {
-          var handler = snAttachmentHandler.create($scope.tableName, $scope.sysID);
-          handler.getAttachments().then(function(files) {
-            $scope.attachmentList = files;
+      function deleteAttachmentBySysID(sysID) {
+        var url = urlTools.getURL('ngk_attachments', {
+          action: 'delete',
+          sys_id: sysID
+        });
+        return $http.get(url);
+      }
+
+      function renameAttachmentBySysID(sysID, newName) {
+        var url = urlTools.getURL('ngk_attachments', {
+          action: 'rename',
+          sys_id: sysID,
+          new_name: newName
+        });
+        return $http.post(url);
+      }
+
+      function createAttachmentHandler(tableName, sysID) {
+        var _tableName = tableName;
+        var _sysID = sysID;
+        var _files = [];
+
+        function getTableName() {
+          return _tableName;
+        }
+
+        function getSysID() {
+          return _sysID;
+        }
+
+        function getAttachments() {
+          var url = urlTools.getURL('ngk_attachments', {
+            action: 'list',
+            sys_id: _sysID,
+            table: _tableName
+          });
+          return $http.get(url).then(function(response) {
+            var files = response.data.files;
+            if (_files.length == 0) {
+              files.forEach(function(file) {
+                _transformFileResponse(file);
+                _files.push(file);
+              })
+            } else {
+              _files = files;
+            }
+            return _files;
           });
         }
-        if (!$scope.attachmentList) {
-          $scope.attachmentList = [];
-          refreshResources();
-        }
-        $scope.$on('attachments_list.update', function(e, tableName, sysID) {
-          if (tableName === $scope.tableName && sysID === $scope.sysID) {
-            refreshResources();
-          }
-        });
-
-        function removeFromFileProgress(fileName) {
-          delete $scope.filesInProgress[fileName];
-        }
-
-        function updateFileProgress(file) {
-          if (!$scope.filesInProgress[file.name])
-            $scope.filesInProgress[file.name] = file;
-        }
-        $scope.$on('attachments_list.upload.progress', function(e, file) {
-          updateFileProgress(file);
-        });
-        $scope.$on('attachments_list.upload.success', function(e, file) {
-          removeFromFileProgress(file.name);
-        });
-        $scope.attachFiles = function(files) {
-          if ($scope.tableName && $scope.sysID) {
-            var handler = snAttachmentHandler.create($scope.tableName, $scope.sysID);
-            var promises = [];
-            files.forEach(function(file) {
-              var promise = handler.uploadAttachment(file, null, {
-                progress: function(e) {
-                  var file = e.config.file;
-                  file.progress = 100.0 * event.loaded / event.total;
-                  updateFileProgress(file);
-                },
-                success: function(data) {
-                  removeFromFileProgress(data.file_name);
-                }
-              });
-              promises.push(promise);
-            });
-            $q.all(promises).then(function() {
-              refreshResources();
-            });
-          } else {
-            if ($scope.uploadFileFn)
-              $scope.uploadFileFn({
-                files: files
-              });
-          }
-        };
-        $scope.getProgressStyle = function(fileName) {
-          return {
-            'width': $scope.filesInProgress[fileName].progress + '%'
-          };
-        };
-        $scope.openSelector = function($event) {
-          $event.stopPropagation();
-          var target = angular.element($event.currentTarget);
-          $timeout(function() {
-            target.parent().find('input').click();
-          });
-        };
-        $scope.confirmDeleteAttachment = function(attachment) {
-          $scope.attachmentToDelete = attachment;
-          $scope.$broadcast('dialog.confirm-delete.show');
-        };
-        $scope.deleteAttachment = function() {
-          snAttachmentHandler.deleteAttachment($scope.attachmentToDelete.sys_id).then(function() {
-            var index = $scope.attachmentList.indexOf($scope.attachmentToDelete);
-            $scope.attachmentList.splice(index, 1);
-          });
-        };
-      }
-    };
-  })
-  .directive('snAttachmentListItem', function(getTemplateUrl, snAttachmentHandler, $rootScope, $window, $timeout, $parse) {
-    'use strict';
-    return {
-      restrict: "E",
-      replace: true,
-      templateUrl: getTemplateUrl("sn_attachment_list_item.xml"),
-      link: function(scope, element, attrs) {
-        function translateAttachment(att) {
-          return {
-            content_type: att.content_type,
-            file_name: att.file_name,
-            image: (att.thumbSrc !== undefined),
-            size_bytes: att.size,
-            sys_created_by: "",
-            sys_created_on: "",
-            sys_id: att.sys_id,
-            thumb_src: att.thumbSrc
-          };
-        }
-        scope.attachment = ($parse(attrs.attachment.size_bytes)) ?
-          scope.$eval(attrs.attachment) :
-          translateAttachment(attrs.attachment);
-        var fileNameView = element.find('.sn-widget-list-title_view');
-        var fileNameEdit = element.find('.sn-widget-list-title_edit');
-
-        function editFileName() {
-          fileNameView.hide();
-          fileNameEdit.show();
-          element.find('.edit-text-input').focus();
-        }
-
-        function viewFileName() {
-          fileNameView.show();
-          fileNameEdit.hide();
-        }
-        viewFileName();
-        scope.editModeToggle = function($event) {
-          $event.preventDefault();
-          $event.stopPropagation();
-          scope.editMode = !scope.editMode;
-          if (scope.editMode)
-            editFileName();
-          else
-            viewFileName();
-        };
-        scope.updateName = function() {
-          scope.editMode = false;
-          viewFileName();
-          snAttachmentHandler.renameAttachment(scope.attachment.sys_id, scope.attachment.file_name);
-        };
-      },
-      controller: function($scope, snCustomEvent) {
-        $scope.editMode = false;
-        $scope.removeAttachment = function(attachment, index) {
-          if ($scope.deleteFileFn !== undefined && $scope.deleteFileFn instanceof Function) {
-            $scope.deleteFileFn.apply(null, arguments);
-            return;
-          }
-          if ($scope.confirmDelete) {
-            $scope.confirmDeleteAttachment($scope.attachment);
-            return;
-          }
-          snAttachmentHandler.deleteAttachment($scope.attachment.sys_id).then(function() {
-            $scope.attachmentList.splice($scope.$index, 1);
-          });
-        };
-        var contentTypeMap = {
-          "application/pdf": "icon-document-pdf",
-          "text/plain": "icon-document-txt",
-          "application/zip": "icon-document-zip",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "icon-document-doc",
-          "application/vnd.openxmlformats-officedocument.presentationml.presentation": "icon-document-ppt",
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "icon-document-xls",
-          "application/vnd.ms-powerpoint": "icon-document-ppt"
-        };
-        $scope.getDocumentType = function(contentType) {
-          return contentTypeMap[contentType] || "icon-document";
-        };
-        $scope.handleAttachmentClick = function(event) {
-          if (event.keyCode === 9)
-            return;
-          if ($scope.editMode)
-            return;
-          if (!$scope.attachment)
-            return;
-          if ($scope.attachment.image)
-            openImageInLightBox(event);
-          else
-            downloadAttachment();
-        };
-
-        function downloadAttachment() {
-          if (!$scope.attachment.sys_id)
-            return;
-          $window.location.href = 'sys_attachment.do?sys_id=' + $scope.attachment.sys_id;
-        }
-
-        function openImageInLightBox(event) {
-          if (!$scope.attachment.size)
-            $scope.attachment.size = $scope.getSize($scope.attachment.size_bytes, 2);
-          $scope.clickImageFn({
-            file: $scope.attachment
-          });
-          snCustomEvent.fire('sn.attachment.preview', event, $scope.attachment);
-        }
-        $scope.getSize = function(bytes, precision) {
-          if (typeof bytes === 'string' && bytes.slice(-1) === 'B')
-            return bytes;
-          var kb = 1024;
-          var mb = kb * 1024;
-          var gb = mb * 1024;
-          if ((bytes >= 0) && (bytes < kb))
-            return bytes + ' B';
-          else if ((bytes >= kb) && (bytes < mb))
-            return (bytes / kb).toFixed(precision) + ' KB';
-          else if ((bytes >= mb) && (bytes < gb))
-            return (bytes / mb).toFixed(precision) + ' MB';
-          else if (bytes >= gb)
-            return (bytes / gb).toFixed(precision) + ' GB';
-          else
-            return bytes + ' B';
-        }
-      }
-    };
-  });;;
+        funct

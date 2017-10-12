@@ -1166,4 +1166,5 @@ var SortDraggable = Class.create(Draggable, {
       onEndHandler: function() {
           SortDraggable.modY = 0;
           if (this.overrideEventHandlers) {
-            Event.stopObserving(document.body, "mouseup", thi
+            Event.stopObserving(document.body, "mouseup", this.mouseUpOverride);
+            Even

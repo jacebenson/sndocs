@@ -1,12 +1,15 @@
-/*! RESOURCE: /scripts/sn/common/form/data/_module.js */
-angular.module('sn.common.form.data', []);;Script', [
-  'sn.common.i18n',
-  'sn.common.util'
-]);;l'
-]);; 'sn.common.avatar', 'sn.common.ui.popover', 'mentio', 'sn.common.controls', 'sn.common.user_profile',
-  'sn.common.datetime', 'sn.common.mention', 'sn.common.ui'
-]);
-angular.module("sn.stream.direct", ['sn.common.stream']);;ommon.user_profile',
+/*! RESOURCE: /scripts/sn/common/util/_module.js */
+angular.module('sn.common.util', ['sn.common.auth']);
+angular.module('sn.util', ['sn.common.util']);;]);;e strict";
+  $provide.constant("PRESENCE_DISABLED", "false" === "true");
+});;nk',
+  'sn.common.mention',
+  'sn.common.messaging',
+  'sn.common.notification',
+  'sn.common.presence',
+  'sn.common.stream',
+  'sn.common.ui',
+  'sn.common.user_profile',
   'sn.common.util'
 ]);
 angular.module('ng.common', [

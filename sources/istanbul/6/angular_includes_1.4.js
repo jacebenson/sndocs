@@ -6011,250 +6011,609 @@
       }
     };
     rd.prototype = {
+      compile: function(a, b) {
+        var d = this,
+          c = this.astBuilder.ast(a);
+        this.state = {
+          nextId: 0,
+          filters: {},
+          expensiveChecks: b,
+          fn: {
+            vars: [],
+            body: [],
+            own: {}
+          },
+          assign: {
+            vars: [],
+            body: [],
+            own: {}
+          },
+          inputs: []
+        };
+        W(c, d.$filter);
+        var e = "",
+          f;
+        this.stage = "assign";
+        if (f = pd(c)) this.state.computing = "assign", e = this.nextId(), this.recurse(f, e), this.return_(e), e = "fn.assign=" + this.generateFunction("assign", "s,v,l");
+        f = nd(c.body);
+        d.stage = "inputs";
+        n(f, function(a, b) {
+          var c = "fn" + b;
+          d.state[c] = {
+            vars: [],
+            body: [],
+            own: {}
+          };
+          d.state.computing = c;
+          var e = d.nextId();
+          d.recurse(a, e);
+          d.return_(e);
+          d.state.inputs.push(c);
+          a.watchId = b
+        });
+        this.state.computing = "fn";
+        this.stage = "main";
+        this.recurse(c);
+        e = '"' + this.USE + " " + this.STRICT +
+          '";\n' + this.filterPrefix() + "var fn=" + this.generateFunction("fn", "s,l,a,i") + e + this.watchFns() + "return fn;";
+        e = (new Function("$filter", "ensureSafeMemberName", "ensureSafeObject", "ensureSafeFunction", "getStringValue", "ensureSafeAssignContext", "ifDefined", "plus", "text", e))(this.$filter, Va, xa, kd, jd, ld, Zf, md, a);
+        this.state = this.stage = u;
+        e.literal = qd(c);
+        e.constant = c.constant;
+        return e
+      },
+      USE: "use",
+      STRICT: "strict",
+      watchFns: function() {
+        var a = [],
+          b = this.state.inputs,
+          d = this;
+        n(b, function(b) {
+          a.push("var " + b + "=" + d.generateFunction(b,
+            "s"))
+        });
+        b.length && a.push("fn.inputs=[" + b.join(",") + "];");
+        return a.join("")
+      },
+      generateFunction: function(a, b) {
+        return "function(" + b + "){" + this.varsPrefix(a) + this.body(a) + "};"
+      },
+      filterPrefix: function() {
+        var a = [],
+          b = this;
+        n(this.state.filters, function(d, c) {
+          a.push(d + "=$filter(" + b.escape(c) + ")")
+        });
+        return a.length ? "var " + a.join(",") + ";" : ""
+      },
+      varsPrefix: function(a) {
+        return this.state[a].vars.length ? "var " + this.state[a].vars.join(",") + ";" : ""
+      },
+      body: function(a) {
+        return this.state[a].body.join("")
+      },
+      recurse: function(a, b,
+        d, c, e, f) {
+        var g, h, k = this,
+          l, m;
+        c = c || x;
+        if (!f && y(a.watchId)) b = b || this.nextId(), this.if_("i", this.lazyAssign(b, this.computedMember("i", a.watchId)), this.lazyRecurse(a, b, d, c, e, !0));
+        else switch (a.type) {
+          case s.Program:
+            n(a.body, function(b, c) {
+              k.recurse(b.expression, u, u, function(a) {
+                h = a
+              });
+              c !== a.body.length - 1 ? k.current().body.push(h, ";") : k.return_(h)
+            });
+            break;
+          case s.Literal:
+            m = this.escape(a.value);
+            this.assign(b, m);
+            c(m);
+            break;
+          case s.UnaryExpression:
+            this.recurse(a.argument, u, u, function(a) {
+              h = a
+            });
+            m = a.operator + "(" + this.ifDefined(h,
+              0) + ")";
+            this.assign(b, m);
+            c(m);
+            break;
+          case s.BinaryExpression:
+            this.recurse(a.left, u, u, function(a) {
+              g = a
+            });
+            this.recurse(a.right, u, u, function(a) {
+              h = a
+            });
+            m = "+" === a.operator ? this.plus(g, h) : "-" === a.operator ? this.ifDefined(g, 0) + a.operator + this.ifDefined(h, 0) : "(" + g + ")" + a.operator + "(" + h + ")";
+            this.assign(b, m);
+            c(m);
+            break;
+          case s.LogicalExpression:
+            b = b || this.nextId();
+            k.recurse(a.left, b);
+            k.if_("&&" === a.operator ? b : k.not(b), k.lazyRecurse(a.right, b));
+            c(b);
+            break;
+          case s.ConditionalExpression:
+            b = b || this.nextId();
+            k.recurse(a.test,
+              b);
+            k.if_(b, k.lazyRecurse(a.alternate, b), k.lazyRecurse(a.consequent, b));
+            c(b);
+            break;
+          case s.Identifier:
+            b = b || this.nextId();
+            d && (d.context = "inputs" === k.stage ? "s" : this.assign(this.nextId(), this.getHasOwnProperty("l", a.name) + "?l:s"), d.computed = !1, d.name = a.name);
+            Va(a.name);
+            k.if_("inputs" === k.stage || k.not(k.getHasOwnProperty("l", a.name)), function() {
+              k.if_("inputs" === k.stage || "s", function() {
+                e && 1 !== e && k.if_(k.not(k.nonComputedMember("s", a.name)), k.lazyAssign(k.nonComputedMember("s", a.name), "{}"));
+                k.assign(b, k.nonComputedMember("s",
+                  a.name))
+              })
+            }, b && k.lazyAssign(b, k.nonComputedMember("l", a.name)));
+            (k.state.expensiveChecks || Fb(a.name)) && k.addEnsureSafeObject(b);
+            c(b);
+            break;
+          case s.MemberExpression:
+            g = d && (d.context = this.nextId()) || this.nextId();
+            b = b || this.nextId();
+            k.recurse(a.object, g, u, function() {
+              k.if_(k.notNull(g), function() {
+                if (a.computed) h = k.nextId(), k.recurse(a.property, h), k.getStringValue(h), k.addEnsureSafeMemberName(h), e && 1 !== e && k.if_(k.not(k.computedMember(g, h)), k.lazyAssign(k.computedMember(g, h), "{}")), m = k.ensureSafeObject(k.computedMember(g,
+                  h)), k.assign(b, m), d && (d.computed = !0, d.name = h);
+                else {
+                  Va(a.property.name);
+                  e && 1 !== e && k.if_(k.not(k.nonComputedMember(g, a.property.name)), k.lazyAssign(k.nonComputedMember(g, a.property.name), "{}"));
+                  m = k.nonComputedMember(g, a.property.name);
+                  if (k.state.expensiveChecks || Fb(a.property.name)) m = k.ensureSafeObject(m);
+                  k.assign(b, m);
+                  d && (d.computed = !1, d.name = a.property.name)
+                }
+              }, function() {
+                k.assign(b, "undefined")
+              });
+              c(b)
+            }, !!e);
+            break;
+          case s.CallExpression:
+            b = b || this.nextId();
+            a.filter ? (h = k.filter(a.callee.name), l = [], n(a.arguments,
+              function(a) {
+                var b = k.nextId();
+                k.recurse(a, b);
+                l.push(b)
+              }), m = h + "(" + l.join(",") + ")", k.assign(b, m), c(b)) : (h = k.nextId(), g = {}, l = [], k.recurse(a.callee, h, g, function() {
+              k.if_(k.notNull(h), function() {
+                  k.addEnsureSafeFunction(h);
+                  n(a.arguments, function(a) {
+                    k.recurse(a, k.nextId(), u, function(a) {
+                      l.push(k.ensureSafeObject(a))
+                    })
+                  });
+                  g.name ? (k.state.expensiveChecks || k.addEnsureSafeObject(g.context), m = k.member(g.context, g.name, g.computed) + "(" + l.join(",") + ")") : m = h + "(" + l.join(",") + ")";
+                  m = k.ensureSafeObject(m);
+                  k.assign(b, m)
+                },
+                function() {
+                  k.assign(b, "undefined")
+                });
+              c(b)
+            }));
+            break;
+          case s.AssignmentExpression:
+            h = this.nextId();
+            g = {};
+            if (!od(a.left)) throw ba("lval");
+            this.recurse(a.left, u, g, function() {
+              k.if_(k.notNull(g.context), function() {
+                k.recurse(a.right, h);
+                k.addEnsureSafeObject(k.member(g.context, g.name, g.computed));
+                k.addEnsureSafeAssignContext(g.context);
+                m = k.member(g.context, g.name, g.computed) + a.operator + h;
+                k.assign(b, m);
+                c(b || m)
+              })
+            }, 1);
+            break;
+          case s.ArrayExpression:
+            l = [];
+            n(a.elements, function(a) {
+              k.recurse(a, k.nextId(), u, function(a) {
+                l.push(a)
+              })
+            });
+            m = "[" + l.join(",") + "]";
+            this.assign(b, m);
+            c(m);
+            break;
+          case s.ObjectExpression:
+            l = [];
+            n(a.properties, function(a) {
+              k.recurse(a.value, k.nextId(), u, function(b) {
+                l.push(k.escape(a.key.type === s.Identifier ? a.key.name : "" + a.key.value) + ":" + b)
+              })
+            });
+            m = "{" + l.join(",") + "}";
+            this.assign(b, m);
+            c(m);
+            break;
+          case s.ThisExpression:
+            this.assign(b, "s");
+            c("s");
+            break;
+          case s.NGValueParameter:
+            this.assign(b, "v"), c("v")
+        }
+      },
+      getHasOwnProperty: function(a, b) {
+        var d = a + "." + b,
+          c = this.current().own;
+        c.hasOwnProperty(d) || (c[d] = this.nextId(!1, a + "&&(" +
+          this.escape(b) + " in " + a + ")"));
+        return c[d]
+      },
+      assign: function(a, b) {
+        if (a) return this.current().body.push(a, "=", b, ";"), a
+      },
+      filter: function(a) {
+        this.state.filters.hasOwnProperty(a) || (this.state.filters[a] = this.nextId(!0));
+        return this.state.filters[a]
+      },
+      ifDefined: function(a, b) {
+        return "ifDefined(" + a + "," + this.escape(b) + ")"
+      },
+      plus: function(a, b) {
+        return "plus(" + a + "," + b + ")"
+      },
+      return_: function(a) {
+        this.current().body.push("return ", a, ";")
+      },
+      if_: function(a, b, d) {
+        if (!0 === a) b();
+        else {
+          var c = this.current().body;
+          c.push("if(", a,
+            "){");
+          b();
+          c.push("}");
+          d && (c.push("else{"), d(), c.push("}"))
+        }
+      },
+      not: function(a) {
+        return "!(" + a + ")"
+      },
+      notNull: function(a) {
+        return a + "!=null"
+      },
+      nonComputedMember: function(a, b) {
+        return a + "." + b
+      },
+      computedMember: function(a, b) {
+        return a + "[" + b + "]"
+      },
+      member: function(a, b, d) {
+        return d ? this.computedMember(a, b) : this.nonComputedMember(a, b)
+      },
+      addEnsureSafeObject: function(a) {
+        this.current().body.push(this.ensureSafeObject(a), ";")
+      },
+      addEnsureSafeMemberName: function(a) {
+        this.current().body.push(this.ensureSafeMemberName(a), ";")
+      },
+      addEnsureSafeFunction: function(a) {
+        this.current().body.push(this.ensureSafeFunction(a), ";")
+      },
+      addEnsureSafeAssignContext: function(a) {
+        this.current().body.push(this.ensureSafeAssignContext(a), ";")
+      },
+      ensureSafeObject: function(a) {
+        return "ensureSafeObject(" + a + ",text)"
+      },
+      ensureSafeMemberName: function(a) {
+        return "ensureSafeMemberName(" + a + ",text)"
+      },
+      ensureSafeFunction: function(a) {
+        return "ensureSafeFunction(" + a + ",text)"
+      },
+      getStringValue: function(a) {
+        this.assign(a, "getStringValue(" + a + ",text)")
+      },
+      ensureSafeAssignContext: function(a) {
+        return "ensureSafeAssignContext(" +
+          a + ",text)"
+      },
+      lazyRecurse: function(a, b, d, c, e, f) {
+        var g = this;
+        return function() {
+          g.recurse(a, b, d, c, e, f)
+        }
+      },
+      lazyAssign: function(a, b) {
+        var d = this;
+        return function() {
+          d.assign(a, b)
+        }
+      },
+      stringEscapeRegex: /[^ a-zA-Z0-9]/g,
+      stringEscapeFn: function(a) {
+        return "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4)
+      },
+      escape: function(a) {
+        if (E(a)) return "'" + a.replace(this.stringEscapeRegex, this.stringEscapeFn) + "'";
+        if (Q(a)) return a.toString();
+        if (!0 === a) return "true";
+        if (!1 === a) return "false";
+        if (null === a) return "null";
+        if ("undefined" ===
+          typeof a) return "undefined";
+        throw ba("esc");
+      },
+      nextId: function(a, b) {
+        var d = "v" + this.state.nextId++;
+        a || this.current().vars.push(d + (b ? "=" + b : ""));
+        return d
+      },
+      current: function() {
+        return this.state[this.state.computing]
+      }
+    };
+    sd.prototype = {
         compile: function(a, b) {
           var d = this,
             c = this.astBuilder.ast(a);
-          this.state = {
-            nextId: 0,
-            filters: {},
-            expensiveChecks: b,
-            fn: {
-              vars: [],
-              body: [],
-              own: {}
-            },
-            assign: {
-              vars: [],
-              body: [],
-              own: {}
-            },
-            inputs: []
-          };
+          this.expression = a;
+          this.expensiveChecks = b;
           W(c, d.$filter);
-          var e = "",
-            f;
-          this.stage = "assign";
-          if (f = pd(c)) this.state.computing = "assign", e = this.nextId(), this.recurse(f, e), this.return_(e), e = "fn.assign=" + this.generateFunction("assign", "s,v,l");
-          f = nd(c.body);
-          d.stage = "inputs";
-          n(f, function(a, b) {
-            var c = "fn" + b;
-            d.state[c] = {
-              vars: [],
-              body: [],
-              own: {}
-            };
-            d.state.computing = c;
-            var e = d.nextId();
-            d.recurse(a, e);
-            d.return_(e);
-            d.state.inputs.push(c);
+          var e, f;
+          if (e = pd(c)) f = this.recurse(e);
+          e = nd(c.body);
+          var g;
+          e && (g = [], n(e, function(a, b) {
+            var c = d.recurse(a);
+            a.input = c;
+            g.push(c);
             a.watchId = b
+          }));
+          var h = [];
+          n(c.body, function(a) {
+            h.push(d.recurse(a.expression))
           });
-          this.state.computing = "fn";
-          this.stage = "main";
-          this.recurse(c);
-          e = '"' + this.USE + " " + this.STRICT +
-            '";\n' + this.filterPrefix() + "var fn=" + this.generateFunction("fn", "s,l,a,i") + e + this.watchFns() + "return fn;";
-          e = (new Function("$filter", "ensureSafeMemberName", "ensureSafeObject", "ensureSafeFunction", "getStringValue", "ensureSafeAssignContext", "ifDefined", "plus", "text", e))(this.$filter, Va, xa, kd, jd, ld, Zf, md, a);
-          this.state = this.stage = u;
+          e = 0 === c.body.length ? function() {} : 1 === c.body.length ? h[0] : function(a, b) {
+            var c;
+            n(h, function(d) {
+              c = d(a, b)
+            });
+            return c
+          };
+          f && (e.assign = function(a, b, c) {
+            return f(a, c, b)
+          });
+          g && (e.inputs = g);
           e.literal = qd(c);
           e.constant = c.constant;
           return e
         },
-        USE: "use",
-        STRICT: "strict",
-        watchFns: function() {
-          var a = [],
-            b = this.state.inputs,
-            d = this;
-          n(b, function(b) {
-            a.push("var " + b + "=" + d.generateFunction(b,
-              "s"))
-          });
-          b.length && a.push("fn.inputs=[" + b.join(",") + "];");
-          return a.join("")
-        },
-        generateFunction: function(a, b) {
-          return "function(" + b + "){" + this.varsPrefix(a) + this.body(a) + "};"
-        },
-        filterPrefix: function() {
-          var a = [],
-            b = this;
-          n(this.state.filters, function(d, c) {
-            a.push(d + "=$filter(" + b.escape(c) + ")")
-          });
-          return a.length ? "var " + a.join(",") + ";" : ""
-        },
-        varsPrefix: function(a) {
-          return this.state[a].vars.length ? "var " + this.state[a].vars.join(",") + ";" : ""
-        },
-        body: function(a) {
-          return this.state[a].body.join("")
-        },
-        recurse: function(a, b,
-          d, c, e, f) {
-          var g, h, k = this,
-            l, m;
-          c = c || x;
-          if (!f && y(a.watchId)) b = b || this.nextId(), this.if_("i", this.lazyAssign(b, this.computedMember("i", a.watchId)), this.lazyRecurse(a, b, d, c, e, !0));
-          else switch (a.type) {
-            case s.Program:
-              n(a.body, function(b, c) {
-                k.recurse(b.expression, u, u, function(a) {
-                  h = a
-                });
-                c !== a.body.length - 1 ? k.current().body.push(h, ";") : k.return_(h)
-              });
-              break;
+        recurse: function(a, b, d) {
+          var c, e, f = this,
+            g;
+          if (a.input) return this.inputs(a.input, a.watchId);
+          switch (a.type) {
             case s.Literal:
-              m = this.escape(a.value);
-              this.assign(b, m);
-              c(m);
-              break;
+              return this.value(a.value, b);
             case s.UnaryExpression:
-              this.recurse(a.argument, u, u, function(a) {
-                h = a
-              });
-              m = a.operator + "(" + this.ifDefined(h,
-                0) + ")";
-              this.assign(b, m);
-              c(m);
-              break;
+              return e = this.recurse(a.argument), this["unary" + a.operator](e, b);
             case s.BinaryExpression:
-              this.recurse(a.left, u, u, function(a) {
-                g = a
-              });
-              this.recurse(a.right, u, u, function(a) {
-                h = a
-              });
-              m = "+" === a.operator ? this.plus(g, h) : "-" === a.operator ? this.ifDefined(g, 0) + a.operator + this.ifDefined(h, 0) : "(" + g + ")" + a.operator + "(" + h + ")";
-              this.assign(b, m);
-              c(m);
-              break;
+              return c = this.recurse(a.left),
+                e = this.recurse(a.right), this["binary" + a.operator](c, e, b);
             case s.LogicalExpression:
-              b = b || this.nextId();
-              k.recurse(a.left, b);
-              k.if_("&&" === a.operator ? b : k.not(b), k.lazyRecurse(a.right, b));
-              c(b);
-              break;
+              return c = this.recurse(a.left), e = this.recurse(a.right), this["binary" + a.operator](c, e, b);
             case s.ConditionalExpression:
-              b = b || this.nextId();
-              k.recurse(a.test,
-                b);
-              k.if_(b, k.lazyRecurse(a.alternate, b), k.lazyRecurse(a.consequent, b));
-              c(b);
-              break;
+              return this["ternary?:"](this.recurse(a.test), this.recurse(a.alternate), this.recurse(a.consequent), b);
             case s.Identifier:
-              b = b || this.nextId();
-              d && (d.context = "inputs" === k.stage ? "s" : this.assign(this.nextId(), this.getHasOwnProperty("l", a.name) + "?l:s"), d.computed = !1, d.name = a.name);
-              Va(a.name);
-              k.if_("inputs" === k.stage || k.not(k.getHasOwnProperty("l", a.name)), function() {
-                k.if_("inputs" === k.stage || "s", function() {
-                  e && 1 !== e && k.if_(k.not(k.nonComputedMember("s", a.name)), k.lazyAssign(k.nonComputedMember("s", a.name), "{}"));
-                  k.assign(b, k.nonComputedMember("s",
-                    a.name))
-                })
-              }, b && k.lazyAssign(b, k.nonComputedMember("l", a.name)));
-              (k.state.expensiveChecks || Fb(a.name)) && k.addEnsureSafeObject(b);
-              c(b);
-              break;
+              return Va(a.name, f.expression), f.identifier(a.name, f.expensiveChecks || Fb(a.name), b, d, f.expression);
             case s.MemberExpression:
-              g = d && (d.context = this.nextId()) || this.nextId();
-              b = b || this.nextId();
-              k.recurse(a.object, g, u, function() {
-                k.if_(k.notNull(g), function() {
-                  if (a.computed) h = k.nextId(), k.recurse(a.property, h), k.getStringValue(h), k.addEnsureSafeMemberName(h), e && 1 !== e && k.if_(k.not(k.computedMember(g, h)), k.lazyAssign(k.computedMember(g, h), "{}")), m = k.ensureSafeObject(k.computedMember(g,
-                    h)), k.assign(b, m), d && (d.computed = !0, d.name = h);
-                  else {
-                    Va(a.property.name);
-                    e && 1 !== e && k.if_(k.not(k.nonComputedMember(g, a.property.name)), k.lazyAssign(k.nonComputedMember(g, a.property.name), "{}"));
-                    m = k.nonComputedMember(g, a.property.name);
-                    if (k.state.expensiveChecks || Fb(a.property.name)) m = k.ensureSafeObject(m);
-                    k.assign(b, m);
-                    d && (d.computed = !1, d.name = a.property.name)
-                  }
-                }, function() {
-                  k.assign(b, "undefined")
-                });
-                c(b)
-              }, !!e);
-              break;
+              return c = this.recurse(a.object, !1, !!d), a.computed || (Va(a.property.name,
+                f.expression), e = a.property.name), a.computed && (e = this.recurse(a.property)), a.computed ? this.computedMember(c, e, b, d, f.expression) : this.nonComputedMember(c, e, f.expensiveChecks, b, d, f.expression);
             case s.CallExpression:
-              b = b || this.nextId();
-              a.filter ? (h = k.filter(a.callee.name), l = [], n(a.arguments,
-                function(a) {
-                  var b = k.nextId();
-                  k.recurse(a, b);
-                  l.push(b)
-                }), m = h + "(" + l.join(",") + ")", k.assign(b, m), c(b)) : (h = k.nextId(), g = {}, l = [], k.recurse(a.callee, h, g, function() {
-                k.if_(k.notNull(h), function() {
-                    k.addEnsureSafeFunction(h);
-                    n(a.arguments, function(a) {
-                      k.recurse(a, k.nextId(), u, function(a) {
-                        l.push(k.ensureSafeObject(a))
-                      })
-                    });
-                    g.name ? (k.state.expensiveChecks || k.addEnsureSafeObject(g.context), m = k.member(g.context, g.name, g.computed) + "(" + l.join(",") + ")") : m = h + "(" + l.join(",") + ")";
-                    m = k.ensureSafeObject(m);
-                    k.assign(b, m)
-                  },
-                  function() {
-                    k.assign(b, "undefined")
-                  });
-                c(b)
-              }));
-              break;
+              return g = [], n(a.arguments, function(a) {
+                g.push(f.recurse(a))
+              }), a.filter && (e = this.$filter(a.callee.name)), a.filter || (e = this.recurse(a.callee, !0)), a.filter ? function(a, c, d, f) {
+                for (var r = [], n = 0; n < g.length; ++n) r.push(g[n](a, c, d, f));
+                a = e.apply(u, r, f);
+                return b ? {
+                  context: u,
+                  name: u,
+                  value: a
+                } : a
+              } : function(a,
+                c, d, m) {
+                var r = e(a, c, d, m),
+                  n;
+                if (null != r.value) {
+                  xa(r.context, f.expression);
+                  kd(r.value, f.expression);
+                  n = [];
+                  for (var q = 0; q < g.length; ++q) n.push(xa(g[q](a, c, d, m), f.expression));
+                  n = xa(r.value.apply(r.context, n), f.expression)
+                }
+                return b ? {
+                  value: n
+                } : n
+              };
             case s.AssignmentExpression:
-              h = this.nextId();
-              g = {};
-              if (!od(a.left)) throw ba("lval");
-              this.recurse(a.left, u, g, function() {
-                k.if_(k.notNull(g.context), function() {
-                  k.recurse(a.right, h);
-                  k.addEnsureSafeObject(k.member(g.context, g.name, g.computed));
-                  k.addEnsureSafeAssignContext(g.context);
-                  m = k.member(g.context, g.name, g.computed) + a.operator + h;
-                  k.assign(b, m);
-                  c(b || m)
-                })
-              }, 1);
-              break;
+              return c = this.recurse(a.left, !0, 1), e = this.recurse(a.right),
+                function(a, d, g, m) {
+                  var n = c(a, d, g, m);
+                  a = e(a, d, g, m);
+                  xa(n.value, f.expression);
+                  ld(n.context);
+                  n.context[n.name] = a;
+                  return b ? {
+                    value: a
+                  } : a
+                };
             case s.ArrayExpression:
-              l = [];
-              n(a.elements, function(a) {
-                k.recurse(a, k.nextId(), u, function(a) {
-                  l.push(a)
-                })
-              });
-              m = "[" + l.join(",") + "]";
-              this.assign(b, m);
-              c(m);
-              break;
+              return g = [], n(a.elements, function(a) {
+                  g.push(f.recurse(a))
+                }),
+                function(a, c, d, e) {
+                  for (var f = [], n = 0; n < g.length; ++n) f.push(g[n](a, c, d, e));
+                  return b ? {
+                    value: f
+                  } : f
+                };
             case s.ObjectExpression:
-              l = [];
-              n(a.properties, function(a) {
-                k.recurse(a.value, k.nextId(), u, function(b) {
-                  l.push(k.escape(a.key.type === s.Identifier ? a.key.name : "" + a.key.value) + ":" + b)
-                })
-              });
-              m = "{" + l.join(",") + "}";
-              this.assign(b, m);
-              c(m);
-              break;
+              return g = [], n(a.properties, function(a) {
+                  g.push({
+                    key: a.key.type === s.Identifier ? a.key.name : "" + a.key.value,
+                    value: f.recurse(a.value)
+                  })
+                }),
+                function(a, c, d, e) {
+                  for (var f = {}, n = 0; n < g.length; ++n) f[g[n].key] = g[n].value(a, c, d, e);
+                  return b ? {
+                    value: f
+                  } : f
+                };
             case s.ThisExpression:
-              this.assign(b, "s");
-              c("s");
-              break;
+              return function(a) {
+                return b ? {
+                  value: a
+                } : a
+              };
             case s.NGValueParameter:
-              this.assign(b, "v"), c("v")
+              return function(a, c, d, e) {
+                return b ? {
+                  value: d
+                } : d
+              }
           }
         },
-        getHasOwnProperty: function(a, b) {
-          var d = a + "." + b,
-            c = this.current().own;
-          c.hasOwnProperty(d) || (c[d] = this.nextId(!1, a + "&&(" +
-            this.escape(b) + " in " + a + ")"));
-          return c[d]
+        "unary+": function(a,
+          b) {
+          return function(d, c, e, f) {
+            d = a(d, c, e, f);
+            d = y(d) ? +d : 0;
+            return b ? {
+              value: d
+            } : d
+          }
         },
-        assign: functio
+        "unary-": function(a, b) {
+          return function(d, c, e, f) {
+            d = a(d, c, e, f);
+            d = y(d) ? -d : 0;
+            return b ? {
+              value: d
+            } : d
+          }
+        },
+        "unary!": function(a, b) {
+          return function(d, c, e, f) {
+            d = !a(d, c, e, f);
+            return b ? {
+              value: d
+            } : d
+          }
+        },
+        "binary+": function(a, b, d) {
+          return function(c, e, f, g) {
+            var h = a(c, e, f, g);
+            c = b(c, e, f, g);
+            h = md(h, c);
+            return d ? {
+              value: h
+            } : h
+          }
+        },
+        "binary-": function(a, b, d) {
+          return function(c, e, f, g) {
+            var h = a(c, e, f, g);
+            c = b(c, e, f, g);
+            h = (y(h) ? h : 0) - (y(c) ? c : 0);
+            return d ? {
+              value: h
+            } : h
+          }
+        },
+        "binary*": function(a,
+          b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) * b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary/": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) / b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary%": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) % b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary===": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) === b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary!==": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) !== b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary==": function(a, b,
+          d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) == b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary!=": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) != b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary<": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) < b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary>": function(a, b, d) {
+          return function(c, e, f, g) {
+            c = a(c, e, f, g) > b(c, e, f, g);
+            return d ? {
+              value: c
+            } : c
+          }
+        },
+        "binary<=": function(a, b, d) {
+            return f

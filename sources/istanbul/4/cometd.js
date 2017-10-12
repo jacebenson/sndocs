@@ -1419,4 +1419,140 @@ org.cometd.Cometd = function(name) {
         message.reestablish = _reestablish;
         _reestablish = true;
         _handleCallback(message);
-        _notifyListeners('/meta/handshake', m
+        _notifyListeners('/meta/handshake', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failHandshake(message);
+      }
+    }
+
+    function _handshakeFailure(message) {
+      var version = '1.0';
+      var url = _cometd.getURL();
+      var oldTransport = _cometd.getTransport();
+      var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
+      var newTransport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
+      if (!newTransport) {
+        _notifyTransportFailure(oldTransport.getType(), null, message.failure);
+        _cometd._warn('Could not negotiate transport; client=[' + transportTypes + ']');
+        _transport.reset();
+        _failHandshake(message);
+      } else {
+        _cometd._debug('Transport', oldTransport.getType(), '->', newTransport.getType());
+        _notifyTransportFailure(oldTransport.getType(), newTransport.getType(), message.failure);
+        _failHandshake(message);
+        _transport = newTransport;
+      }
+    }
+
+    function _failConnect(message) {
+      _notifyListeners('/meta/connect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var action = _isDisconnected() ? 'none' : _advice.reconnect;
+      switch (action) {
+        case 'retry':
+          _delayedConnect();
+          _increaseBackoff();
+          break;
+        case 'handshake':
+          _transports.reset();
+          _resetBackoff();
+          _delayedHandshake();
+          break;
+        case 'none':
+          _disconnect(false);
+          break;
+        default:
+          throw 'Unrecognized advice action' + action;
+      }
+    }
+
+    function _connectResponse(message) {
+      _connected = message.successful;
+      if (_connected) {
+        _notifyListeners('/meta/connect', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failConnect(message);
+      }
+    }
+
+    function _connectFailure(message) {
+      _connected = false;
+      _failConnect(message);
+    }
+
+    function _failDisconnect(message) {
+      _disconnect(true);
+      _handleCallback(message);
+      _notifyListeners('/meta/disconnect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _disconnectResponse(message) {
+      if (message.successful) {
+        _disconnect(false);
+        _handleCallback(message);
+        _notifyListeners('/meta/disconnect', message);
+      } else {
+        _failDisconnect(message);
+      }
+    }
+
+    function _disconnectFailure(message) {
+      _failDisconnect(message);
+    }
+
+    function _failSubscribe(message) {
+      var subscriptions = _listeners[message.subscription];
+      if (subscriptions) {
+        for (var i = subscriptions.length - 1; i >= 0; --i) {
+          var subscription = subscriptions[i];
+          if (subscription && !subscription.listener) {
+            delete subscriptions[i];
+            _cometd._debug('Removed failed subscription', subscription);
+            break;
+          }
+        }
+      }
+      _handleCallback(message);
+      _notifyListeners('/meta/subscribe', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _subscribeResponse(message) {
+      if (message.successful) {
+        _handleCallback(message);
+        _notifyListeners('/meta/subscribe', message);
+      } else {
+        _failSubscribe(message);
+      }
+    }
+
+    function _subscribeFailure(message) {
+      _failSubscribe(message);
+    }
+
+    function _failUnsubscri

@@ -759,46 +759,399 @@ var GlideFilterNumber = Class.create(GlideFilterString, {
   }
 });
 var GlideFilterDuration = Class.create(GlideFilterHandler, {
-      _setup: function(values) {
-        this.maxValues = 2;
-        var valueArray = this._parseValues(values, "@");
-        this.duration = new GlideDuration(valueArray[0], this.item);
-        if (this._getOperator() == "BETWEEN") {
-          this.maxValues = 2;
-          if (valueArray.length > 1)
-            this.durationTo = new GlideDuration(valueArray[1], this.item);
-          else
-            this.durationTo = new GlideDuration(valueArray[0], this.item);
-        }
-        this.listenForOperChange = true;
-      },
-      destroy: function() {
-        if (this.tr)
-          this.tr.tdValue.innerHTML = "";
-        this.inputCnt = 0;
-        GlideFilterHandler.prototype.destroy.call(this);
-      },
-      _initValues: function(values) {
-        this.values = new Array();
-        this.values[0] = this.duration.getDays();
-        this.values[1] = this.duration.getHours();
-        this.values[2] = this.duration.getMinutes();
-        this.values[3] = this.duration.getSeconds();
-        this.inputCnt = 4;
-        if (this._getOperator() == "BETWEEN") {
-          this.values[4] = this.duration.getDays();
-          this.values[5] = this.duration.getHours();
-          this.values[6] = this.duration.getMinutes();
-          this.values[7] = this.duration.getSeconds();
-          this.inputCnt = 8;
-        }
-      },
-      getValues: function() {
-          this._clearValues();
-          if (this.inputCnt == 0)
-            return "";
-          var answer = this.duration.getValue();
-          this.values[0] = this.duration.getDays();
-          this.values[1] = this.duration.getHours();
-          this.values[2] = this.duration.getMinutes();
-          this.values[3] = this.d
+  _setup: function(values) {
+    this.maxValues = 2;
+    var valueArray = this._parseValues(values, "@");
+    this.duration = new GlideDuration(valueArray[0], this.item);
+    if (this._getOperator() == "BETWEEN") {
+      this.maxValues = 2;
+      if (valueArray.length > 1)
+        this.durationTo = new GlideDuration(valueArray[1], this.item);
+      else
+        this.durationTo = new GlideDuration(valueArray[0], this.item);
+    }
+    this.listenForOperChange = true;
+  },
+  destroy: function() {
+    if (this.tr)
+      this.tr.tdValue.innerHTML = "";
+    this.inputCnt = 0;
+    GlideFilterHandler.prototype.destroy.call(this);
+  },
+  _initValues: function(values) {
+    this.values = new Array();
+    this.values[0] = this.duration.getDays();
+    this.values[1] = this.duration.getHours();
+    this.values[2] = this.duration.getMinutes();
+    this.values[3] = this.duration.getSeconds();
+    this.inputCnt = 4;
+    if (this._getOperator() == "BETWEEN") {
+      this.values[4] = this.duration.getDays();
+      this.values[5] = this.duration.getHours();
+      this.values[6] = this.duration.getMinutes();
+      this.values[7] = this.duration.getSeconds();
+      this.inputCnt = 8;
+    }
+  },
+  getValues: function() {
+    this._clearValues();
+    if (this.inputCnt == 0)
+      return "";
+    var answer = this.duration.getValue();
+    this.values[0] = this.duration.getDays();
+    this.values[1] = this.duration.getHours();
+    this.values[2] = this.duration.getMinutes();
+    this.values[3] = this.duration.getSeconds();
+    if (this._isMappingEnabled)
+      return this.getMappingValue();
+    if (this._getOperator() == "BETWEEN") {
+      if (this.durationTo) {
+        var answer1 = this.durationTo.getValue();
+        this.values[4] = this.durationTo.getDays();
+        this.values[5] = this.durationTo.getHours();
+        this.values[6] = this.durationTo.getMinutes();
+        this.values[7] = this.durationTo.getSeconds();
+        return "javascript:gs.getDurationDate('" + answer + "')@javascript:gs.getDurationDate('" + answer1 + "')";
+      }
+    }
+    return "javascript:gs.getDurationDate('" + answer + "')";
+  },
+  _build: function() {
+    clearNodes(this.tr.tdValue);
+    this.inputCnt = 0;
+    if (this._isEmptyOper())
+      return;
+    if (this._renderRightOperandAsFieldList(this._getOperator())) {
+      this._addSameAsLabels(this, this._getOperator());
+      this._populateRightOperandChoices();
+    } else {
+      this.inputCnt = 1;
+      this.duration.buildHTML(this.tr.tdValue);
+      if (this._getOperator() == "BETWEEN" && this.maxValues == 2) {
+        var txt = document.createTextNode(" " + getMessage('and') + " ");
+        this.tr.tdValue.appendChild(txt);
+        if (!this.durationTo)
+          this.durationTo = new GlideDuration();
+        this.durationTo.buildHTML(this.tr.tdValue);
+      }
+    }
+  }
+});
+var GlideFilterStringMulti = Class.create(GlideFilterString, {
+  _setup: function(values) {
+    this.maxValues = 1;
+    this.listenForOperChange = true;
+  },
+  _build: function() {
+    clearNodes(this.tr.tdValue);
+    this.inputCnt = 0;
+    if (this._isEmptyOper())
+      return;
+    if (this._renderDynamicOperandInput(this._getOperator()))
+      return;
+    if (this._renderRightOperandAsFieldList(this._getOperator())) {
+      this._addSameAsLabels(this, this._getOperator());
+      this._populateRightOperandChoices();
+    } else
+      this._addTextArea();
+  }
+});
+var GlideFilterChoice = Class.create(GlideFilterHandler, {
+  _setup: function(values) {
+    this.maxValues = 2;
+    this.listenForOperChange = true;
+  },
+  setChoices: function(choices) {
+    this.choices = choices;
+  },
+  setWidth: function(width) {
+    this.width = width;
+  },
+  setMulti: function(multi) {
+    this.multi = multi;
+  },
+  setSize: function(size) {
+    this.size = size;
+  },
+  _build: function() {
+    clearNodes(this.tr.tdValue);
+    this.inputCnt = 0;
+    if (this._isEmptyOper())
+      return;
+    if (this._renderRightOperandAsFieldList(this._getOperator())) {
+      this._addSameAsLabels(this, this._getOperator());
+      this._populateRightOperandChoices();
+    } else {
+      var s = this._addSelect(this.width, this.multi, this.size);
+      this._fillSelect();
+    }
+  },
+  _fillSelect: function(inputIndex) {
+    if (inputIndex == null)
+      inputIndex = 0;
+    var vars = {};
+    if (this.values[inputIndex]) {
+      var valSplit = this.values[inputIndex].split(',');
+      for (var i = 0; i < valSplit.length; i++) {
+        vars[valSplit[i]] = true;
+      }
+    }
+    var removeNone = false;
+    var oper = this._getOperator();
+    if ((oper == 'IN') || (oper == 'NOT IN'))
+      removeNone = true;
+    if (isMSIE && this.inputs[0].multiple) {
+      var isIE6 = /MSIE 6/.test(navigator.userAgent);
+      if (isIE6)
+        this.inputs[0].focus();
+    }
+    for (var i = 0; i < this.choices.length; i++) {
+      var option = this.choices[i];
+      if (option[0] == '' && removeNone)
+        continue;
+      var selected = (vars[option[0]] != null || this.values[inputIndex] == option[0]);
+      addOption(this.inputs[inputIndex], option[0], option[1], selected);
+    }
+  }
+});
+var GlideFilterChoiceDynamic = Class.create(GlideFilterChoice, {
+  _setup: function(values) {
+    this.size = 4;
+    this.maxValues = 2;
+    this.listenForOperChange = true;
+  },
+  setChoices: function(choices) {
+    this.choices = choices;
+  },
+  _initMappingValue: function(value) {
+    this.mappingType = 'choice';
+    if (value.indexOf("{{") !== -1) {
+      this.setMappingValue(value);
+      this.activateMapping();
+    } else {
+      this.deactivateMapping();
+    }
+  },
+  _build: function() {
+    clearNodes(this.tr.tdValue);
+    this.inputCnt = 0;
+    if (this._isEmptyOper())
+      return;
+    var oper = this._getOperator();
+    if (this._renderRightOperandAsFieldList(oper)) {
+      this._addSameAsLabels(this, oper);
+      this._populateRightOperandChoices();
+    } else if ((oper == 'LIKE') || (oper == 'STARTSWITH') || (oper == 'ENDSWITH') || (oper == 'NOT LIKE')) {
+      if (this.prevOper && (this.prevOper != 'LIKE') && (this.prevOper != 'STARTSWITH') && (this.prevOper != 'ENDSWITH'))
+        this._clearValues();
+      this._addTextInput();
+    } else if ((oper == 'IN') || (oper == 'NOT IN')) {
+      this.multi = true;
+      var s = this._addSelect(this.width, this.multi, this.size);
+      if (!this.hasChoices) {
+        s.disabled = true;
+        this._getChoices();
+      } else
+        this._fillSelect();
+    } else if (oper == 'BETWEEN') {
+      this.multi = false;
+      var s = this._addSelect(this.width, this.multi, 1);
+      if (!this.hasChoices) {
+        s.disabled = true;
+        this._getChoices();
+      } else
+        this._fillSelect();
+      var txt = document.createTextNode(" " + getMessage('and') + " ");
+      this.tr.tdValue.appendChild(txt);
+      this.multi = false;
+      var s = this._addSelect(this.width, this.multi, 1);
+      if (!this.hasChoices) {
+        s.disabled = true;
+        this._getChoices();
+      } else
+        this._fillSelect(1);
+    } else {
+      this.multi = false;
+      var s = this._addSelect(this.width, this.multi, 1);
+      if (!this.hasChoices) {
+        s.disabled = true;
+        this._getChoices();
+      } else
+        this._fillSelect();
+    }
+    this.prevOper = oper;
+  },
+  _getChoices: function() {
+    if (typeof g_filter_description != 'undefined' && g_filter_description.getChoiceList(this.tr.tableField) != null) {
+      var response = loadXML(g_filter_description.getChoiceList(this.tr.tableField));
+      this._addChoices(response);
+    } else {
+      var ajax = new GlideAjax('PickList');
+      ajax.addParam('sysparm_chars', '*');
+      ajax.addParam('sysparm_nomax', 'true');
+      ajax.addParam('sysparm_name', this.tr.tableField);
+      var response = ajax.getXMLWait();
+      this._addChoices(response);
+    }
+  },
+  _addChoices: function(xml) {
+    if (!xml)
+      return;
+    var msg = new GwtMessage();
+    var select = this.inputs[0];
+    select.disabled = false;
+    select.options.length = 0;
+    this.choices = [];
+    this.hasChoices = true;
+    var root = xml.documentElement;
+    var dep = root.getAttribute("dependent");
+    var items = xml.getElementsByTagName("item");
+    var addNone = true;
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.getAttribute("value") == '')
+        addNone = false;
+    }
+    if (addNone)
+      this.choices[0] = ['', msg.getMessage('-- None --')];
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var v = item.getAttribute("value");
+      var l = item.getAttribute("label");
+      var option = [v, l];
+      this.choices.push(option);
+    }
+    if (dep != null) {
+      this.choices = this.choices
+        .sort(function(a, b) {
+          if ((a[1].toLowerCase() + "") < (b[1]
+              .toLowerCase() + "")) {
+            return -1;
+          }
+          if ((a[1].toLowerCase() + "") > (b[1]
+              .toLowerCase() + "")) {
+            return 1;
+          }
+          return 0;
+        });
+      for (var i = 0; i < this.choices.length - 1; i++) {
+        if (this.choices[i][1] == this.choices[i + 1][1])
+          i = this.amendLabel(i);
+      }
+    }
+    this._fillSelect();
+  },
+  amendLabel: function(i) {
+    var dupe = this.choices[i][1];
+    while (i < this.choices.length && this.choices[i][1] == dupe) {
+      var c = this.choices[i];
+      c[1] = c[1] + " - " + c[0];
+      i++;
+    }
+    return i - 1;
+  }
+});
+var GlideFilterCurrency = Class.create(GlideFilterString, {
+  initialize: function(tableName, item) {
+    GlideFilterHandler.prototype.initialize.call(this, tableName, item);
+  },
+  _operOnChange: function() {
+    var lastOp = this.lastOperator;
+    this.lastOperator = this._getOperator();
+    if ((fieldComparisonOperators.indexOf(lastOp) >= 0) != (fieldComparisonOperators.indexOf(this.lastOperator) >= 0)) {
+      this.inputCnt = 0;
+      this.input = [];
+    }
+    this.getValues();
+    if (lastOp != 'BETWEEN' && this._getOperator() == 'BETWEEN') {
+      this.values[2] = this.values[1];
+      this.values[1] = '';
+    }
+    this._unescapeIfRequired();
+    this._build();
+  },
+  _setup: function(values) {
+    this.maxValues = 2;
+    this.id = this.tr.tableField + "." + guid();
+    this.listenForOperChange = true;
+  },
+  _build: function() {
+    GlideFilterString.prototype._build.call(this);
+    var s = this._addSelect(60, false, 1);
+    this._getCurrencies(s);
+  },
+  _getCurrencies: function(s) {
+    var currencies = new Array();
+    if (currencies.length != 0)
+      return currencies;
+    var ajax = new GlideAjax("CurrencyConverter");
+    ajax.addParam("sysparm_name", "getCurrencies");
+    ajax.getXMLAnswer(this._getCurrenciesResponse.bind(this), null, s);
+  },
+  _getCurrenciesResponse: function(answer, s) {
+    var values = answer;
+    var currencies = values.split(",");
+    var cache = this._getCache();
+    cache.put("currencies", values);
+    for (var i = 0; i < currencies.length; i++)
+      addOption(s, currencies[i], currencies[i]);
+    this.currency_widget = s;
+    this._parseValue();
+  },
+  _resolveFromCache: function() {
+    var cache = this._getCache();
+    var value = cache.get("currencies");
+    if (value)
+      return value.split(",");
+    return [];
+  },
+  _getCache: function() {
+    if (typeof(g_cache_currency) != "undefined")
+      return g_cache_currency;
+    g_cache_currency = new GlideClientCache(1);
+    return g_cache_currency;
+  },
+  _parseValue: function() {
+    if (this.inputs.length == 0)
+      return;
+    var processSelect = false;
+    for (var i = 0; i < this.inputs.length; i++) {
+      var v = this.inputs[i].value;
+      if (!v)
+        continue;
+      if (v.indexOf('javascript') < 0)
+        continue;
+      processSelect = true;
+      var sa = v.split(';');
+      var first = sa[0].split('\'');
+      var currency = first[first.length - 1];
+      var price = sa[sa.length - 1];
+      var priceIndex = price.indexOf('\'');
+      price = price.substring(0, priceIndex);
+      this.inputs[i].value = price;
+    }
+    if (!processSelect)
+      return;
+    var sel = new Select(this.currency_widget);
+    sel.selectValue(currency);
+  },
+  getValues: function() {
+    if (this._isMappingEnabled)
+      return this.getMappingValue();
+    if (!this.currency_widget)
+      return '';
+    var v = GlideFilterString.prototype.getValues.call(this);
+    var tn = this.item.table.tableName;
+    var fn = this.item.name;
+    var valList = v.split('@');
+    var fromVal = 'javascript:global.getCurrencyFilter(\'' + tn + '\',\'' + fn + '\', \'' + this.currency_widget.value + ';' + valList[0] + '\')'
+    if ((valList.length > 1 && this._getOperator() == 'BETWEEN') || (valList.length > 2))
+      return fromVal + '@javascript:global.getCurrencyFilter(\'' + tn + '\',\'' + fn + '\', \'' + this.currency_widget.value + ';' + valList[1] + '\')'
+    return fromVal;
+  },
+  destroy: function() {
+    GlideFilterString.prototype.destroy.call(this);
+    this.currency_widget = null;
+  },
+  z: null
+});;

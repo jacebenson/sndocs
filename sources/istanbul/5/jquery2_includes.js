@@ -1482,30 +1482,4 @@
     }
     n.event = {
         global: {},
-        add: function(a, b, c, d, e) {
-          var f, g, h, i, j, k, l, m, o, p, q, r = N.get(a);
-          if (r) {
-            c.handler && (f = c, c = f.handler, e = f.selector), c.guid || (c.guid = n.guid++), (i = r.events) || (i = r.events = {}), (g = r.handle) || (g = r.handle = function(b) {
-              return "undefined" != typeof n && n.event.triggered !== b.type ? n.event.dispatch.apply(a, arguments) : void 0
-            }), b = (b || "").match(G) || [""], j = b.length;
-            while (j--) h = fa.exec(b[j]) || [], o = q = h[1], p = (h[2] || "").split(".").sort(), o && (l = n.event.special[o] || {}, o = (e ? l.delegateType : l.bindType) || o, l = n.event.special[o] || {}, k = n.extend({
-              type: o,
-              origType: q,
-              data: d,
-              handler: c,
-              guid: c.guid,
-              selector: e,
-              needsContext: e && n.expr.match.needsContext.test(e),
-              namespace: p.join(".")
-            }, f), (m = i[o]) || (m = i[o] = [], m.delegateCount = 0, l.setup && l.setup.call(a, d, p, g) !== !1 || a.addEventListener && a.addEventListener(o, g)), l.add && (l.add.call(a, k), k.handler.guid || (k.handler.guid = c.guid)), e ? m.splice(m.delegateCount++, 0, k) : m.push(k), n.event.global[o] = !0)
-          }
-        },
-        remove: function(a, b, c, d, e) {
-            var f, g, h, i, j, k, l, m, o, p, q, r = N.hasData(a) && N.get(a);
-            if (r && (i = r.events)) {
-              b = (b || "").match(G) || [""], j = b.length;
-              while (j--)
-                if (h = fa.exec(b[j]) || [], o = q = h[1], p = (h[2] || "").split(".").sort(), o) {
-                  l = n.event.special[o] || {}, o = (d ? l.delegateType : l.bindType) || o, m = i[o] || [], h = h[2] && new RegExp("(^|\\.)" + p.join("\\.(?:.*\\.|)") + "(\\.|$)"), g = f = m.length;
-                  while (f--) k = m[f], !e && q !== k.origType || c && c.guid !== k.guid || h && !h.test(k.namespace) || d && d !== k.selector && ("**" !== d || !k.selector) || (m.splice(f, 1), k.selector && m.delegateCount--, l.remove && l.remove.call(a, k));
-                  g && !m.
+        add:

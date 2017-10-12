@@ -1030,123 +1030,537 @@ angular.module("sn.common.util").directive("snCloak", function() {
 });
 /*! RESOURCE: /scripts/sn/common/util/service.md5.js */
 angular.module('sn.common.util').factory('md5', function() {
-      'use strict';
-      var md5cycle = function(x, k) {
-        var a = x[0],
-          b = x[1],
-          c = x[2],
-          d = x[3];
-        a = ff(a, b, c, d, k[0], 7, -680876936);
-        d = ff(d, a, b, c, k[1], 12, -389564586);
-        c = ff(c, d, a, b, k[2], 17, 606105819);
-        b = ff(b, c, d, a, k[3], 22, -1044525330);
-        a = ff(a, b, c, d, k[4], 7, -176418897);
-        d = ff(d, a, b, c, k[5], 12, 1200080426);
-        c = ff(c, d, a, b, k[6], 17, -1473231341);
-        b = ff(b, c, d, a, k[7], 22, -45705983);
-        a = ff(a, b, c, d, k[8], 7, 1770035416);
-        d = ff(d, a, b, c, k[9], 12, -1958414417);
-        c = ff(c, d, a, b, k[10], 17, -42063);
-        b = ff(b, c, d, a, k[11], 22, -1990404162);
-        a = ff(a, b, c, d, k[12], 7, 1804603682);
-        d = ff(d, a, b, c, k[13], 12, -40341101);
-        c = ff(c, d, a, b, k[14], 17, -1502002290);
-        b = ff(b, c, d, a, k[15], 22, 1236535329);
-        a = gg(a, b, c, d, k[1], 5, -165796510);
-        d = gg(d, a, b, c, k[6], 9, -1069501632);
-        c = gg(c, d, a, b, k[11], 14, 643717713);
-        b = gg(b, c, d, a, k[0], 20, -373897302);
-        a = gg(a, b, c, d, k[5], 5, -701558691);
-        d = gg(d, a, b, c, k[10], 9, 38016083);
-        c = gg(c, d, a, b, k[15], 14, -660478335);
-        b = gg(b, c, d, a, k[4], 20, -405537848);
-        a = gg(a, b, c, d, k[9], 5, 568446438);
-        d = gg(d, a, b, c, k[14], 9, -1019803690);
-        c = gg(c, d, a, b, k[3], 14, -187363961);
-        b = gg(b, c, d, a, k[8], 20, 1163531501);
-        a = gg(a, b, c, d, k[13], 5, -1444681467);
-        d = gg(d, a, b, c, k[2], 9, -51403784);
-        c = gg(c, d, a, b, k[7], 14, 1735328473);
-        b = gg(b, c, d, a, k[12], 20, -1926607734);
-        a = hh(a, b, c, d, k[5], 4, -378558);
-        d = hh(d, a, b, c, k[8], 11, -2022574463);
-        c = hh(c, d, a, b, k[11], 16, 1839030562);
-        b = hh(b, c, d, a, k[14], 23, -35309556);
-        a = hh(a, b, c, d, k[1], 4, -1530992060);
-        d = hh(d, a, b, c, k[4], 11, 1272893353);
-        c = hh(c, d, a, b, k[7], 16, -155497632);
-        b = hh(b, c, d, a, k[10], 23, -1094730640);
-        a = hh(a, b, c, d, k[13], 4, 681279174);
-        d = hh(d, a, b, c, k[0], 11, -358537222);
-        c = hh(c, d, a, b, k[3], 16, -722521979);
-        b = hh(b, c, d, a, k[6], 23, 76029189);
-        a = hh(a, b, c, d, k[9], 4, -640364487);
-        d = hh(d, a, b, c, k[12], 11, -421815835);
-        c = hh(c, d, a, b, k[15], 16, 530742520);
-        b = hh(b, c, d, a, k[2], 23, -995338651);
-        a = ii(a, b, c, d, k[0], 6, -198630844);
-        d = ii(d, a, b, c, k[7], 10, 1126891415);
-        c = ii(c, d, a, b, k[14], 15, -1416354905);
-        b = ii(b, c, d, a, k[5], 21, -57434055);
-        a = ii(a, b, c, d, k[12], 6, 1700485571);
-        d = ii(d, a, b, c, k[3], 10, -1894986606);
-        c = ii(c, d, a, b, k[10], 15, -1051523);
-        b = ii(b, c, d, a, k[1], 21, -2054922799);
-        a = ii(a, b, c, d, k[8], 6, 1873313359);
-        d = ii(d, a, b, c, k[15], 10, -30611744);
-        c = ii(c, d, a, b, k[6], 15, -1560198380);
-        b = ii(b, c, d, a, k[13], 21, 1309151649);
-        a = ii(a, b, c, d, k[4], 6, -145523070);
-        d = ii(d, a, b, c, k[11], 10, -1120210379);
-        c = ii(c, d, a, b, k[2], 15, 718787259);
-        b = ii(b, c, d, a, k[9], 21, -343485551);
-        x[0] = add32(a, x[0]);
-        x[1] = add32(b, x[1]);
-        x[2] = add32(c, x[2]);
-        x[3] = add32(d, x[3]);
-      };
-      var cmn = function(q, a, b, x, s, t) {
-        a = add32(add32(a, q), add32(x, t));
-        return add32((a << s) | (a >>> (32 - s)), b);
-      };
-      var ff = function(a, b, c, d, x, s, t) {
-        return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-      };
-      var gg = function(a, b, c, d, x, s, t) {
-        return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-      };
-      var hh = function(a, b, c, d, x, s, t) {
-        return cmn(b ^ c ^ d, a, b, x, s, t);
-      };
-      var ii = function(a, b, c, d, x, s, t) {
-        return cmn(c ^ (b | (~d)), a, b, x, s, t);
-      };
-      var md51 = function(s) {
-        var txt = '';
-        var n = s.length,
-          state = [1732584193, -271733879, -1732584194, 271733878],
-          i;
-        for (i = 64; i <= s.length; i += 64) {
-          md5cycle(state, md5blk(s.substring(i - 64, i)));
+  'use strict';
+  var md5cycle = function(x, k) {
+    var a = x[0],
+      b = x[1],
+      c = x[2],
+      d = x[3];
+    a = ff(a, b, c, d, k[0], 7, -680876936);
+    d = ff(d, a, b, c, k[1], 12, -389564586);
+    c = ff(c, d, a, b, k[2], 17, 606105819);
+    b = ff(b, c, d, a, k[3], 22, -1044525330);
+    a = ff(a, b, c, d, k[4], 7, -176418897);
+    d = ff(d, a, b, c, k[5], 12, 1200080426);
+    c = ff(c, d, a, b, k[6], 17, -1473231341);
+    b = ff(b, c, d, a, k[7], 22, -45705983);
+    a = ff(a, b, c, d, k[8], 7, 1770035416);
+    d = ff(d, a, b, c, k[9], 12, -1958414417);
+    c = ff(c, d, a, b, k[10], 17, -42063);
+    b = ff(b, c, d, a, k[11], 22, -1990404162);
+    a = ff(a, b, c, d, k[12], 7, 1804603682);
+    d = ff(d, a, b, c, k[13], 12, -40341101);
+    c = ff(c, d, a, b, k[14], 17, -1502002290);
+    b = ff(b, c, d, a, k[15], 22, 1236535329);
+    a = gg(a, b, c, d, k[1], 5, -165796510);
+    d = gg(d, a, b, c, k[6], 9, -1069501632);
+    c = gg(c, d, a, b, k[11], 14, 643717713);
+    b = gg(b, c, d, a, k[0], 20, -373897302);
+    a = gg(a, b, c, d, k[5], 5, -701558691);
+    d = gg(d, a, b, c, k[10], 9, 38016083);
+    c = gg(c, d, a, b, k[15], 14, -660478335);
+    b = gg(b, c, d, a, k[4], 20, -405537848);
+    a = gg(a, b, c, d, k[9], 5, 568446438);
+    d = gg(d, a, b, c, k[14], 9, -1019803690);
+    c = gg(c, d, a, b, k[3], 14, -187363961);
+    b = gg(b, c, d, a, k[8], 20, 1163531501);
+    a = gg(a, b, c, d, k[13], 5, -1444681467);
+    d = gg(d, a, b, c, k[2], 9, -51403784);
+    c = gg(c, d, a, b, k[7], 14, 1735328473);
+    b = gg(b, c, d, a, k[12], 20, -1926607734);
+    a = hh(a, b, c, d, k[5], 4, -378558);
+    d = hh(d, a, b, c, k[8], 11, -2022574463);
+    c = hh(c, d, a, b, k[11], 16, 1839030562);
+    b = hh(b, c, d, a, k[14], 23, -35309556);
+    a = hh(a, b, c, d, k[1], 4, -1530992060);
+    d = hh(d, a, b, c, k[4], 11, 1272893353);
+    c = hh(c, d, a, b, k[7], 16, -155497632);
+    b = hh(b, c, d, a, k[10], 23, -1094730640);
+    a = hh(a, b, c, d, k[13], 4, 681279174);
+    d = hh(d, a, b, c, k[0], 11, -358537222);
+    c = hh(c, d, a, b, k[3], 16, -722521979);
+    b = hh(b, c, d, a, k[6], 23, 76029189);
+    a = hh(a, b, c, d, k[9], 4, -640364487);
+    d = hh(d, a, b, c, k[12], 11, -421815835);
+    c = hh(c, d, a, b, k[15], 16, 530742520);
+    b = hh(b, c, d, a, k[2], 23, -995338651);
+    a = ii(a, b, c, d, k[0], 6, -198630844);
+    d = ii(d, a, b, c, k[7], 10, 1126891415);
+    c = ii(c, d, a, b, k[14], 15, -1416354905);
+    b = ii(b, c, d, a, k[5], 21, -57434055);
+    a = ii(a, b, c, d, k[12], 6, 1700485571);
+    d = ii(d, a, b, c, k[3], 10, -1894986606);
+    c = ii(c, d, a, b, k[10], 15, -1051523);
+    b = ii(b, c, d, a, k[1], 21, -2054922799);
+    a = ii(a, b, c, d, k[8], 6, 1873313359);
+    d = ii(d, a, b, c, k[15], 10, -30611744);
+    c = ii(c, d, a, b, k[6], 15, -1560198380);
+    b = ii(b, c, d, a, k[13], 21, 1309151649);
+    a = ii(a, b, c, d, k[4], 6, -145523070);
+    d = ii(d, a, b, c, k[11], 10, -1120210379);
+    c = ii(c, d, a, b, k[2], 15, 718787259);
+    b = ii(b, c, d, a, k[9], 21, -343485551);
+    x[0] = add32(a, x[0]);
+    x[1] = add32(b, x[1]);
+    x[2] = add32(c, x[2]);
+    x[3] = add32(d, x[3]);
+  };
+  var cmn = function(q, a, b, x, s, t) {
+    a = add32(add32(a, q), add32(x, t));
+    return add32((a << s) | (a >>> (32 - s)), b);
+  };
+  var ff = function(a, b, c, d, x, s, t) {
+    return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+  };
+  var gg = function(a, b, c, d, x, s, t) {
+    return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+  };
+  var hh = function(a, b, c, d, x, s, t) {
+    return cmn(b ^ c ^ d, a, b, x, s, t);
+  };
+  var ii = function(a, b, c, d, x, s, t) {
+    return cmn(c ^ (b | (~d)), a, b, x, s, t);
+  };
+  var md51 = function(s) {
+    var txt = '';
+    var n = s.length,
+      state = [1732584193, -271733879, -1732584194, 271733878],
+      i;
+    for (i = 64; i <= s.length; i += 64) {
+      md5cycle(state, md5blk(s.substring(i - 64, i)));
+    }
+    s = s.substring(i - 64);
+    var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+    tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+    if (i > 55) {
+      md5cycle(state, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
+    }
+    tail[14] = n * 8;
+    md5cycle(state, tail);
+    return state;
+  };
+  var md5blk = function(s) {
+    var md5blks = [],
+      i;
+    for (i = 0; i < 64; i += 4) {
+      md5blks[i >> 2] = s.charCodeAt(i) +
+        (s.charCodeAt(i + 1) << 8) +
+        (s.charCodeAt(i + 2) << 16) +
+        (s.charCodeAt(i + 3) << 24);
+    }
+    return md5blks;
+  };
+  var hex_chr = '0123456789abcdef'.split('');
+  var rhex = function(n) {
+    var s = '',
+      j = 0;
+    for (; j < 4; j++)
+      s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] +
+      hex_chr[(n >> (j * 8)) & 0x0F];
+    return s;
+  };
+  var hex = function(x) {
+    for (var i = 0; i < x.length; i++)
+      x[i] = rhex(x[i]);
+    return x.join('');
+  };
+  var add32 = function(a, b) {
+    return (a + b) & 0xFFFFFFFF;
+  };
+  return function(s) {
+    return hex(md51(s));
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.priorityQueue.js */
+angular.module('sn.common.util').factory('priorityQueue', function() {
+  'use strict';
+  return function(comparator) {
+    var items = [];
+    var compare = comparator || function(a, b) {
+      return a - b;
+    };
+    var swap = function(a, b) {
+      var temp = items[a];
+      items[a] = items[b];
+      items[b] = temp;
+    };
+    var bubbleUp = function(pos) {
+      var parent;
+      while (pos > 0) {
+        parent = (pos - 1) >> 1;
+        if (compare(items[pos], items[parent]) >= 0)
+          break;
+        swap(parent, pos);
+        pos = parent;
+      }
+    };
+    var bubbleDown = function(pos) {
+      var left, right, min, last = items.length - 1;
+      while (true) {
+        left = (pos << 1) + 1;
+        right = left + 1;
+        min = pos;
+        if (left <= last && compare(items[left], items[min]) < 0)
+          min = left;
+        if (right <= last && compare(items[right], items[min]) < 0)
+          min = right;
+        if (min === pos)
+          break;
+        swap(min, pos);
+        pos = min;
+      }
+    };
+    return {
+      add: function(item) {
+        items.push(item);
+        bubbleUp(items.length - 1);
+      },
+      poll: function() {
+        var first = items[0],
+          last = items.pop();
+        if (items.length > 0) {
+          items[0] = last;
+          bubbleDown(0);
         }
-        s = s.substring(i - 64);
-        var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (i = 0; i < s.length; i++)
-          tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
-        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-        if (i > 55) {
-          md5cycle(state, tail);
-          for (i = 0; i < 16; i++) tail[i] = 0;
-        }
-        tail[14] = n * 8;
-        md5cycle(state, tail);
-        return state;
+        return first;
+      },
+      peek: function() {
+        return items[0];
+      },
+      clear: function() {
+        items = [];
+      },
+      inspect: function() {
+        return angular.toJson(items, true);
+      },
+      get size() {
+        return items.length;
+      },
+      get all() {
+        return items;
+      },
+      set comparator(fn) {
+        compare = fn;
+      }
+    };
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snResource.js */
+angular.module('sn.common.util').factory('snResource', function($http, $q, priorityQueue, md5) {
+  'use strict';
+  var methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'jsonp', 'trace'],
+    queue = priorityQueue(function(a, b) {
+      return a.timestamp - b.timestamp;
+    }),
+    resource = {},
+    pendingRequests = [],
+    inFlightRequests = [];
+  return function() {
+    var requestInterceptors = $http.defaults.transformRequest,
+      responseInterceptors = $http.defaults.transformResponse;
+    var next = function() {
+      var request = queue.peek();
+      pendingRequests.shift();
+      inFlightRequests.push(request.hash);
+      $http(request.config).then(function(response) {
+        request.deferred.resolve(response);
+      }, function(reason) {
+        request.deferred.reject(reason);
+      }).finally(function() {
+        queue.poll();
+        inFlightRequests.shift();
+        if (queue.size > 0)
+          next();
+      });
+    };
+    angular.forEach(methods, function(method) {
+      resource[method] = function(url, data) {
+        var deferredRequest = $q.defer(),
+          promise = deferredRequest.promise,
+          deferredAbort = $q.defer(),
+          config = {
+            method: method,
+            url: url,
+            data: data,
+            transformRequest: requestInterceptors,
+            transformResponse: responseInterceptors,
+            timeout: deferredAbort.promise
+          },
+          hash = md5(JSON.stringify(config));
+        pendingRequests.push(hash);
+        queue.add({
+          config: config,
+          deferred: deferredRequest,
+          timestamp: Date.now(),
+          hash: hash
+        });
+        if (queue.size === 1)
+          next();
+        promise.abort = function() {
+          deferredAbort.resolve('Request cancelled');
+        };
+        return promise;
       };
-      var md5blk = function(s) {
-          var md5blks = [],
-            i;
-          for (i = 0; i < 64; i += 4) {
-            md5blks[i >> 2] = s.charCodeAt(i) +
-              (s.charCodeAt(i + 1) << 8) +
-              (s.charCodeAt(i + 2) << 16) +
-              (s.charCodeAt(i
+    });
+    resource.addRequestInterceptor = function(fn) {
+      requestInterceptors = requestInterceptors.concat([fn]);
+    };
+    resource.addResponseInterceptor = function(fn) {
+      responseInterceptors = responseInterceptors.concat([fn]);
+    };
+    resource.queueSize = function() {
+      return queue.size;
+    };
+    resource.queuedRequests = function() {
+      return queue.all;
+    };
+    return resource;
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snConnect.js */
+angular.module("sn.common.util").service("snConnectService", function($http, snCustomEvent) {
+  "use strict";
+  var connectPaths = ["/$c.do", "/$chat.do"];
+
+  function canOpenInFrameset() {
+    return window.top.NOW.collaborationFrameset;
+  }
+
+  function isInConnect() {
+    var parentPath = getParentPath();
+    return connectPaths.some(function(path) {
+      return parentPath == path;
+    });
+  }
+
+  function getParentPath() {
+    try {
+      return window.top.location.pathname;
+    } catch (IGNORED) {
+      return "";
+    }
+  }
+
+  function openWithProfile(profile) {
+    if (isInConnect() || canOpenInFrameset())
+      snCustomEvent.fireTop('chat:open_conversation', profile);
+    else
+      window.open("$c.do#/with/" + profile.sys_id, "_blank");
+  }
+  return {
+    openWithProfile: openWithProfile
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/snPolyfill.js */
+(function() {
+  "use strict";
+  polyfill(String.prototype, 'startsWith', function(prefix) {
+    return this.indexOf(prefix) === 0;
+  });
+  polyfill(String.prototype, 'endsWith', function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  });
+  polyfill(Number, 'isNaN', function(value) {
+    return value !== value;
+  });
+  polyfill(window, 'btoa', function(input) {
+    var str = String(input);
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    for (
+      var block, charCode, idx = 0, map = chars, output = ''; str.charAt(idx | 0) || (map = '=', idx % 1); output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+      charCode = str.charCodeAt(idx += 3 / 4);
+      if (charCode > 0xFF) {
+        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+      }
+      block = block << 8 | charCode;
+    }
+    return output;
+  });
+
+  function polyfill(obj, slot, fn) {
+    if (obj[slot] === void(0)) {
+      obj[slot] = fn;
+    }
+  }
+  window.console = window.console || {
+    log: function() {}
+  };
+})();;
+/*! RESOURCE: /scripts/sn/common/util/directive.snFocus.js */
+angular.module('sn.common.util').directive('snFocus', function($timeout) {
+  'use strict';
+  return function(scope, element, attrs) {
+    scope.$watch(attrs.snFocus, function(value) {
+      if (value !== true)
+        return;
+      $timeout(function() {
+        element[0].focus();
+      });
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snResizeHeight.js */
+angular.module('sn.common.util').directive('snResizeHeight', function($timeout) {
+  "use strict";
+  return {
+    restrict: 'A',
+    link: function(scope, elem, attrs) {
+      var typographyStyles = [
+        'fontFamily',
+        'fontSize',
+        'fontWeight',
+        'fontStyle',
+        'letterSpacing',
+        'textTransform',
+        'wordSpacing',
+        'textIndent'
+      ];
+      var maxHeight = parseInt(elem.css('max-height'), 10) || 0;
+      var offset = 0;
+      if (elem.css('box-sizing') === 'border-box' || elem.css('-moz-box-sizing') === 'border-box' || elem.css('-webkit-box-sizing') === 'border-box')
+        offset = elem.outerHeight() - elem.height();
+      var styles = {};
+      angular.forEach(typographyStyles, function(val) {
+        styles[val] = elem.css(val);
+      });
+      var $clone = angular.element('<textarea rows="1" tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"></textarea>');
+      $clone.css(styles);
+      $timeout(function() {
+        angular.element(document.body).append($clone);
+        if (elem[0].value) {
+          reSize();
+        }
+      }, 0, false);
+
+      function reSize() {
+        if (!isVisible(elem[0]) || !setWidth())
+          return;
+        if (!elem[0].value && attrs['placeholder'])
+          $clone[0].value = attrs['placeholder'] || '';
+        else
+          $clone[0].value = elem[0].value;
+        $clone[0].scrollTop = 0;
+        $clone[0].scrollTop = 9e4;
+        var newHeight = $clone[0].scrollTop;
+        if (maxHeight && newHeight > maxHeight) {
+          newHeight = maxHeight;
+          elem[0].style.overflow = "auto";
+        } else
+          elem[0].style.overflow = "hidden";
+        newHeight += offset;
+        elem[0].style.height = newHeight + "px";
+      }
+      var style, bordersAndPadding;
+
+      function setWidth() {
+        style = style || window.getComputedStyle(elem[0], null);
+        var width = elem[0].getBoundingClientRect().width;
+        if (width === 0 || typeof width !== 'number')
+          width = parseInt(style.width, 10);
+        if (width === 0 || typeof width !== 'number') {
+          if (style.width.length && style.width[style.width.length - 1] === '%') {
+            $timeout(reSize, 0, false);
+            return false;
+          }
+          width = parseInt(style.width, 10);
+        }
+        if (!bordersAndPadding) {
+          bordersAndPadding = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce(function(acc, val) {
+            return acc + parseInt(style[val], 10);
+          }, 0);
+        }
+        $clone[0].style.width = (width - bordersAndPadding) + 'px';
+        return true;
+      }
+      scope.$watch(
+        function() {
+          return elem[0].value
+        },
+        function watchBinding(newValue, oldValue) {
+          if (newValue === oldValue)
+            return;
+          reSize();
+        }
+      );
+      elem.on('input.resize', reSize);
+      if (attrs['snResizeHeight'] == "trim") {
+        elem.on('blur', function() {
+          elem.val(elem.val().trim());
+          reSize();
+        });
+      }
+      scope.$on('$destroy', function() {
+        $clone.remove();
+      });
+
+      function isVisible(elem) {
+        return !!elem.offsetParent;
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snBlurOnEnter.js */
+angular.module('sn.common.util').directive('snBlurOnEnter', function() {
+  'use strict';
+  return function(scope, element) {
+    element.bind("keydown keypress", function(event) {
+      if (event.which !== 13)
+        return;
+      element.blur();
+      event.preventDefault();
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snStickyHeaders.js */
+angular.module('sn.common.util').directive('snStickyHeaders', function() {
+  "use strict";
+  return {
+    restrict: 'A',
+    transclude: false,
+    replace: false,
+    link: function(scope, element, attrs) {
+      element.addClass('sticky-headers');
+      var containers;
+      var scrollContainer = element.find('[sn-sticky-scroll-container]');
+      scrollContainer.addClass('sticky-scroll-container');
+
+      function refreshHeaders() {
+        if (attrs.snStickyHeaders !== 'false') {
+          angular.forEach(containers, function(container) {
+            var stickyContainer = angular.element(container);
+            var stickyHeader = stickyContainer.find('[sn-sticky-header]');
+            var stickyOffset = stickyContainer.position().top + stickyContainer.outerHeight();
+            stickyContainer.addClass('sticky-container');
+            if (stickyOffset < stickyContainer.outerHeight() && stickyOffset > -stickyHeader.outerHeight()) {
+              stickyContainer.css('padding-top', stickyHeader.outerHeight());
+              stickyHeader.css('width', stickyHeader.outerWidth());
+              stickyHeader.removeClass('sticky-header-disabled').addClass('sticky-header-enabled');
+            } else {
+              stickyContainer.css('padding-top', '');
+              stickyHeader.css('width', '');
+              stickyHeader.removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+            }
+          });
+        } else {
+          element.find('[sn-sticky-container]').removeClass('sticky-container');
+          element.find('[sn-sticky-container]').css('padding-top', '');
+          element.find('[sn-sticky-header]').css('width', '');
+          element.find('[sn-sticky-header]').removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+        }
+      }
+      scope.$watch(function() {
+        scrollContainer.find('[sn-sticky-header]').addClass('sticky-header');
+        containers = element.find('[sn-sticky-container]');
+        return attrs.snStickyHeaders;
+      }, refreshHeaders);
+      scope.$watch(function() {
+        return scrollContainer[0].scrollHeight;
+      }, refreshHeaders);
+      scrollContainer.on('scroll', refreshHeaders);
+    }
+  };
+});;;

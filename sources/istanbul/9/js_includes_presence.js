@@ -1466,4 +1466,55 @@ org.cometd.Cometd = function(name) {
       switch (action) {
         case 'retry':
           _delayedConnect();
-          _incr
+          _increaseBackoff();
+          break;
+        case 'handshake':
+          _transports.reset();
+          _resetBackoff();
+          _delayedHandshake();
+          break;
+        case 'none':
+          _disconnect(false);
+          break;
+        default:
+          throw 'Unrecognized advice action' + action;
+      }
+    }
+
+    function _connectResponse(message) {
+      _connected = message.successful;
+      if (_connected) {
+        _notifyListeners('/meta/connect', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failConnect(message);
+      }
+    }
+
+    function _connectFailure(message) {
+      _connected = false;
+      _failConnect(message);
+    }
+
+    function _failDisconnect(message) {
+      _disconnect(true);
+      _handleCallback(message);
+      _notifyListeners('/meta/disconnect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _disconnectResponse(message) {
+      if (message.successful) {
+        _disconnect(false);
+        _handleCa

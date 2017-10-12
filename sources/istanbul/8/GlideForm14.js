@@ -1270,22 +1270,178 @@ var GlideForm = Class.create({
         return true;
       },
       addOption: function(fieldName, choiceValue, choiceLabel, choiceIndex) {
+        fieldName = this.removeCurrentPrefix(fieldName);
+        var control = this.getControl(fieldName);
+        if (!control) {
+          var handler = this.getPrefixHandler(fieldName);
+          if (handler)
+            handler.getObject().addOption(handler.getFieldName(), choiceValue, choiceLabel, choiceIndex);
+          return;
+        }
+        if (!control.options)
+          return;
+        var len = control.options.length;
+        for (i = 0; i < len; i++) {
+          if (control.options[i].text == choiceLabel) {
+            return;
+          }
+        }
+        if (choiceIndex == undefined)
+          choiceIndex = len;
+        if (choiceIndex < 0 || choiceIndex > len)
+          choiceIndex = len;
+        var newOption = new Option(choiceLabel, choiceValue);
+        var value = choiceValue;
+        if (len > 0) {
+          value = this.getValue(fieldName);
+          control.options[len] = new Option('', '');
+          for (var i = len; i > choiceIndex; i--) {
+            control.options[i].text = control.options[i - 1].text;
+            control.options[i].value = control.options[i - 1].value;
+          }
+        }
+        control.options[choiceIndex] = newOption;
+        this.setValue(fieldName, value);
+      },
+      enableOption: function(control, choiceValue, choiceLabel) {
+        var len = control.options.length;
+        for (var i = len - 1; i >= 0; i--) {
+          if (control.options[i].text == choiceLabel && control.options[i].value == choiceValue) {
+            control.options[i].disabled = false;
+            return true;
+          }
+        }
+        return false;
+      },
+      clearOptions: function(fieldName) {
+        fieldName = this.removeCurrentPrefix(fieldName);
+        var control = this.getControl(fieldName);
+        if (control && !control.options) {
+          var name = "sys_select." + this.tableName + "." + fieldName;
+          control = gel(name);
+        }
+        if (!control) {
+          var handler = this.getPrefixHandler(fieldName);
+          if (handler)
+            handler.getObject().clearOptions(handler.getFieldName());
+          return;
+        }
+        if (!control.options)
+          return;
+        control.innerHTML = '';
+      },
+      getOptionControl: function(fieldName, choiceValue) {
+        var noPrefix = this.removeCurrentPrefix(fieldName);
+        var control = this.getControl(noPrefix);
+        if (control && !control.options) {
+          var name = "sys_select." + this.tableName + "." + noPrefix;
+          control = gel(name);
+        }
+        return control;
+      },
+      removeOption: function(fieldName, choiceValue) {
+        var control = this.getOptionControl(fieldName, choiceValue);
+        if (!control)
+          return;
+        if (!control.options)
+          return;
+        var options = control.options;
+        for (var i = 0; i < options.length; i++) {
+          var option = options[i];
+          if (option.value == choiceValue) {
+            control.options[i] = null;
+            break;
+          }
+        }
+      },
+      getOption: function(fieldName, choiceValue) {
+        var control = this.getOptionControl(fieldName, choiceValue);
+        if (!control)
+          return null;
+        if (!control.options)
+          return null;
+        var options = control.options;
+        for (var i = 0; i < options.length; i++) {
+          var option = options[i];
+          if (option.value == choiceValue)
+            return option;
+        }
+        return null;
+      },
+      removeContextItem: function(itemID) {
+        for (av in contextMenus) {
+          if (contextMenus[av]) {
+            var menu = contextMenus[av];
+            var c = menu.context;
+            if (c)
+              this.removeItem(menu, itemID);
+          }
+        }
+      },
+      removeItem: function(menu, itemID) {
+        var items = menu.childNodes;
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          if (item.innerHTML == itemID) {
+            menu.removeChild(item);
+            clearNodes(item);
+            break;
+          }
+        }
+        return;
+      },
+      getGlideUIElement: function(fieldName) {
+        fieldName = this.removeCurrentPrefix(fieldName);
+        for (var i = 0; i < this.elements.length; i++) {
+          var thisElement = this.elements[i];
+          if (thisElement.fieldName == fieldName)
+            return thisElement;
+        }
+      },
+      getDerivedFields: function(fieldName) {
+        var parts = fieldName.split(".");
+        parts.shift();
+        fieldName = parts.join(".") + ".";
+        var list = new Array();
+        for (var i = 0; i < this.elements.length; i++) {
+          var thisElement = this.elements[i];
+          if (thisElement.fieldName.indexOf(fieldName) == 0) {
+            var target = thisElement.fieldName.substring(fieldName.length);
+            list.push(target);
+          }
+        }
+        if (list.length == 0)
+          return null;
+        return list;
+      },
+      _addDerivedWaiting: function(fieldName) {
+        this.derivedWaiting.push(fieldName);
+      },
+      _isDerivedWaiting: function(fieldName) {
+        var tablePrefix = this.tableName + ".";
+        if (fieldName.startsWith(tablePrefix))
+          fieldName = fieldName.substring(tablePrefix.length);
+        var index = this.derivedWaiting.indexOf(fieldName);
+        return (index != -1);
+      },
+      _removeDerivedWaiting: function(fieldName) {
+        var index = this.derivedWaiting.indexOf(fieldName);
+        if (index > -1)
+          this.derivedWaiting.splice(index, 1);
+      },
+      getReference: function(fieldName, callback) {
+          var opticsContext = null;
+          if (window['g_optics_inspect_handler'] && g_optics_inspect_handler.opticsContextStack.length > 0)
+            opticsContext = g_optics_inspect_handler.opticsContextStack[g_optics_inspect_handler.opticsContextStack.length - 1];
           fieldName = this.removeCurrentPrefix(fieldName);
-          var control = this.getControl(fieldName);
-          if (!control) {
+          var ed = this.getGlideUIElement(fieldName);
+          if (!ed) {
             var handler = this.getPrefixHandler(fieldName);
             if (handler)
-              handler.getObject().addOption(handler.getFieldName(), choiceValue, choiceLabel, choiceIndex);
+              return handler.getObject().getReference(handler.getFieldName(), callback);
             return;
           }
-          if (!control.options)
+          if (ed.type != 'reference' && ed.type != 'domain_id')
             return;
-          var len = control.options.length;
-          for (i = 0; i < len; i++) {
-            if (control.options[i].text == choiceLabel) {
-              return;
-            }
-          }
-          if (choiceIndex == undefined)
-            choiceIndex = len;
-          if (
+          var value = this.getValue(fieldName);
+          var gr = new Gl

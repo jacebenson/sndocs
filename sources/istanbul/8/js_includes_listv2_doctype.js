@@ -1510,5 +1510,1697 @@ GlideList2.unload = function() {
   CustomEvent.un("print.grouped.headers", GlideList2.breakGroupHeader);
 }
 GlideList2.get = function(idOrElement) {
-    if (typeof idOrElement == 'string')
-      return Gli
+  if (typeof idOrElement == 'string')
+    return GlideLists2[idOrElement];
+  return GlideList2._getByElement(idOrElement);
+}
+GlideList2.getIdByElement = function(element) {
+  element = $(element);
+  if (!element)
+    return null;
+  var div = element;
+  do {
+    div = findParentByTag(div, 'div');
+    if (!div)
+      break;
+    var type = getAttributeValue(div, "type");
+    if (type == "list_div")
+      break;
+  } while (div);
+  if (!div)
+    return null;
+  return div.id;
+}
+GlideList2.getByName = function(name) {
+  for (var id in GlideLists2) {
+    var list = GlideLists2[id];
+    if (list.getListName() == name)
+      return list;
+  }
+  return null;
+}
+GlideList2.getListsForTable = function(table) {
+  var lists = [];
+  for (var id in GlideLists2) {
+    var list = GlideLists2[id];
+    if (list.getTableName() == table)
+      lists.push(list);
+  }
+  return lists;
+}
+GlideList2._getByElement = function(element) {
+  var id = this.getIdByElement(element);
+  if (!id)
+    return null;
+  return GlideLists2[id];
+}
+GlideList2.breakGroupHeader = function(checkedFlag) {
+  var breakStyle = "auto";
+  if (checkedFlag)
+    breakStyle = "always";
+  var tds = document.getElementsByTagName("td");
+  var len = tds.length;
+  var first = true;
+  for (var i = 0; i < len; i++) {
+    var td = tds[i];
+    if (getAttributeValue(td, "group_row_td") != "true")
+      continue;
+    if (first)
+      first = false;
+    else
+      td.style.pageBreakBefore = breakStyle;
+  }
+  return false;
+}
+GlideList2.toggleAll = function(expandFlag) {
+  for (var id in GlideLists2) {
+    var list = GlideLists2[id];
+    list.showHideList(expandFlag);
+  }
+}
+GlideList2.updateCellContents = function(cell, data) {
+  $(cell).setStyle({
+    backgroundColor: '',
+    cssText: data.getAttribute('style')
+  });
+  var work = document.createElement('div');
+  cell.innerHTML = '';
+  for (var child = data.firstChild; child; child = child.nextSibling) {
+    work.innerHTML = getXMLString(child);
+    if (work.firstChild !== null)
+      cell.appendChild(work.firstChild);
+  }
+  cell.innerHTML.evalScripts(true);
+  cell.removeClassName('list_edit_dirty');
+  CustomEvent.fire("list_cell_changed", cell);
+};
+/*! RESOURCE: /scripts/classes/GlideList2Handlers.js */
+var GlideList2NewHandler = Class.create();
+GlideList2NewHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    if (actionName == "sysverb_new")
+      list.addToForm("sys_id", "-1");
+    return true;
+  },
+  type: 'GlideList2NewHandler'
+};
+var GlideList2ChecksHandler = Class.create();
+GlideList2ChecksHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    if (!actionName.startsWith("sysverb")) {
+      var keys = ['No records selected', 'Delete the selected item?', 'Delete these', 'items?'];
+      var msgs = getMessages(keys);
+      if (list.checkedIds == '') {
+        alert(msgs["No records selected"]);
+        return false;
+      }
+      if (actionName == "delete_checked") {
+        var items = list.checkedIds.split(",");
+        if (items.length == 1) {
+          if (!confirm(msgs["Delete the selected item?"]))
+            return false;
+        } else if (items.length > 0) {
+          if (!confirm(msgs["Delete these"] + " " + items.length + " " + msgs["items?"]))
+            return false;
+        }
+      }
+    }
+    list.addToForm('sysparm_checked_items', list.checkedIds);
+    return true;
+  },
+  type: 'GlideList2ChecksHandler'
+};
+var GlideList2SecurityHandler = Class.create();
+GlideList2SecurityHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    var element = null;
+    if (actionId)
+      element = $(actionId);
+    if (!element)
+      element = $(actionName);
+    if (element) {
+      var gsftc = element.getAttribute('gsft_condition');
+      if (gsftc != null && gsftc != 'true')
+        return;
+    }
+    if (list.checkedIds.length == 0)
+      return true;
+    var sysIds = list.checkedIds;
+    var ajax = new GlideAjax("AJAXActionSecurity");
+    ajax.addParam("sys_target", list.getTableName());
+    ajax.addParam("sys_action", actionId);
+    ajax.addParam("sysparm_checked_items", sysIds);
+    ajax.addParam("sysparm_view", list.getView());
+    ajax.addParam("sysparm_query", list.getSubmitValue("sysparm_fixed_query"));
+    ajax.addParam("sysparm_referring_url", list.getReferringURL());
+    ajax.addParam("sys_is_related_list", list.getSubmitValue("sys_is_related_list"));
+    ajax.addParam("sysparm_collection_related_file", list.getSubmitValue("sysparm_collection_related_file"));
+    ajax.addParam("sysparm_collection_key", list.getSubmitValue("sysparm_collection_key"));
+    ajax.addParam("sysparm_collection_relationship", list.getSubmitValue("sysparm_collection_relationship"));
+    ajax.addParam("sysparm_target", list.getTableName());
+    var xml = ajax.getXMLWait();
+    var answer = {};
+    var root = xml.getElementsByTagName("action_" + actionId)[0];
+    var keys = root.childNodes;
+    var validIds = [];
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var id = key.getAttribute('sys_id');
+      if (key.getAttribute('can_execute') == 'true')
+        validIds.push(id);
+    }
+    if (validIds.length == sysIds.length)
+      return true;
+    if (validIds.length == 0) {
+      var m = new GwtMessage().getMessage('Security does not allow the execution of that action against the specified record');
+      if (validIds.length > 1)
+        m = m + 's';
+      alert(m);
+      return false;
+    }
+    var sysIds = sysIds.split(',');
+    if (validIds.length != sysIds.length) {
+      var m = new GwtMessage().getMessage('Security allows the execution of that action against {0} of {1} records. Proceed?', validIds.length, sysIds.length);
+      list.addToForm('sysparm_checked_items', validIds.join(','));
+      return confirm(m);
+    }
+    return true;
+  },
+  type: 'GlideList2SecurityHandler'
+};;
+/*! RESOURCE: /scripts/classes/GlideListWidget.js */
+var GlideListWidget = Class.create();
+GlideListWidget.prototype = {
+  initialize: function(widgetID, listID) {
+    this.widgetID = widgetID;
+    this.listID = listID;
+    GlideListWidgets[this.widgetID] = this;
+    CustomEvent.observe('list.loaded', this.refresh.bind(this));
+    CustomEvent.observe('partial.page.reload', this.refreshPartial.bind(this));
+  },
+  refresh: function(listTable, list) {
+    if (!list || !list.listID)
+      return;
+    if (list.listID != this.listID)
+      return;
+    this._refresh(listTable, list, true);
+  },
+  refreshPartial: function(listTable, list) {
+    if (!list || !list.listID)
+      return;
+    if (list.listID != this.listID)
+      return;
+    this._refresh(listTable, list, false);
+  },
+  _refresh: function(listTable, list, isInitialLoad) {},
+  _getElement: function(n) {
+    return $(this.widgetID + "_" + n);
+  },
+  _getValue: function(n) {
+    var e = this._getElement(n);
+    if (!e)
+      return "";
+    return e.value;
+  },
+  _setValue: function(n, v) {
+    var e = this._getElement(n);
+    if (!e)
+      return;
+    e.value = v;
+  },
+  _setInner: function(n, v) {
+    var e = this._getElement(n);
+    if (!e)
+      return;
+    e.innerHTML = v;
+  },
+  type: 'GlideListWidget'
+}
+var GlideListWidgets = {};
+GlideListWidget.get = function(id) {
+  return GlideListWidgets[id];
+};
+/*! RESOURCE: /scripts/classes/GlideWidgetVCR.js */
+var GlideWidgetVCR = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID) {
+    $super(widgetID, listID);
+    this.backAllowed = false;
+    this.nextAllowed = false;
+    this._initEvents();
+    CustomEvent.observe("list_v2.orderby.update", this._updateOrderBy.bind(this));
+  },
+  gotoAction: function(ev, el) {
+    ev.preventDefault();
+    var action = el.name.substring(4);
+    if (!this.backAllowed && ((action == 'first') || (action == 'back')))
+      return;
+    if (!this.nextAllowed && ((action == 'next') || (action == 'last')))
+      return;
+    var list = GlideList2.get(this.listID);
+    var row;
+    if (action == 'first')
+      row = 1;
+    else if (action == 'back')
+      row = list.firstRow - list.rowsPerPage;
+    else if (action == 'next')
+      row = list.firstRow + list.rowsPerPage;
+    else if (action == 'last')
+      row = (list.totalRows + 1) - list.rowsPerPage;
+    else
+      return;
+    list._refreshAjax(row, {}, true);
+  },
+  gotoRow: function(ev) {
+    ev = getEvent(ev);
+    if (!ev || ev.keyCode != 13)
+      return;
+    ev.stop();
+    var row = this._getElement('first_row').value;
+    if (isNaN(row))
+      row = 1;
+    var list = GlideList2.get(this.listID);
+    list._refreshAjax(row, {}, true);
+  },
+  _initEvents: function() {
+    this.span = $(this.widgetID + "_vcr");
+    if (!this.span)
+      return;
+    this.span.on('click', "[data-nav=true]", this.gotoAction.bind(this));
+    var input = this.span.getElementsByTagName("INPUT")[0];
+    $(input).observe('keypress', this.gotoRow.bind(this));
+  },
+  _refresh: function(listTable, list) {
+    if (this.span.innerHTML == "")
+      this.span = $(this.widgetID + "_vcr");
+    if (list.totalRows == 0) {
+      this._setVisible(false);
+      this._setRepVisible(false);
+    } else if (list.totalRows <= list.rowsPerPage && GlideList2.get(this.listID).isHierarchical()) {
+      this._setVisible(false);
+      if (this._setRepVisible(true, list.totalRows))
+        this._setInner('rep_total_rows', list.totalRows);
+    } else {
+      this._setVisible(true);
+      this._setRepVisible(false);
+      this.backAllowed = (list.firstRow > 1);
+      this.nextAllowed = (list.lastRow < list.totalRows);
+      this._setRowNumbers(list);
+      var images = $(this.span).select("[data-nav=true]");
+      if (images && images.length) {
+        this._setAction(images[0], this.backAllowed);
+        this._setAction(images[1], this.backAllowed);
+        this._setAction(images[2], this.nextAllowed);
+        this._setAction(images[3], this.nextAllowed);
+      }
+    }
+  },
+  _setRowNumbers: function(list) {
+    var lastRow = $(this.widgetID + '_last_row'),
+      totalRows = $(this.widgetID + '_total_rows'),
+      firstRow = $(this.widgetID + '_first_row');
+    if (lastRow)
+      lastRow.innerHTML = list.lastRow;
+    if (totalRows)
+      totalRows.innerHTML = list.totalRows;
+    if (firstRow)
+      firstRow.value = list.firstRow;
+  },
+  _setAction: function(img, allowed) {
+    if (img.tagName.toLowerCase() == "img") {
+      if (allowed) {
+        img.addClassName("pointerhand");
+        this._removeDis(img);
+      } else {
+        img.removeClassName("pointerhand");
+        this._addDis(img);
+      }
+    } else {
+      if (!allowed)
+        img.addClassName("tab_button_disabled");
+      else
+        img.removeClassName("tab_button_disabled");
+    }
+  },
+  _removeDis: function(img) {
+    var src = img.src;
+    if (src.indexOf('_dis.gifx') != -1)
+      img.src = src.replace(/\_dis\.gifx/i, ".gifx");
+  },
+  _addDis: function(img) {
+    var src = img.src;
+    if (src.indexOf('_dis.gifx') == -1)
+      img.src = src.replace(/\.gifx/i, "_dis.gifx");
+  },
+  _setVisible: function(flag) {
+    var e = this.span;
+    if (!e)
+      return;
+    if ((flag && !e.visible()) || (!flag && e.visible()))
+      e.toggle();
+  },
+  _setRepVisible: function(flag, total_rows) {
+    var e = $(this.widgetID + "_rep_vcr");
+    if (!e)
+      return false;
+    if ((flag && !e.visible()) || (!flag && e.visible()))
+      e.toggle();
+    if (!flag)
+      return true;
+    var showPlural = false;
+    var showSingular = false;
+    if (total_rows > 1)
+      showPlural = flag;
+    else
+      showSingular = flag;
+    var e = $(this.widgetID + "_rep_plural_label");
+    if (e)
+      if ((showPlural && !e.visible()) || (!showPlural && e.visible()))
+        e.toggle();
+    var e = $(this.widgetID + "_rep_singular_label");
+    if (e)
+      if ((showSingular && !e.visible()) || (!showSingular && e.visible()))
+        e.toggle();
+    return true;
+  },
+  _updateOrderBy: function(orderBy) {
+    var list = GlideList2.get(this.listID);
+    if (list)
+      list.setOrderBy(orderBy);
+  },
+  type: 'GlideWidgetVCR'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetActions.js */
+var GlideWidgetActions = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID, ofText) {
+    $super(widgetID, listID);
+    this.ofText = ofText;
+    this.securityActions = {};
+  },
+  _refresh: function(listTable, list) {
+    this.securityActions = {};
+    list._setTheAllCheckbox(false);
+  },
+  actionCheck: function(select) {
+    if (select.getAttribute('gsft_sec_check') == 'true')
+      return;
+    select.setAttribute('gsft_sec_check', 'true');
+    var actions = [];
+    var sysIds = [];
+    var list = GlideList2.get(this.listID);
+    var checkedIds = list.getChecked();
+    if (checkedIds)
+      sysIds = checkedIds.split(",");
+    var options = select.options;
+    for (var i = 0; i < options.length; i++) {
+      var opt = options[i];
+      opt.style.display = 'inline';
+      if (getAttributeValue(opt, 'gsft_is_action') != 'true')
+        continue;
+      if (this._checkAction(opt, sysIds))
+        actions.push(opt);
+    }
+    if (actions.length > 0) {
+      var actionIds = [];
+      for (var i = 0; i < actions.length; i++)
+        actionIds.push(actions[i].id);
+      this._canExecute(actionIds, sysIds, list.tableName);
+      for (var i = 0; i < actions.length; i++) {
+        var opt = actions[i];
+        var validIds = this.securityActions[opt.id];
+        opt.style.color = "";
+        if (!validIds || (validIds.length == 0)) {
+          opt.style.color = '#777';
+          opt.disabled = true;
+        } else if (validIds.length == sysIds.length) {
+          opt.disabled = false;
+          if (opt.getAttribute("action_name"))
+            opt.innerHTML = "&nbsp;&nbsp;&nbsp;" + htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+          else
+            opt.innerHTML = htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+          opt.setAttribute('gsft_allow', '');
+        } else {
+          opt.disabled = false;
+          opt.innerHTML = getAttributeValue(opt, 'gsft_base_label') + ' (' + validIds.length + ' ' + this.ofText + ' ' + sysIds.length + ')';
+          opt.setAttribute('gsft_allow', validIds.join(','));
+        }
+      }
+    }
+    if ('' == 'true' && options.length > 0) {
+      for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        if (this._shouldHide(opt, select))
+          opt.style.display = 'none';
+      }
+    }
+    select.focus();
+  },
+  _shouldHide: function(opt, select) {
+    var options = select.options;
+    var ourId = opt.id;
+    var ourLabel = opt.innerHTML;
+    for (var i = 0; i < options.length; i++) {
+      var actionLabel = options[i].innerHTML,
+        actionEnabled = options[i].disabled != true,
+        actionId = options[i].id;
+      if (ourId == actionId && !opt.disabled)
+        return false;
+      if (ourLabel == actionLabel && actionEnabled)
+        return true;
+    }
+    return false;
+  },
+  _checkAction: function(opt, sysIds) {
+    if (sysIds.length == 0) {
+      opt.disabled = true;
+      if (opt.getAttribute("action_name"))
+        opt.innerHTML = "&nbsp;&nbsp;&nbsp;" + htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+      else
+        opt.innerHTML = htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+      opt.style.color = '#777';
+      return false;
+    }
+    if (getAttributeValue(opt, 'gsft_check_condition') != 'true') {
+      opt.disabled = false;
+      opt.style.color = '';
+      return false;
+    }
+    return true;
+  },
+  _canExecute: function(actionIds, sysIds, tableName) {
+    var ajax = new GlideAjax("AJAXActionSecurity");
+    ajax.addParam("sys_target", tableName);
+    ajax.addParam("sys_action", actionIds.join(","));
+    ajax.addParam("sysparm_checked_items", sysIds.join(','));
+    var xml = ajax.getXMLWait();
+    var answer = {};
+    for (var n = 0; n < actionIds.length; n++) {
+      var actionId = actionIds[n];
+      var root = xml.getElementsByTagName("action_" + actionId)[0];
+      var keys = root.childNodes;
+      this.securityActions[actionId] = [];
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var id = key.getAttribute('sys_id');
+        if (key.getAttribute('can_execute') == 'true')
+          this.securityActions[actionId].push(id);
+      }
+    }
+  },
+  runAction: function(select) {
+    var opt = getSelectedOption(select);
+    if (!opt)
+      return false;
+    if (opt.id == 'ignore' || (!opt.value && !opt.text))
+      return false;
+    if (opt.disabled)
+      return false;
+    var list = GlideList2.get(this.listID);
+    if (!list)
+      return false;
+    var id = opt.id;
+    var name = getAttributeValue(opt, 'action_name');
+    if (!name)
+      name = id;
+    if (getAttributeValue(opt, 'client') == 'true') {
+      g_list = list;
+      var href = getAttributeValue(opt, 'href');
+      eval(href);
+      g_list = null;
+    } else {
+      var ids = opt.getAttribute('gsft_allow');
+      list.action(id, name, ids);
+    }
+    return false;
+  },
+  type: 'GlideWidgetActions'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetSearch.js */
+var GlideWidgetSearch = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID, focusOnRefresh) {
+    $super(widgetID, listID);
+    this.field = "";
+    this.focusOnRefresh = (focusOnRefresh == 'true');
+    this._initEvents();
+  },
+  _refresh: function(listTable, list, isInitialLoad) {
+    var field = list.sortBy;
+    if (!field)
+      field = 'zztextsearchyy';
+    this._setSelect(field);
+    this._setTitle();
+    this._clearText();
+    if (this.focusOnRefresh) {
+      var e = this._getElement("text");
+      try {
+        e.focus();
+      } catch (er) {}
+    }
+  },
+  _initEvents: function() {
+    this._getElement('select').observe('change', this._setTitle.bind(this));
+    var text = this._getElement('text');
+    text.observe('keypress', this.searchKeyPress.bind(this));
+    var a = text.nextSibling;
+    var spn = text.previousSibling;
+    if (spn && spn.tagName.toUpperCase() == "SPAN")
+      $(spn).observe('click', this.search.bind(this));
+    while (a && a.tagName.toUpperCase() != "A")
+      a = a.nextSibling;
+    if (!a)
+      return;
+    var a = $(a);
+    a.observe('click', this.search.bind(this));
+  },
+  searchKeyPress: function(ev) {
+    if (!ev || ev.keyCode != 13)
+      return;
+    return this.search(ev);
+  },
+  search: function(ev) {
+    var select = new Select(this._getElement('select'));
+    var value = this._getValue("text");
+    if (!value)
+      return;
+    ev.stop();
+    var field = select.getValue();
+    var list = GlideList2.get(this.listID);
+    var parms = {};
+    parms['sysparm_goto_query'] = value;
+    parms['sysparm_goto_field'] = field;
+    parms['sys_target'] = list.tableName;
+    parms['sysparm_userpref.' + list.tableName + '.db.order'] = field;
+    parms['sysparm_query'] = list.getQuery({
+      groupby: true
+    });
+    CustomEvent.fire('list_v2.orderby.update', field);
+    this._clearText();
+    list.refresh(1, parms);
+  },
+  setTitle: function() {
+    this._setTitle();
+  },
+  _clearText: function() {
+    this._setValue('text', '');
+  },
+  _setSelect: function(field) {
+    var select = new Select(this._getElement('select'));
+    if (select.contains(field))
+      select.selectValue(field);
+  },
+  _setTitle: function() {
+    var opt = getSelectedOption(this._getElement('select'));
+    if (!opt) {
+      this._setInner('title', new GwtMessage().getMessage('Go to'));
+      return;
+    }
+    if (opt.value == 'zztextsearchyy')
+      this._setInner('title', new GwtMessage().getMessage('Search'));
+    else
+      this._setInner('title', new GwtMessage().getMessage('Go to'));
+  },
+  type: 'GlideWidgetSearch'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetHideOnEmpty.js */
+var GlideWidgetHideOnEmpty = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID) {
+    $super(widgetID, listID);
+  },
+  _refresh: function() {
+    var list = GlideList2.get(this.listID);
+    var empty = (list.totalRows == 0);
+    var elements = list.listContainer.select('.list_hide_empty');
+    for (var i = 0; i < elements.length; i++) {
+      if (empty)
+        elements[i].hide();
+      else
+        elements[i].show();
+    }
+  },
+  type: 'GlideWidgetHideOnEmpty'
+});;
+/*! RESOURCE: /scripts/classes/GlideList2FilterUtil.js */
+function runFilterV2Lists(name, filter) {
+  var list = GlideList2.get(name);
+  if (!list) {
+    list = GlideList2.getByName(name);
+  }
+  if (list) {
+    var groupBy = list.getGroupBy();
+    if (groupBy)
+      filter += "^" + groupBy;
+    list.setFilterAndRefresh(filter);
+  }
+}
+GlideList2.saveFilter = function(listID, listName) {
+  var list = GlideList2.get(listID);
+  var siname = gel('save_filter_name');
+  if (!siname || !siname.value || siname.value.length <= 0) {
+    var msg = getMessage("Enter a name to use for saving the filter");
+    alert(msg);
+    siname.focus();
+    return;
+  }
+  var filter = getFilter(listName);
+  var visibility = getFilterVisibility();
+  var groupBy = list.getGroupBy();
+  if (groupBy)
+    filter += "^" + groupBy;
+  var parms = {};
+  parms['filter_visible'] = visibility;
+  parms['save_filter_query'] = filter;
+  parms['save_filter_name'] = siname.value;
+  parms['sys_target'] = list.getTableName();
+  parms['sys_action'] = 'sysverb_save_filter';
+  list.submit(parms);
+}
+GlideList2.setDefaultFilter = function(listID, listName) {
+  var filter = getFilter(listName, false);
+  GlideList2.get(listID).setDefaultFilter(filter);
+};
+/*! RESOURCE: /scripts/classes/GlideList2InitEvents.js */
+function glideList2InitEvents() {
+  document.body.on('click', 'a[data-type="list2_top_title"], button[data-type="list2_top_title"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).clickTitle(evt);
+    evt.stop();
+  });
+  document.body.on('contextmenu', '.list_nav_top', function(evt, element) {
+    if (!element.hasAttribute('data-list_id'))
+      return;
+    if (evt.ctrlKey)
+      return;
+    if (evt.target.tagName.toLowerCase() === 'input')
+      return;
+    GlideList2.get(element.getAttribute('data-list_id')).clickTitle(evt);
+    evt.stop();
+  });
+  document.body.on('click', 'a[data-type="list2_toggle"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).toggleList();
+    evt.stop();
+  });
+  if (isDoctype()) {
+    $j('input[data-type="list2_checkbox"] + label.checkbox-label').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var input = $j(e.target).parent()[0].querySelector('input');
+      input.checked = !input.checked;
+      GlideList2.get(input.getAttribute('data-list_id')).rowChecked(input, e);
+      $j(input).change();
+    });
+  } else {
+    document.body.on('click', 'input[data-type="list2_checkbox"], label[data-type="list2_checkbox"]', function(evt, element) {
+      GlideList2.get(element.getAttribute('data-list_id')).rowChecked(element, evt);
+      evt.stopPropagation();
+    });
+  }
+  document.body.on('click', 'input[data-type="list2_all_checkbox"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).allChecked(element);
+    evt.stopPropagation();
+  });
+  document.body.on('click', 'a[data-type="list2_group_toggle"]', function(evt, element) {
+    var toggleIcon = element.childNodes[0];
+    if (toggleIcon && toggleIcon.className.indexOf('collapsedGroup') > -1)
+      toggleIcon.className = toggleIcon.className.replace(/\bcollapsedGroup\b/, '');
+    else
+      toggleIcon.className += 'collapsedGroup';
+    GlideList2.get(element.getAttribute('data-list_id')).toggleGroups();
+    evt.stop();
+  });
+  document.body.on('click', 'img[data-type="list2_delete_row"], i[data-type="list2_delete_row"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    editListWithFormDeleteRow(row.sysId, gl.listID);
+  });
+  document.body.on('click', 'img[data-type="list2_hier"], i[data-type="list2_hier"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    gl.toggleHierarchy(element, 'hier_row_' + gl.listID + '_' + row.sysId, row.target, row.sysId);
+    evt.stop();
+  });
+  document.on('mouseover', 'img[data-type="list2_popup"], a[data-type="list2_popup"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    popListDiv(evt, row.target, row.sysId, gl.view, 600);
+    evt.stop();
+  });
+  document.on('mouseout', 'img[data-type="list2_popup"], a[data-type="list2_popup"]', function(evt, element) {
+    lockPopup(evt);
+    evt.stop();
+  });
+  document.body.on('click', 'a[data-type="list2_hdrcell"]', function(evt, element) {
+    element = element.up("TH");
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellClick(element, evt);
+    evt.stop();
+  });
+  document.body.on('contextmenu', 'th[data-type="list2_hdrcell"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+  });
+  document.body.on('click', 'a.list_header_context', function(evt, element) {
+    element = element.parentElement;
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+    evt.stop();
+  });
+  document.body.on('click', 'i.list_header_context', function(evt, element) {
+    element = element.parentElement.parentElement;
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+    evt.stop();
+  });
+  document.body.on('click', 'span[data-type="list2_hdrcell"]', list2Context);
+
+  function list2Context(evt, element) {
+    element = element.up("th");
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+  }
+  document.body.on('contextmenu', 'tr[data-type="list2_row"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).rowContextMenu(element, evt);
+  });
+  document.body.on('click', 'a[data-type="list_mechanic2_open"], i[data-type="list_mechanic2_open"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).listMechanicClick(element);
+    evt.stop();
+  });
+  document.body.on('click', 'a.linked, a.web, a.kb_link, a.report_link, .list_decoration > a', function(evt, el) {
+    if (!evt.shiftKey)
+      return;
+    var url = new GlideURL(el.getAttribute('href'));
+    var table = url.getContextPath().split('.do')[0];
+    var sys_id = url.getParam('sys_id');
+    var view = url.getParam('sysparm_view');
+    popForm(evt, table, sys_id, view);
+    evt.stop();
+  })
+}
+if (!window['g_isGlideList2InitEvents']) {
+  addAfterPageLoadedEvent(glideList2InitEvents);
+  window.g_isGlideList2InitEvents = true;
+};
+/*! RESOURCE: /scripts/GlideListEditorMessaging.js */
+(function() {
+  "use strict";
+  window.GlideListEditorMessaging = Class.create({
+    initialize: function(gle) {
+      if (!NOW || !NOW.MessageBus)
+        return;
+      this._recordMessage = NOW.messaging.record;
+      this._pendingNewRecords = [];
+      this._pendingSavedRecords = {};
+      this._listEditor = gle;
+      this._registerEvents(gle);
+    },
+    _registerEvents: function() {
+      this._listEditor.tableController.observe(
+        'glide:list_v2.edit.save', this._messageListEdit.bind(this));
+      this._listEditor.tableController.observe(
+        'glide:list_v2.edit.cells_changed', this._messageCellsChanged.bind(this));
+      this._listEditor.tableController.observe(
+        'glide:list_v2.edit.row_added', this._messageRowAdded.bind(this));
+      this._listEditor.tableController.observe(
+        'glide:list_v2.edit.changes_saved', this._messageRowSaved.bind(this));
+      this._listEditor.tableController.observe(
+        'glide:list_v2.edit.rows_deleted', this._messageRowDeleted.bind(this));
+    },
+    _messageListEdit: function() {
+      if (this._listEditor.hasChanges()) {
+        var modifiedRecords = this._listEditor.cellEditor.changes.getModifiedRecords();
+        for (var i in modifiedRecords) {
+          if (!modifiedRecords.hasOwnProperty(i) || i == '-1')
+            continue;
+          this._pendingSavedRecords[i] = this._getRecordChanges(modifiedRecords[i]);
+        }
+      }
+    },
+    _messageCellsChanged: function(evt) {
+      var edits = this._listEditor.savePolicy.getEdits(evt);
+      for (var i = 0; i < edits.length; i++) {
+        var recordSysId = edits[i][0];
+        if (this._isPendingNewRecord(recordSysId))
+          continue;
+        var savedRecord = this._pendingSavedRecords[recordSysId];
+        if (!savedRecord)
+          savedRecord = this._getRecordChanges(this._listEditor.cellEditor.changes.get(recordSysId));
+      }
+    },
+    _messageRowAdded: function(evt) {
+      var recordSysId = evt.memo.sys_id;
+      this._pendingNewRecords.push(recordSysId);
+    },
+    _messageRowSaved: function(evt) {
+      var recordTableName = this._getTableName();
+      for (var i = 0; i < evt.memo.saves.length; i++) {
+        var recordSysId = evt.memo.saves[i];
+        if (this._isPendingNewRecord(recordSysId)) {
+          this._recordMessage.created(
+            recordTableName, {
+              sys_id: recordSysId
+            }, {
+              name: 'list',
+              list_id: evt.memo.listId
+            }
+          );
+          var pendingIndex = this._pendingNewRecords.indexOf(recordSysId);
+          this._pendingNewRecords.splice(pendingIndex, 1);
+        } else {
+          var savedRecord = this._pendingSavedRecords[recordSysId];
+          if (!savedRecord)
+            return;
+          this._recordMessage.updated(
+            recordTableName, {
+              sys_id: recordSysId
+            },
+            savedRecord.changes, {
+              name: 'list',
+              list_id: evt.memo.listId
+            }
+          );
+          delete this._pendingNewRecords[recordSysId];
+        }
+      }
+    },
+    _messageRowDeleted: function(evt) {
+      var recordTableName = this._getTableName();
+      for (var i = 0; i < evt.memo.deletes; i++) {
+        var recordSysId = evt.memo.deletes[i];
+        this._recordMessage.deleted(
+          recordTableName, {
+            sys_id: recordSysId
+          }, {
+            name: 'list',
+            list_id: evt.memo.listId
+          }
+        );
+      }
+    },
+    _isPendingNewRecord: function(id) {
+      return this._pendingNewRecords.indexOf(id) != -1;
+    },
+    _getRecordChanges: function(modifiedRecord) {
+      return {
+        changes: this._getFieldChanges(modifiedRecord)
+      }
+    },
+    _getFieldChanges: function(modifiedRecord) {
+      var fields = modifiedRecord.getFields();
+      var changes = {};
+      for (var f in fields) {
+        if (!fields.hasOwnProperty(f))
+          continue;
+        var field = fields[f];
+        changes[f] = {
+          current: {
+            value: field.value,
+            displayValue: field.renderValue
+          },
+          previous: {
+            value: field.originalValue,
+            displayValue: field.originalDisplay
+          }
+        };
+      }
+      return changes;
+    },
+    _getTableName: function() {
+      return this._listEditor.tableController.tableName;
+    },
+    toString: function() {
+      return 'GlideListEditorMessaging';
+    }
+  })
+})();;
+/*! RESOURCE: /scripts/classes/doctype/fixedHeaders.js */
+CustomEvent.observe('list2_init', function(list2) {
+  if (typeof $j == 'undefined')
+    return;
+  if (list2.getRelated() || window.g_form)
+    return;
+  if ($j('BODY').hasClass('non_standard_lists'))
+    return;
+  var enableStickyColumns = false;
+  var numColsSticky = 2;
+  var tableId = document.getElementById(list2.listID);
+  var $cloneTable;
+
+  function cloneHeader() {
+    $j("#clone_table").remove();
+    if (enableStickyColumns) {
+      $j("#clone_table_columns").remove();
+      $j("#clone_column_headers").remove();
+    }
+    var $origHeader = $j('thead', tableId).first();
+    var $pageHeader = $j('nav.list_nav_top.list_nav').first();
+    var pageHeaderHeight = $pageHeader.outerHeight();
+    $pageHeader.css({
+      'position': 'fixed',
+      'width': '100%',
+      'top': 0,
+      'z-index': 10
+    });
+    var navbar = $j('nav.navbar');
+    var navbarMarginTop = navbar.outerHeight() + parseInt(navbar.css('padding-bottom')) - parseInt(navbar.css('border-bottom-width'));
+    $j('.list_nav_spacer').css({
+      marginTop: navbarMarginTop,
+      'display': 'block'
+    });
+    var $header = $origHeader.first()[0].cloneNode(true);
+    var $originalTable = $j($j('table', tableId)[0].cloneNode(false));
+    $originalTable.empty();
+    $originalTable.removeClass('list_table list_header_search');
+    $originalTable.attr('id', 'table_clone');
+    $originalTable.append($header);
+    $cloneTable = $j($j(tableId)[0].cloneNode(false));
+    $cloneTable.empty();
+    $cloneTable.append($originalTable);
+    $cloneTable.attr('id', 'clone_table');
+    $cloneTable.removeClass("list_table").addClass('list_table_clone');
+    $cloneTable.css({
+      'position': 'fixed',
+      'width': $j(tableId).width(),
+      'display': 'none',
+      'top': pageHeaderHeight,
+      'z-index': 10
+    });
+    $j(".list_v2").first().prepend($cloneTable);
+    var originalHeaders = $j('thead th', tableId);
+    var cloneHeaders = $j('#clone_table thead th');
+    var widths = [];
+    addAfterPageLoadedEvent(function() {
+      $j.each(originalHeaders, function() {
+        widths.push($j(this).outerWidth());
+      });
+      $j.each(cloneHeaders, function(index, value) {
+        $j(this).css({
+          'width': widths[index]
+        });
+      });
+    });
+    if (enableStickyColumns) {
+      var curCol = 0;
+      var rowHeights = [];
+      var $cloneTableColumns = $j(tableId).clone();
+      var $cloneOfClone = $cloneTable.clone();
+      var $tableBody = $($cloneTableColumns).find('tbody');
+      $cloneOfClone.attr('id', 'clone_column_headers');
+      $cloneOfClone.css({
+        "z-index": 1000
+      });
+      $cloneOfClone.find('thead').find('th').each(function() {
+        curCol = curCol + 1;
+        if (curCol > numColsSticky) {
+          $j(this).remove();
+        }
+      });
+      curCol = 0;
+      $j(".list_v2").first().prepend($cloneOfClone);
+      $cloneTableColumns.find('thead').find('tr').find('th').each(function() {
+        curCol = curCol + 1;
+        if (curCol > numColsSticky) {
+          $j(this).remove();
+        }
+      });
+      curCol = 0;
+      $j(tableId).find('tbody').find('tr').each(function() {
+        rowHeights.push($j(this).outerHeight());
+      });
+      $tableBody.find("tr").each(function(index) {
+        $j(this).css('height', rowHeights[index]);
+        $j(this).find('td').each(function() {
+          curCol = curCol + 1;
+          if (curCol > numColsSticky) {
+            $j(this).remove();
+          }
+        });
+        curCol = 0;
+      });
+      $cloneTableColumns.css({
+        'position': 'absolute'
+      });
+      $cloneTableColumns.attr('id', 'clone_table_columns');
+      $j(".list_v2").prepend($cloneTableColumns);
+    }
+  }
+
+  function checkPosition() {
+    var $table = $j(tableId);
+    if (!$table.length) {
+      return;
+    }
+    var scrollLeft = $j(document).scrollLeft();
+    var margin = parseInt($j("body").css('margin-left'));
+    var listHeaderSpacerHeight = $j('.list_nav_spacer').offset();
+    listHeaderSpacerHeight = (listHeaderSpacerHeight) ? listHeaderSpacerHeight.top : 0;
+    var scrollTop = $j(window).scrollTop();
+    var offset = $table.offset();
+    var tableTop = offset.top - listHeaderSpacerHeight;
+    if (g_text_direction == "rtl") {
+      $cloneTable.css({
+        "right": margin + scrollLeft
+      });
+    } else {
+      $cloneTable.css({
+        "left": -scrollLeft + margin
+      });
+    }
+    if (enableStickyColumns) {
+      var $columns = $j("#clone_table_columns");
+      var $columnHeaders = $j("#clone_column_headers");
+      $columns.css({
+        "left": offset.left,
+        "top": offset.top
+      });
+      if (scrollLeft > offset.left) {
+        $columns.css("left", scrollLeft);
+        $columnHeaders.css("left", 0);
+      }
+    }
+    if ((scrollTop > tableTop)) {
+      $cloneTable.css('display', 'block');
+      if (enableStickyColumns) {
+        $columnHeaders.css('display', 'block');
+      }
+    } else {
+      $cloneTable.css('display', 'none');
+      if (enableStickyColumns) {
+        $columnHeaders.css('display', 'none');
+      }
+    }
+  }
+  var eventSet = false;
+  var cloneTimeout;
+
+  function reclone(event) {
+    clearTimeout(cloneTimeout);
+    cloneTimeout = setTimeout(function() {
+      var sw = new StopWatch();
+      cloneHeader();
+      checkPosition();
+      if (!eventSet)
+        $j(window).scroll(checkPosition).trigger("scroll");
+      eventSet = true;
+      sw.jslog("Reclone headers");
+    }, 100);
+  }
+  CustomEvent.observe('list.loaded', reclone);
+  CustomEvent.observe('list2_init', reclone);
+  CustomEvent.observe('listheadersearch.show_hide', reclone);
+  CustomEvent.observe('compact', reclone);
+  $j(window).load(reclone);
+  $j(window).resize(reclone);
+});;
+/*! RESOURCE: /scripts/classes/doctype/GlideHeaderSearch.js */
+$j(function($) {
+  'use strict';
+  if (window.NOW.headerSearchLoaded)
+    return;
+  window.NOW.headerSearchLoaded = true;
+  var keyEvents = isMSIE9 || isMSIE10 ? "keydown" : "keyup"
+  $(document).on(keyEvents, "INPUT.list_header_search", function(evt) {
+    $(this).addClass('modified');
+    var choiceType = $(this).closest('[data-choice]').attr('data-choice');
+    var isReference = $(this).closest('[data-glide-type="reference"]').length > 0;
+    if (!isReference && (choiceType == '1' || choiceType == '3')) {
+      parseChoice($(this).closest('[data-choice]'));
+    }
+    if (evt.keyCode != 13)
+      return;
+    evt.preventDefault();
+    submitHeaderSearch(this);
+  });
+
+  function submitHeaderSearch(el) {
+    var $table = $(el).closest('table.list_table');
+    if ($table.data('choice_query_active')) {
+      $table.data('choice_query_submit_onresponse', true);
+      return;
+    }
+    var listID = $table.attr('data-list_id');
+    var list = GlideList2.get(listID);
+    var query = getQueryFromTable($table);
+    var extraParms = {
+      sysparm_choice_query_raw: getRawChoiceQuery($table),
+      sysparm_list_header_search: true
+    };
+    list.setFilter(query);
+    list.refresh(1, extraParms);
+  }
+
+  function parseChoice($el) {
+    var $table = $el.closest('table.list_table');
+    var table = $table.attr('glide_table');
+    var field = $el.attr('name');
+    var $input = $el.find('input.list_header_search.modified');
+    var value = $input.val();
+    if (!value) {
+      $input.data('choice_query', null);
+      return;
+    }
+    $table.data('choice_query_active', true);
+    var term = buildTerm(field, value)
+    var partialTerm = term.operator + term.value;
+    translateChoiceListQuery(table, field, partialTerm, function onSuccess(values) {
+      term.operator = 'IN';
+      term.value = values.join(',');
+      $input.data('choice_query', term);
+      submitIfNecessary($table);
+    }, function onError() {
+      submitIfNecessary($table);
+    });
+  }
+
+  function submitIfNecessary($table) {
+    $table.data('choice_query_active', false);
+    if ($table.data('choice_query_submit_onresponse'))
+      submitHeaderSearch($table);
+  }
+
+  function getRawChoiceQuery($table) {
+    var query = [];
+    $table.find('tr.list_header_search_row td').each(function(index, el) {
+      var choiceType = el.getAttribute('data-choice');
+      var isReference = el.getAttribute('data-glide-type') == "reference";
+      if (isReference || (choiceType != '1' && choiceType != '3'))
+        return;
+      var field = el.getAttribute('name');
+      var $input = $(el).find('input.list_header_search');
+      if (!$input.val())
+        return;
+      var term = buildTerm(field, $input.val())
+      query.push(term.field + term.operator + term.value);
+    });
+    return query.join('^');
+  }
+
+  function loadFromTables() {
+    $('TABLE.list_table').each(function(index, table) {
+      var $table = $(table);
+      var query = $table.attr('query');
+      if (typeof query === 'undefined')
+        return;
+      var filterEnabled = isFilterEnabled($table);
+      if (query.indexOf('^NQ') != -1 || query.indexOf('^OR') != -1 || !filterEnabled) {
+        var orMatches = query.match(/\^OR/g) !== null ? query.match(/\^OR/g).length : 0;
+        var orderByMatches = query.match(/\^ORDERBY/g) !== null ? query.match(/\^ORDERBY/g).length : 0;
+        if (orMatches != orderByMatches || query.indexOf('^NQ') != -1 || !filterEnabled) {
+          $j($table).find('button.list_header_search_toggle')
+            .attr('disabled', true)
+            .closest('th')
+            .attr('title', getMessage('This filter query cannot be edited'))
+            .addClass('disabled')
+            .css('cursor', 'not-allowed')
+            .tooltip()
+            .hideFix();
+          $table.addClass('list_header_search_disabled');
+        }
+      }
+      var listID = $table.attr('data-list_id');
+      var enc = new GlideEncodedQuery(listID, query);
+      enc.partsXML = loadXML($table.attr('parsed_query'));
+      enc.terms = [];
+      enc.parseXML();
+      var parts = enc.getTerms();
+      var encChoice = new GlideEncodedQuery(listID, $table.attr('choice_query'));
+      encChoice.partsXML = loadXML($table.attr('parsed_choice_query'));
+      encChoice.terms = [];
+      encChoice.parseXML();
+      parts = parts.concat(encChoice.getTerms());
+      var hasHeaderQueries = false;
+      var hasGotoQuery = false;
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        var value = p.displayValue || p.value;
+        if (value && value.indexOf('javascript:') == 0) {
+          p.script = true;
+          continue;
+        }
+        if (p.Goto == 'true')
+          hasGotoQuery = true;
+        if (setInputValue($table, p.field, buildDisplayValue(p.operator, value)))
+          hasHeaderQueries = true;
+      }
+      showHeaderSearchRow($table, hasHeaderQueries, hasGotoQuery);
+      disableUnsupportedFields($table);
+      $table.data('g_enc_query', enc);
+      if ($table.hasClass('list_header_search_disabled') && $table.hasClass('list_header_search'))
+        $table.removeClass('list_header_search');
+    });
+  }
+
+  function setInputValue($table, field, value) {
+    if (!value)
+      return false;
+    var columnInput = $table.find('.list_header_search_row td[name="' + field + '"] input');
+    if (columnInput.length == 0 && field.indexOf('.') > -1) {
+      var lastDot = field.lastIndexOf('.');
+      var refField = field.substring(0, lastDot);
+      var refFieldDisplay = field.substring(lastDot + 1);
+      columnInput = $table.find('.list_header_search_row ' +
+        'td[name=\'' + refField + '\']' +
+        '[data-glide-type=reference]' +
+        '[data-glide-reference-name=' + refFieldDisplay + ']' +
+        ' input');
+    }
+    columnInput.val(value);
+    return columnInput.length > 0;
+  }
+
+  function getQueryFromTable($table) {
+    var enc_query = $table.data('g_enc_query');
+    var terms = enc_query ? enc_query.getTerms() : [];
+    $table.find('tr.list_header_search_row td').each(function(index, el) {
+      var field = el.getAttribute('name');
+      var type = el.getAttribute('data-glide-type');
+      var baseField = "";
+      var reference_name = el.getAttribute('data-glide-reference-name');
+      if (reference_name) {
+        baseField = field;
+        field = field + '.' + reference_name;
+      }
+      var $input = $(el).find('input.list_header_search.modified');
+      if ($input.length === 0)
+        return;
+      var value = $input.val() || '';
+      var newTerm;
+      var choiceQuery = $input.data('choice_query');
+      if (choiceQuery)
+        newTerm = choiceQuery;
+      else
+        newTerm = buildTerm(field, value);
+      var found = false;
+      for (var i = terms.length - 1; i >= 0; i--) {
+        if ((terms[i].field == newTerm.field || terms[i].field == baseField) &&
+          terms[i].script !== true) {
+          found = true;
+          if (newTerm.value || value)
+            terms[i] = newTerm;
+          else
+            terms.splice(i, 1);
+          break;
+        }
+      }
+      if (!found && value)
+        terms.push(newTerm);
+    });
+    var query = "";
+    for (var i = 0; i < terms.length; i++) {
+      var t = terms[i];
+      if (!t.field)
+        continue;
+      query += '^' + t.field + t.operator + t.value;
+    }
+    return query;
+  }
+
+  function buildTerm(field, value) {
+    var operator = 'STARTSWITH';
+    if (value.indexOf('*') == 0 || value.indexOf('.') == 0) {
+      operator = 'LIKE';
+      value = value.substring(1);
+    } else if (value.indexOf('=') == 0) {
+      operator = '=';
+      value = value.substring(1);
+    } else if (value.indexOf('!=') == 0) {
+      operator = '!=';
+      value = value.substring(2);
+    } else if (value.indexOf('%') == 0) {
+      if (value.charAt(value.length - 1) == '%') {
+        operator = 'LIKE';
+        value = value.substring(1, value.length - 1);
+      } else {
+        operator = 'ENDSWITH';
+        value = value.substring(1);
+      }
+    } else if (value.charAt(value.length - 1) == '%') {
+      operator = 'STARTSWITH';
+      value = value.substring(0, value.length - 1);
+    } else if (value.indexOf('!*') == 0) {
+      operator = 'NOT LIKE';
+      value = value.substring(2);
+    }
+    return {
+      field: field,
+      operator: operator,
+      value: value
+    }
+  }
+
+  function buildDisplayValue(operator, value) {
+    switch (operator) {
+      case 'LIKE':
+        return '*' + value;
+      case 'STARTSWITH':
+        return value;
+      case 'NOT LIKE':
+        return '!*' + value;
+      case 'ENDSWITH':
+        return '%' + value;
+      case '=':
+      case '!=':
+        return operator + value;
+    }
+    return '';
+  }
+  $(document).on("click", "button.list_header_search_toggle", function(evt) {
+    var $table = $(this).closest('TABLE')
+    if ($table.hasClass('list_header_search_disabled'))
+      return;
+    var isActive;
+    if ($table.hasClass('list_header_search')) {
+      isActive = false;
+      $table.removeClass('list_header_search');
+    } else {
+      isActive = true;
+      disableUnsupportedFields($table);
+      $table.addClass('list_header_search');
+    }
+    if (canUseListSearchPreference())
+      setPreference('glide.ui.list_header_search.open', isActive);
+    CustomEvent.fire('listheadersearch.show_hide');
+    _frameChanged();
+    evt.preventDefault();
+  })
+
+  function translateChoiceListQuery(table, field, filter, callback, callbackError) {
+    $.ajax({
+      url: 'xmlhttp.do?sysparm_processor=com.glide.ui.ChoiceListSearchProcessor',
+      data: {
+        table: table,
+        field: field,
+        filter: filter
+      },
+      headers: {
+        'X-UserToken': window.g_ck
+      },
+      success: function(response) {
+        if (response) {
+          var responseJSON = JSON.parse(response.documentElement.getAttribute('answer'));
+          callback.call(null, responseJSON.result);
+        } else {
+          callbackError.call(null);
+        }
+      },
+      error: function() {
+        callbackError.call(null);
+      }
+    })
+  }
+
+  function showHeaderSearchRow($table, hasHeaderQueries, hasGoto) {
+    if (window.g_report)
+      return;
+    var preferenceValue = $table.find('tr.list_header_search_row').attr('data-open-onload') == 'true' &&
+      canUseListSearchPreference();
+    if (preferenceValue) {
+      $table.addClass('list_header_search');
+      CustomEvent.fire('listheadersearch.show_hide');
+      return;
+    }
+    var cameFromNavigator = location.search.indexOf('sysparm_userpref_module=') != -1;
+    if (cameFromNavigator)
+      return;
+    var onLoadShowSearch = $table.attr('data-search-show') == 'true';
+    var openWithGoto = $table.find('tr.list_header_search_row').attr('data-open-ongoto') == 'true';
+    if ((onLoadShowSearch && hasHeaderQueries) || (hasGoto && openWithGoto))
+      $table.addClass('list_header_search');
+  }
+
+  function isFilterEnabled($table) {
+    var listID = $table.attr('data-list_id');
+    var list = GlideList2.get(listID);
+    return list.isFilterEnabled();
+  }
+
+  function disableUnsupportedFields($table) {
+    $table.find('tr.list_header_search_row td').each(function(index, el) {
+      var type = el.getAttribute('data-glide-type');
+      if (type == 'user_roles' || type == 'glide_list' || type == 'related_tags' || type == 'sys_class_name')
+        $(el).find('input.list_header_search').prop('disabled', true);
+    })
+  }
+
+  function canUseListSearchPreference() {
+    return !window.g_form;
+  }
+  loadFromTables();
+  CustomEvent.observe('partial.page.reload', loadFromTables);
+});;
+/*! RESOURCE: /scripts/classes/doctype/GlideWidgetFilter.js */
+var GlideWidgetFilter = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID, listName, query, pinned, saveFilterHidden) {
+    $super(widgetID, listID);
+    this.query = query;
+    this.listName = listName;
+    this.checkFilterEnabled();
+    this.pinned = (pinned == 'true');
+    this.openOnRefresh = false;
+    if (!saveFilterHidden)
+      this.saveFilterHidden = false;
+    else
+      this.saveFilterHidden = saveFilterHidden;
+  },
+  setOpenOnRefresh: function() {
+    this.openOnRefresh = true;
+  },
+  toggleFilter: function() {
+    if (!this._isFilterEnabled)
+      return;
+    var e = this._getFilterDiv();
+    if (!e)
+      return;
+    if (e.getAttribute('gsft_empty') == 'true') {
+      this._loadFilter(e);
+      return;
+    }
+    var showFlag = e.style.display == "none";
+    this._filterDisplay(showFlag);
+  },
+  togglePin: function() {
+    this.pinned = !this.pinned;
+    if (this.pinned)
+      setPreference('filter.pinned.' + this.listName, 'true');
+    else
+      deletePreference('filter.pinned.' + this.listName);
+    this._setPinned(this.pinned);
+  },
+  _setPinned: function() {
+    var e = gel(this.listName + "_pin");
+    if (!e)
+      return;
+    var msgs = new GwtMessage();
+    if (this.pinned) {
+      writeTitle(e, msgs.getMessage("Unpin the filters"));
+      e.className = "toolbarImgActive btn btn-default active";
+    } else {
+      writeTitle(e, msgs.getMessage("Pin the filters"));
+      e.className = "toolbarImgDisabled btn btn-default";
+    }
+  },
+  isPinned: function() {
+    return this.pinned;
+  },
+  _refresh: function(listTable, list, loadFlag) {
+    if (loadFlag) {
+      this._initEvents(list);
+    } else
+      this._updateBreadcrumbs();
+    if (!this.isPinned()) {
+      this._filterDisplay(false);
+      if (this.openOnRefresh)
+        this.toggleFilter();
+    }
+    this.openOnRefresh = false;
+    var query = list.getQuery({
+      orderby: true
+    });
+    if (query == this.query)
+      return;
+    var filter = getThing(list.tableName, list.listID + "gcond_filters");
+    if (filter && filter.filterObject)
+      filter.filterObject.setQueryAsync(query);
+    this.query = query;
+  },
+  _updateBreadcrumbs: function() {
+    var bc = this._getBreadcrumbsContainer();
+    if (!bc)
+      return;
+    var bc_hidden = $(this.listID + "_breadcrumb_hidden");
+    if (!bc_hidden)
+      return;
+    if (!bc_hidden.innerHTML)
+      return;
+    bc.innerHTML = bc_hidden.innerHTML;
+    bc_hidden.innerHTML = "";
+    if (window.opener != null)
+      $j(window).resize();
+  },
+  _getBreadcrumbsContainer: function() {
+    return $(this.listID + "_breadcrumb");
+  },
+  _filterDisplay: function(showFlag) {
+    var e = this._getFilterDiv();
+    if (!e)
+      return;
+    if (showFlag)
+      showObject(e);
+    else
+      hideObject(e);
+    e = gel(this.listID + "_filter_toggle_image");
+    if (!e)
+      return;
+    this._changeFilterToggleIcon(e, showFlag);
+    writeTitle(e, this._getFilterIconMessage());
+    CustomEvent.fire('list.section.toggle');
+  },
+  _getFilterIconMessage: function() {
+    if (!this._isFilterEnabled)
+      return getMessage('This filter query cannot be edited');
+    return getMessage('Show / hide filter');
+  },
+  _changeFilterToggleIcon: function(e, showFlag) {
+    if (showFlag)
+      e.src = "images/list_v2_filter_hide.gifx";
+    else
+      e.src = "images/list_v2_filter_reveal.gifx";
+  },
+  _loadFilter: function(targetDiv) {
+    this._filterDisplay(true);
+    targetDiv.setAttribute('gsft_empty', 'false');
+    var list = this._getList();
+    var ajax = new GlideAjax("AJAXJellyRunner", "AJAXJellyRunner.do");
+    ajax.addParam("template", "list2_filter_partial.xml");
+    ajax.addParam("sysparm_widget_id", this.widgetID);
+    ajax.addParam("sysparm_list_id", this.listID);
+    ajax.addParam("sysparm_list_name", this.listName);
+    ajax.addParam("sysparm_query_encoded", list.getQuery({
+      groupby: true,
+      orderby: true
+    }));
+    ajax.addParam("sysparm_table", list.getTableName());
+    ajax.addParam("sysparm_filter_query_prefix", list.filterQueryPrefix);
+    ajax.addParam("sysparm_save_filter_hidden", this.saveFilterHidden);
+    ajax.addParam("sysparm_view", list.getView());
+    try {
+      if (getTopWindow().Table.isCached(list.getTableName(), null))
+        ajax.addParam("sysparm_want_metadata", "false");
+      else
+        ajax.addParam("sysparm_want_metadata", "true");
+    } catch (e) {
+      ajax.addParam("sysparm_want_metadata", "true");
+    }
+    var related = list.getRelated();
+    if (related)
+      ajax.addParam("sysparm_is_related_list", "true");
+    ajax.addParam("sysparm_filter_pinned", this.pinned);
+    list = null;
+    ajax.getXML(this._loadFiltersResponse.bind(this), null, targetDiv);
+  },
+  _loadFiltersResponse: function(response, targetDiv) {
+    var html = response.responseText;
+    targetDiv.innerHTML = html;
+    html.evalScripts(true);
+    this._setPinned();
+    var n = targetDiv.id.substring(0, targetDiv.id.length - "filterdiv".length);
+    columnsGet(n);
+    refreshFilter(n);
+    _frameChanged();
+    CustomEvent.fire('list.section.toggle');
+  },
+  _getFilterDiv: function() {
+    return gel(this.listName + "filterdiv");
+  },
+  checkFilterEnabled: function() {
+    var list = this._getList();
+    this._isFilterEnabled = list.isFilterEnabled();
+  },
+  _getFilterToggle: function(list) {
+    list = list || this._getList();
+    return list.listContainer.select('a.list_filter_toggle');
+  },
+  _initEvents: function(list) {
+    var a = this._getFilterToggle(list);
+    if (a.length == 1) {
+      if (!this._isFilterEnabled) {
+        $j(a[0])
+          .attr('aria-disabled', 'true')
+          .attr('disabled', 'disabled')
+      } else
+        this._initFilterEvents(a[0]);
+    }
+    var span = list.listContainer.select('span.breadcrumb_container');
+    if (span.length == 1)
+      this._initBreadcrumbEvents(span[0]);
+  },
+  _initFilterEvents: function(a) {
+    var self = this;
+    a.observe('click', function(ev) {
+      self.toggleFilter();
+      ev.stop();
+    });
+  },
+  _initBreadcrumbEvents: function(span) {
+    span.on('mouseover', 'a.breadcrumb_separator', this._enterBreadcrumb.bind(this));
+    span.on('mouseout', 'a.breadcrumb_separator', this._exitBreadcrumb.bind(this));
+    span.on('click', 'a.breadcrumb_separator', this._runBreadcrumb.bind(this));
+    span.on('click', 'a.breadcrumb_link', this._runBreadcrumb.bind(this));
+    span.on('contextmenu', 'a.breadcrumb_link', this._onBreadcrumbContext.bind(this));
+  },
+  _enterBreadcrumb: function(evt) {
+    evt.target.next().addClassName('breadcrumb_delete');
+  },
+  _exitBreadcrumb: function(evt) {
+    evt.target.next().removeClassName('breadcrumb_delete');
+  },
+  _runBreadcrumb: function(evt) {
+    var element = evt.target;
+    var container = element.up('span.breadcrumb_container');
+    var listID = container.readAttribute('list_id');
+    var filter = element.readAttribute('filter');
+    GlideList2.get(listID).setFilterAndRefresh(filter);
+    evt.stop();
+  },
+  _onBreadcrumbContext: function(evt) {
+    var element = evt.target;
+    var container = element.up('span.breadcrumb_container');
+    var list = GlideList2.get(container.readAttribute('list_id'));
+    var filter = element.readAttribute('filter');
+    var fixedQuery = list.getFixedQuery();
+    if (fixedQuery)
+      filter = fixedQuery + "^" + filter;
+    var relatedQuery = list.getRelatedQuery();
+    if (relatedQuery)
+      filter = relatedQuery + "^" + filter;
+    this._setBreadcrumbMenu(list.getTableName(), filter);
+    contextShow(evt, 'context_breadcrumb_menu', -1, 0, 0);
+    evt.stop();
+  },
+  _setBreadcrumbMenu: function(tableName, query) {
+    var link = tableName + "_list.do?sysparm_query=" + encodeURIComponent(query);
+    var msgs = new GwtMessage();
+    var crumbMenu = new GwtContextMenu("context_breadcrumb_menu");
+    crumbMenu.clear();
+    crumbMenu.addURL(msgs.getMessage('Open new window'), link, "_blank", "open_new");
+    var baseURL = document.baseURI || document.URL;
+    if (baseURL && baseURL.match(/(.*)\/([^\/]+)/))
+      baseURL = RegExp.$1 + "/";
+    crumbMenu.addFunc(msgs.getMessage('Copy URL'), function() {
+      copyToClipboard(baseURL + link);
+    }, "copy_url");
+    var item = crumbMenu.addFunc(msgs.getMessage('Copy query'), function() {
+      copyToClipboard(query);
+    }, "copy_query");
+    if (!query)
+      crumbMenu.setDisabled(item);
+  },
+  _getList: function() {
+    if (this._list)
+      return this._list;
+    this._list = GlideList2.get(this.listID);
+    return this._list;
+  },
+  type: 'GlideWidgetFilter'
+});;
+/*! RESOURCE: /scripts/classes/doctype/streamBut

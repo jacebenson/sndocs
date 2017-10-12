@@ -1501,11 +1501,146 @@
           }
         },
         remove: function(a, b, c, d, e) {
-            var f, g, h, i, j, k, l, m, o, p, q, r = N.hasData(a) && N.get(a);
-            if (r && (i = r.events)) {
-              b = (b || "").match(G) || [""], j = b.length;
-              while (j--)
-                if (h = fa.exec(b[j]) || [], o = q = h[1], p = (h[2] || "").split(".").sort(), o) {
-                  l = n.event.special[o] || {}, o = (d ? l.delegateType : l.bindType) || o, m = i[o] || [], h = h[2] && new RegExp("(^|\\.)" + p.join("\\.(?:.*\\.|)") + "(\\.|$)"), g = f = m.length;
-                  while (f--) k = m[f], !e && q !== k.origType || c && c.guid !== k.guid || h && !h.test(k.namespace) || d && d !== k.selector && ("**" !== d || !k.selector) || (m.splice(f, 1), k.selector && m.delegateCount--, l.remove && l.remove.call(a, k));
-                  g && !m.
+          var f, g, h, i, j, k, l, m, o, p, q, r = N.hasData(a) && N.get(a);
+          if (r && (i = r.events)) {
+            b = (b || "").match(G) || [""], j = b.length;
+            while (j--)
+              if (h = fa.exec(b[j]) || [], o = q = h[1], p = (h[2] || "").split(".").sort(), o) {
+                l = n.event.special[o] || {}, o = (d ? l.delegateType : l.bindType) || o, m = i[o] || [], h = h[2] && new RegExp("(^|\\.)" + p.join("\\.(?:.*\\.|)") + "(\\.|$)"), g = f = m.length;
+                while (f--) k = m[f], !e && q !== k.origType || c && c.guid !== k.guid || h && !h.test(k.namespace) || d && d !== k.selector && ("**" !== d || !k.selector) || (m.splice(f, 1), k.selector && m.delegateCount--, l.remove && l.remove.call(a, k));
+                g && !m.length && (l.teardown && l.teardown.call(a, p, r.handle) !== !1 || n.removeEvent(a, o, r.handle), delete i[o])
+              } else
+                for (o in i) n.event.remove(a, o + b[j], c, d, !0);
+            n.isEmptyObject(i) && N.remove(a, "handle events")
+          }
+        },
+        dispatch: function(a) {
+          a = n.event.fix(a);
+          var b, c, d, f, g, h = [],
+            i = e.call(arguments),
+            j = (N.get(this, "events") || {})[a.type] || [],
+            k = n.event.special[a.type] || {};
+          if (i[0] = a, a.delegateTarget = this, !k.preDispatch || k.preDispatch.call(this, a) !== !1) {
+            h = n.event.handlers.call(this, a, j), b = 0;
+            while ((f = h[b++]) && !a.isPropagationStopped()) {
+              a.currentTarget = f.elem, c = 0;
+              while ((g = f.handlers[c++]) && !a.isImmediatePropagationStopped()) a.rnamespace && !a.rnamespace.test(g.namespace) || (a.handleObj = g, a.data = g.data, d = ((n.event.special[g.origType] || {}).handle || g.handler).apply(f.elem, i), void 0 !== d && (a.result = d) === !1 && (a.preventDefault(), a.stopPropagation()))
+            }
+            return k.postDispatch && k.postDispatch.call(this, a), a.result
+          }
+        },
+        handlers: function(a, b) {
+          var c, d, e, f, g = [],
+            h = b.delegateCount,
+            i = a.target;
+          if (h && i.nodeType && ("click" !== a.type || isNaN(a.button) || a.button < 1))
+            for (; i !== this; i = i.parentNode || this)
+              if (1 === i.nodeType && (i.disabled !== !0 || "click" !== a.type)) {
+                for (d = [], c = 0; h > c; c++) f = b[c], e = f.selector + " ", void 0 === d[e] && (d[e] = f.needsContext ? n(e, this).index(i) > -1 : n.find(e, this, null, [i]).length), d[e] && d.push(f);
+                d.length && g.push({
+                  elem: i,
+                  handlers: d
+                })
+              }
+          return h < b.length && g.push({
+            elem: this,
+            handlers: b.slice(h)
+          }), g
+        },
+        props: "altKey bubbles cancelable ctrlKey currentTarget detail eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(" "),
+        fixHooks: {},
+        keyHooks: {
+          props: "char charCode key keyCode".split(" "),
+          filter: function(a, b) {
+            return null == a.which && (a.which = null != b.charCode ? b.charCode : b.keyCode), a
+          }
+        },
+        mouseHooks: {
+          props: "button buttons clientX clientY offsetX offsetY pageX pageY screenX screenY toElement".split(" "),
+          filter: function(a, b) {
+            var c, e, f, g = b.button;
+            return null == a.pageX && null != b.clientX && (c = a.target.ownerDocument || d, e = c.documentElement, f = c.body, a.pageX = b.clientX + (e && e.scrollLeft || f && f.scrollLeft || 0) - (e && e.clientLeft || f && f.clientLeft || 0), a.pageY = b.clientY + (e && e.scrollTop || f && f.scrollTop || 0) - (e && e.clientTop || f && f.clientTop || 0)), a.which || void 0 === g || (a.which = 1 & g ? 1 : 2 & g ? 3 : 4 & g ? 2 : 0), a
+          }
+        },
+        fix: function(a) {
+          if (a[n.expando]) return a;
+          var b, c, e, f = a.type,
+            g = a,
+            h = this.fixHooks[f];
+          h || (this.fixHooks[f] = h = ea.test(f) ? this.mouseHooks : da.test(f) ? this.keyHooks : {}), e = h.props ? this.props.concat(h.props) : this.props, a = new n.Event(g), b = e.length;
+          while (b--) c = e[b], a[c] = g[c];
+          return a.target || (a.target = d), 3 === a.target.nodeType && (a.target = a.target.parentNode), h.filter ? h.filter(a, g) : a
+        },
+        special: {
+          load: {
+            noBubble: !0
+          },
+          focus: {
+            trigger: function() {
+              return this !== ia() && this.focus ? (this.focus(), !1) : void 0
+            },
+            delegateType: "focusin"
+          },
+          blur: {
+            trigger: function() {
+              return this === ia() && this.blur ? (this.blur(), !1) : void 0
+            },
+            delegateType: "focusout"
+          },
+          click: {
+            trigger: function() {
+              return "checkbox" === this.type && this.click && n.nodeName(this, "input") ? (this.click(), !1) : void 0
+            },
+            _default: function(a) {
+              return n.nodeName(a.target, "a")
+            }
+          },
+          beforeunload: {
+            postDispatch: function(a) {
+              void 0 !== a.result && a.originalEvent && (a.originalEvent.returnValue = a.result)
+            }
+          }
+        }
+      }, n.removeEvent = function(a, b, c) {
+        a.removeEventListener && a.removeEventListener(b, c)
+      }, n.Event = function(a, b) {
+        return this instanceof n.Event ? (a && a.type ? (this.originalEvent = a, this.type = a.type, this.isDefaultPrevented = a.defaultPrevented || void 0 === a.defaultPrevented && a.returnValue === !1 ? ga : ha) : this.type = a, b && n.extend(this, b), this.timeStamp = a && a.timeStamp || n.now(), void(this[n.expando] = !0)) : new n.Event(a, b)
+      }, n.Event.prototype = {
+        constructor: n.Event,
+        isDefaultPrevented: ha,
+        isPropagationStopped: ha,
+        isImmediatePropagationStopped: ha,
+        preventDefault: function() {
+          var a = this.originalEvent;
+          this.isDefaultPrevented = ga, a && a.preventDefault()
+        },
+        stopPropagation: function() {
+          var a = this.originalEvent;
+          this.isPropagationStopped = ga, a && a.stopPropagation()
+        },
+        stopImmediatePropagation: function() {
+          var a = this.originalEvent;
+          this.isImmediatePropagationStopped = ga, a && a.stopImmediatePropagation(), this.stopPropagation()
+        }
+      }, n.each({
+        mouseenter: "mouseover",
+        mouseleave: "mouseout",
+        pointerenter: "pointerover",
+        pointerleave: "pointerout"
+      }, function(a, b) {
+        n.event.special[a] = {
+          delegateType: b,
+          bindType: b,
+          handle: function(a) {
+            var c, d = this,
+              e = a.relatedTarget,
+              f = a.handleObj;
+            return e && (e === d || n.contains(d, e)) || (a.type = f.origType, c = f.handler.apply(this, arguments), a.type = b), c
+          }
+        }
+      }), n.fn.extend({
+          on: function(a, b, c, d) {
+            return ja(this, a, b, c, d)
+          },
+          one: function(a, b, c, d) {
+              return ja(th

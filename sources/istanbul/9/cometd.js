@@ -1371,4 +1371,322 @@ org.cometd.Cometd = function(name) {
     }
 
     function _handleCallback(message) {
-      var callback = _callbacks[message.i
+      var callback = _callbacks[message.id];
+      if (_isFunction(callback)) {
+        delete _callbacks[message.id];
+        callback.call(_cometd, message);
+      }
+    }
+
+    function _failHandshake(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/handshake', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var retry = !_isDisconnected() && _advice.reconnect !== 'none';
+      if (retry) {
+        _increaseBackoff();
+        _delayedHandshake();
+      } else {
+        _disconnect(false);
+      }
+    }
+
+    function _handshakeResponse(message) {
+      if (message.successful) {
+        _clientId = message.clientId;
+        var url = _cometd.getURL();
+        var newTransport = _transports.negotiateTransport(message.supportedConnectionTypes, message.version, _crossDomain, url);
+        if (newTransport === null) {
+          var failure = 'Could not negotiate transport with server; client=[' +
+            _transports.findTransportTypes(message.version, _crossDomain, url) +
+            '], server=[' + message.supportedConnectionTypes + ']';
+          var oldTransport = _cometd.getTransport();
+          _notifyTransportFailure(oldTransport.getType(), null, {
+            reason: failure,
+            connectionType: oldTransport.getType(),
+            transport: oldTransport
+          });
+          _cometd._warn(failure);
+          _transport.reset();
+          _failHandshake(message);
+          return;
+        } else if (_transport !== newTransport) {
+          _cometd._debug('Transport', _transport.getType(), '->', newTransport.getType());
+          _transport = newTransport;
+        }
+        _internalBatch = false;
+        _flushBatch();
+        message.reestablish = _reestablish;
+        _reestablish = true;
+        _handleCallback(message);
+        _notifyListeners('/meta/handshake', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failHandshake(message);
+      }
+    }
+
+    function _handshakeFailure(message) {
+      var version = '1.0';
+      var url = _cometd.getURL();
+      var oldTransport = _cometd.getTransport();
+      var transportTypes = _transports.findTransportTypes(version, _crossDomain, url);
+      var newTransport = _transports.negotiateTransport(transportTypes, version, _crossDomain, url);
+      if (!newTransport) {
+        _notifyTransportFailure(oldTransport.getType(), null, message.failure);
+        _cometd._warn('Could not negotiate transport; client=[' + transportTypes + ']');
+        _transport.reset();
+        _failHandshake(message);
+      } else {
+        _cometd._debug('Transport', oldTransport.getType(), '->', newTransport.getType());
+        _notifyTransportFailure(oldTransport.getType(), newTransport.getType(), message.failure);
+        _failHandshake(message);
+        _transport = newTransport;
+      }
+    }
+
+    function _failConnect(message) {
+      _notifyListeners('/meta/connect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+      var action = _isDisconnected() ? 'none' : _advice.reconnect;
+      switch (action) {
+        case 'retry':
+          _delayedConnect();
+          _increaseBackoff();
+          break;
+        case 'handshake':
+          _transports.reset();
+          _resetBackoff();
+          _delayedHandshake();
+          break;
+        case 'none':
+          _disconnect(false);
+          break;
+        default:
+          throw 'Unrecognized advice action' + action;
+      }
+    }
+
+    function _connectResponse(message) {
+      _connected = message.successful;
+      if (_connected) {
+        _notifyListeners('/meta/connect', message);
+        var action = _isDisconnected() ? 'none' : _advice.reconnect;
+        switch (action) {
+          case 'retry':
+            _resetBackoff();
+            _delayedConnect();
+            break;
+          case 'none':
+            _disconnect(false);
+            break;
+          default:
+            throw 'Unrecognized advice action ' + action;
+        }
+      } else {
+        _failConnect(message);
+      }
+    }
+
+    function _connectFailure(message) {
+      _connected = false;
+      _failConnect(message);
+    }
+
+    function _failDisconnect(message) {
+      _disconnect(true);
+      _handleCallback(message);
+      _notifyListeners('/meta/disconnect', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _disconnectResponse(message) {
+      if (message.successful) {
+        _disconnect(false);
+        _handleCallback(message);
+        _notifyListeners('/meta/disconnect', message);
+      } else {
+        _failDisconnect(message);
+      }
+    }
+
+    function _disconnectFailure(message) {
+      _failDisconnect(message);
+    }
+
+    function _failSubscribe(message) {
+      var subscriptions = _listeners[message.subscription];
+      if (subscriptions) {
+        for (var i = subscriptions.length - 1; i >= 0; --i) {
+          var subscription = subscriptions[i];
+          if (subscription && !subscription.listener) {
+            delete subscriptions[i];
+            _cometd._debug('Removed failed subscription', subscription);
+            break;
+          }
+        }
+      }
+      _handleCallback(message);
+      _notifyListeners('/meta/subscribe', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _subscribeResponse(message) {
+      if (message.successful) {
+        _handleCallback(message);
+        _notifyListeners('/meta/subscribe', message);
+      } else {
+        _failSubscribe(message);
+      }
+    }
+
+    function _subscribeFailure(message) {
+      _failSubscribe(message);
+    }
+
+    function _failUnsubscribe(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/unsubscribe', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _unsubscribeResponse(message) {
+      if (message.successful) {
+        _handleCallback(message);
+        _notifyListeners('/meta/unsubscribe', message);
+      } else {
+        _failUnsubscribe(message);
+      }
+    }
+
+    function _unsubscribeFailure(message) {
+      _failUnsubscribe(message);
+    }
+
+    function _failMessage(message) {
+      _handleCallback(message);
+      _notifyListeners('/meta/publish', message);
+      _notifyListeners('/meta/unsuccessful', message);
+    }
+
+    function _messageResponse(message) {
+      if (message.successful === undefined) {
+        if (message.data !== undefined) {
+          _notifyListeners(message.channel, message);
+        } else {
+          _cometd._warn('Unknown Bayeux Message', message);
+        }
+      } else {
+        if (message.successful) {
+          _handleCallback(message);
+          _notifyListeners('/meta/publish', message);
+        } else {
+          _failMessage(message);
+        }
+      }
+    }
+
+    function _messageFailure(failure) {
+      _failMessage(failure);
+    }
+
+    function _receive(message) {
+      message = _applyIncomingExtensions(message);
+      if (message === undefined || message === null) {
+        return;
+      }
+      _updateAdvice(message.advice);
+      var channel = message.channel;
+      switch (channel) {
+        case '/meta/handshake':
+          _handshakeResponse(message);
+          break;
+        case '/meta/connect':
+          _connectResponse(message);
+          break;
+        case '/meta/disconnect':
+          _disconnectResponse(message);
+          break;
+        case '/meta/subscribe':
+          _subscribeResponse(message);
+          break;
+        case '/meta/unsubscribe':
+          _unsubscribeResponse(message);
+          break;
+        default:
+          _messageResponse(message);
+          break;
+      }
+    }
+    this.receive = _receive;
+    _handleMessages = function(rcvdMessages) {
+      _cometd._debug('Received', rcvdMessages);
+      for (var i = 0; i < rcvdMessages.length; ++i) {
+        var message = rcvdMessages[i];
+        _receive(message);
+      }
+    };
+    _handleFailure = function(conduit, messages, failure) {
+      _cometd._debug('handleFailure', conduit, messages, failure);
+      failure.transport = conduit;
+      for (var i = 0; i < messages.length; ++i) {
+        var message = messages[i];
+        var failureMessage = {
+          id: message.id,
+          successful: false,
+          channel: message.channel,
+          failure: failure
+        };
+        failure.message = message;
+        switch (message.channel) {
+          case '/meta/handshake':
+            _handshakeFailure(failureMessage);
+            break;
+          case '/meta/connect':
+            _connectFailure(failureMessage);
+            break;
+          case '/meta/disconnect':
+            _disconnectFailure(failureMessage);
+            break;
+          case '/meta/subscribe':
+            failureMessage.subscription = message.subscription;
+            _subscribeFailure(failureMessage);
+            break;
+          case '/meta/unsubscribe':
+            failureMessage.subscription = message.subscription;
+            _unsubscribeFailure(failureMessage);
+            break;
+          default:
+            _messageFailure(failureMessage);
+            break;
+        }
+      }
+    };
+
+    function _hasSubscriptions(channel) {
+      var subscriptions = _listeners[channel];
+      if (subscriptions) {
+        for (var i = 0; i < subscriptions.length; ++i) {
+          if (subscriptions[i]) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function _resolveScopedCallback(scope, callback) {
+      var delegate = {
+          scope: scope,
+          method: callback

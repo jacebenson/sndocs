@@ -5793,72 +5793,2155 @@ $j(function() {
 });;
 /*! RESOURCE: /scripts/doctype/deferred_related_lists.js */
 $j(function($) {
-      "use strict";
-      var timeout = 50;
-      var loadingTimeout = 3000;
-      var loadingTimer = null;
-      setTimeout(function() {
-        if (!window.g_form || window.g_related_list_timing != 'deferred')
-          return;
-        getRelatedLists();
-      }, timeout);
-      $('.related-list-trigger').on('click', function() {
-        $(this).closest('.related-list-trigger-container').hide();
-        loadingTimeout = 0;
-        getRelatedLists();
-      })
+  "use strict";
+  var timeout = 50;
+  var loadingTimeout = 3000;
+  var loadingTimer = null;
+  setTimeout(function() {
+    if (!window.g_form || window.g_related_list_timing != 'deferred')
+      return;
+    getRelatedLists();
+  }, timeout);
+  $('.related-list-trigger').on('click', function() {
+    $(this).closest('.related-list-trigger-container').hide();
+    loadingTimeout = 0;
+    getRelatedLists();
+  })
 
-      function getRelatedLists() {
-        setupLoadingMessage();
-        var deferred_start_time = new Date();
-        var listContainer = $('#related_lists_wrapper');
-        if (listContainer.length === 0)
+  function getRelatedLists() {
+    setupLoadingMessage();
+    var deferred_start_time = new Date();
+    var listContainer = $('#related_lists_wrapper');
+    if (listContainer.length === 0)
+      return;
+    var url = new GlideURL('list2_deferred_related_lists.do');
+    url.addParam('sysparm_table', g_form.getTableName());
+    url.addParam('sysparm_keep_related_lists_open', 'true');
+    url.addEncodedString('sysparm_sys_id=' + g_form.getUniqueValue().trim());
+    url.addParam('sysparm_view', $('#sysparm_view').val());
+    if ($('#sysparm_domain'))
+      url.addParam('sysparm_domain', $('#sysparm_domain').val());
+    if ($('#sysparm_domain_scope'))
+      url.addParam('sysparm_domain_scope', $('#sysparm_domain_scope').val());
+    url.addParam('sysparm_stack', 'no');
+    url.addParam('partial_page', 'related_lists');
+    url.addEncodedString('sysparm_embedded=' + $('#sysparm_embedded').val());
+    var ga = new GlideAjax(null, url.getURL());
+    ga.getXML(function(response) {
+      var deferred_responsetime = new Date();
+      CustomEvent.fire('page_timing', {
+        name: 'RLV2',
+        child: 'Delay until load',
+        ms: (deferred_responsetime - deferred_start_time)
+      });
+      var html = response.responseText;
+      listContainer[0].innerHTML = html;
+      html.evalScripts(true);
+      CustomEvent.fire('partial.page.reload');
+      clearLoadingMessage();
+      var lists_loaded_time = new Date();
+      var deferred_loadtime = lists_loaded_time - deferred_start_time;
+      CustomEvent.fire('page_timing', {
+        name: 'RLV2',
+        child: 'Network time',
+        ms: (lists_loaded_time - deferred_responsetime)
+      });
+    });
+  }
+  CustomEvent.observe('list.loaded', function(table, list) {
+    if (!table) {
+      return;
+    }
+    if (!list) {
+      return;
+    }
+    if (list.getReferringURL().indexOf('list2_deferred_related_lists.do') != -1 ||
+      list.getReferringURL() == 'undefined')
+      list.setReferringURL(window.location.pathname + window.location.search);
+  });
+
+  function setupLoadingMessage() {
+    loadingTimer = setTimeout(function() {
+      $('.related-list-loading').fadeIn();
+    }, loadingTimeout)
+  }
+
+  function clearLoadingMessage() {
+    if (loadingTimer)
+      clearTimeout(loadingTimer);
+    $('.related-list-loading').hide();
+  }
+});
+/*! RESOURCE: /scripts/classes/GlideNavigation.js */
+;
+(function() {
+  var GlideNavigation = function() {};
+  GlideNavigation.prototype = {
+    open: function(url, target) {
+      if (target) {
+        window.open(url, target);
+        return;
+      }
+      window.location.href = url;
+    },
+    openList: function(table, query) {
+      var url = table + '_list.do';
+      if (query)
+        url += "?sysparm_query=" + encodeURIComponent(query);
+      this.open(url);
+    },
+    openRecord: function(table, sys_id) {
+      var url = table + '.do?sys_id=' + sys_id;
+      this.open(url);
+    },
+    reloadWindow: function() {
+      if (window.location.reload)
+        window.location.reload();
+    },
+    refreshNavigator: function() {
+      CustomEvent.fireTop('navigator.refresh');
+    },
+    getURL: function() {
+      return window.location.href;
+    },
+    openPopup: function(url, name, features, noStack) {
+      if (noStack === true && url.indexOf("sysparm_nameofstack") == -1)
+        url += "&sysparm_stack=no";
+      var win = window.open(url, name, features, false);
+      return win;
+    },
+    setPermalink: function(title, relativePath) {
+      CustomEvent.fireTop('magellanNavigator.permalink.set', {
+        title: title,
+        relativePath: relativePath
+      });
+    },
+    addUserHistoryEntry: function(title, relativePath, description, isTable) {
+      if (typeof description == "undefined")
+        description = "";
+      if (typeof isTable == "undefined")
+        isTable = false;
+      CustomEvent.fireTop('magellanNavigator.sendHistoryEvent', {
+        title: title,
+        url: relativePath,
+        description: description,
+        isTable: isTable
+      });
+    }
+  };
+  window.g_navigation = new GlideNavigation();
+})();;
+/*! RESOURCE: /scripts/classes/GlideAPI1.js */
+window.g_api = 1;;
+/*! RESOURCE: /scripts/ac.js */
+var g_isInternetExplorer = isMSIE;
+var KEY_RETURN = 3;
+var KEY_BACKSPACE = 8;
+var KEY_TAB = 9;
+var KEY_ENTER = 13;
+var KEY_PAGEUP = 33;
+var KEY_PAGEDOWN = 34;
+var KEY_END = 35;
+var KEY_HOME = 36;
+var KEY_ARROWLEFT = 37;
+var KEY_ARROWUP = 38;
+var KEY_ARROWRIGHT = 39;
+var KEY_ARROWDOWN = 40;
+var KEY_INSERT = 45;
+var KEY_DELETE = 46;
+var NO_INVISIBLE = 0;
+var itemHeight = 16;
+var ctimeVal = {};
+var TAG_DIV = "div";
+var TAG_SPAN = "span";
+var ONE_TO_MANY = "OTM";
+var g_ac_objects = new Array();
+
+function acKeyDown(evt, elementName, type, dependent) {
+  var typedChar = getKeyCode(evt);
+  if (typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP)
+    fieldChange(evt, elementName, type, dependent);
+}
+
+function acKeyUp(evt, elementName, type, dependent) {
+  var typedChar = getKeyCode(evt);
+  if (typedChar != KEY_ARROWDOWN && typedChar != KEY_ARROWUP)
+    fieldChange(evt, elementName, type, dependent);
+}
+
+function fieldChange(event, elementName, type, dependent) {
+  if (document.readyState && document.readyState != "complete") {
+    jslog("fieldChange delayed due to document not being ready");
+    return;
+  }
+  var table = elementName.split('.')[0];
+  var additional = null;
+  if (dependent != null) {
+    var dparts = dependent.split(",");
+    var el = document.getElementsByName(table + "." + dparts[0])[0];
+    if (el != null) {
+      var selectValue = "";
+      if (el.tagName == "INPUT") {
+        var selectValue = el.value;
+      } else {
+        selectValue = el.options[el.selectedIndex].value;
+      }
+      additional = "sysparm_value=" + selectValue;
+    }
+  }
+  fieldProcess(event, elementName, type, false, true, null, additional);
+}
+
+function fieldProcess(evt, elementName, type, noMax, useInvisible, uFieldName, additional, refField) {
+  var typedChar = getKeyCode(evt);
+  var evalText = "fieldProcessNow('" + typedChar + "', " +
+    "'" + elementName + "', " +
+    "'" + type + "', " +
+    noMax + ", " +
+    useInvisible + ", " +
+    (uFieldName != null ? "'" + uFieldName + "'" : "null") + ", " +
+    (additional != null ? "\"" + additional + "\"" : "null") + ", " +
+    (refField != null ? "'" + refField + "'" : "null") +
+    ");";
+  if (ctimeVal[elementName] > 0 && typedChar != 0)
+    clearTimeout(ctimeVal[elementName]);
+  var displayField;
+  var invisibleField;
+  if (type == "Reference") {
+    displayField = gel("sys_display." + elementName);
+    if (useInvisible)
+      invisibleField = gel(elementName);
+  } else {
+    displayField = gel(elementName);
+    if (useInvisible)
+      invisibleField = gel("sys_display." + elementName);
+  }
+  var updateField;
+  if (uFieldName != null)
+    updateField = gel(uFieldName);
+  var ac = displayField.ac;
+  if (ac == null) {
+    ac = getAC(displayField.name);
+    if (ac == null) {
+      ac = newAC(displayField, invisibleField, updateField, elementName, type);
+      if (ac.isOTM())
+        ac.refField = refField;
+    }
+  }
+  if (typedChar != KEY_TAB) {
+    ac.fieldChanged = true;
+    ac.matched = false;
+    ac.ignoreAJAX = false;
+    if (ac.type == 'Reference')
+      ac.dirty = true;
+  }
+  var waitTime = 50;
+  if (typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP || typedChar == NO_INVISIBLE)
+    waitTime = 0;
+  ctimeVal[elementName] = setTimeout(evalText, g_acWaitTime || waitTime);
+}
+
+function initAutoCompleteField(ac) {
+  if (ac.getUpdateField())
+    return;
+  Event.observe(ac.getField(), 'blur', fieldBlurred.bind(ac.getField()), false);
+  setDropDownSizes();
+  setStyle(ac.getMenu(), "dropDownTableStyle");
+  window.onresize = setDropDownSizes;
+  setSavedText(ac, new Array((ac.getInvisibleField() ? ac.getInvisibleField().value : null), ac.getField().value));
+  var request = new Object();
+  request.responseXML = new Object();
+  request.responseXML.ac = ac;
+  storeResults(ac, "", request);
+}
+
+function setDropDownSizes() {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    var ac = g_ac_objects[i];
+    if (!ac)
+      continue;
+    setDropDownSize(ac);
+  }
+}
+
+function setDropDownSize(ac) {
+  var field = ac.getField();
+  var mLeft = grabOffsetLeft(field) + "px";
+  var mTop = grabOffsetTop(field) + (field.offsetHeight - 1) + "px";
+  var mWidth = estimateWidth(ac) + "px";
+  var menu = ac.getMenu();
+  if (menu.offsetWidth > parseInt(mWidth))
+    mWidth = menu.offsetWidth + "px";
+  acSetTopLeftWidth(menu.style, mTop, mLeft, mWidth);
+  var iframe = ac.getIFrame();
+  if (iframe)
+    acSetTopLeftWidth(iframe.style, mTop, mLeft, mWidth);
+}
+
+function acSetTopLeftWidth(style, top, left, width) {
+  style.left = left;
+  style.top = top;
+  style.width = width;
+}
+
+function estimateWidth(ac) {
+  var field = ac.getField();
+  if (g_isInternetExplorer)
+    return field.offsetWidth - (ac.menuBorderSize * 2);
+  else
+    return field.offsetWidth;
+}
+
+function fieldBlurred() {
+  var theField = this;
+  var ac = theField.ac;
+  ac.ignoreAJAX = true;
+  var cc = ac.getField().value;
+  if (cc.indexOf("javascript:") != 0) {
+    if (ac.type == 'Reference' && ac.matched == false && ac.fieldChanged == true) {
+      setReferenceField(ac, cc);
+    }
+  }
+  ac.matched = false;
+  ac.fieldChanged = false;
+  ac.previousTextValue = '';
+  checkForDirty(ac);
+  ac.hideDropDown();
+}
+
+function setReferenceField(ac, cc) {
+  var encodedText = encodeText(cc);
+  var url = "xmlhttp.do?sysparm_processor=" + ac.type +
+    "&sysparm_name=" + ac.elementName +
+    "&sysparm_exact_match=yes" +
+    "&sysparm_chars=" + encodedText +
+    "&sysparm_type=" + ac.type;
+  var response = serverRequestWait(url);
+  var items = response.responseXML.getElementsByTagName("item");
+  if (items.length == 1) {
+    var item = items[0];
+    var name = trim(item.getAttribute("name"));
+    var label = trim(item.getAttribute("label"));
+    ac.getField().value = label;
+    ac.getInvisibleField().value = name;
+  } else {
+    var e = ac.getField();
+    var f = e.filter;
+    if (!f || f == '') {
+      ac.getInvisibleField().value = "x";
+      ac.getField().value = "";
+      ac.getInvisibleField().value = "";
+    }
+  }
+  fieldSet(ac);
+  refFlipImage(ac.getField(), ac.elementName);
+  ac.dirty = true;
+}
+
+function stripNewlines(data) {
+  var retData = "";
+  var Ib = "\n\r";
+  for (var c = 0; c < data.length; c++) {
+    if (Ib.indexOf(data.charAt(c)) == -1)
+      retData += data.charAt(c);
+    else
+      retData += " ";
+  }
+  return retData;
+}
+
+function grabMenuInfo(j) {
+  var spanTag = j.getElementsByTagName(TAG_SPAN);
+  var spanInfo = new Array();
+  if (!spanTag)
+    return spanInfo;
+  for (var i = 0; i < spanTag.length; i++) {
+    var e = spanTag[i];
+    if (e.className != "selected_item")
+      continue;
+    var spanData = e.innerHTML;
+    if (spanData != "&nbsp;") {
+      spanInfo = new Array(e.gname, stripNewlines(e.glabel));
+    }
+    break;
+  }
+  return spanInfo;
+}
+
+function storeResults(ac, searchString, req) {
+  ac.resultsStorage[searchString] = req;
+}
+
+function retrieveStorage(ac, textStr) {
+  return ac.resultsStorage[textStr];
+}
+
+function storeZeroString(ac, searchString, req) {
+  ac.emptyResults[searchString] = req;
+}
+
+function findRelatedZeroString(ac, searchString) {
+  for (var str in ac.emptyResults) {
+    if (searchString.substring(0, str.length) == str) {
+      return ac.emptyResults[str];
+    }
+  }
+}
+var handleClickedDropDown = function() {
+  setAllText(this.ac, grabMenuInfo(this));
+  this.ac.dirty = false;
+}
+var handleMouseOverDropDown = function() {
+  setStyle(this, "selectedItemStyle");
+}
+var handleMouseOutDropDown = function() {
+  setStyle(this, "nonSelectedItemStyle");
+}
+
+function dropDownHilight(ac, direction) {
+  setTextField(ac, new Array((ac.getInvisibleField() ? ac.savedInvisibleTextValue : null), ac.savedTextValue));
+  ac.matched = true;
+  if (!ac.currentMenuItems || ac.currentMenuCount <= 0)
+    return;
+  ac.showDropDown();
+  var toSelect = ac.selectedItemNum + direction;
+  if (toSelect >= ac.currentMenuCount)
+    toSelect = ac.currentMenuCount - 1;
+  if (ac.selectedItemNum != -1 && toSelect != ac.selectedItemNum) {
+    setStyle(ac.selectedItemObj, "nonSelectedItemStyle");
+    ac.selectedItemNum = -1;
+  }
+  if (toSelect < 0) {
+    ac.selectedItemNum = -1;
+    ac.getField().focus();
+    return;
+  }
+  ac.selectItem(toSelect);
+  setStyle(ac.selectedItemObj, "selectedItemStyle");
+  setTextField(ac, grabMenuInfo(ac.selectedItemObj));
+  ac.dirty = true;
+}
+
+function setPreviousText(ac, textArray) {
+  if (textArray[1] != null)
+    ac.previousTextValue = textArray[1];
+}
+
+function setSavedText(ac, textArray) {
+  ac.setSavedText(textArray);
+}
+
+function setTextValue(ac, textArray) {
+  ac.textValue = textArray[1].replace(/\r\n/g, "\n");
+  if (textArray[0] != null && ac.getInvisibleField()) {
+    ac.invisibleTextValue = textArray[0];
+  }
+}
+
+function setTextField(ac, textArray) {
+  var f;
+  if (textArray[0] != null && ac.getInvisibleField()) {
+    f = ac.getInvisibleField();
+    f.value = textArray[0];
+  }
+  f = ac.getField();
+  f.value = textArray[1];
+  fireOnFormat(ac);
+}
+
+function setAllText(ac, textArray) {
+  setSavedText(ac, textArray);
+  setTextValue(ac, textArray);
+  setTextField(ac, textArray);
+  setPreviousText(ac, textArray);
+  fieldSet(ac);
+}
+
+function fieldSet(ac) {
+  ac.dirty = false;
+  ac.matched = true;
+  updateRelated(ac);
+  fireChange(ac);
+  fireOnFormat(ac);
+}
+
+function fireChange(ac) {
+  callOnChange(ac.getInvisibleField());
+  callOnChange(ac.getField());
+}
+
+function callOnChange(f) {
+  if (!f)
+    return;
+  if (f["onchange"])
+    f.onchange();
+}
+
+function fireOnFormat(ac) {
+  var f = ac.getField();
+  if (f.getAttribute("onformat"))
+    eval(f.getAttribute("onformat"));
+}
+
+function updateRelated(ac) {
+  var elementName = ac.elementName;
+  var elementValue = ac.invisibleTextValue;
+  if (elementValue != '')
+    updateRelatedGivenNameAndValue(elementName, elementValue);
+  if (ac["fCall"]) {
+    var onset = ac["fCall"];
+    eval(onset);
+  }
+}
+
+function clearRelated(ac) {
+  var elementName = ac.elementName;
+  var nodes = document.getElementsByTagName('input');
+  var sName = elementName + ".";
+  for (var i = 0; i < nodes.length; i++) {
+    var current = nodes[i];
+    var id = current.id;
+    var index = id.indexOf(sName);
+    if (index == -1)
+      continue;
+    index = id.lastIndexOf(".");
+    var fName = id.substring(index + 1, id.length);
+    var select = gel(elementName + "." + fName);
+    if (select != null) {
+      var x = select.tagName;
+      if (x == 'select' || x == 'SELECT') {
+        var selindex = select.selectedIndex;
+        if (selindex != -1) {
+          var option = select.options[selindex];
+          option.selected = false;
+        }
+        var options = select.options;
+        for (oi = 0; oi < options.length; oi++) {
+          var option = options[oi];
+          var optval = option.value;
+          if (optval == '') {
+            option.selected = true;
+            break;
+          }
+        }
+      }
+    }
+    current.value = '';
+  }
+}
+
+function setStyle(child, styleName) {
+  child.className = styleName;
+  var style = child.style;
+  var ac = child.ac;
+  if (styleName == "dropDownTableStyle") {
+    style.fontSize = "13px";
+    style.fontFamily = "arial,sans-serif";
+    style.wordWrap = "break-word";
+  } else if (styleName == "nonSelectedItemStyle") {
+    ac.setNonSelectedStyle(child);
+  } else if (styleName == "selectedItemStyle") {
+    ac.setSelectedStyle(child);
+  } else if (styleName == "dropDownRowStyle") {
+    style.display = "block";
+    style.paddingLeft = 3;
+    style.paddingRight = 3;
+    style.height = itemHeight + "px";
+    style.overflow = "hidden";
+    style.whiteSpace = "nowrap";
+  }
+}
+
+function createDropDown(ac, foundStrings) {
+  ac.clearDropDown();
+  for (var c = 0; c < foundStrings.length; c++) {
+    var child = createChild(ac, foundStrings[c]);
+    ac.appendItem(child);
+  }
+  setSavedText(ac, new Array((ac.getInvisibleField() ? ac.invisibleTextValue : null), ac.textValue));
+  if (ac.currentMenuCount != 0) {
+    var height = (itemHeight * ac.currentMenuCount) + 4;
+    ac.setHeight(height);
+  }
+  ac.selectedItemObj = null;
+  ac.selectedItemNum = -1;
+}
+
+function createChild(ac, sa) {
+  var theDiv = cel(TAG_DIV);
+  theDiv.ac = ac;
+  setStyle(theDiv, "nonSelectedItemStyle");
+  theDiv.onmousedown = handleClickedDropDown;
+  theDiv.onmouseover = handleMouseOverDropDown;
+  theDiv.onmouseout = handleMouseOutDropDown;
+  var menuRow = cel(TAG_SPAN);
+  setStyle(menuRow, "dropDownRowStyle");
+  if (false && sa.length == 4) {
+    var r = cel(TAG_SPAN);
+    r.innerHTML = sa[3];
+    menuRow.appendChild(r);
+    r = cel(TAG_SPAN);
+    r.innerHTML = "&nbsp;";
+    menuRow.appendChild(r);
+  }
+  var itemInRow = cel(TAG_SPAN);
+  itemInRow.innerHTML = sa[1].escapeHTML();
+  itemInRow.gname = sa[0];
+  if (ac.type == "PickList")
+    itemInRow.glabel = sa[2];
+  else
+    itemInRow.glabel = sa[1];
+  itemInRow.className = "selected_item";
+  menuRow.appendChild(itemInRow);
+  theDiv.appendChild(menuRow);
+  return theDiv;
+}
+
+function encodeText(txt) {
+  if (encodeURIComponent)
+    return encodeURIComponent(txt);
+  if (escape)
+    return escape(txt);
+}
+
+function newAC(fld, invfld, ufld, elementName, type) {
+  var name = fld.name + "_form";
+  var ac = new AJAXOtherCompleter(name, elementName);
+  ac.setType(type);
+  ac.setField(fld);
+  ac.setInvisibleField(invfld);
+  ac.setUpdateField(ufld);
+  var oCount = g_ac_objects.length;
+  g_ac_objects[oCount] = ac;
+  initAutoCompleteField(ac);
+  ac.firstUse = true;
+  return ac;
+}
+
+function removeAC(name) {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    if (g_ac_objects[i] == null)
+      continue;
+    if (g_ac_objects[i].elementName == name)
+      g_ac_objects[i] = null;
+  }
+}
+
+function getAC(name) {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    if (g_ac_objects[i] == null)
+      continue;
+    if (g_ac_objects[i].name == name)
+      return g_ac_objects[i];
+  }
+  return getacPerInput(name);
+}
+
+function getacPerInput(elementName) {
+  var f = gel("sys_display." + elementName);
+  if (f != null && f.ac != null)
+    return f.ac;
+  f = gel(elementName);
+  if (f != null && f.ac != null)
+    return f.ac;
+  return null;
+}
+
+function checkEnter(e, elementName) {
+  var ac = getAC(elementName);
+  if (ac == null)
+    return true;
+  var keyCode = getKeyCode(e);
+  if (keyCode == KEY_ENTER) {
+    if (ac.type != 'PickList') {
+      Event.stop(e);
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkForDirty(ac) {
+  if (!ac.dirty)
+    return;
+  setTextValue(ac, new Array((ac.getInvisibleField() ? ac.getInvisibleField().value : null), ac.getField().value));
+  fieldSet(ac);
+}
+
+function fieldChangeSlush(event, elementName, type, noMax, uFieldName, additional) {
+  fieldProcess(event, elementName, type, noMax, false, uFieldName, additional);
+}
+
+function fieldChangeSlush1(event, elementName, fieldName, type, noMax, uFieldName) {
+  var filter = getFilter();
+  displayField = document.getElementsByName(elementName)[0];
+  displayField.value = filter;
+  fieldProcess(event, elementName, ONE_TO_MANY, noMax, false, uFieldName, 1, fieldName);
+}
+
+function fieldChangeSlush2(event, elementName, fieldName, type, noMax, uFieldName, queryAddOn, additional, fDiv) {
+  var filter = getFilter(elementName, '', fDiv);
+  filter += "^" + queryAddOn;
+  displayField = gel(elementName);
+  displayField.value = filter;
+  fieldProcess(event, elementName, ONE_TO_MANY, noMax, false, uFieldName, additional, fieldName);
+}
+
+function updateSlushField(ac, values) {
+  var updateField = ac.getUpdateField();
+  destroyUpdateField(ac);
+  if (values != null) {
+    for (var zi = 0; zi < values.length; zi++) {
+      updateField.options[zi] = new Option(values[zi][1], values[zi][0]);
+    }
+  }
+  if (updateField["onchange"])
+    updateField.onchange();
+}
+
+function destroyUpdateField(ac) {
+  ac.getUpdateField().options.length = 0;
+}
+
+function getKeyCode(e) {
+  if (e == null)
+    return 0;
+  return g_isInternetExplorer && window.event ? event.keyCode : e.keyCode;
+}
+
+function fieldProcessNow(typedChar, elementName, type, noMax, useInvisible, uFieldName, additional, refField) {
+  var displayField;
+  var invisibleField;
+  var updateField;
+  if (type == "Reference") {
+    displayField = gel("sys_display." + elementName);
+    if (useInvisible)
+      invisibleField = gel(elementName);
+  } else {
+    displayField = gel(elementName);
+    if (useInvisible)
+      invisibleField = gel("sys_display." + elementName);
+  }
+  if (uFieldName != null)
+    updateField = gel(uFieldName);
+  var ac = displayField.ac;
+  if (ac == null) {
+    ac = getAC(displayField.name);
+    if (ac == null) {
+      ac = newAC(displayField, invisibleField, updateField, elementName, type);
+      if (ac.isOTM())
+        ac.refField = refField;
+    }
+  }
+  var eDep = displayField;
+  var itemName = eDep.getAttribute("function");
+  if (itemName != null)
+    ac.fCall = itemName;
+  setTextValue(ac, new Array((invisibleField ? invisibleField.value : null), displayField.value));
+  if (typedChar == KEY_TAB)
+    return;
+  ac.fieldChanged = true;
+  if (typedChar != 0 || updateField || ac.isOTM()) {
+    if (ac.isOTM() || ((typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP) && !updateField)) {
+      if (ac.isOTM() || !ac.isVisible()) {
+        if (ac.isOTM())
+          searchForData(ac, elementName, 'M2MList', noMax, additional);
+        else
+          searchForData(ac, elementName, type, noMax, additional);
+      } else {
+        ac.showDropDown();
+        dropDownHilight(ac, typedChar == KEY_ARROWUP ? -1 : 1);
+      }
+    } else {
+      if (!updateField)
+        setSavedText(ac, new Array((invisibleField ? ac.invisibleTextValue : null), ac.textValue));
+      if (typedChar != KEY_ENTER && typedChar != KEY_RETURN) {
+        if (ac.firstUse || ac.previousTextValue != ac.textValue) {
+          searchForData(ac, elementName, type, noMax, additional);
+          ac.firstUse = false;
+        } else
+          clearRelated(ac);
+      } else {
+        var selectedItemNum = ac.selectedItemNum;
+        ac.hideDropDown();
+        if (ac.matched == false && selectedItemNum == -1) {
+          jslog("Enter hit without matches, ignoring it");
           return;
-        var url = new GlideURL('list2_deferred_related_lists.do');
-        url.addParam('sysparm_table', g_form.getTableName());
-        url.addParam('sysparm_keep_related_lists_open', 'true');
-        url.addEncodedString('sysparm_sys_id=' + g_form.getUniqueValue().trim());
-        url.addParam('sysparm_view', $('#sysparm_view').val());
-        if ($('#sysparm_domain'))
-          url.addParam('sysparm_domain', $('#sysparm_domain').val());
-        if ($('#sysparm_domain_scope'))
-          url.addParam('sysparm_domain_scope', $('#sysparm_domain_scope').val());
-        url.addParam('sysparm_stack', 'no');
-        url.addParam('partial_page', 'related_lists');
-        url.addEncodedString('sysparm_embedded=' + $('#sysparm_embedded').val());
-        var ga = new GlideAjax(null, url.getURL());
-        ga.getXML(function(response) {
-          var deferred_responsetime = new Date();
-          CustomEvent.fire('page_timing', {
-            name: 'RLV2',
-            child: 'Delay until load',
-            ms: (deferred_responsetime - deferred_start_time)
-          });
-          var html = response.responseText;
-          listContainer[0].innerHTML = html;
-          html.evalScripts(true);
-          CustomEvent.fire('partial.page.reload');
-          clearLoadingMessage();
-          var lists_loaded_time = new Date();
-          var deferred_loadtime = lists_loaded_time - deferred_start_time;
-          CustomEvent.fire('page_timing', {
-            name: 'RLV2',
-            child: 'Network time',
-            ms: (lists_loaded_time - deferred_responsetime)
-          });
+        }
+        fieldSet(ac);
+        ac.previousTextValue = '';
+      }
+    }
+  }
+}
+
+function updateRelatedGivenNameAndValue(elementName, elementValue) {
+  var viewField = gel("view." + elementName);
+  if (viewField == null)
+    return;
+  if (isDoctype())
+    viewField.style.display = '';
+  else
+    viewField.style.display = "inline";
+  var viewRField = gel("viewr." + elementName);
+  var viewHideField = gel("view." + elementName + ".no");
+  if (viewRField != null) {
+    if (isDoctype())
+      viewRField.style.display = '';
+    else
+      viewRField.style.display = "inline";
+  }
+  if (viewHideField != null)
+    viewHideField.style.display = "none";
+  if (typeof(g_form) == 'undefined')
+    return;
+  var list = g_form.getDerivedFields(elementName);
+  if (list == null)
+    return;
+  var url = "xmlhttp.do?sysparm_processor=GetReferenceRecord" +
+    "&sysparm_name=" + elementName +
+    "&sysparm_value=" + elementValue;
+  var args = new Array(elementName, list.join(','));
+  serverRequest(url, refFieldChangeResponse, args);
+}
+
+function emptySubstr(ac) {
+  return findRelatedZeroString(ac, ac.textValue);
+}
+
+function searchForData(ac, elementName, type, noMax, additional) {
+  var cachedData;
+  if (!additional && !ac.isOTM())
+    cachedData = retrieveStorage(ac, ac.textValue);
+  window.status = "Searching for: " + ac.textValue;
+  if (emptySubstr(ac))
+    cachedData = emptySubstr(ac);
+  if (cachedData) {
+    fieldChangeResponse(cachedData, true);
+  } else {
+    var encodedText = encodeText(ac.textValue);
+    var url = "sysparm_processor=" + type +
+      "&sysparm_name=" + elementName +
+      "&sysparm_chars=" + encodedText +
+      "&sysparm_nomax=" + noMax +
+      "&sysparm_type=" + type;
+    if (ac.isOTM())
+      url += "&sysparm_field=" + ac.refField;
+    if (additional)
+      url += "&" + additional;
+    if (type != "Reference" && typeof(g_form) != "undefined")
+      url += "&" + g_form.serialize();
+    serverRequestPost("xmlhttp.do", url, fieldChangeResponse);
+    var target = ac.getField();
+    if (target.type != 'hidden' && ac.ignoreAJAX != true)
+      ac.getField().focus();
+  }
+  setPreviousText(ac, new Array(ac.invisibleTextValue, ac.textValue));
+}
+
+function fieldChangeResponse(request, nozero) {
+  if (request == null)
+    return;
+  var ac = request.responseXML.ac;
+  if (request.responseXML.documentElement) {
+    var xml = request.responseXML;
+    var items = xml.getElementsByTagName("item");
+    var e = xml.documentElement;
+    var elementName = e.getAttribute("sysparm_name");
+    var searchText = e.getAttribute("sysparm_chars");
+    var type = e.getAttribute("sysparm_type");
+    var displayField;
+    var invisibleField;
+    if (type == "Reference") {
+      displayField = gel("sys_display." + elementName);
+      invisibleField = gel(elementName);
+    } else {
+      displayField = gel(elementName);
+      invisibleField = gel("sys_display." + elementName);
+    }
+    var ac = displayField.ac;
+    if (ac.ignoreAJAX == true)
+      return;
+    var values = new Array();
+    window.status = "Matches" + (searchText ? " for " + searchText : "") + ": " + items.length;
+    if (items.length == 0) {
+      if (ac.getInvisibleField())
+        ac.getInvisibleField().value = "";
+      if (nozero != true)
+        storeZeroString(ac, searchText, request);
+    }
+    if (searchText && ac.textValue && searchText != ac.textValue)
+      return;
+    storeResults(ac, (searchText ? searchText : ""), request);
+    for (var iCnt = 0; iCnt < items.length; iCnt++) {
+      var item = items[iCnt];
+      var name = item.getAttribute("name");
+      var label = item.getAttribute("label");
+      var value = item.getAttribute("value");
+      var className = item.getAttribute("sys_class_name");
+      value = replaceRegEx(value, document, elementName.split(".")[0]);
+      values[values.length] = new Array(name, label, value, className);
+    }
+    if (type == "Reference") {
+      if (items.length == 1 && searchText != null && fieldMatches(searchText, items[0].getAttribute("label"))) {
+        displayField.value = items[0].getAttribute("label");
+        invisibleField.value = items[0].getAttribute("name");
+        fieldSet(ac);
+      } else {
+        var viewField = document.getElementById("view." + elementName);
+        var viewHideField = document.getElementById("view." + elementName + ".no");
+        if (viewField != null)
+          viewField.style.display = "none";
+        if (viewHideField != null)
+          viewHideField.style.display = "inline";
+        invisibleField.value = "";
+        ac.dirty = true;
+      }
+    }
+    if (ac.getUpdateField()) {
+      updateSlushField(ac, values);
+    } else {
+      createDropDown(ac, values);
+      ac.showDropDown();
+    }
+  } else {
+    window.status = "";
+    if (ac.getUpdateField())
+      updateSlushField(ac, null);
+    else {
+      clearRelated(ac);
+      ac.clearDropDown();
+    }
+  }
+  if (!ac.getUpdateField() && ac.currentMenuCount < 1)
+    ac.hideDropDown();
+}
+
+function fieldMatches(search, retitem) {
+  if (search.length >= retitem.length) {
+    var cc = retitem.substring(0, search.length);
+    if (search.toLowerCase() == cc.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function lightWeightReferenceLink(inputName, tableName, addOnRefClick) {
+  if (typeof(addOnRefClick) != "undefined" && addOnRefClick) {
+    if (typeof(g_cart) == "undefined")
+      g_cart = new SCCartV2();
+    g_cart.showReferenceForm(inputName, tableName);
+    return;
+  }
+  var input = gel(inputName);
+  var sys_id = input.value;
+  var url = tableName + ".do?sys_id=" + sys_id;
+  var frame = top.gsft_main;
+  if (!frame)
+    frame = top;
+  frame.location = url;
+}
+
+function clearDependents(name) {
+  var nodes = document.getElementsByTagName('input');
+  for (var i = 0; i < nodes.length; i++) {
+    var current = nodes[i];
+    var dependentField = current.dependent_field;
+    if (!dependentField)
+      continue;
+    if (name == dependentField) {
+      current.value = "";
+      var ac = getAC(current.name);
+      if (ac) {
+        ac.resultsStorage = new Object();
+        ac.emptyResults = new Object();
+      }
+      clearDependents(current.id);
+    }
+  }
+};
+/*! RESOURCE: /scripts/ac_derived_field_support.js */
+function refFieldChangeResponse(request, args) {
+  if (request == null)
+    return;
+  var elementName = args[0];
+  var parts = elementName.split(".");
+  parts.shift();
+  var sName = parts.join(".") + ".";
+  if (args[1]) {
+    var fields = args[1].split(',');
+    setNodes(sName, fields, request);
+    return;
+  }
+  jslog("************** WHAT ARE WE DOING HERE *********************");
+}
+
+function setNodes(sName, array, request) {
+  for (var i = 0; i < array.length; i++) {
+    var fn = array[i];
+    var eln = sName + fn;
+    var elo = g_form.getGlideUIElement(eln);
+    if (!elo)
+      continue;
+    var field = request.responseXML.getElementsByTagName(fn);
+    if (field.length != 1) {
+      g_form.clearValue(eln);
+      if (g_form._isDerivedWaiting(eln)) {
+        g_form.setReadOnly(eln, false);
+        g_form._removeDerivedWaiting(eln);
+      }
+      continue;
+    }
+    var dv = field[0].getAttribute('value');
+    var v = field[0].getAttribute('db_value');
+    if (elo.getType() == 'glide_list' || elo.getType() == 'reference') {
+      var v = field[0].getAttribute('db_value')
+      g_form._setValue(eln, v, dv.split(","), false);
+    } else if (v)
+      g_form.setValue(eln, v, dv);
+    else
+      g_form.setValue(eln, dv);
+    if (g_form._isDerivedWaiting(eln)) {
+      g_form.setReadOnly(eln, false);
+      g_form._removeDerivedWaiting(eln);
+    }
+  }
+};
+/*! RESOURCE: /scripts/lib/glide_updates/prototype.effects.js */
+(function() {
+  var elemdisplay = {};
+  var rfxtypes = /^(?:toggle|show|hide)$/;
+  var ralpha = /alpha\([^)]*\)/i;
+  var rdigit = /\d/;
+  var ropacity = /opacity=([^)]*)/;
+  var rfxnum = /^([+\-]=)?([\d+.\-]+)(.*)$/;
+  var rnumpx = /^-?\d+(?:px)?$/i;
+  var rnum = /^-?\d/;
+  var timerId;
+  var fxAttrs = [
+    ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+    ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+    ["opacity"]
+  ];
+  var shrinkWrapBlocks = false;
+  var inlineBlockNeedsLayout = false;
+  var cssFloat = false;
+  var curCSS;
+  var opacitySupport;
+  document.observe("dom:loaded", function() {
+    var div = document.createElement("div");
+    div.style.width = div.style.paddingLeft = "1px";
+    document.body.appendChild(div);
+    if ("zoom" in div.style) {
+      div.style.display = "inline";
+      div.style.zoom = 1;
+      inlineBlockNeedsLayout = div.offsetWidth === 2;
+      div.style.display = "";
+      div.innerHTML = "<div style='width:4px;'></div>";
+      shrinkWrapBlocks = div.offsetWidth !== 2;
+      document.body.removeChild(div);
+    }
+    div = document.createElement("div");
+    div.style.display = "none";
+    div.innerHTML = "<link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
+    document.body.appendChild(div);
+    var a = div.getElementsByTagName("a")[0];
+    opacitySupport = /^0.55$/.test(a.style.opacity);
+    cssFloat = !!a.style.cssFloat;
+    document.body.removeChild(div);
+    if (!opacitySupport) {
+      Prototype.cssHooks.opacity = {
+        get: function(elem, computed) {
+          return ropacity.test((computed && elem.currentStyle ? elem.currentStyle.filter : elem.style.filter) || "") ?
+            (parseFloat(RegExp.$1) / 100) + "" :
+            computed ? "1" : "";
+        },
+        set: function(elem, value) {
+          var style = elem.style;
+          style.zoom = 1;
+          var opacity = Prototype.isNaN(value) ?
+            "" :
+            "alpha(opacity=" + value * 100 + ")",
+            filter = style.filter || "";
+          style.filter = ralpha.test(filter) ?
+            filter.replace(ralpha, opacity) :
+            style.filter + ' ' + opacity;
+        }
+      };
+    }
+  });
+  if (document.defaultView && document.defaultView.getComputedStyle) {
+    curCSS = function(elem, newName, name) {
+      var ret;
+      var defaultView;
+      var computedStyle;
+      name = name.replace(rupper, "-$1").toLowerCase();
+      if (!(defaultView = elem.ownerDocument.defaultView))
+        return undefined;
+      if ((computedStyle = defaultView.getComputedStyle(elem, null))) {
+        ret = computedStyle.getPropertyValue(name);
+        if (ret === "" && !contains(elem.ownerDocument.documentElement, elem))
+          ret = style(elem, name);
+      }
+      return ret;
+    };
+  } else if (document.documentElement.currentStyle) {
+    curCSS = function(elem, name) {
+      var left;
+      var rsLeft;
+      var ret = elem.currentStyle && elem.currentStyle[name];
+      var style = elem.style;
+      if (!rnumpx.test(ret) && rnum.test(ret)) {
+        left = style.left;
+        rsLeft = elem.runtimeStyle.left;
+        elem.runtimeStyle.left = elem.currentStyle.left;
+        style.left = name === "fontSize" ? "1em" : (ret || 0);
+        ret = style.pixelLeft + "px";
+        style.left = left;
+        elem.runtimeStyle.left = rsLeft;
+      }
+      return ret === "" ? "auto" : ret;
+    };
+  }
+
+  function contains(a, b) {
+    return document.compareDocumentPosition ? a.compareDocumentPosition(b) & 16 :
+      (a !== b && (a.contains ? a.contains(b) : true));
+  }
+
+  function style(elem, name, value, extra) {
+    if (!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)
+      return;
+    var ret;
+    var origName = name.camelize();
+    var s = elem.style;
+    var hooks = Prototype.cssHooks[origName];
+    name = Prototype.cssProps[origName] || origName;
+    if (value !== undefined) {
+      if (typeof value === "number" && isNaN(value) || value == null)
+        return;
+      if (typeof value === "number" && !Prototype.cssNumber[origName])
+        value += "px";
+      if (!hooks || !("set" in hooks) || (value = hooks.set(elem, value)) !== undefined) {
+        try {
+          s[name] = value;
+        } catch (e) {}
+      }
+    } else {
+      if (hooks && "get" in hooks && (ret = hooks.get(elem, false, extra)) !== undefined)
+        return ret;
+      return s[name];
+    }
+  }
+
+  function isEmptyObject(obj) {
+    for (var name in obj)
+      return false;
+    return true;
+  }
+
+  function isWindow(obj) {
+    return obj && typeof obj === "object" && "setInterval" in obj;
+  }
+
+  function arrayMerge(first, second) {
+    var i = first.length;
+    var j = 0;
+    if (typeof second.length === "number") {
+      for (var l = second.length; j < l; j++)
+        first[i++] = second[j];
+    } else {
+      while (second[j] !== undefined)
+        first[i++] = second[j++];
+    }
+    first.length = i;
+    return first;
+  }
+
+  function makeArray(array) {
+    var ret = [];
+    if (array != null) {
+      var type = typeof array;
+      if (array.length == null || type === "string" || type === "function" || type === "regexp" || isWindow(array))
+        Array.prototype.push.call(ret, array);
+      else
+        arrayMerge(ret, array);
+    }
+    return ret;
+  }
+
+  function genFx(type, num) {
+    var obj = {};
+    fxAttrs.concat.apply([], fxAttrs.slice(0, num)).each(function(context) {
+      obj[context] = type;
+    });
+    return obj;
+  }
+
+  function defaultDisplay(nodeName) {
+    if (elemdisplay[nodeName])
+      return elemdisplay[nodeName];
+    var e = $(document.createElement(nodeName));
+    document.body.appendChild(e);
+    var display = e.getStyle("display");
+    e.remove();
+    if (display === "none" || display === "")
+      display = "block";
+    elemdisplay[nodeName] = display;
+    return display;
+  }
+  Prototype.effects = {
+    speed: function(speed, easing, fn) {
+      var opt = speed && typeof speed === "object" ? Object.extend({}, speed) : {
+        complete: fn || !fn && easing || typeof speed == 'function' && speed,
+        duration: speed,
+        easing: fn && easing || easing && !(typeof easing == 'function') && easing
+      };
+      opt.duration = Prototype.effects.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
+        opt.duration in Prototype.effects.fx.speeds ? Prototype.effects.fx.speeds[opt.duration] : Prototype.effects.fx.speeds._default;
+      opt.old = opt.complete;
+      opt.complete = function() {
+        if (opt.queue !== false)
+          $(this).dequeue();
+        if (typeof opt.old == 'function')
+          opt.old.call(this);
+      };
+      return opt;
+    },
+    easing: {
+      linear: function(p, n, firstNum, diff) {
+        return firstNum + diff * p;
+      },
+      swing: function(p, n, firstNum, diff) {
+        return ((-Math.cos(p * Math.PI) / 2) + 0.5) * diff + firstNum;
+      }
+    },
+    timers: [],
+    fx: function(elem, options, prop) {
+      this.elem = elem;
+      this.options = options;
+      this.prop = prop;
+      if (!options.orig)
+        options.orig = {};
+    }
+  };
+  Prototype.effects.fx.prototype = {
+    update: function() {
+      if (this.options.step)
+        this.options.step.call(this.elem, this.now, this);
+      (Prototype.effects.fx.step[this.prop] || Prototype.effects.fx.step._default)(this);
+    },
+    cur: function() {
+      if (this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null))
+        return this.elem[this.prop];
+      var r = parseFloat(this.elem.getStyle(this.prop));
+      return r || 0;
+    },
+    custom: function(from, to, unit) {
+      var self = this;
+      var fx = Prototype.effects.fx;
+      this.startTime = new Date().getTime()
+      this.start = from;
+      this.end = to;
+      this.unit = unit || this.unit || "px";
+      this.now = this.start;
+      this.pos = this.state = 0;
+
+      function t(gotoEnd) {
+        return self.step(gotoEnd);
+      }
+      t.elem = this.elem;
+      if (t() && Prototype.effects.timers.push(t) && !timerId)
+        timerId = setInterval(fx.tick, fx.interval);
+    },
+    show: function() {
+      this.options.orig[this.prop] = style(this.elem, this.prop);
+      this.options.show = true;
+      this.custom(this.prop === "width" || this.prop === "height" ? 1 : 0, this.cur());
+      $(this.elem).show();
+    },
+    hide: function() {
+      this.options.orig[this.prop] = style(this.elem, this.prop);
+      this.options.hide = true;
+      this.custom(this.cur(), 0);
+    },
+    step: function(gotoEnd) {
+      var t = new Date().getTime();
+      var done = true;
+      if (gotoEnd || t >= this.options.duration + this.startTime) {
+        this.now = this.end;
+        this.pos = this.state = 1;
+        this.update();
+        this.options.curAnim[this.prop] = true;
+        for (var i in this.options.curAnim) {
+          if (this.options.curAnim[i] !== true)
+            done = false;
+        }
+        if (done) {
+          if (this.options.overflow != null && !shrinkWrapBlocks) {
+            var elem = this.elem;
+            var options = this.options;
+            var overflowArray = ["", "X", "Y"];
+            for (var ii = 0, ll = overflowArray.length; ii < ll; ii++)
+              elem.style["overflow" + overflowArray[ii]] = options.overflow[ii];
+          }
+          if (this.options.hide) {
+            $(this.elem).hide();
+            if (Prototype.Browser.IE)
+              $(this.elem).setStyle({
+                filter: ''
+              });
+          }
+          if (this.options.hide || this.options.show) {
+            for (var p in this.options.curAnim)
+              style(this.elem, p, this.options.orig[p]);
+          }
+          this.options.complete.call(this.elem);
+        }
+        return false;
+      } else {
+        var n = t - this.startTime;
+        this.state = n / this.options.duration;
+        var specialEasing = this.options.specialEasing && this.options.specialEasing[this.prop];
+        var defaultEasing = this.options.easing || (Prototype.effects.easing.swing ? "swing" : "linear");
+        this.pos = Prototype.effects.easing[specialEasing || defaultEasing](this.state, n, 0, 1, this.options.duration);
+        this.now = this.start + ((this.end - this.start) * this.pos);
+        this.update();
+      }
+      return true;
+    }
+  };
+  Object.extend(Prototype.effects.fx, {
+    tick: function() {
+      var timers = Prototype.effects.timers;
+      for (var i = 0; i < timers.length; i++) {
+        if (!timers[i]())
+          timers.splice(i--, 1);
+      }
+      if (!timers.length)
+        Prototype.effects.fx.stop();
+    },
+    interval: 13,
+    stop: function() {
+      clearInterval(timerId);
+      timerId = null;
+    },
+    speeds: {
+      slow: 600,
+      fast: 200,
+      _default: 400
+    },
+    step: {
+      opacity: function(fx) {
+        fx.elem.setStyle({
+          opacity: fx.now
+        });
+      },
+      _default: function(fx) {
+        if (fx.elem.style && fx.elem.style[fx.prop] != null)
+          fx.elem.style[fx.prop] = (fx.prop === "width" || fx.prop === "height" ? Math.max(0, fx.now) : fx.now) + fx.unit;
+        else
+          fx.elem[fx.prop] = fx.now;
+      }
+    }
+  });
+  Object.extend(Prototype, {
+    isNaN: function(obj) {
+      return obj == null || !rdigit.test(obj) || isNaN(obj);
+    },
+    queue: function(elem, type, data) {
+      if (!elem)
+        return;
+      type = (type || "fx") + "queue";
+      var q = elem.retrieve(type);
+      if (!data)
+        return q || [];
+      if (!q || Object.isArray(data))
+        q = elem.store(type, makeArray(data));
+      else
+        q.push(data);
+      return q;
+    },
+    dequeue: function(elem, type) {
+      type = type || "fx";
+      var queue = Prototype.queue(elem, type);
+      var fn = queue.shift();
+      if (fn === "inprogress")
+        fn = queue.shift();
+      if (fn) {
+        if (type === "fx")
+          queue.unshift("inprogress");
+        fn.call(elem, function() {
+          Prototype.dequeue(elem, type);
         });
       }
-      CustomEvent.observe('list.loaded', function(table, list) {
-        if (!table) {
-          return;
+    },
+    cssHooks: {
+      opacity: {
+        get: function(elem, computed) {
+          if (computed) {
+            var ret = curCSS(elem, "opacity", "opacity");
+            return ret === "" ? "1" : ret;
+          }
+          return elem.style.opacity;
         }
-        if (!list) {
-          return;
-        }
-        if (list.getReferringURL().indexOf('list2_deferred_related_lists.do') != -1 ||
-          list.getReferringURL() == 'undefined')
-          list.setReferringURL(window.location.pathname + window.location.search);
-      });
+      }
+    },
+    cssProps: {
+      "float": cssFloat ? "cssFloat" : "styleFloat"
+    },
+    cssNumber: {
+      "zIndex": true,
+      "fontWeight": true,
+      "opacity": true,
+      "zoom": true,
+      "lineHeight": true
+    }
+  });
 
-      function setupLoadingMessage() {
-        loadingTimer = setTimeout(f
+  function show(elem, speed, easing, callback) {
+    if (speed || speed === 0)
+      return animate(elem, genFx("show", 3), speed, easing, callback);
+    var display = elem.style.display;
+    if (!elem.retrieve("olddisplay") && display === "none")
+      display = elem.style.display = "";
+    if (display === "" && elem.getStyle("display") === "none")
+      elem.store("olddisplay", defaultDisplay(elem.nodeName));
+    display = elem.style.display;
+    if (display === "" || display === "none")
+      elem.style.display = elem.retrieve("olddisplay") || "";
+    return elem;
+  }
+
+  function hide(elem, speed, easing, callback) {
+    if (speed || speed === 0)
+      return animate(elem, genFx("hide", 3), speed, easing, callback);
+    var display = elem.getStyle('display');
+    if (display !== "none")
+      elem.store("olddisplay", elem.getStyle('display'));
+    elem.style.display = "none";
+    return elem;
+  }
+
+  function toggle(elem, fn, fn2, callback) {
+    var bool = typeof fn === "boolean";
+    if (typeof fn == 'function' && typeof fn2 == 'function')
+      toggle.apply(this, arguments);
+    else if (fn == null || bool) {
+      var state = bool ? fn : !elem.visible();
+      elem[state ? "show" : "hide"]();
+    } else
+      animate(elem, genFx("toggle", 3), fn, fn2, callback);
+    return elem;
+  }
+
+  function fadeTo(elem, speed, to, easing, callback) {
+    elem.setStyle({
+      opacity: 0
+    });
+    if (!elem.visible())
+      elem.show();
+    return animate(elem, {
+      opacity: to
+    }, speed, easing, callback);
+  }
+
+  function animate(elem, prop, speed, easing, callback) {
+    var optall = Prototype.effects.speed(speed, easing, callback);
+    if (isEmptyObject(prop))
+      return optall.complete;
+    return elem[optall.queue === false ? "_execute" : "queue"](function() {
+      var opt = Object.extend({}, optall);
+      var p;
+      var isElement = elem.nodeType === 1;
+      var hidden = isElement && !elem.visible();
+      for (p in prop) {
+        var name = p.camelize();
+        if (p !== name) {
+          prop[name] = prop[p];
+          delete prop[p];
+          p = name;
+        }
+        if (prop[p] === "hide" && hidden || prop[p] === "show" && !hidden)
+          return opt.complete.call(this);
+        if (isElement && (p === "height" || p === "width")) {
+          opt.overflow = [elem.style.overflow, elem.style.overflowX, elem.style.overflowY];
+          if (elem.getStyle("display") === "inline" && elem.getStyle("float") === "none") {
+            if (!inlineBlockNeedsLayout)
+              elem.style.display = "inline-block";
+            else {
+              var display = defaultDisplay(this.nodeName);
+              if (display === "inline")
+                elem.style.display = "inline-block";
+              else {
+                elem.style.display = "inline";
+                elem.style.zoom = 1;
+              }
+            }
+          }
+        }
+        if (Object.isArray(prop[p])) {
+          (opt.specialEasing = opt.specialEasing || {})[p] = prop[p][1];
+          prop[p] = prop[p][0];
+        }
+      }
+      if (opt.overflow != null)
+        elem.style.overflow = "hidden";
+      opt.curAnim = Object.extend({}, prop);
+      for (var i in prop) {
+        var name = i;
+        var val = prop[i];
+        var e = new Prototype.effects.fx(elem, opt, name);
+        if (rfxtypes.test(val)) {
+          e[val === "toggle" ? hidden ? "show" : "hide" : val](prop);
+        } else {
+          var parts = rfxnum.exec(val);
+          var start = e.cur() || 0;
+          if (parts) {
+            var end = parseFloat(parts[2]);
+            var unit = parts[3] || "px";
+            if (unit !== "px") {
+              style(elem, name, (end || 1) + unit);
+              start = ((end || 1) / e.cur()) * start;
+              style(name, start + unit);
+            }
+            if (parts[1])
+              end = ((parts[1] === "-=" ? -1 : 1) * end) + start;
+            e.custom(start, end, unit);
+          } else {
+            e.custom(start, val, "");
+          }
+        }
+      }
+      return true;
+    });
+  }
+
+  function stop(elem, clearQueue, gotoEnd) {
+    var timers = Prototype.effects.timers;
+    if (clearQueue)
+      elem.queue([]);
+    for (var i = timers.length - 1; i >= 0; i--) {
+      if (timers[i].elem === elem) {
+        if (gotoEnd) {
+          timers[i](true);
+        }
+        timers.splice(i, 1);
+      }
+    }
+    if (!gotoEnd)
+      elem.dequeue();
+    return elem;
+  }
+
+  function queue(elem, type, data) {
+    if (typeof type !== "string") {
+      data = type;
+      type = "fx";
+    }
+    if (data === undefined)
+      return Prototype.queue(elem, type);
+    var queue = Prototype.queue(elem, type, data);
+    if (type === "fx" && queue[0] !== "inprogress")
+      Prototype.dequeue(elem, type);
+    return elem;
+  }
+
+  function dequeue(elem, type) {
+    Prototype.dequeue(elem, type);
+    return elem;
+  }
+
+  function delay(elem, time, type) {
+    time = Prototype.effects.fx ? Prototype.effects.fx.speeds[time] || time : time;
+    type = type || "fx";
+    return elem.queue(type, function() {
+      setTimeout(function() {
+        Prototype.dequeue(elem, type);
+      }, time);
+    });
+  }
+
+  function clearQueue(elem, type) {
+    return elem.queue(type || "fx", []);
+  }
+  return Element.addMethods({
+    show: show,
+    hide: hide,
+    toggle: toggle,
+    fadeTo: fadeTo,
+    animate: animate,
+    slideDown: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('show', 1), speed, easing, callback);
+    },
+    slideUp: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('hide', 1), speed, easing, callback);
+    },
+    slideToggle: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('toggle', 1), speed, easing, callback);
+    },
+    fadeIn: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'show'
+      }, speed, easing, callback);
+    },
+    fadeOut: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'hide'
+      }, speed, easing, callback);
+    },
+    fadeToggle: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'toggle'
+      }, speed, easing, callback);
+    },
+    stop: stop,
+    queue: queue,
+    dequeue: dequeue,
+    delay: delay,
+    clearQueue: clearQueue,
+    _execute: function(elem, f) {
+      f();
+      return elem;
+    }
+  });
+}());;
+/*! RESOURCE: /scripts/classes/doctype/GlideModal.js */
+(function(global, $) {
+  "use strict";
+  var GlideModal = function() {
+    GlideModal.prototype.initialize.apply(this, arguments);
+  };
+  GlideModal.prototype = {
+    initialize: function(id, readOnly, width, height) {
+      this.preferences = {};
+      this.id = id;
+      this.readOnly = readOnly;
+      this.backdropStatic = false;
+      this.nologValue = false;
+      this.setDialog(id);
+      this.setSize(width, height);
+      this.setPreference('renderer', 'RenderForm');
+      this.setPreference('type', 'direct');
+    },
+    setDialog: function(dialogName) {
+      this.setPreference('table', dialogName);
+    },
+    setPreference: function(name, value) {
+      this.preferences[name] = value;
+    },
+    getPreference: function(name) {
+      return this.preferences[name];
+    },
+    setAutoFullHeight: function(isAutoFullHeight) {
+      this.isAutoFullHeight = isAutoFullHeight;
+    },
+    setSize: function(width) {
+      this.size = 'modal-md';
+      if (!width)
+        this.size = 'modal-md';
+      else if (width < 350)
+        this.size = 'modal-alert';
+      else if (width < 450)
+        this.size = 'modal-sm';
+      else if (width < 650)
+        this.size = 'modal-md';
+      else
+        this.size = 'modal-lg';
+    },
+    setWidth: function(width) {
+      this.setSize(width);
+    },
+    setTitle: function(title) {
+      this.title = title;
+    },
+    setBackdropStatic: function(makeStatic) {
+      this.backdropStatic = makeStatic;
+    },
+    setNologValue: function(nolog) {
+      this.nologValue = !!nolog;
+    },
+    updateTitle: function() {
+      $('.modal-title', this.$window).html(this.title);
+    },
+    updateSize: function() {
+      $('.modal-dialog', this.$window).attr('class', 'modal-dialog').addClass(this.size);
+    },
+    setFocus: function(el) {},
+    render: function() {
+      var description = this.getDescribingText();
+      var ajax = new GlideAjax("RenderInfo");
+      if (this.nologValue)
+        ajax.addParam("ni.nolog.sysparm_value", true);
+      ajax.addParam("sysparm_value", description);
+      ajax.addParam("sysparm_name", this.id);
+      ajax.getXML(this._renderFromAjax.bind(this));
+    },
+    switchView: function(newView) {
+      this.setPreferenceAndReload({
+        'sysparm_view': newView
+      });
+    },
+    setPreferenceAndReload: function(params) {
+      for (var key in params)
+        this.preferences[key] = params[key];
+      this.render();
+    },
+    _renderFromAjax: function(response) {
+      var xml = response.responseXML;
+      var newBody = xml.getElementsByTagName("html")[0];
+      xml = newBody.xml ? newBody.xml :
+        new XMLSerializer().serializeToString(newBody);
+      if (!xml)
+        return;
+      this.setPreferencesFromBody(response.responseXML);
+      this.setEscapedBody(xml);
+      this._evalScripts(xml);
+    },
+    maximizeHeight: function(callback) {
+      if (this.resizeTimeout)
+        clearTimeout(this.resizeTimeout);
+      var context = this;
+      this.resizeTimeout = setTimeout(function() {
+        var padding = 100;
+        var $modalBody = context.$modalContent.find('.modal-body');
+        var modalHeight = context.$modalContent.height();
+        var modalToolsHeight = modalHeight - $modalBody.height();
+        var newHeight = $(window).height() - padding - modalToolsHeight;
+        $modalBody.height(newHeight);
+        if (callback)
+          callback.apply(context);
+      }, 150);
+    },
+    renderWithContent: function(content) {
+      this._createModal();
+      if (typeof content == 'string')
+        $('.modal-body', this.$window)[0].innerHTML = content;
+      else
+        $('.modal-body', this.$window).html(content);
+      var self = this;
+      this.$window.on('show.bs.modal', function() {
+        self.isOpen = true;
+        self.$modalContent = self.$window.find('.modal-content');
+        if (self.isAutoFullHeight)
+          self.maximizeHeight();
+      }).on('hidden.bs.modal', function() {
+        self.isOpen = false;
+      });
+      this.$window.modal({
+        backdrop: this.readOnly || this.backdropStatic ? 'static' : undefined,
+        keyboard: !this.readOnly
+      });
+      this.fireEvent("bodyrendered", this);
+      _frameChanged();
+    },
+    renderIframe: function(url, onloadCallback) {
+      var loadingMessage = 'Loading...';
+      var div = document.createElement('div');
+      div.setAttribute('style', 'position: absolute; top: 2px; right: 2px; bottom: 2px; left: 2px;');
+      var loading = document.createElement('div');
+      loading.setAttribute('style', 'position: absolute; top: 10px; left: 10px;');
+      loading.setAttribute('class', 'loading');
+      if (loading.textContent)
+        loading.textContent = loadingMessage;
+      else
+        loading.innerText = loadingMessage;
+      var iframe = document.createElement('iframe');
+      iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white; visibility: hidden;');
+      iframe.src = url;
+      div.appendChild(loading);
+      div.appendChild(iframe);
+      var context = this;
+      this.on('bodyrendered', function() {
+        context.$modalContent.find('iframe').load(function(evt) {
+          context.$modalContent.find('.loading').hide();
+          iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white;');
+          if (onloadCallback && evt.target && evt.target.contentWindow)
+            onloadCallback.apply(evt.target.contentWindow);
+        });
+      });
+      this.renderWithContent(div);
+    },
+    _createModal: function() {
+      var template;
+      if (this.$window) {
+        this.updateTitle();
+        this.updateSize();
+        return;
+      }
+      if (this.template) {
+        template = this.template
+      } else {
+        template = getTemplate();
+      }
+      this._closeIdenticalModals();
+      var html = new Template(template).evaluate({
+        title: this.title,
+        id: this.id,
+        size: this.size,
+        readOnly: this.readOnly ? 'true' : 'false',
+        showHelp: this.showHelp ? 'true' : 'false'
+      });
+      var $modal = $(html);
+      $modal.data('gWindow', this);
+      this.$window = $modal;
+      $(document.body).append(this.$window);
+      this._watchForClose();
+      this._watchHelp();
+    },
+    _onWindowResize: function(context) {
+      return function() {
+        if (context.isOpen && context.isAutoFullHeight) {
+          context.maximizeHeight();
+        }
+      }
+    },
+    setEscapedBody: function(body) {
+      if (!body)
+        return;
+      body = body.replace(/\t/g, "");
+      body = body.replace(/\r/g, "");
+      body = body.replace(/\n+/g, "\n");
+      body = body.replace(/%27/g, "'");
+      body = body.replace(/%3c/g, "<");
+      body = body.replace(/%3e/g, ">");
+      body = body.replace(/&amp;/g, "&");
+      this.setBody(body, true);
+    },
+    setBody: function(html, noEvaluate) {
+      if (typeof html == 'string') {
+        html = this._substituteGet(html);
+        html = this._fixBrowserTags(html);
+        this.renderWithContent(html);
+        if (!noEvaluate)
+          this._evalScripts(html);
+      } else {
+        this.renderWithContent(html);
+      }
+    },
+    setPreferencesFromBody: function(xml) {
+      var prefs = xml.getElementsByTagName("renderpreference");
+      if (prefs.length > 0) {
+        for (var i = 0; i < prefs.length; i++) {
+          var pref = prefs[i];
+          var name = pref.getAttribute("name");
+          var valu = pref.getAttribute("value");
+          this.setPreference(name, valu);
+          if (name == "title")
+            this.setTitle(valu);
+          if (name == "render_title" && valu == "false")
+            this.setTitle("");
+        }
+      }
+    },
+    _substituteGet: function(html) {
+      if (!html)
+        return html;
+      var substitutions = [this.type(), 'GlideDialogWindow', 'GlideDialogForm'];
+      for (var i = 0; i < substitutions.length; i++) {
+        var reg = new RegExp(substitutions[i] + ".get\\(", "g");
+        html = html.replace(reg, this.type() + ".prototype.get('" + this.getID() + "'");
+      }
+      return html;
+    },
+    _fixBrowserTags: function(html) {
+      if (!html)
+        return html;
+      var tags = ["script", "a ", "div", "span", "select"];
+      for (var i = 0; i < tags.length; i++) {
+        var tag = tags[i];
+        html = html.replace(new RegExp('<' + tag + '([^>]*?)/>', 'img'), '<' + tag + '$1></' + tag + '>');
+      }
+      return html;
+    },
+    _evalScripts: function(html) {
+      html = this._substituteGet(html, this.type());
+      var x = loadXML("<xml>" + html + "</xml>");
+      if (x) {
+        var scripts = x.getElementsByTagName("script");
+        for (var i = 0; i < scripts.length; i++) {
+          var script = scripts[i];
+          var s = "";
+          if (script.getAttribute("type") == "application/xml")
+            continue;
+          if (script.getAttribute("src")) {
+            var url = script.getAttribute("src");
+            var req = serverRequestWait(url);
+            s = req.responseText;
+          } else {
+            s = getTextValue(script);
+            if (!s)
+              s = script.innerHTML;
+          }
+          if (s)
+            evalScript(s, true);
+        }
+      }
+      if (!window.G_vmlCanvasManager)
+        return;
+      window.G_vmlCanvasManager.init_(document)
+    },
+    getID: function() {
+      return this.id;
+    },
+    getPreferences: function() {
+      return this.preferences;
+    },
+    getDescribingXML: function() {
+      var section = document.createElement("section");
+      section.setAttribute("name", this.getID());
+      var preferences = this.getPreferences();
+      for (var name in preferences) {
+        if (!preferences.hasOwnProperty(name))
+          continue;
+        var p = document.createElement("preference");
+        var v = preferences[name];
+        p.setAttribute("name", name);
+        if (v !== null && typeof v == 'object') {
+          if (typeof v.join == "function") {
+            v = v.join(",");
+          } else if (typeof v.toString == "function") {
+            v = v.toString();
+          }
+        }
+        if (v && typeof v.escapeHTML === "function")
+          v = v.escapeHTML();
+        if (v)
+          p.setAttribute("value", v);
+        section.appendChild(p);
+      }
+      return section;
+    },
+    getDescribingText: function() {
+      var gxml = document.createElement("gxml");
+      var x = this.getDescribingXML();
+      gxml.appendChild(x);
+      return gxml.innerHTML;
+    },
+    destroy: function() {
+      if (!this.fireEvent('closeconfirm', this))
+        return;
+      if (this.$window)
+        this.$window.modal('hide');
+    },
+    _removeWindow: function() {
+      this.fireEvent('beforeclose', this);
+      this.$window.remove();
+    },
+    get: function(id) {
+      if (!id)
+        return this;
+      var win = document.getElementById(id);
+      if (!win)
+        return this;
+      return $(win).data('gWindow');
+    },
+    _watchForClose: function() {
+      this.$window.on('click', '[data-dismiss=GlideModal]', function() {
+        this.destroy();
+      }.bind(this));
+      this.$window.on('hidden.bs.modal', function() {
+        this._removeWindow(true);
+      }.bind(this));
+    },
+    _watchHelp: function() {
+      this.$window.on('click', '.help', function() {
+        if (this._helpCallback)
+          this._helpCallback.call();
+      }.bind(this));
+    },
+    on: function(evtName, callbackFn) {
+      if (!this._events)
+        this._events = {};
+      if (!this._events[evtName])
+        this._events[evtName] = [];
+      this._events[evtName].push(callbackFn);
+    },
+    fireEvent: function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      var evtName = args.shift();
+      if (!this._events || !this._events[evtName])
+        return true;
+      for (var i = 0; i < this._events[evtName].length; i++) {
+        var ev = this._events[evtName][i];
+        if (!ev)
+          continue;
+        if (ev.apply(this, args) === false)
+          return false;
+      }
+      return true;
+    },
+    _closeIdenticalModals: function() {
+      var $existingModal = $('#' + this.id).data('gWindow');
+      if (!$existingModal)
+        return;
+      $existingModal.destroy();
+    },
+    addDecoration: function(decorationElement, leftSide) {},
+    addFunctionDecoration: function(imgSrc, imgAlt, func, side) {
+      if (imgSrc == 'images/help.gif')
+        this.addHelpDecoration(func);
+    },
+    addHelpDecoration: function(func) {
+      this.showHelp = true;
+      this._helpCallback = func;
+    },
+    type: function() {
+      return "GlideModal";
+    }
+  };
+
+  function getTemplate() {
+    return '<div id="#{HTML:id}" tabindex="-1" ' +
+      'aria-hidden="true" class="modal" role="dialog" ' +
+      'aria-labelledby="#{HTML:id}_title" data-readonly="#{HTML:readOnly}" data-has-help="#{HTML:showHelp}">' +
+      '	<div class="modal-dialog #{size}">' +
+      '		<div class="modal-content">' +
+      '			<header class="modal-header">' +
+      '				<button data-dismiss="GlideModal" class="btn btn-icon close icon-cross">' +
+      '					<span class="sr-only">Close</span>' +
+      '				</button>' +
+      '			<h4 id="#{HTML:id}_title" class="modal-title">' +
+      '				#{HTML:title}' +
+      '			<button class="btn btn-icon icon-help help">' +
+      '				<span class="sr-only">Help</span>' +
+      '			</button>' +
+      '			</h4>' +
+      '			</header>' +
+      '			<div class="modal-body container-fluid"></div>' +
+      '		</div>' +
+      '	</div>' +
+      '</div>';
+  }
+  global.GlideModal = GlideModal;
+})(window, jQuery);;
+/*! RESOURCE: /scripts/classes/doctype/GlideModalForm.js */
+(function(global, $) {
+  "use strict";
+  var GlideModalForm = function() {
+    GlideModalForm.prototype.init.apply(this, arguments);
+  };
+  GlideModalForm.prototype = $.extend({}, GlideModal.prototype, {
+    IGNORED_PREFERENCES: {
+      'renderer': true,
+      'type': true,
+      'table': true
+    },
+    init: function(title, tableName, onCompletionCallback, readOnly) {
+      this.initialize.call(this, tableName, readOnly, 800);
+      this.tableName = tableName;
+      if (title) {
+        this.setTitle(title);
+      }
+      if (onCompletionCallback) {
+        this.setCompletionCallback(onCompletionCallback);
+      }
+    },
+    setSize: function(width) {
+      this.size = 'modal-95';
+    },
+    setFooter: function(bool) {
+      this.hasFooter = !!bool;
+    },
+    setSysID: function(id) {
+      this.setPreference('sys_id', id);
+    },
+    setType: function(type) {
+      this.setPreference('type', type);
+    },
+    setTemplate: function(template) {
+      this.template = template;
+    },
+    setCompletionCallback: function(func) {
+      this.onCompletionFunc = func;
+    },
+    setOnloadCallback: function(func) {
+      this.onFormLoad = func;
+    },
+    render: function() {
+      this._createModal();
+      var body = $('.modal-body', this.$window)[0];
+      body.innerHTML = getFormTemplate();
+      var frame = $('.modal-frame', this.$window);
+      frame.on('load', function() {
+        this._formLoaded();
+      }.bind(this));
+      this.$window.modal({
+        backdrop: 'static'
+      });
+      this._bodyHeight = $('#' + this.id)[0].getHeight();
+      var margin = $('.modal-dialog', this.$window)[0].offsetTop * 2;
+      margin += frame.offset().top;
+      if (this._bodyHeight > margin)
+        this._bodyHeight -= margin;
+      if (this.hasFooter) {
+        this._bodyHeight = this._bodyHeight - 40;
+      }
+      frame.css('height', this._bodyHeight);
+      var $doc = frame[0].contentWindow ? frame[0].contentWindow.document : frame[0].contentDocument;
+      var $body = $($doc.body);
+      $body.html('');
+      $body.append($('link').clone());
+      $body.append('<center>' + getMessage('Loading') + '... <br/><img src="images/ajax-loader.gifx"/></center></span>');
+      var f = $('.modal_dialog_form_poster', this.$window)[0];
+      f.action = this.getPreference('table') + '.do';
+      addHidden(f, 'sysparm_clear_stack', 'true');
+      addHidden(f, 'sysparm_nameofstack', 'formDialog');
+      addHidden(f, 'sysparm_titleless', 'true');
+      addHidden(f, 'sysparm_is_dialog_form', 'true');
+      var sysId = this.getPreference('sys_id');
+      if (!sysId)
+        sysId = '';
+      addHidden(f, 'sys_id', sysId);
+      var targetField = '';
+      if (this.fieldIDSet)
+        targetField = this.getPreference('sysparm_target_field');
+      for (var id in this.preferences) {
+        if (!this.IGNORED_PREFERENCES[id])
+          addHidden(f, id, this.preferences[id]);
+      }
+      var parms = [];
+      parms.push('sysparm_skipmsgs=true');
+      parms.push('sysparm_nostack=true');
+      parms.push('sysparm_target_field=' + targetField);
+      parms.push('sysparm_returned_action=$action');
+      parms.push('sysparm_returned_sysid=$sys_id');
+      parms.push('sysparm_returned_value=$display_value');
+      addHidden(f, 'sysparm_goto_url', 'modal_dialog_form_response.do?' + parms.join('&'));
+      f.submit();
+    },
+    switchView: function(newView) {
+      this.setPreferenceAndReload({
+        'sysparm_view': newView
+      });
+    },
+    setPreferenceAndReload: function(params) {
+      for (var key in params)
+        this.preferences[key] = params[key];
+      this.render();
+    },
+    _formLoaded: function() {
+      var frame = $('.modal-frame', this.$window);
+      if (frame.contents().get(0).location.href.indexOf('modal_dialog_form_response') != -1) {
+        if (this.onCompletionFunc) {
+          var f = $('.modal_dialog_form_response form', frame.contents())[0];
+          this.onCompletionFunc(f.action.value, f.sysid.value, this.tableName, f.value.value);
+        }
+        this.destroy();
+        return;
+      }
+      if (this.onFormLoad)
+        this.onFormLoad(this);
+    },
+    addParm: function(k, v) {
+      this.setPreference(k, v);
+    }
+  });
+
+  function getFormTemplate() {
+    return '<form class="modal_dialog_form_poster" target="dialog_frame" method="POST" style="display: inline;"/>' +
+      '<iframe id="dialog_frame" name="dialog_frame" class="modal-frame" style="width:100%;height:100%;" frameborder="no" />';
+  }
+  global.GlideModalForm = GlideModalForm;
+})(window, jQuery);;;

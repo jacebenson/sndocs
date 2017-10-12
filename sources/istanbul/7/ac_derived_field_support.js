@@ -39,9 +39,4 @@ function setNodes(sName, array, request) {
       g_form.setValue(eln, v, dv);
     else
       g_form.setValue(eln, dv);
-    if (g_form._isDerivedWaiting(eln)) {
-      g_form.setReadOnly(eln, false);
-      g_form._removeDerivedWaiting(eln);
-    }
-  }
-};
+    if (g_form._isDerivedWaiting(eln

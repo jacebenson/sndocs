@@ -1579,11 +1579,833 @@ GlideList2.toggleAll = function(expandFlag) {
   }
 }
 GlideList2.updateCellContents = function(cell, data) {
-    $(cell).setStyle({
-      backgroundColor: '',
-      cssText: data.getAttribute('style')
+  $(cell).setStyle({
+    backgroundColor: '',
+    cssText: data.getAttribute('style')
+  });
+  var work = document.createElement('div');
+  cell.innerHTML = '';
+  for (var child = data.firstChild; child; child = child.nextSibling) {
+    work.innerHTML = getXMLString(child);
+    if (work.firstChild !== null)
+      cell.appendChild(work.firstChild);
+  }
+  cell.innerHTML.evalScripts(true);
+  cell.removeClassName('list_edit_dirty');
+  CustomEvent.fire("list_cell_changed", cell);
+};
+/*! RESOURCE: /scripts/classes/GlideList2Handlers.js */
+var GlideList2NewHandler = Class.create();
+GlideList2NewHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    if (actionName == "sysverb_new")
+      list.addToForm("sys_id", "-1");
+    return true;
+  },
+  type: 'GlideList2NewHandler'
+};
+var GlideList2ChecksHandler = Class.create();
+GlideList2ChecksHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    if (!actionName.startsWith("sysverb")) {
+      var keys = ['No records selected', 'Delete the selected item?', 'Delete these', 'items?'];
+      var msgs = getMessages(keys);
+      if (list.checkedIds == '') {
+        alert(msgs["No records selected"]);
+        return false;
+      }
+      if (actionName == "delete_checked") {
+        var items = list.checkedIds.split(",");
+        if (items.length == 1) {
+          if (!confirm(msgs["Delete the selected item?"]))
+            return false;
+        } else if (items.length > 0) {
+          if (!confirm(msgs["Delete these"] + " " + items.length + " " + msgs["items?"]))
+            return false;
+        }
+      }
+    }
+    list.addToForm('sysparm_checked_items', list.checkedIds);
+    return true;
+  },
+  type: 'GlideList2ChecksHandler'
+};
+var GlideList2SecurityHandler = Class.create();
+GlideList2SecurityHandler.prototype = {
+  initialize: function() {
+    CustomEvent.observe("list.handler", this.process.bind(this));
+  },
+  process: function(list, actionId, actionName) {
+    var element = null;
+    if (actionId)
+      element = $(actionId);
+    if (!element)
+      element = $(actionName);
+    if (element) {
+      var gsftc = element.getAttribute('gsft_condition');
+      if (gsftc != null && gsftc != 'true')
+        return;
+    }
+    if (list.checkedIds.length == 0)
+      return true;
+    var sysIds = list.checkedIds;
+    var ajax = new GlideAjax("AJAXActionSecurity");
+    ajax.addParam("sys_target", list.getTableName());
+    ajax.addParam("sys_action", actionId);
+    ajax.addParam("sysparm_checked_items", sysIds);
+    ajax.addParam("sysparm_view", list.getView());
+    ajax.addParam("sysparm_query", list.getSubmitValue("sysparm_fixed_query"));
+    ajax.addParam("sysparm_referring_url", list.getReferringURL());
+    ajax.addParam("sys_is_related_list", list.getSubmitValue("sys_is_related_list"));
+    ajax.addParam("sysparm_collection_related_file", list.getSubmitValue("sysparm_collection_related_file"));
+    ajax.addParam("sysparm_collection_key", list.getSubmitValue("sysparm_collection_key"));
+    ajax.addParam("sysparm_collection_relationship", list.getSubmitValue("sysparm_collection_relationship"));
+    ajax.addParam("sysparm_target", list.getTableName());
+    var xml = ajax.getXMLWait();
+    var answer = {};
+    var root = xml.getElementsByTagName("action_" + actionId)[0];
+    var keys = root.childNodes;
+    var validIds = [];
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var id = key.getAttribute('sys_id');
+      if (key.getAttribute('can_execute') == 'true')
+        validIds.push(id);
+    }
+    if (validIds.length == sysIds.length)
+      return true;
+    if (validIds.length == 0) {
+      var m = new GwtMessage().getMessage('Security does not allow the execution of that action against the specified record');
+      if (validIds.length > 1)
+        m = m + 's';
+      alert(m);
+      return false;
+    }
+    var sysIds = sysIds.split(',');
+    if (validIds.length != sysIds.length) {
+      var m = new GwtMessage().getMessage('Security allows the execution of that action against {0} of {1} records. Proceed?', validIds.length, sysIds.length);
+      list.addToForm('sysparm_checked_items', validIds.join(','));
+      return confirm(m);
+    }
+    return true;
+  },
+  type: 'GlideList2SecurityHandler'
+};;
+/*! RESOURCE: /scripts/classes/GlideListWidget.js */
+var GlideListWidget = Class.create();
+GlideListWidget.prototype = {
+  initialize: function(widgetID, listID) {
+    this.widgetID = widgetID;
+    this.listID = listID;
+    GlideListWidgets[this.widgetID] = this;
+    CustomEvent.observe('list.loaded', this.refresh.bind(this));
+    CustomEvent.observe('partial.page.reload', this.refreshPartial.bind(this));
+  },
+  refresh: function(listTable, list) {
+    if (!list || !list.listID)
+      return;
+    if (list.listID != this.listID)
+      return;
+    this._refresh(listTable, list, true);
+  },
+  refreshPartial: function(listTable, list) {
+    if (!list || !list.listID)
+      return;
+    if (list.listID != this.listID)
+      return;
+    this._refresh(listTable, list, false);
+  },
+  _refresh: function(listTable, list, isInitialLoad) {},
+  _getElement: function(n) {
+    return $(this.widgetID + "_" + n);
+  },
+  _getValue: function(n) {
+    var e = this._getElement(n);
+    if (!e)
+      return "";
+    return e.value;
+  },
+  _setValue: function(n, v) {
+    var e = this._getElement(n);
+    if (!e)
+      return;
+    e.value = v;
+  },
+  _setInner: function(n, v) {
+    var e = this._getElement(n);
+    if (!e)
+      return;
+    e.innerHTML = v;
+  },
+  type: 'GlideListWidget'
+}
+var GlideListWidgets = {};
+GlideListWidget.get = function(id) {
+  return GlideListWidgets[id];
+};
+/*! RESOURCE: /scripts/classes/GlideWidgetVCR.js */
+var GlideWidgetVCR = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID) {
+    $super(widgetID, listID);
+    this.backAllowed = false;
+    this.nextAllowed = false;
+    this._initEvents();
+    CustomEvent.observe("list_v2.orderby.update", this._updateOrderBy.bind(this));
+  },
+  gotoAction: function(ev, el) {
+    ev.preventDefault();
+    var action = el.name.substring(4);
+    if (!this.backAllowed && ((action == 'first') || (action == 'back')))
+      return;
+    if (!this.nextAllowed && ((action == 'next') || (action == 'last')))
+      return;
+    var list = GlideList2.get(this.listID);
+    var row;
+    if (action == 'first')
+      row = 1;
+    else if (action == 'back')
+      row = list.firstRow - list.rowsPerPage;
+    else if (action == 'next')
+      row = list.firstRow + list.rowsPerPage;
+    else if (action == 'last')
+      row = (list.totalRows + 1) - list.rowsPerPage;
+    else
+      return;
+    list._refreshAjax(row, {}, true);
+  },
+  gotoRow: function(ev) {
+    ev = getEvent(ev);
+    if (!ev || ev.keyCode != 13)
+      return;
+    ev.stop();
+    var row = this._getElement('first_row').value;
+    if (isNaN(row))
+      row = 1;
+    var list = GlideList2.get(this.listID);
+    list._refreshAjax(row, {}, true);
+  },
+  _initEvents: function() {
+    this.span = $(this.widgetID + "_vcr");
+    if (!this.span)
+      return;
+    this.span.on('click', "[data-nav=true]", this.gotoAction.bind(this));
+    var input = this.span.getElementsByTagName("INPUT")[0];
+    $(input).observe('keypress', this.gotoRow.bind(this));
+  },
+  _refresh: function(listTable, list) {
+    if (this.span.innerHTML == "")
+      this.span = $(this.widgetID + "_vcr");
+    if (list.totalRows == 0) {
+      this._setVisible(false);
+      this._setRepVisible(false);
+    } else if (list.totalRows <= list.rowsPerPage && GlideList2.get(this.listID).isHierarchical()) {
+      this._setVisible(false);
+      if (this._setRepVisible(true, list.totalRows))
+        this._setInner('rep_total_rows', list.totalRows);
+    } else {
+      this._setVisible(true);
+      this._setRepVisible(false);
+      this.backAllowed = (list.firstRow > 1);
+      this.nextAllowed = (list.lastRow < list.totalRows);
+      this._setRowNumbers(list);
+      var images = $(this.span).select("[data-nav=true]");
+      if (images && images.length) {
+        this._setAction(images[0], this.backAllowed);
+        this._setAction(images[1], this.backAllowed);
+        this._setAction(images[2], this.nextAllowed);
+        this._setAction(images[3], this.nextAllowed);
+      }
+    }
+  },
+  _setRowNumbers: function(list) {
+    var lastRow = $(this.widgetID + '_last_row'),
+      totalRows = $(this.widgetID + '_total_rows'),
+      firstRow = $(this.widgetID + '_first_row');
+    if (lastRow)
+      lastRow.innerHTML = list.lastRow;
+    if (totalRows)
+      totalRows.innerHTML = list.totalRows;
+    if (firstRow)
+      firstRow.value = list.firstRow;
+  },
+  _setAction: function(img, allowed) {
+    if (img.tagName.toLowerCase() == "img") {
+      if (allowed) {
+        img.addClassName("pointerhand");
+        this._removeDis(img);
+      } else {
+        img.removeClassName("pointerhand");
+        this._addDis(img);
+      }
+    } else {
+      if (!allowed)
+        img.addClassName("tab_button_disabled");
+      else
+        img.removeClassName("tab_button_disabled");
+    }
+  },
+  _removeDis: function(img) {
+    var src = img.src;
+    if (src.indexOf('_dis.gifx') != -1)
+      img.src = src.replace(/\_dis\.gifx/i, ".gifx");
+  },
+  _addDis: function(img) {
+    var src = img.src;
+    if (src.indexOf('_dis.gifx') == -1)
+      img.src = src.replace(/\.gifx/i, "_dis.gifx");
+  },
+  _setVisible: function(flag) {
+    var e = this.span;
+    if (!e)
+      return;
+    if ((flag && !e.visible()) || (!flag && e.visible()))
+      e.toggle();
+  },
+  _setRepVisible: function(flag, total_rows) {
+    var e = $(this.widgetID + "_rep_vcr");
+    if (!e)
+      return false;
+    if ((flag && !e.visible()) || (!flag && e.visible()))
+      e.toggle();
+    if (!flag)
+      return true;
+    var showPlural = false;
+    var showSingular = false;
+    if (total_rows > 1)
+      showPlural = flag;
+    else
+      showSingular = flag;
+    var e = $(this.widgetID + "_rep_plural_label");
+    if (e)
+      if ((showPlural && !e.visible()) || (!showPlural && e.visible()))
+        e.toggle();
+    var e = $(this.widgetID + "_rep_singular_label");
+    if (e)
+      if ((showSingular && !e.visible()) || (!showSingular && e.visible()))
+        e.toggle();
+    return true;
+  },
+  _updateOrderBy: function(orderBy) {
+    var list = GlideList2.get(this.listID);
+    if (list)
+      list.setOrderBy(orderBy);
+  },
+  type: 'GlideWidgetVCR'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetActions.js */
+var GlideWidgetActions = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID, ofText) {
+    $super(widgetID, listID);
+    this.ofText = ofText;
+    this.securityActions = {};
+  },
+  _refresh: function(listTable, list) {
+    this.securityActions = {};
+    list._setTheAllCheckbox(false);
+  },
+  actionCheck: function(select) {
+    if (select.getAttribute('gsft_sec_check') == 'true')
+      return;
+    select.setAttribute('gsft_sec_check', 'true');
+    var actions = [];
+    var sysIds = [];
+    var list = GlideList2.get(this.listID);
+    var checkedIds = list.getChecked();
+    if (checkedIds)
+      sysIds = checkedIds.split(",");
+    var options = select.options;
+    for (var i = 0; i < options.length; i++) {
+      var opt = options[i];
+      opt.style.display = 'inline';
+      if (getAttributeValue(opt, 'gsft_is_action') != 'true')
+        continue;
+      if (this._checkAction(opt, sysIds))
+        actions.push(opt);
+    }
+    if (actions.length > 0) {
+      var actionIds = [];
+      for (var i = 0; i < actions.length; i++)
+        actionIds.push(actions[i].id);
+      this._canExecute(actionIds, sysIds, list.tableName);
+      for (var i = 0; i < actions.length; i++) {
+        var opt = actions[i];
+        var validIds = this.securityActions[opt.id];
+        opt.style.color = "";
+        if (!validIds || (validIds.length == 0)) {
+          opt.style.color = '#777';
+          opt.disabled = true;
+        } else if (validIds.length == sysIds.length) {
+          opt.disabled = false;
+          if (opt.getAttribute("action_name"))
+            opt.innerHTML = "&nbsp;&nbsp;&nbsp;" + htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+          else
+            opt.innerHTML = htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+          opt.setAttribute('gsft_allow', '');
+        } else {
+          opt.disabled = false;
+          opt.innerHTML = getAttributeValue(opt, 'gsft_base_label') + ' (' + validIds.length + ' ' + this.ofText + ' ' + sysIds.length + ')';
+          opt.setAttribute('gsft_allow', validIds.join(','));
+        }
+      }
+    }
+    if ('' == 'true' && options.length > 0) {
+      for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        if (this._shouldHide(opt, select))
+          opt.style.display = 'none';
+      }
+    }
+    select.focus();
+  },
+  _shouldHide: function(opt, select) {
+    var options = select.options;
+    var ourId = opt.id;
+    var ourLabel = opt.innerHTML;
+    for (var i = 0; i < options.length; i++) {
+      var actionLabel = options[i].innerHTML,
+        actionEnabled = options[i].disabled != true,
+        actionId = options[i].id;
+      if (ourId == actionId && !opt.disabled)
+        return false;
+      if (ourLabel == actionLabel && actionEnabled)
+        return true;
+    }
+    return false;
+  },
+  _checkAction: function(opt, sysIds) {
+    if (sysIds.length == 0) {
+      opt.disabled = true;
+      if (opt.getAttribute("action_name"))
+        opt.innerHTML = "&nbsp;&nbsp;&nbsp;" + htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+      else
+        opt.innerHTML = htmlEscape(getAttributeValue(opt, 'gsft_base_label'));
+      opt.style.color = '#777';
+      return false;
+    }
+    if (getAttributeValue(opt, 'gsft_check_condition') != 'true') {
+      opt.disabled = false;
+      opt.style.color = '';
+      return false;
+    }
+    return true;
+  },
+  _canExecute: function(actionIds, sysIds, tableName) {
+    var ajax = new GlideAjax("AJAXActionSecurity");
+    ajax.addParam("sys_target", tableName);
+    ajax.addParam("sys_action", actionIds.join(","));
+    ajax.addParam("sysparm_checked_items", sysIds.join(','));
+    var xml = ajax.getXMLWait();
+    var answer = {};
+    for (var n = 0; n < actionIds.length; n++) {
+      var actionId = actionIds[n];
+      var root = xml.getElementsByTagName("action_" + actionId)[0];
+      var keys = root.childNodes;
+      this.securityActions[actionId] = [];
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var id = key.getAttribute('sys_id');
+        if (key.getAttribute('can_execute') == 'true')
+          this.securityActions[actionId].push(id);
+      }
+    }
+  },
+  runAction: function(select) {
+    var opt = getSelectedOption(select);
+    if (!opt)
+      return false;
+    if (opt.id == 'ignore' || (!opt.value && !opt.text))
+      return false;
+    if (opt.disabled)
+      return false;
+    var list = GlideList2.get(this.listID);
+    if (!list)
+      return false;
+    var id = opt.id;
+    var name = getAttributeValue(opt, 'action_name');
+    if (!name)
+      name = id;
+    if (getAttributeValue(opt, 'client') == 'true') {
+      g_list = list;
+      var href = getAttributeValue(opt, 'href');
+      eval(href);
+      g_list = null;
+    } else {
+      var ids = opt.getAttribute('gsft_allow');
+      list.action(id, name, ids);
+    }
+    return false;
+  },
+  type: 'GlideWidgetActions'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetSearch.js */
+var GlideWidgetSearch = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID, focusOnRefresh) {
+    $super(widgetID, listID);
+    this.field = "";
+    this.focusOnRefresh = (focusOnRefresh == 'true');
+    this._initEvents();
+  },
+  _refresh: function(listTable, list, isInitialLoad) {
+    var field = list.sortBy;
+    if (!field)
+      field = 'zztextsearchyy';
+    this._setSelect(field);
+    this._setTitle();
+    this._clearText();
+    if (this.focusOnRefresh) {
+      var e = this._getElement("text");
+      try {
+        e.focus();
+      } catch (er) {}
+    }
+  },
+  _initEvents: function() {
+    this._getElement('select').observe('change', this._setTitle.bind(this));
+    var text = this._getElement('text');
+    text.observe('keypress', this.searchKeyPress.bind(this));
+    var a = text.nextSibling;
+    var spn = text.previousSibling;
+    if (spn && spn.tagName.toUpperCase() == "SPAN")
+      $(spn).observe('click', this.search.bind(this));
+    while (a && a.tagName.toUpperCase() != "A")
+      a = a.nextSibling;
+    if (!a)
+      return;
+    var a = $(a);
+    a.observe('click', this.search.bind(this));
+  },
+  searchKeyPress: function(ev) {
+    if (!ev || ev.keyCode != 13)
+      return;
+    return this.search(ev);
+  },
+  search: function(ev) {
+    var select = new Select(this._getElement('select'));
+    var value = this._getValue("text");
+    if (!value)
+      return;
+    ev.stop();
+    var field = select.getValue();
+    var list = GlideList2.get(this.listID);
+    var parms = {};
+    parms['sysparm_goto_query'] = value;
+    parms['sysparm_goto_field'] = field;
+    parms['sys_target'] = list.tableName;
+    parms['sysparm_userpref.' + list.tableName + '.db.order'] = field;
+    parms['sysparm_query'] = list.getQuery({
+      groupby: true
     });
-    var work = document.createElement('div');
-    cell.innerHTML = '';
-    for (var child = data.firstChild; child; child = child.nextSibling) {
-      work.innerHTML = getXMLStri
+    CustomEvent.fire('list_v2.orderby.update', field);
+    this._clearText();
+    list.refresh(1, parms);
+  },
+  setTitle: function() {
+    this._setTitle();
+  },
+  _clearText: function() {
+    this._setValue('text', '');
+  },
+  _setSelect: function(field) {
+    var select = new Select(this._getElement('select'));
+    if (select.contains(field))
+      select.selectValue(field);
+  },
+  _setTitle: function() {
+    var opt = getSelectedOption(this._getElement('select'));
+    if (!opt) {
+      this._setInner('title', new GwtMessage().getMessage('Go to'));
+      return;
+    }
+    if (opt.value == 'zztextsearchyy')
+      this._setInner('title', new GwtMessage().getMessage('Search'));
+    else
+      this._setInner('title', new GwtMessage().getMessage('Go to'));
+  },
+  type: 'GlideWidgetSearch'
+});;
+/*! RESOURCE: /scripts/classes/GlideWidgetHideOnEmpty.js */
+var GlideWidgetHideOnEmpty = Class.create(GlideListWidget, {
+  initialize: function($super, widgetID, listID) {
+    $super(widgetID, listID);
+  },
+  _refresh: function() {
+    var list = GlideList2.get(this.listID);
+    var empty = (list.totalRows == 0);
+    var elements = list.listContainer.select('.list_hide_empty');
+    for (var i = 0; i < elements.length; i++) {
+      if (empty)
+        elements[i].hide();
+      else
+        elements[i].show();
+    }
+  },
+  type: 'GlideWidgetHideOnEmpty'
+});;
+/*! RESOURCE: /scripts/classes/GlideList2FilterUtil.js */
+function runFilterV2Lists(name, filter) {
+  var list = GlideList2.get(name);
+  if (!list) {
+    list = GlideList2.getByName(name);
+  }
+  if (list) {
+    var groupBy = list.getGroupBy();
+    if (groupBy)
+      filter += "^" + groupBy;
+    list.setFilterAndRefresh(filter);
+  }
+}
+GlideList2.saveFilter = function(listID, listName) {
+  var list = GlideList2.get(listID);
+  var siname = gel('save_filter_name');
+  if (!siname || !siname.value || siname.value.length <= 0) {
+    var msg = getMessage("Enter a name to use for saving the filter");
+    alert(msg);
+    siname.focus();
+    return;
+  }
+  var filter = getFilter(listName);
+  var visibility = getFilterVisibility();
+  var groupBy = list.getGroupBy();
+  if (groupBy)
+    filter += "^" + groupBy;
+  var parms = {};
+  parms['filter_visible'] = visibility;
+  parms['save_filter_query'] = filter;
+  parms['save_filter_name'] = siname.value;
+  parms['sys_target'] = list.getTableName();
+  parms['sys_action'] = 'sysverb_save_filter';
+  list.submit(parms);
+}
+GlideList2.setDefaultFilter = function(listID, listName) {
+  var filter = getFilter(listName, false);
+  GlideList2.get(listID).setDefaultFilter(filter);
+};
+/*! RESOURCE: /scripts/classes/GlideList2InitEvents.js */
+function glideList2InitEvents() {
+  document.body.on('click', 'a[data-type="list2_top_title"], button[data-type="list2_top_title"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).clickTitle(evt);
+    evt.stop();
+  });
+  document.body.on('contextmenu', '.list_nav_top', function(evt, element) {
+    if (!element.hasAttribute('data-list_id'))
+      return;
+    if (evt.ctrlKey)
+      return;
+    if (evt.target.tagName.toLowerCase() === 'input')
+      return;
+    GlideList2.get(element.getAttribute('data-list_id')).clickTitle(evt);
+    evt.stop();
+  });
+  document.body.on('click', 'a[data-type="list2_toggle"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).toggleList();
+    evt.stop();
+  });
+  if (isDoctype()) {
+    $j('input[data-type="list2_checkbox"] + label.checkbox-label').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var input = $j(e.target).parent()[0].querySelector('input');
+      input.checked = !input.checked;
+      GlideList2.get(input.getAttribute('data-list_id')).rowChecked(input, e);
+      $j(input).change();
+    });
+  } else {
+    document.body.on('click', 'input[data-type="list2_checkbox"], label[data-type="list2_checkbox"]', function(evt, element) {
+      GlideList2.get(element.getAttribute('data-list_id')).rowChecked(element, evt);
+      evt.stopPropagation();
+    });
+  }
+  document.body.on('click', 'input[data-type="list2_all_checkbox"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).allChecked(element);
+    evt.stopPropagation();
+  });
+  document.body.on('click', 'a[data-type="list2_group_toggle"]', function(evt, element) {
+    var toggleIcon = element.childNodes[0];
+    if (toggleIcon && toggleIcon.className.indexOf('collapsedGroup') > -1)
+      toggleIcon.className = toggleIcon.className.replace(/\bcollapsedGroup\b/, '');
+    else
+      toggleIcon.className += 'collapsedGroup';
+    GlideList2.get(element.getAttribute('data-list_id')).toggleGroups();
+    evt.stop();
+  });
+  document.body.on('click', 'img[data-type="list2_delete_row"], i[data-type="list2_delete_row"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    editListWithFormDeleteRow(row.sysId, gl.listID);
+  });
+  document.body.on('click', 'img[data-type="list2_hier"], i[data-type="list2_hier"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    gl.toggleHierarchy(element, 'hier_row_' + gl.listID + '_' + row.sysId, row.target, row.sysId);
+    evt.stop();
+  });
+  document.on('mouseover', 'img[data-type="list2_popup"], a[data-type="list2_popup"]', function(evt, element) {
+    var gl = GlideList2.get(element.getAttribute('data-list_id'));
+    var row = gl._getRowRecord(element);
+    popListDiv(evt, row.target, row.sysId, gl.view, 600);
+    evt.stop();
+  });
+  document.on('mouseout', 'img[data-type="list2_popup"], a[data-type="list2_popup"]', function(evt, element) {
+    lockPopup(evt);
+    evt.stop();
+  });
+  document.body.on('click', 'a[data-type="list2_hdrcell"]', function(evt, element) {
+    element = element.up("TH");
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellClick(element, evt);
+    evt.stop();
+  });
+  document.body.on('contextmenu', 'th[data-type="list2_hdrcell"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+  });
+  document.body.on('click', 'a.list_header_context', function(evt, element) {
+    element = element.parentElement;
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+    evt.stop();
+  });
+  document.body.on('click', 'i.list_header_context', function(evt, element) {
+    element = element.parentElement.parentElement;
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+    evt.stop();
+  });
+  document.body.on('click', 'span[data-type="list2_hdrcell"]', list2Context);
+
+  function list2Context(evt, element) {
+    element = element.up("th");
+    GlideList2.get(element.getAttribute('data-list_id')).hdrCellContextMenu(element, evt);
+  }
+  document.body.on('contextmenu', 'tr[data-type="list2_row"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).rowContextMenu(element, evt);
+  });
+  document.body.on('click', 'a[data-type="list_mechanic2_open"], i[data-type="list_mechanic2_open"]', function(evt, element) {
+    GlideList2.get(element.getAttribute('data-list_id')).listMechanicClick(element);
+    evt.stop();
+  });
+  document.body.on('click', 'a.linked, a.web, a.kb_link, a.report_link, .list_decoration > a', function(evt, el) {
+    if (!evt.shiftKey)
+      return;
+    var url = new GlideURL(el.getAttribute('href'));
+    var table = url.getContextPath().split('.do')[0];
+    var sys_id = url.getParam('sys_id');
+    var view = url.getParam('sysparm_view');
+    popForm(evt, table, sys_id, view);
+    evt.stop();
+  })
+}
+if (!window['g_isGlideList2InitEvents']) {
+  addAfterPageLoadedEvent(glideList2InitEvents);
+  window.g_isGlideList2InitEvents = true;
+};
+/*! RESOURCE: /scripts/GlideListEditorMessaging.js */
+(function() {
+    "use strict";
+    window.GlideListEditorMessaging = Class.create({
+          initialize: function(gle) {
+            if (!NOW || !NOW.MessageBus)
+              return;
+            this._recordMessage = NOW.messaging.record;
+            this._pendingNewRecords = [];
+            this._pendingSavedRecords = {};
+            this._listEditor = gle;
+            this._registerEvents(gle);
+          },
+          _registerEvents: function() {
+            this._listEditor.tableController.observe(
+              'glide:list_v2.edit.save', this._messageListEdit.bind(this));
+            this._listEditor.tableController.observe(
+              'glide:list_v2.edit.cells_changed', this._messageCellsChanged.bind(this));
+            this._listEditor.tableController.observe(
+              'glide:list_v2.edit.row_added', this._messageRowAdded.bind(this));
+            this._listEditor.tableController.observe(
+              'glide:list_v2.edit.changes_saved', this._messageRowSaved.bind(this));
+            this._listEditor.tableController.observe(
+              'glide:list_v2.edit.rows_deleted', this._messageRowDeleted.bind(this));
+          },
+          _messageListEdit: function() {
+            if (this._listEditor.hasChanges()) {
+              var modifiedRecords = this._listEditor.cellEditor.changes.getModifiedRecords();
+              for (var i in modifiedRecords) {
+                if (!modifiedRecords.hasOwnProperty(i) || i == '-1')
+                  continue;
+                this._pendingSavedRecords[i] = this._getRecordChanges(modifiedRecords[i]);
+              }
+            }
+          },
+          _messageCellsChanged: function(evt) {
+            var edits = this._listEditor.savePolicy.getEdits(evt);
+            for (var i = 0; i < edits.length; i++) {
+              var recordSysId = edits[i][0];
+              if (this._isPendingNewRecord(recordSysId))
+                continue;
+              var savedRecord = this._pendingSavedRecords[recordSysId];
+              if (!savedRecord)
+                savedRecord = this._getRecordChanges(this._listEditor.cellEditor.changes.get(recordSysId));
+            }
+          },
+          _messageRowAdded: function(evt) {
+            var recordSysId = evt.memo.sys_id;
+            this._pendingNewRecords.push(recordSysId);
+          },
+          _messageRowSaved: function(evt) {
+            var recordTableName = this._getTableName();
+            for (var i = 0; i < evt.memo.saves.length; i++) {
+              var recordSysId = evt.memo.saves[i];
+              if (this._isPendingNewRecord(recordSysId)) {
+                this._recordMessage.created(
+                  recordTableName, {
+                    sys_id: recordSysId
+                  }, {
+                    name: 'list',
+                    list_id: evt.memo.listId
+                  }
+                );
+                var pendingIndex = this._pendingNewRecords.indexOf(recordSysId);
+                this._pendingNewRecords.splice(pendingIndex, 1);
+              } else {
+                var savedRecord = this._pendingSavedRecords[recordSysId];
+                if (!savedRecord)
+                  return;
+                this._recordMessage.updated(
+                  recordTableName, {
+                    sys_id: recordSysId
+                  },
+                  savedRecord.changes, {
+                    name: 'list',
+                    list_id: evt.memo.listId
+                  }
+                );
+                delete this._pendingNewRecords[recordSysId];
+              }
+            }
+          },
+          _messageRowDeleted: function(evt) {
+            var recordTableName = this._getTableName();
+            for (var i = 0; i < evt.memo.deletes; i++) {
+              var recordSysId = evt.memo.deletes[i];
+              this._recordMessage.deleted(
+                recordTableName, {
+                  sys_id: recordSysId
+                }, {
+                  name: 'list',
+                  list_id: evt.memo.listId
+                }
+              );
+            }
+          },
+          _isPendingNewRecord: function(id) {
+            return this._pendingNewRecords.indexOf(id) != -1;
+          },
+          _getRecordChanges: function(modifiedRecord) {
+            return {
+              changes: this._getFieldChanges(modifiedRecord)
+            }
+          },
+          _getFieldChanges: function(modifiedRecord) {
+              var fields = modifiedRecord.getFields();
+              var changes = {};
+              for (var f

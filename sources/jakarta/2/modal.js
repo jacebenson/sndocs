@@ -1,264 +1,205 @@
-/*! RESOURCE: /scripts/thirdparty/angular.strap.2.2.2/modules/modal.js */
-angular.module('mgcrea.ngStrap.modal', ['mgcrea.ngStrap.helpers.dimensions']).provider('$modal', function() {
-  var defaults = this.defaults = {
-    animation: 'am-fade',
-    backdropAnimation: 'am-fade',
-    prefixClass: 'modal',
-    prefixEvent: 'modal',
-    placement: 'top',
-    template: 'modal/modal.tpl.html',
-    contentTemplate: false,
-    container: false,
-    element: null,
+/*! RESOURCE: /scripts/heisenberg/bootstrap/modal.js */ + function($) {
+  'use strict';
+  var Modal = function(element, options) {
+    this.options = options
+    this.$body = $(document.body)
+    this.$element = $(element)
+    this.$backdrop =
+      this.isShown = null
+    this.scrollbarWidth = 0
+    if (this.options.remote) {
+      this.$element
+        .find('.modal-content')
+        .load(this.options.remote, $.proxy(function() {
+          this.$element.trigger('loaded.bs.modal')
+        }, this))
+    }
+  }
+  Modal.VERSION = '3.2.0'
+  Modal.DEFAULTS = {
     backdrop: true,
     keyboard: true,
-    html: false,
     show: true
-  };
-  this.$get = ['$window', '$rootScope', '$compile', '$q', '$templateCache', '$http', '$animate', '$timeout', '$sce', 'dimensions', function($window, $rootScope, $compile, $q, $templateCache, $http, $animate, $timeout, $sce, dimensions) {
-    var forEach = angular.forEach;
-    var trim = String.prototype.trim;
-    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
-    var bodyElement = angular.element($window.document.body);
-    var htmlReplaceRegExp = /ng-bind="/gi;
-
-    function ModalFactory(config) {
-      var $modal = {};
-      var options = $modal.$options = angular.extend({}, defaults, config);
-      $modal.$promise = fetchTemplate(options.template);
-      var scope = $modal.$scope = options.scope && options.scope.$new() || $rootScope.$new();
-      if (!options.element && !options.container) {
-        options.container = 'body';
+  }
+  Modal.prototype.toggle = function(_relatedTarget) {
+    return this.isShown ? this.hide() : this.show(_relatedTarget)
+  }
+  Modal.prototype.show = function(_relatedTarget) {
+    var that = this
+    var e = $.Event('show.bs.modal', {
+      relatedTarget: _relatedTarget
+    })
+    this.$element.trigger(e)
+    if (this.isShown || e.isDefaultPrevented()) return
+    this.isShown = true
+    this.checkScrollbar()
+    this.$body.addClass('modal-open')
+    this.setScrollbar()
+    this.escape()
+    this.$element.on('click.dismiss.bs.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
+    this.backdrop(function() {
+      var transition = $.support.transition && that.$element.hasClass('fade')
+      if (!that.$element.parent().length) {
+        that.$element.appendTo(that.$body)
       }
-      $modal.$id = options.id || options.element && options.element.attr('id') || '';
-      forEach(['title', 'content'], function(key) {
-        if (options[key]) scope[key] = $sce.trustAsHtml(options[key]);
-      });
-      scope.$hide = function() {
-        scope.$$postDigest(function() {
-          $modal.hide();
-        });
-      };
-      scope.$show = function() {
-        scope.$$postDigest(function() {
-          $modal.show();
-        });
-      };
-      scope.$toggle = function() {
-        scope.$$postDigest(function() {
-          $modal.toggle();
-        });
-      };
-      $modal.$isShown = scope.$isShown = false;
-      if (options.contentTemplate) {
-        $modal.$promise = $modal.$promise.then(function(template) {
-          var templateEl = angular.element(template);
-          return fetchTemplate(options.contentTemplate).then(function(contentTemplate) {
-            var contentEl = findElement('[ng-bind="content"]', templateEl[0]).removeAttr('ng-bind').html(contentTemplate);
-            if (!config.template) contentEl.next().remove();
-            return templateEl[0].outerHTML;
-          });
-        });
+      that.$element
+        .show()
+        .scrollTop(0)
+      if (transition) {
+        that.$element[0].offsetWidth
       }
-      var modalLinker, modalElement;
-      var backdropElement = angular.element('<div class="' + options.prefixClass + '-backdrop"/>');
-      backdropElement.css({
-        position: 'fixed',
-        top: '0px',
-        left: '0px',
-        bottom: '0px',
-        right: '0px',
-        'z-index': 1038
-      });
-      $modal.$promise.then(function(template) {
-        if (angular.isObject(template)) template = template.data;
-        if (options.html) template = template.replace(htmlReplaceRegExp, 'ng-bind-html="');
-        template = trim.apply(template);
-        modalLinker = $compile(template);
-        $modal.init();
-      });
-      $modal.init = function() {
-        if (options.show) {
-          scope.$$postDigest(function() {
-            $modal.show();
-          });
+      that.$element
+        .addClass('in')
+        .attr('aria-hidden', false)
+      that.enforceFocus()
+      var e = $.Event('shown.bs.modal', {
+        relatedTarget: _relatedTarget
+      })
+      transition ?
+        that.$element.find('.modal-dialog')
+        .one('bsTransitionEnd', function() {
+          that.$element.trigger('focus').trigger(e)
+        })
+        .emulateTransitionEnd(300) :
+        that.$element.trigger('focus').trigger(e)
+    })
+  }
+  Modal.prototype.hide = function(e) {
+    if (e) e.preventDefault()
+    e = $.Event('hide.bs.modal')
+    this.$element.trigger(e)
+    if (!this.isShown || e.isDefaultPrevented()) return
+    this.isShown = false
+    this.$body.removeClass('modal-open')
+    this.resetScrollbar()
+    this.escape()
+    $(document).off('focusin.bs.modal')
+    this.$element
+      .removeClass('in')
+      .attr('aria-hidden', true)
+      .off('click.dismiss.bs.modal')
+    $.support.transition && this.$element.hasClass('fade') ?
+      this.$element
+      .one('bsTransitionEnd', $.proxy(this.hideModal, this))
+      .emulateTransitionEnd(300) :
+      this.hideModal()
+  }
+  Modal.prototype.enforceFocus = function() {
+    $(document)
+      .off('focusin.bs.modal')
+      .on('focusin.bs.modal', $.proxy(function(e) {
+        if (this.$element[0] !== e.target && !this.$element.has(e.target).length) {
+          this.$element.trigger('focus')
         }
-      };
-      $modal.destroy = function() {
-        if (modalElement) {
-          modalElement.remove();
-          modalElement = null;
-        }
-        if (backdropElement) {
-          backdropElement.remove();
-          backdropElement = null;
-        }
-        scope.$destroy();
-      };
-      $modal.show = function() {
-        if ($modal.$isShown) return;
-        var parent, after;
-        if (angular.isElement(options.container)) {
-          parent = options.container;
-          after = options.container[0].lastChild ? angular.element(options.container[0].lastChild) : null;
-        } else {
-          if (options.container) {
-            parent = findElement(options.container);
-            after = parent[0] && parent[0].lastChild ? angular.element(parent[0].lastChild) : null;
-          } else {
-            parent = null;
-            after = options.element;
-          }
-        }
-        modalElement = $modal.$element = modalLinker(scope, function(clonedElement, scope) {});
-        if (scope.$emit(options.prefixEvent + '.show.before', $modal).defaultPrevented) {
-          return;
-        }
-        modalElement.css({
-          display: 'block'
-        }).addClass(options.placement);
-        if (options.animation) {
-          if (options.backdrop) {
-            backdropElement.addClass(options.backdropAnimation);
-          }
-          modalElement.addClass(options.animation);
-        }
-        if (options.backdrop) {
-          $animate.enter(backdropElement, bodyElement, null);
-        }
-        var promise = $animate.enter(modalElement, parent, after, enterAnimateCallback);
-        if (promise && promise.then) promise.then(enterAnimateCallback);
-        $modal.$isShown = scope.$isShown = true;
-        safeDigest(scope);
-        var el = modalElement[0];
-        requestAnimationFrame(function() {
-          el.focus();
-        });
-        bodyElement.addClass(options.prefixClass + '-open');
-        if (options.animation) {
-          bodyElement.addClass(options.prefixClass + '-with-' + options.animation);
-        }
-        if (options.backdrop) {
-          modalElement.on('click', hideOnBackdropClick);
-          backdropElement.on('click', hideOnBackdropClick);
-          backdropElement.on('wheel', preventEventDefault);
-        }
-        if (options.keyboard) {
-          modalElement.on('keyup', $modal.$onKeyUp);
-        }
-      };
-
-      function enterAnimateCallback() {
-        scope.$emit(options.prefixEvent + '.show', $modal);
-      }
-      $modal.hide = function() {
-        if (!$modal.$isShown) return;
-        if (scope.$emit(options.prefixEvent + '.hide.before', $modal).defaultPrevented) {
-          return;
-        }
-        var promise = $animate.leave(modalElement, leaveAnimateCallback);
-        if (promise && promise.then) promise.then(leaveAnimateCallback);
-        if (options.backdrop) {
-          $animate.leave(backdropElement);
-        }
-        $modal.$isShown = scope.$isShown = false;
-        safeDigest(scope);
-        if (options.backdrop) {
-          modalElement.off('click', hideOnBackdropClick);
-          backdropElement.off('click', hideOnBackdropClick);
-          backdropElement.off('wheel', preventEventDefault);
-        }
-        if (options.keyboard) {
-          modalElement.off('keyup', $modal.$onKeyUp);
-        }
-      };
-
-      function leaveAnimateCallback() {
-        scope.$emit(options.prefixEvent + '.hide', $modal);
-        bodyElement.removeClass(options.prefixClass + '-open');
-        if (options.animation) {
-          bodyElement.removeClass(options.prefixClass + '-with-' + options.animation);
-        }
-      }
-      $modal.toggle = function() {
-        $modal.$isShown ? $modal.hide() : $modal.show();
-      };
-      $modal.focus = function() {
-        modalElement[0].focus();
-      };
-      $modal.$onKeyUp = function(evt) {
-        if (evt.which === 27 && $modal.$isShown) {
-          $modal.hide();
-          evt.stopPropagation();
-        }
-      };
-
-      function hideOnBackdropClick(evt) {
-        if (evt.target !== evt.currentTarget) return;
-        options.backdrop === 'static' ? $modal.focus() : $modal.hide();
-      }
-
-      function preventEventDefault(evt) {
-        evt.preventDefault();
-      }
-      return $modal;
+      }, this))
+  }
+  Modal.prototype.escape = function() {
+    if (this.isShown && this.options.keyboard) {
+      this.$element.on('keyup.dismiss.bs.modal', $.proxy(function(e) {
+        e.which == 27 && this.hide()
+      }, this))
+    } else if (!this.isShown) {
+      this.$element.off('keyup.dismiss.bs.modal')
     }
+  }
+  Modal.prototype.hideModal = function() {
+    var that = this
+    this.$element.hide()
+    this.backdrop(function() {
+      that.$element.trigger('hidden.bs.modal')
+    })
+  }
+  Modal.prototype.removeBackdrop = function() {
+    this.$backdrop && this.$backdrop.remove()
+    this.$backdrop = null
+  }
+  Modal.prototype.backdrop = function(callback) {
+    var that = this
+    var animate = this.$element.hasClass('fade') ? 'fade' : ''
+    if (this.isShown && this.options.backdrop) {
+      var doAnimate = $.support.transition && animate
+      this.$backdrop = $('<div class="modal-backdrop ' + animate + '" />')
+        .appendTo(this.$body)
+      this.$element.on('click.dismiss.bs.modal', $.proxy(function(e) {
+        if (e.target !== e.currentTarget) return
+        this.options.backdrop == 'static' ?
+          this.$element[0].focus.call(this.$element[0]) :
+          this.hide.call(this)
+      }, this))
+      if (doAnimate) this.$backdrop[0].offsetWidth
+      this.$backdrop.addClass('in')
+      if (!callback) return
+      doAnimate ?
+        this.$backdrop
+        .one('bsTransitionEnd', callback)
+        .emulateTransitionEnd(150) :
+        callback()
+    } else if (!this.isShown && this.$backdrop) {
+      this.$backdrop.removeClass('in')
+      var callbackRemove = function() {
+        that.removeBackdrop()
+        callback && callback()
+      }
+      $.support.transition && this.$element.hasClass('fade') ?
+        this.$backdrop
+        .one('bsTransitionEnd', callbackRemove)
+        .emulateTransitionEnd(150) :
+        callbackRemove()
+    } else if (callback) {
+      callback()
+    }
+  }
+  Modal.prototype.checkScrollbar = function() {
+    if (document.body.clientWidth >= window.innerWidth) return
+    this.scrollbarWidth = this.scrollbarWidth || this.measureScrollbar()
+  }
+  Modal.prototype.setScrollbar = function() {
+    var bodyPad = parseInt((this.$body.css('padding-right') || 0), 10)
+    if (this.scrollbarWidth) this.$body.css('padding-right', bodyPad + this.scrollbarWidth)
+  }
+  Modal.prototype.resetScrollbar = function() {
+    this.$body.css('padding-right', '')
+  }
+  Modal.prototype.measureScrollbar = function() {
+    var scrollDiv = document.createElement('div')
+    scrollDiv.className = 'modal-scrollbar-measure'
+    this.$body.append(scrollDiv)
+    var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth
+    this.$body[0].removeChild(scrollDiv)
+    return scrollbarWidth
+  }
 
-    function safeDigest(scope) {
-      scope.$$phase || scope.$root && scope.$root.$$phase || scope.$digest();
-    }
-
-    function findElement(query, element) {
-      return angular.element((element || document).querySelectorAll(query));
-    }
-    var fetchPromises = {};
-
-    function fetchTemplate(template) {
-      if (fetchPromises[template]) return fetchPromises[template];
-      return fetchPromises[template] = $http.get(template, {
-        cache: $templateCache
-      }).then(function(res) {
-        return res.data;
-      });
-    }
-    return ModalFactory;
-  }];
-}).directive('bsModal', ['$window', '$sce', '$modal', function($window, $sce, $modal) {
-  return {
-    restrict: 'EAC',
-    scope: true,
-    link: function postLink(scope, element, attr, transclusion) {
-      var options = {
-        scope: scope,
-        element: element,
-        show: false
-      };
-      angular.forEach(['template', 'contentTemplate', 'placement', 'backdrop', 'keyboard', 'html', 'container', 'animation', 'id', 'prefixEvent', 'prefixClass'], function(key) {
-        if (angular.isDefined(attr[key])) options[key] = attr[key];
-      });
-      var falseValueRegExp = /^(false|0|)$/i;
-      angular.forEach(['backdrop', 'keyboard', 'html', 'container'], function(key) {
-        if (angular.isDefined(attr[key]) && falseValueRegExp.test(attr[key])) options[key] = false;
-      });
-      angular.forEach(['title', 'content'], function(key) {
-        attr[key] && attr.$observe(key, function(newValue, oldValue) {
-          scope[key] = $sce.trustAsHtml(newValue);
-        });
-      });
-      attr.bsModal && scope.$watch(attr.bsModal, function(newValue, oldValue) {
-        if (angular.isObject(newValue)) {
-          angular.extend(scope, newValue);
-        } else {
-          scope.content = newValue;
-        }
-      }, true);
-      var modal = $modal(options);
-      element.on(attr.trigger || 'click', modal.toggle);
-      scope.$on('$destroy', function() {
-        if (modal) modal.destroy();
-        options = null;
-        modal = null;
-      });
-    }
-  };
-}]);;
+  function Plugin(option, _relatedTarget) {
+    return this.each(function() {
+      var $this = $(this)
+      var data = $this.data('bs.modal')
+      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
+      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
+      if (typeof option == 'string') data[option](_relatedTarget)
+      else if (options.show) data.show(_relatedTarget)
+    })
+  }
+  var old = $.fn.modal
+  $.fn.modal = Plugin
+  $.fn.modal.Constructor = Modal
+  $.fn.modal.noConflict = function() {
+    $.fn.modal = old
+    return this
+  }
+  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function(e) {
+    var $this = $(this)
+    var href = $this.attr('href')
+    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, '')))
+    var option = $target.data('bs.modal') ? 'toggle' : $.extend({
+      remote: !/#/.test(href) && href
+    }, $target.data(), $this.data())
+    if ($this.is('a')) e.preventDefault()
+    $target.one('show.bs.modal', function(showEvent) {
+      if (showEvent.isDefaultPrevented()) return
+      $target.one('hidden.bs.modal', function() {
+        $this.is(':visible') && $this.trigger('focus')
+      })
+    })
+    Plugin.call($target, option, this)
+  })
+}(jQuery);;

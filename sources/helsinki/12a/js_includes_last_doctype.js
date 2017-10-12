@@ -3479,4 +3479,270 @@ function addFirstLevelFields(s, target, fValue, filterMethod, fieldName, filter,
     var t = item.getName();
     if (filterMethod && t != fValue) {
       if (!filterMethod(item))
-        conti
+        continue;
+    }
+    var t = item.getName();
+    if (prefix != '')
+      t = prefix + '.' + t;
+    if (!noOps && item.getAttribute("filterable") == "no" &&
+      !allowConditionsForJournal(item.getAttribute("type"), filter))
+      continue;
+    if (!item.canRead()) {
+      if (t != fValue)
+        continue;
+      item.setCanRead('yes');
+    }
+    if (!item.isActive()) {
+      if (t != fValue)
+        continue;
+      item.setActive('yes');
+    }
+    var label = item.getLabel();
+    if (!elementDef || elementDef.getType() != "glide_var") {
+      savedItems[label] = t;
+      savedLabels.push(label);
+    }
+    if (item.isReference() && !item.isRefRotated() &&
+      item.getType() != 'glide_list' && filterExpanded &&
+      showRelated == 'yes') {
+      label += " ⟹ " + item.getRefLabel();
+      label += " " + messages['lowercase_fields'];
+      t += "...";
+      savedItems[label] = t;
+      savedLabels.push(label);
+    }
+  }
+  items = tableDef.getExtensions();
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var label = item.getLabel() + " (+)";
+    t = item.getExtName() + "...";
+    if (prefix != '')
+      t = prefix + '.' + t;
+    savedItems[label] = t;
+    savedLabels.push(label);
+  }
+  if (!onlyRestrictedFields &&
+    ((fValue == TEXTQUERY || textIndex) && filterMethod == null || forFilter)) {
+    o = addOption(s, TEXTQUERY, messages['Keywords'], (fValue == TEXTQUERY));
+    o.fullLabel = messages['Keywords'];
+  }
+  savedLabels.forEach(function(sname) {
+    var o = addOption(s, savedItems[sname], sname, savedItems[sname] == fValue);
+    o.tableName = tableDef.getName();
+    if (labelPrefix != '')
+      o.fullLabel = labelPrefix + "." + sname;
+    else
+      o.fullLabel = sname;
+    if (indentLabel)
+      o.innerHTML = "&nbsp;&nbsp;&nbsp;" + o.innerHTML;
+    if (o.value.indexOf("...") != -1)
+      if (o.fullLabel.indexOf("(+)") == -1)
+        o.style.color = 'blue';
+      else
+        o.style.color = 'darkred';
+  })
+  if (filterExpanded && !onlyRestrictedFields) {
+    if (showRelated != 'yes')
+      var o = addOption(s, "...Show Related Fields...", messages['Show Related Fields'], false);
+    else
+      o = addOption(s, "...Remove Related Fields...", messages['Remove Related Fields'], false);
+    o.style.color = 'blue';
+  }
+  if (!placeholder && (s.selectedIndex == 0 && ((textIndex && fValue != TEXTQUERY) || headersAdded)))
+    s.selectedIndex = selindex;
+  return s;
+
+  function fixParts() {
+    var o = null;
+    if (filterExpanded && parts.length > 2) {
+      var tableLabel = tableDef.getLabel();
+      if (tableLabel == null)
+        tableLabel = "Parent";
+      o = addOption(s, tableDef.getName() + "...", tableLabel + " " + messages['lowercase_fields'], false);
+      o.tableName = tableDef.getName();
+      o.style.color = 'blue';
+    }
+    if (parts[1] == PLACEHOLDERFIELD) {
+      o = addOption(s, PLACEHOLDER, messages['-- choose field --'], true);
+      o.style.color = 'blue';
+      o.tableName = tableDef.getName();
+      o.fullLabel = messages['-- choose field --'];
+      placeholder = true;
+    }
+    var sPeriod = "";
+    var cname = '';
+    for (var i = 1; i < parts.length - 1; i++) {
+      var f = parts[i];
+      if (f == null || f == '')
+        break;
+      var elementDef = tableDef.getElement(parts[i]);
+      if (elementDef == null)
+        break;
+      var childTable = tableName;
+      if (elementDef.isReference()) {
+        childTable = elementDef.getReference();
+        if (elementDef.isExtensionElement())
+          extension = childTable;
+        else
+          extension = '';
+      } else {
+        if (fieldName != null && fieldName.indexOf("...") > -1)
+          childTable = parts[0];
+        else
+          break;
+      }
+      var parentTable = (extension != '') ? extension : elementDef.getTable().getName();
+      tableDef = getTableReference(childTable, parentTable);
+      if (cname.length)
+        cname = cname + ".";
+      cname += elementDef.getName();
+      sPeriod = "." + sPeriod;
+      var clabel = sPeriod + elementDef.getLabel() + " \u00bb " +
+        elementDef.getRefLabel() + " " +
+        messages['lowercase_fields'];
+      o = addOption(s, cname + "...", clabel, false);
+      o.tablename = tableDef.getName();
+      o.style.color = 'blue';
+      selindex++;
+      indentLabel = true;
+      headersAdded = true;
+      if (labelPrefix.length)
+        labelPrefix += ".";
+      labelPrefix += elementDef.getLabel();
+      if (prefix.length)
+        prefix += ".";
+      prefix += elementDef.getName();
+    }
+    return elementDef;
+  }
+}
+
+function addSortSpec(name, fField, fOper) {
+  if (!NOW.c14.setup(name))
+    return null;
+  var fDiv = getThing(currentTable, 'gcond_filters');
+  var e = $('gcond_sort_order');
+  if (e) {
+    e.filterObject = fDiv.filterObject;
+    fDiv = e;
+  }
+  if (!checkFilterSize(fDiv.filterObject))
+    return;
+  fDiv.filterObject.addSortRow(fField, fOper);
+  _frameChanged();
+}
+
+function addFields(tableName, fValue, isSort, extendedFields) {
+  NOW.c14.setup(tableName);
+  var s = _createFilterSelect();
+  if (!isSort)
+    s.onchange = function() {
+      updateFields(tableName, this, null, null, extendedFields);
+    };
+  else
+    s.onchange = function() {
+      updateSortFields(tableName, this);
+    };
+  var sname = tableName.split(".")[0];
+  if (fValue)
+    sname = sname + "." + fValue;
+  if (isSort)
+    addFirstLevelFields(s, sname, fValue, sortByFilter);
+  else
+    addFirstLevelFields(s, sname, fValue);
+  return s;
+}
+
+function sortByFilter(item) {
+  return item.canSort() && (g_lang == 'en' || item.canSortI18N());
+}
+
+function updateSortFields(name, select) {
+  if (!NOW.c14.setup(name))
+    return;
+  name = currentTable;
+  var o = getSelectedOption(select);
+  var fieldName = o.value;
+  name = name.split(".")[0];
+  var idx = fieldName.indexOf("...");
+  if (idx != -1) {
+    NOW.c14.setShowRelated(fieldName, idx, name, select);
+    return;
+  }
+  name = currentTable = getTableFromOption(o);
+  var options = select.options;
+  for (var i = 0; i < options.length; i++) {
+    var option = options[i];
+    if (optionWasSelected(option)) {
+      option.innerHTML = getNormalLabel(option);
+      option.style.color = 'black';
+      option.wasSelected = 'false';
+      break;
+    }
+  }
+  if (!NOW.c14.setup(name))
+    return;
+  var tr = select.parentNode.parentNode;
+  o.normalLabel = o.innerHTML;
+  o.innerHTML = getFullLabel(o);
+  o.style.color = 'green';
+  o.wasSelected = 'true';
+  $(select).addClassName('filter_type');
+  $j(select).select2();
+}
+
+function addCondition(name) {
+  if (!NOW.c14.setup(name))
+    return null;
+  var fDiv = getThing(currentTable, 'gcond_filters');
+  if (!checkFilterSize(fDiv.filterObject))
+    return;
+  fDiv.filterObject.addConditionRowToFirstSection();
+  _frameChanged();
+}
+
+function addConditionSpec(name, queryID, field, oper, value, fDiv) {
+  if (firstTable == null)
+    firstTable = currentTable;
+  if (!NOW.c14.setup(name))
+    return null;
+  var divName = "gcond_filters";
+  if (fDiv != null)
+    divName = fDiv + "gcond_filters";
+  var fDiv = getThing(currentTable, divName);
+  var filter = fDiv.filterObject;
+  if (filter == null) {
+    filter = new GlideFilter(currentTable, "");
+    if (typeof field == "undefined") {
+      return;
+    }
+  }
+  if (!checkFilterSize(filter))
+    return;
+  var answer = filter.addConditionRow(queryID, field, oper, value);
+  _frameChanged();
+  return answer;
+};
+/*! RESOURCE: /scripts/doctype/condition14_templates.js */
+function addTextArea(td, dValue) {
+  if (!useTextareas)
+    return addTextInput(td, dValue);
+  var input = cel("textarea");
+  td.fieldType = "textarea";
+  if (dValue)
+    input.value = dValue;
+  input.className = "filerTableInput form-control";
+  input.title = 'input value';
+  input.wrap = "soft";
+  input.rows = 5;
+  input.style.width = "80%";
+  input.maxlength = 80;
+  td.appendChild(input);
+  return input;
+};
+/*! RESOURCE: /scripts/doctype/condition14_reporting.js */
+function columnsGetWithFilter(mft, filter, nu) {
+  queueFilters[mft] = filter;
+  queueTables[mft] = mft;
+  colum

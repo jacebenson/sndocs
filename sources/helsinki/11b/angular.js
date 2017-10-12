@@ -9525,4 +9525,863 @@
             return dontMatchWholeObject ? false : deepCompare(actual, expected, comparator, false);
           } else if (expectedType === 'object') {
             for (key in expected) {
-              var expecte
+              var expectedVal = expected[key];
+              if (isFunction(expectedVal) || isUndefined(expectedVal)) {
+                continue;
+              }
+              var matchAnyProperty = key === '$';
+              var actualVal = matchAnyProperty ? actual : actual[key];
+              if (!deepCompare(actualVal, expectedVal, comparator, matchAnyProperty, matchAnyProperty)) {
+                return false;
+              }
+            }
+            return true;
+          } else {
+            return comparator(actual, expected);
+          }
+          break;
+        case 'function':
+          return false;
+        default:
+          return comparator(actual, expected);
+      }
+    }
+
+    function getTypeForFilter(val) {
+      return (val === null) ? 'null' : typeof val;
+    }
+    var MAX_DIGITS = 22;
+    var DECIMAL_SEP = '.';
+    var ZERO_CHAR = '0';
+    currencyFilter.$inject = ['$locale'];
+
+    function currencyFilter($locale) {
+      var formats = $locale.NUMBER_FORMATS;
+      return function(amount, currencySymbol, fractionSize) {
+        if (isUndefined(currencySymbol)) {
+          currencySymbol = formats.CURRENCY_SYM;
+        }
+        if (isUndefined(fractionSize)) {
+          fractionSize = formats.PATTERNS[1].maxFrac;
+        }
+        return (amount == null) ?
+          amount :
+          formatNumber(amount, formats.PATTERNS[1], formats.GROUP_SEP, formats.DECIMAL_SEP, fractionSize).
+        replace(/\u00A4/g, currencySymbol);
+      };
+    }
+    numberFilter.$inject = ['$locale'];
+
+    function numberFilter($locale) {
+      var formats = $locale.NUMBER_FORMATS;
+      return function(number, fractionSize) {
+        return (number == null) ?
+          number :
+          formatNumber(number, formats.PATTERNS[0], formats.GROUP_SEP, formats.DECIMAL_SEP,
+            fractionSize);
+      };
+    }
+
+    function parse(numStr) {
+      var exponent = 0,
+        digits, numberOfIntegerDigits;
+      var i, j, zeros;
+      if ((numberOfIntegerDigits = numStr.indexOf(DECIMAL_SEP)) > -1) {
+        numStr = numStr.replace(DECIMAL_SEP, '');
+      }
+      if ((i = numStr.search(/e/i)) > 0) {
+        if (numberOfIntegerDigits < 0) numberOfIntegerDigits = i;
+        numberOfIntegerDigits += +numStr.slice(i + 1);
+        numStr = numStr.substring(0, i);
+      } else if (numberOfIntegerDigits < 0) {
+        numberOfIntegerDigits = numStr.length;
+      }
+      for (i = 0; numStr.charAt(i) == ZERO_CHAR; i++) {}
+      if (i == (zeros = numStr.length)) {
+        digits = [0];
+        numberOfIntegerDigits = 1;
+      } else {
+        zeros--;
+        while (numStr.charAt(zeros) == ZERO_CHAR) zeros--;
+        numberOfIntegerDigits -= i;
+        digits = [];
+        for (j = 0; i <= zeros; i++, j++) {
+          digits[j] = +numStr.charAt(i);
+        }
+      }
+      if (numberOfIntegerDigits > MAX_DIGITS) {
+        digits = digits.splice(0, MAX_DIGITS - 1);
+        exponent = numberOfIntegerDigits - 1;
+        numberOfIntegerDigits = 1;
+      }
+      return {
+        d: digits,
+        e: exponent,
+        i: numberOfIntegerDigits
+      };
+    }
+
+    function roundNumber(parsedNumber, fractionSize, minFrac, maxFrac) {
+      var digits = parsedNumber.d;
+      var fractionLen = digits.length - parsedNumber.i;
+      fractionSize = (isUndefined(fractionSize)) ? Math.min(Math.max(minFrac, fractionLen), maxFrac) : +fractionSize;
+      var roundAt = fractionSize + parsedNumber.i;
+      var digit = digits[roundAt];
+      if (roundAt > 0) {
+        digits.splice(Math.max(parsedNumber.i, roundAt));
+        for (var j = roundAt; j < digits.length; j++) {
+          digits[j] = 0;
+        }
+      } else {
+        fractionLen = Math.max(0, fractionLen);
+        parsedNumber.i = 1;
+        digits.length = Math.max(1, roundAt = fractionSize + 1);
+        digits[0] = 0;
+        for (var i = 1; i < roundAt; i++) digits[i] = 0;
+      }
+      if (digit >= 5) {
+        if (roundAt - 1 < 0) {
+          for (var k = 0; k > roundAt; k--) {
+            digits.unshift(0);
+            parsedNumber.i++;
+          }
+          digits.unshift(1);
+          parsedNumber.i++;
+        } else {
+          digits[roundAt - 1]++;
+        }
+      }
+      for (; fractionLen < Math.max(0, fractionSize); fractionLen++) digits.push(0);
+      var carry = digits.reduceRight(function(carry, d, i, digits) {
+        d = d + carry;
+        digits[i] = d % 10;
+        return Math.floor(d / 10);
+      }, 0);
+      if (carry) {
+        digits.unshift(carry);
+        parsedNumber.i++;
+      }
+    }
+
+    function formatNumber(number, pattern, groupSep, decimalSep, fractionSize) {
+      if (!(isString(number) || isNumber(number)) || isNaN(number)) return '';
+      var isInfinity = !isFinite(number);
+      var isZero = false;
+      var numStr = Math.abs(number) + '',
+        formattedText = '',
+        parsedNumber;
+      if (isInfinity) {
+        formattedText = '\u221e';
+      } else {
+        parsedNumber = parse(numStr);
+        roundNumber(parsedNumber, fractionSize, pattern.minFrac, pattern.maxFrac);
+        var digits = parsedNumber.d;
+        var integerLen = parsedNumber.i;
+        var exponent = parsedNumber.e;
+        var decimals = [];
+        isZero = digits.reduce(function(isZero, d) {
+          return isZero && !d;
+        }, true);
+        while (integerLen < 0) {
+          digits.unshift(0);
+          integerLen++;
+        }
+        if (integerLen > 0) {
+          decimals = digits.splice(integerLen);
+        } else {
+          decimals = digits;
+          digits = [0];
+        }
+        var groups = [];
+        if (digits.length >= pattern.lgSize) {
+          groups.unshift(digits.splice(-pattern.lgSize).join(''));
+        }
+        while (digits.length > pattern.gSize) {
+          groups.unshift(digits.splice(-pattern.gSize).join(''));
+        }
+        if (digits.length) {
+          groups.unshift(digits.join(''));
+        }
+        formattedText = groups.join(groupSep);
+        if (decimals.length) {
+          formattedText += decimalSep + decimals.join('');
+        }
+        if (exponent) {
+          formattedText += 'e+' + exponent;
+        }
+      }
+      if (number < 0 && !isZero) {
+        return pattern.negPre + formattedText + pattern.negSuf;
+      } else {
+        return pattern.posPre + formattedText + pattern.posSuf;
+      }
+    }
+
+    function padNumber(num, digits, trim, negWrap) {
+      var neg = '';
+      if (num < 0 || (negWrap && num <= 0)) {
+        if (negWrap) {
+          num = -num + 1;
+        } else {
+          num = -num;
+          neg = '-';
+        }
+      }
+      num = '' + num;
+      while (num.length < digits) num = ZERO_CHAR + num;
+      if (trim) {
+        num = num.substr(num.length - digits);
+      }
+      return neg + num;
+    }
+
+    function dateGetter(name, size, offset, trim, negWrap) {
+      offset = offset || 0;
+      return function(date) {
+        var value = date['get' + name]();
+        if (offset > 0 || value > -offset) {
+          value += offset;
+        }
+        if (value === 0 && offset == -12) value = 12;
+        return padNumber(value, size, trim, negWrap);
+      };
+    }
+
+    function dateStrGetter(name, shortForm, standAlone) {
+      return function(date, formats) {
+        var value = date['get' + name]();
+        var propPrefix = (standAlone ? 'STANDALONE' : '') + (shortForm ? 'SHORT' : '');
+        var get = uppercase(propPrefix + name);
+        return formats[get][value];
+      };
+    }
+
+    function timeZoneGetter(date, formats, offset) {
+      var zone = -1 * offset;
+      var paddedZone = (zone >= 0) ? "+" : "";
+      paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
+        padNumber(Math.abs(zone % 60), 2);
+      return paddedZone;
+    }
+
+    function getFirstThursdayOfYear(year) {
+      var dayOfWeekOnFirst = (new Date(year, 0, 1)).getDay();
+      return new Date(year, 0, ((dayOfWeekOnFirst <= 4) ? 5 : 12) - dayOfWeekOnFirst);
+    }
+
+    function getThursdayThisWeek(datetime) {
+      return new Date(datetime.getFullYear(), datetime.getMonth(),
+        datetime.getDate() + (4 - datetime.getDay()));
+    }
+
+    function weekGetter(size) {
+      return function(date) {
+        var firstThurs = getFirstThursdayOfYear(date.getFullYear()),
+          thisThurs = getThursdayThisWeek(date);
+        var diff = +thisThurs - +firstThurs,
+          result = 1 + Math.round(diff / 6.048e8);
+        return padNumber(result, size);
+      };
+    }
+
+    function ampmGetter(date, formats) {
+      return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
+    }
+
+    function eraGetter(date, formats) {
+      return date.getFullYear() <= 0 ? formats.ERAS[0] : formats.ERAS[1];
+    }
+
+    function longEraGetter(date, formats) {
+      return date.getFullYear() <= 0 ? formats.ERANAMES[0] : formats.ERANAMES[1];
+    }
+    var DATE_FORMATS = {
+      yyyy: dateGetter('FullYear', 4, 0, false, true),
+      yy: dateGetter('FullYear', 2, 0, true, true),
+      y: dateGetter('FullYear', 1, 0, false, true),
+      MMMM: dateStrGetter('Month'),
+      MMM: dateStrGetter('Month', true),
+      MM: dateGetter('Month', 2, 1),
+      M: dateGetter('Month', 1, 1),
+      LLLL: dateStrGetter('Month', false, true),
+      dd: dateGetter('Date', 2),
+      d: dateGetter('Date', 1),
+      HH: dateGetter('Hours', 2),
+      H: dateGetter('Hours', 1),
+      hh: dateGetter('Hours', 2, -12),
+      h: dateGetter('Hours', 1, -12),
+      mm: dateGetter('Minutes', 2),
+      m: dateGetter('Minutes', 1),
+      ss: dateGetter('Seconds', 2),
+      s: dateGetter('Seconds', 1),
+      sss: dateGetter('Milliseconds', 3),
+      EEEE: dateStrGetter('Day'),
+      EEE: dateStrGetter('Day', true),
+      a: ampmGetter,
+      Z: timeZoneGetter,
+      ww: weekGetter(2),
+      w: weekGetter(1),
+      G: eraGetter,
+      GG: eraGetter,
+      GGG: eraGetter,
+      GGGG: longEraGetter
+    };
+    var DATE_FORMATS_SPLIT = /((?:[^yMLdHhmsaZEwG']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|L+|d+|H+|h+|m+|s+|a|Z|G+|w+))(.*)/,
+      NUMBER_STRING = /^\-?\d+$/;
+    dateFilter.$inject = ['$locale'];
+
+    function dateFilter($locale) {
+      var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
+
+      function jsonStringToDate(string) {
+        var match;
+        if (match = string.match(R_ISO8601_STR)) {
+          var date = new Date(0),
+            tzHour = 0,
+            tzMin = 0,
+            dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
+            timeSetter = match[8] ? date.setUTCHours : date.setHours;
+          if (match[9]) {
+            tzHour = toInt(match[9] + match[10]);
+            tzMin = toInt(match[9] + match[11]);
+          }
+          dateSetter.call(date, toInt(match[1]), toInt(match[2]) - 1, toInt(match[3]));
+          var h = toInt(match[4] || 0) - tzHour;
+          var m = toInt(match[5] || 0) - tzMin;
+          var s = toInt(match[6] || 0);
+          var ms = Math.round(parseFloat('0.' + (match[7] || 0)) * 1000);
+          timeSetter.call(date, h, m, s, ms);
+          return date;
+        }
+        return string;
+      }
+      return function(date, format, timezone) {
+        var text = '',
+          parts = [],
+          fn, match;
+        format = format || 'mediumDate';
+        format = $locale.DATETIME_FORMATS[format] || format;
+        if (isString(date)) {
+          date = NUMBER_STRING.test(date) ? toInt(date) : jsonStringToDate(date);
+        }
+        if (isNumber(date)) {
+          date = new Date(date);
+        }
+        if (!isDate(date) || !isFinite(date.getTime())) {
+          return date;
+        }
+        while (format) {
+          match = DATE_FORMATS_SPLIT.exec(format);
+          if (match) {
+            parts = concat(parts, match, 1);
+            format = parts.pop();
+          } else {
+            parts.push(format);
+            format = null;
+          }
+        }
+        var dateTimezoneOffset = date.getTimezoneOffset();
+        if (timezone) {
+          dateTimezoneOffset = timezoneToOffset(timezone, dateTimezoneOffset);
+          date = convertTimezoneToLocal(date, timezone, true);
+        }
+        forEach(parts, function(value) {
+          fn = DATE_FORMATS[value];
+          text += fn ? fn(date, $locale.DATETIME_FORMATS, dateTimezoneOffset) :
+            value === "''" ? "'" : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
+        });
+        return text;
+      };
+    }
+
+    function jsonFilter() {
+      return function(object, spacing) {
+        if (isUndefined(spacing)) {
+          spacing = 2;
+        }
+        return toJson(object, spacing);
+      };
+    }
+    var lowercaseFilter = valueFn(lowercase);
+    var uppercaseFilter = valueFn(uppercase);
+
+    function limitToFilter() {
+      return function(input, limit, begin) {
+        if (Math.abs(Number(limit)) === Infinity) {
+          limit = Number(limit);
+        } else {
+          limit = toInt(limit);
+        }
+        if (isNaN(limit)) return input;
+        if (isNumber(input)) input = input.toString();
+        if (!isArray(input) && !isString(input)) return input;
+        begin = (!begin || isNaN(begin)) ? 0 : toInt(begin);
+        begin = (begin < 0) ? Math.max(0, input.length + begin) : begin;
+        if (limit >= 0) {
+          return input.slice(begin, begin + limit);
+        } else {
+          if (begin === 0) {
+            return input.slice(limit, input.length);
+          } else {
+            return input.slice(Math.max(0, begin + limit), begin);
+          }
+        }
+      };
+    }
+    orderByFilter.$inject = ['$parse'];
+
+    function orderByFilter($parse) {
+      return function(array, sortPredicate, reverseOrder) {
+        if (array == null) return array;
+        if (!isArrayLike(array)) {
+          throw minErr('orderBy')('notarray', 'Expected array but received: {0}', array);
+        }
+        if (!isArray(sortPredicate)) {
+          sortPredicate = [sortPredicate];
+        }
+        if (sortPredicate.length === 0) {
+          sortPredicate = ['+'];
+        }
+        var predicates = processPredicates(sortPredicate, reverseOrder);
+        predicates.push({
+          get: function() {
+            return {};
+          },
+          descending: reverseOrder ? -1 : 1
+        });
+        var compareValues = Array.prototype.map.call(array, getComparisonObject);
+        compareValues.sort(doComparison);
+        array = compareValues.map(function(item) {
+          return item.value;
+        });
+        return array;
+
+        function getComparisonObject(value, index) {
+          return {
+            value: value,
+            predicateValues: predicates.map(function(predicate) {
+              return getPredicateValue(predicate.get(value), index);
+            })
+          };
+        }
+
+        function doComparison(v1, v2) {
+          var result = 0;
+          for (var index = 0, length = predicates.length; index < length; ++index) {
+            result = compare(v1.predicateValues[index], v2.predicateValues[index]) * predicates[index].descending;
+            if (result) break;
+          }
+          return result;
+        }
+      };
+
+      function processPredicates(sortPredicate, reverseOrder) {
+        reverseOrder = reverseOrder ? -1 : 1;
+        return sortPredicate.map(function(predicate) {
+          var descending = 1,
+            get = identity;
+          if (isFunction(predicate)) {
+            get = predicate;
+          } else if (isString(predicate)) {
+            if ((predicate.charAt(0) == '+' || predicate.charAt(0) == '-')) {
+              descending = predicate.charAt(0) == '-' ? -1 : 1;
+              predicate = predicate.substring(1);
+            }
+            if (predicate !== '') {
+              get = $parse(predicate);
+              if (get.constant) {
+                var key = get();
+                get = function(value) {
+                  return value[key];
+                };
+              }
+            }
+          }
+          return {
+            get: get,
+            descending: descending * reverseOrder
+          };
+        });
+      }
+
+      function isPrimitive(value) {
+        switch (typeof value) {
+          case 'number':
+          case 'boolean':
+          case 'string':
+            return true;
+          default:
+            return false;
+        }
+      }
+
+      function objectValue(value, index) {
+        if (typeof value.valueOf === 'function') {
+          value = value.valueOf();
+          if (isPrimitive(value)) return value;
+        }
+        if (hasCustomToString(value)) {
+          value = value.toString();
+          if (isPrimitive(value)) return value;
+        }
+        return index;
+      }
+
+      function getPredicateValue(value, index) {
+        var type = typeof value;
+        if (value === null) {
+          type = 'string';
+          value = 'null';
+        } else if (type === 'string') {
+          value = value.toLowerCase();
+        } else if (type === 'object') {
+          value = objectValue(value, index);
+        }
+        return {
+          value: value,
+          type: type
+        };
+      }
+
+      function compare(v1, v2) {
+        var result = 0;
+        if (v1.type === v2.type) {
+          if (v1.value !== v2.value) {
+            result = v1.value < v2.value ? -1 : 1;
+          }
+        } else {
+          result = v1.type < v2.type ? -1 : 1;
+        }
+        return result;
+      }
+    }
+
+    function ngDirective(directive) {
+      if (isFunction(directive)) {
+        directive = {
+          link: directive
+        };
+      }
+      directive.restrict = directive.restrict || 'AC';
+      return valueFn(directive);
+    }
+    var htmlAnchorDirective = valueFn({
+      restrict: 'E',
+      compile: function(element, attr) {
+        if (!attr.href && !attr.xlinkHref) {
+          return function(scope, element) {
+            if (element[0].nodeName.toLowerCase() !== 'a') return;
+            var href = toString.call(element.prop('href')) === '[object SVGAnimatedString]' ?
+              'xlink:href' : 'href';
+            element.on('click', function(event) {
+              if (!element.attr(href)) {
+                event.preventDefault();
+              }
+            });
+          };
+        }
+      }
+    });
+    var ngAttributeAliasDirectives = {};
+    forEach(BOOLEAN_ATTR, function(propName, attrName) {
+      if (propName == "multiple") return;
+
+      function defaultLinkFn(scope, element, attr) {
+        scope.$watch(attr[normalized], function ngBooleanAttrWatchAction(value) {
+          attr.$set(attrName, !!value);
+        });
+      }
+      var normalized = directiveNormalize('ng-' + attrName);
+      var linkFn = defaultLinkFn;
+      if (propName === 'checked') {
+        linkFn = function(scope, element, attr) {
+          if (attr.ngModel !== attr[normalized]) {
+            defaultLinkFn(scope, element, attr);
+          }
+        };
+      }
+      ngAttributeAliasDirectives[normalized] = function() {
+        return {
+          restrict: 'A',
+          priority: 100,
+          link: linkFn
+        };
+      };
+    });
+    forEach(ALIASED_ATTR, function(htmlAttr, ngAttr) {
+      ngAttributeAliasDirectives[ngAttr] = function() {
+        return {
+          priority: 100,
+          link: function(scope, element, attr) {
+            if (ngAttr === "ngPattern" && attr.ngPattern.charAt(0) == "/") {
+              var match = attr.ngPattern.match(REGEX_STRING_REGEXP);
+              if (match) {
+                attr.$set("ngPattern", new RegExp(match[1], match[2]));
+                return;
+              }
+            }
+            scope.$watch(attr[ngAttr], function ngAttrAliasWatchAction(value) {
+              attr.$set(ngAttr, value);
+            });
+          }
+        };
+      };
+    });
+    forEach(['src', 'srcset', 'href'], function(attrName) {
+      var normalized = directiveNormalize('ng-' + attrName);
+      ngAttributeAliasDirectives[normalized] = function() {
+        return {
+          priority: 99,
+          link: function(scope, element, attr) {
+            var propName = attrName,
+              name = attrName;
+            if (attrName === 'href' &&
+              toString.call(element.prop('href')) === '[object SVGAnimatedString]') {
+              name = 'xlinkHref';
+              attr.$attr[name] = 'xlink:href';
+              propName = null;
+            }
+            attr.$observe(normalized, function(value) {
+              if (!value) {
+                if (attrName === 'href') {
+                  attr.$set(name, null);
+                }
+                return;
+              }
+              attr.$set(name, value);
+              if (msie && propName) element.prop(propName, attr[name]);
+            });
+          }
+        };
+      };
+    });
+    var nullFormCtrl = {
+        $addControl: noop,
+        $$renameControl: nullFormRenameControl,
+        $removeControl: noop,
+        $setValidity: noop,
+        $setDirty: noop,
+        $setPristine: noop,
+        $setSubmitted: noop
+      },
+      SUBMITTED_CLASS = 'ng-submitted';
+
+    function nullFormRenameControl(control, name) {
+      control.$name = name;
+    }
+    FormController.$inject = ['$element', '$attrs', '$scope', '$animate', '$interpolate'];
+
+    function FormController(element, attrs, $scope, $animate, $interpolate) {
+      var form = this,
+        controls = [];
+      form.$error = {};
+      form.$$success = {};
+      form.$pending = undefined;
+      form.$name = $interpolate(attrs.name || attrs.ngForm || '')($scope);
+      form.$dirty = false;
+      form.$pristine = true;
+      form.$valid = true;
+      form.$invalid = false;
+      form.$submitted = false;
+      form.$$parentForm = nullFormCtrl;
+      form.$rollbackViewValue = function() {
+        forEach(controls, function(control) {
+          control.$rollbackViewValue();
+        });
+      };
+      form.$commitViewValue = function() {
+        forEach(controls, function(control) {
+          control.$commitViewValue();
+        });
+      };
+      form.$addControl = function(control) {
+        assertNotHasOwnProperty(control.$name, 'input');
+        controls.push(control);
+        if (control.$name) {
+          form[control.$name] = control;
+        }
+        control.$$parentForm = form;
+      };
+      form.$$renameControl = function(control, newName) {
+        var oldName = control.$name;
+        if (form[oldName] === control) {
+          delete form[oldName];
+        }
+        form[newName] = control;
+        control.$name = newName;
+      };
+      form.$removeControl = function(control) {
+        if (control.$name && form[control.$name] === control) {
+          delete form[control.$name];
+        }
+        forEach(form.$pending, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        forEach(form.$error, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        forEach(form.$$success, function(value, name) {
+          form.$setValidity(name, null, control);
+        });
+        arrayRemove(controls, control);
+        control.$$parentForm = nullFormCtrl;
+      };
+      addSetValidityMethod({
+        ctrl: this,
+        $element: element,
+        set: function(object, property, controller) {
+          var list = object[property];
+          if (!list) {
+            object[property] = [controller];
+          } else {
+            var index = list.indexOf(controller);
+            if (index === -1) {
+              list.push(controller);
+            }
+          }
+        },
+        unset: function(object, property, controller) {
+          var list = object[property];
+          if (!list) {
+            return;
+          }
+          arrayRemove(list, controller);
+          if (list.length === 0) {
+            delete object[property];
+          }
+        },
+        $animate: $animate
+      });
+      form.$setDirty = function() {
+        $animate.removeClass(element, PRISTINE_CLASS);
+        $animate.addClass(element, DIRTY_CLASS);
+        form.$dirty = true;
+        form.$pristine = false;
+        form.$$parentForm.$setDirty();
+      };
+      form.$setPristine = function() {
+        $animate.setClass(element, PRISTINE_CLASS, DIRTY_CLASS + ' ' + SUBMITTED_CLASS);
+        form.$dirty = false;
+        form.$pristine = true;
+        form.$submitted = false;
+        forEach(controls, function(control) {
+          control.$setPristine();
+        });
+      };
+      form.$setUntouched = function() {
+        forEach(controls, function(control) {
+          control.$setUntouched();
+        });
+      };
+      form.$setSubmitted = function() {
+        $animate.addClass(element, SUBMITTED_CLASS);
+        form.$submitted = true;
+        form.$$parentForm.$setSubmitted();
+      };
+    }
+    var formDirectiveFactory = function(isNgForm) {
+      return ['$timeout', '$parse', function($timeout, $parse) {
+        var formDirective = {
+          name: 'form',
+          restrict: isNgForm ? 'EAC' : 'E',
+          require: ['form', '^^?form'],
+          controller: FormController,
+          compile: function ngFormCompile(formElement, attr) {
+            formElement.addClass(PRISTINE_CLASS).addClass(VALID_CLASS);
+            var nameAttr = attr.name ? 'name' : (isNgForm && attr.ngForm ? 'ngForm' : false);
+            return {
+              pre: function ngFormPreLink(scope, formElement, attr, ctrls) {
+                var controller = ctrls[0];
+                if (!('action' in attr)) {
+                  var handleFormSubmission = function(event) {
+                    scope.$apply(function() {
+                      controller.$commitViewValue();
+                      controller.$setSubmitted();
+                    });
+                    event.preventDefault();
+                  };
+                  addEventListenerFn(formElement[0], 'submit', handleFormSubmission);
+                  formElement.on('$destroy', function() {
+                    $timeout(function() {
+                      removeEventListenerFn(formElement[0], 'submit', handleFormSubmission);
+                    }, 0, false);
+                  });
+                }
+                var parentFormCtrl = ctrls[1] || controller.$$parentForm;
+                parentFormCtrl.$addControl(controller);
+                var setter = nameAttr ? getSetter(controller.$name) : noop;
+                if (nameAttr) {
+                  setter(scope, controller);
+                  attr.$observe(nameAttr, function(newValue) {
+                    if (controller.$name === newValue) return;
+                    setter(scope, undefined);
+                    controller.$$parentForm.$$renameControl(controller, newValue);
+                    setter = getSetter(controller.$name);
+                    setter(scope, controller);
+                  });
+                }
+                formElement.on('$destroy', function() {
+                  controller.$$parentForm.$removeControl(controller);
+                  setter(scope, undefined);
+                  extend(controller, nullFormCtrl);
+                });
+              }
+            };
+          }
+        };
+        return formDirective;
+
+        function getSetter(expression) {
+          if (expression === '') {
+            return $parse('this[""]').assign;
+          }
+          return $parse(expression).assign || noop;
+        }
+      }];
+    };
+    var formDirective = formDirectiveFactory();
+    var ngFormDirective = formDirectiveFactory(true);
+    var ISO_DATE_REGEXP = /^\d{4,}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+(?:[+-][0-2]\d:[0-5]\d|Z)$/;
+    var URL_REGEXP = /^[a-z][a-z\d.+-]*:\/*(?:[^:@]+(?::[^@]+)?@)?(?:[^\s:/?#]+|\[[a-f\d:]+\])(?::\d+)?(?:\/[^?#]*)?(?:\?[^#]*)?(?:#.*)?$/i;
+    var EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
+    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))([eE][+-]?\d+)?\s*$/;
+    var DATE_REGEXP = /^(\d{4,})-(\d{2})-(\d{2})$/;
+    var DATETIMELOCAL_REGEXP = /^(\d{4,})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d)(\.\d{1,3})?)?$/;
+    var WEEK_REGEXP = /^(\d{4,})-W(\d\d)$/;
+    var MONTH_REGEXP = /^(\d{4,})-(\d\d)$/;
+    var TIME_REGEXP = /^(\d\d):(\d\d)(?::(\d\d)(\.\d{1,3})?)?$/;
+    var PARTIAL_VALIDATION_EVENTS = 'keydown wheel mousedown';
+    var PARTIAL_VALIDATION_TYPES = createMap();
+    forEach('date,datetime-local,month,time,week'.split(','), function(type) {
+      PARTIAL_VALIDATION_TYPES[type] = true;
+    });
+    var inputType = {
+      'text': textInputType,
+      'date': createDateInputType('date', DATE_REGEXP,
+        createDateParser(DATE_REGEXP, ['yyyy', 'MM', 'dd']),
+        'yyyy-MM-dd'),
+      'datetime-local': createDateInputType('datetimelocal', DATETIMELOCAL_REGEXP,
+        createDateParser(DATETIMELOCAL_REGEXP, ['yyyy', 'MM', 'dd', 'HH', 'mm', 'ss', 'sss']),
+        'yyyy-MM-ddTHH:mm:ss.sss'),
+      'time': createDateInputType('time', TIME_REGEXP,
+        createDateParser(TIME_REGEXP, ['HH', 'mm', 'ss', 'sss']),
+        'HH:mm:ss.sss'),
+      'week': createDateInputType('week', WEEK_REGEXP, weekParser, 'yyyy-Www'),
+      'month': createDateInputType('month', MONTH_REGEXP,
+        createDateParser(MONTH_REGEXP, ['yyyy', 'MM']),
+        'yyyy-MM'),
+      'number': numberInputType,
+      'url': urlInputType,
+      'email': emailInputType,
+      'radio': radioInputType,
+      'checkbox': checkboxInputType,
+      'hidden': noop,
+      'button': noop,
+      'submit': noop,
+      'reset': noop,
+      'file': noop
+    };
+
+    function stringBasedInputType(ctrl) {
+      ctrl.$formatters.push(function(value) {
+            return ctrl.
