@@ -9,13 +9,10 @@ cache:
   paths:
   - node_modules/
 
-install:
-  script:
-   - npm install
-   - npm start
-
 create_assets:
   script:
+  - npm install
+  - npm start
   - docco ./sources/helsinki/11b/*.js -o ./docs/helsinki/11b #makes html for files
   - docco ./sources/helsinki/12/*.js -o ./docs/helsinki/12 #makes html for files
   - docco ./sources/helsinki/12a/*.js -o ./docs/helsinki/12a #makes html for files
