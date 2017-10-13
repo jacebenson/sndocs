@@ -167,7 +167,7 @@ function downloadEndpoints(obj) {
                               jsBody = beautify(jsBody, { indent_size: 2 });
 
                               fs.writeFile(
-                                jspath + justFile,
+                                jspath,
                                 jsBody,
                                 function(err) {
                                   if (err) {
