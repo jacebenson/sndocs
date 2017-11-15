@@ -77,8 +77,9 @@
         "https://netflix.service-now.com/stats.do",
         "https://mozilla.service-now.com/stats.do",
         "https://mozilladev.service-now.com/stats.do",
-        "https://tideworks.service-now.com/stats.do"
-        
+        "https://tideworks.service-now.com/stats.do",
+        "https://empdslusher.service-now.com/stats.do",
+        "https://empjnerius.service-now.com/stats.do"
     ],
     "endpoints":[
             "/scripts/js_includes_sp.jsx",
