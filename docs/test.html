@@ -1,0 +1,65 @@
+<html>
+
+<head>
+    <link rel="icon" href="./css/images/favicon.png" />
+</head>
+
+<body>
+    <header>
+        <script src="http://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+            crossorigin="anonymous"></link>
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+            crossorigin="anonymous">
+    </header>
+    <div class="container">
+        <table id="table" class="table table-responsive table-hover"></table>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: 'js/data.json',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    window.colspan = 1;
+                    window.dataJson = data;
+                    var html = '<thead>\n\t<tr class="thead">\n\t\t<th class=""></th>\n';
+                    html += '\t</tr>\n</thead>\n<tbody>\n\t<tr>\n';
+                        console.log('data.length: ' + data.length )
+                        for(var x = data.length-1;x>0;x--){
+                            console.log(x);
+                            var version = data[x];
+                            console.log(JSON.stringify(version,'','  '));
+                        html += '\t<tr class="section-header"><td class="section-header" colspan="' + window.colspan + '">';
+                        html += '<a href="'+version.url+'">'
+                        html += version.name;
+                        html += '</a></td>';
+                        if(version.patches.length<15){
+                            while(version.patches.length<15){
+                                version.patches.push({});
+                            }
+                        }
+                        for (var patch in version.patches) {
+                            var patchNum = parseInt(patch,10) + 1;
+                            if(version.patches[patch].name){
+                            html += '<td><a title="'+version.patches[patch].name+'"href="'+version.patches[patch].url+'">'+ patchNum +'</a></td>'
+                            } else {
+                                html += '<td></td>';
+                            }
+                        }
+                        html += '</tr>\n';
+                    }
+                    html += '</tbody>\n';
+                    window.html = html
+                    console.log(html);
+                    $(html).appendTo("#table");
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
