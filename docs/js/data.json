@@ -908,37 +908,44 @@
         "name": "Helsinki Patch 1",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html",
-        "date": "2016-06-10"
+        "date": "2016-06-10",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0594814"
       },      {
         "name": "Helsinki Patch 2",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html",
-        "date": "2016-07-07"
+        "date": "2016-07-07",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0596138"
       },      {
         "name": "Helsinki Patch 3",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html",
-        "date": "2016-08-05"
+        "date": "2016-08-05",
+        "hi":"https://hi.service-now.com/kb_view.do?sysparm_article=KB0596689"
       },      {
         "name": "Helsinki Patch 4",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html",
-        "date": "2016-08-31"
+        "date": "2016-08-31",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597395"
       },      {
         "name": "Helsinki Patch 5",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
-        "date": "2016-09-21"
+        "date": "2016-09-21",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597668"
       },      {
         "name": "Helsinki Patch 6",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html",
-        "date": "2016-10-20"
+        "date": "2016-10-20",
+        "hi":"https://hi.service-now.com/kb_view.do?sysparm_article=KB0598105"
       },      {
         "name": "Helsinki Patch 7",
         "url":
           "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html",
-        "date": "2016-11-17"
+        "date": "2016-11-17",
+        "hi":"https://hi.service-now.com/kb_view.do?sysparm_article=KB0596689"
       },      {
         "name": "Helsinki Patch 8",
         "url":
