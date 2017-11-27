@@ -739,7 +739,7 @@
   {
     "name": "Fuji",
     "url":
-      "https://web.archive.org/web/20170513212222/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Release_Notes",
+      "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",
     "date": "2015-01-23",
     "patches": [
       {
@@ -827,39 +827,247 @@
     "name": "Geneva",
     "url":
       "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html",
-    "date": "",
-    "patches": [],
+    "date": "2015-11-03",
+    "patches": [
+      {
+        "name": "Geneva Patch 1",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html",
+        "date": "2015-11-25"
+      },
+      {
+        "name": "Geneva Patch 2",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
+        "date": "2016-01-22"
+      },
+      {
+        "name": "Geneva Patch 3",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
+        "date": "2016-01-22"
+      },
+      {
+        "name": "Geneva Patch 4",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html",
+        "date": "2016-02-16"
+      },
+      {
+        "name": "Geneva Patch 5",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html",
+        "date": "2016-03-23"
+      },
+      {
+        "name": "Geneva Patch 6",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html",
+        "date": "2016-04-19"
+      },
+      {
+        "name": "Geneva Patch 7",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html",
+        "date": "2016-05-21"
+      },
+      {
+        "name": "Geneva Patch 8",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html",
+        "date": "2016-08-16"
+      },
+      {
+        "name": "Geneva Patch 9",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html",
+        "date": "2016-09-28"
+      },
+      {
+        "name": "Geneva Patch 10",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html",
+        "date": "2016-11-24"
+      },
+      {
+        "name": "Geneva Patch 11",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
+        "date": "2017-02-23"
+      }
+    ],
     "features": []
   },
   {
     "name": "Helsinki",
     "url":
       "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html",
-    "date": "",
-    "patches": [],
+    "date": "2016-04-28",
+    "patches": [
+      {
+        "name": "Helsinki Patch 1",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html",
+        "date": "2016-06-10"
+      },      {
+        "name": "Helsinki Patch 2",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html",
+        "date": "2016-07-07"
+      },      {
+        "name": "Helsinki Patch 3",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html",
+        "date": "2016-08-05"
+      },      {
+        "name": "Helsinki Patch 4",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html",
+        "date": "2016-08-31"
+      },      {
+        "name": "Helsinki Patch 5",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
+        "date": "2016-09-21"
+      },      {
+        "name": "Helsinki Patch 6",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html",
+        "date": "2016-10-20"
+      },      {
+        "name": "Helsinki Patch 7",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html",
+        "date": "2016-11-17"
+      },      {
+        "name": "Helsinki Patch 8",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html",
+        "date": "2016-12-15"
+      },      {
+        "name": "Helsinki Patch 9",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html",
+        "date": "2017-02-14"
+      },      {
+        "name": "Helsinki Patch 10",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html",
+        "date": "2017-05-04"
+      },      {
+        "name": "Helsinki Patch 11",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
+        "date": "2017-06-09"
+      }, {
+        "name": "Helsinki Patch 12",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html",
+        "date": "2017-08-24"
+      }
+    ],
     "features": []
   },
   {
     "name": "Istanbul",
     "url":
       "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html",
-    "date": "",
-    "patches": [],
+    "date": "2016-11-28",
+    "patches": [
+      {
+        "name": "Istanbul Patch 1",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
+        "date": "2017-01-13"
+      },
+      {
+        "name": "Istanbul Patch 2",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html",
+        "date": "2017-02-01"
+      },
+      {
+        "name": "Istanbul Patch 3",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html",
+        "date": "2017-02-28"
+      },
+      {
+        "name": "Istanbul Patch 4",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html",
+        "date": "2017-03-27"
+      },
+      {
+        "name": "Istanbul Patch 5",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html",
+        "date": "2017-04-20"
+      },
+      {
+        "name": "Istanbul Patch 6",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html",
+        "date": "2017-06-05"
+      },
+      {
+        "name": "Istanbul Patch 7",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html",
+        "date": "2017-07-06"
+      },
+      {
+        "name": "Istanbul Patch 8",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html",
+        "date": "2017-07-28"
+      },
+      {
+        "name": "Istanbul Patch 9",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html",
+        "date": "2017-08-31"
+      },
+      {
+        "name": "Istanbul Patch 10",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html",
+        "date": "2017-10-25"
+      }
+    ],
     "features": []
   },
   {
     "name": "Jakarta",
     "url":
       "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html",
-    "date": "",
-    "patches": [],
+    "date": "2017-06-15",
+    "patches": [
+      {
+        "name":"Jakarta Patch 1",
+        "url":"https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html",
+        "hi": "#",
+        "date":"2017-07-31"
+      },
+      {
+        "name":"Jakarta Patch 2",
+        "url":"https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html",
+        "date":"2017-08-18"
+      },
+      {
+        "name":"Jakarta Patch 3",
+        "url":"https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html",
+        "date":"2017-09-13"
+      },
+      {
+        "name":"Jakarta Patch 4",
+        "url":"https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html",
+        "date":"2017-10-06"
+      },
+      {
+        "name":"Jakarta Patch 5",
+        "url":"https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html",
+        "date":"2017-11-02"
+      }
+      
+    ],
     "features": []
   },
   {
     "name": "Kingston",
     "url":
       "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html",
-    "date": "",
+    "date": "2017-11-16",
     "patches": [],
     "features": []
   }

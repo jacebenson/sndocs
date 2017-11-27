@@ -17,26 +17,29 @@
     <div class="container">
         <table id="table" class="table table-responsive table-hover"></table>
     </div>
+    <style>
+.file-text { font-size: 8px;
+margin-left: -1.5em;}
+</style>
     <script>
         $(document).ready(function () {
             $.ajax({
-                url: 'js/data.json',
+                url: 'js/data.json?id=' + new Date(),
                 dataType: 'json',
                 success: function (data) {
                     console.log(data);
                     window.colspan = 1;
                     window.dataJson = data;
-                    var html = '<thead>\n\t<tr class="thead">\n\t\t<th class=""></th>\n';
-                    html += '\t</tr>\n</thead>\n<tbody>\n\t<tr>\n';
-                        console.log('data.length: ' + data.length )
+                    var html = '<thead>\n\t<tr class="thead">\n';
+                        html += '\t\t<th class="">Version</th>\n';
+                        html += '\t\t<th colspan="15" class="">Patches</th>\n';
+                        html += '\t</tr>\n</thead>\n<tbody>\n\t<tr>\n';
                         for(var x = data.length-1;x>0;x--){
-                            console.log(x);
                             var version = data[x];
-                            console.log(JSON.stringify(version,'','  '));
                         html += '\t<tr class="section-header"><td class="section-header" colspan="' + window.colspan + '">';
-                        html += '<a href="'+version.url+'">'
+                        html += '<a href="'+version.url+'">' 
                         html += version.name;
-                        html += '</a></td>';
+                        html += '</a> ('+version.date+')</td>';
                         if(version.patches.length<15){
                             while(version.patches.length<15){
                                 version.patches.push({});
@@ -44,8 +47,37 @@
                         }
                         for (var patch in version.patches) {
                             var patchNum = parseInt(patch,10) + 1;
-                            if(version.patches[patch].name){
-                            html += '<td><a title="'+version.patches[patch].name+'"href="'+version.patches[patch].url+'">'+ patchNum +'</a></td>'
+                            var thisPatch = version.patches[patch];
+                            var hasHi = thisPatch.hi;
+                            console.log('hasHi: ' + hasHi);
+                            if(thisPatch.name){
+                                    html += '<td><div class="row">';
+                                    //release notes
+                                    html += '<div class="col-6">';
+                                    html += '<a title="'+thisPatch.name+'"href="'+thisPatch.url+'">';
+                                    html += '<span class="fa-stack fa-3">';
+                                    html += '<i class="fa fa-file-o fa-stack-2"></i>'
+                                    html += '<strong class="fa-stack-1 fa-stack-text file-text">'+patchNum+'</strong>';
+                                    html += '</span>';
+                                    html += '</a>';
+                                    html += '</div>';
+                                    //end release notes
+                                    if(typeof thisPatch.hi !== undefined){
+                                    //hi security notes
+                                    html += '<div class="col-6">';
+                                    html += '<i class="fa fa-power-off"></i>'
+                                    html += '</div>';
+                                    }
+                                    //end hi security notes
+                                    if(typeof thisPatch.git){
+                                    //saved off code
+                                    html += '<div class="col-6">';
+                                    html += '<i class="fa fa fa-code-fork"></i>'
+                                    html += '</div>';
+                                    //end saved off code
+                                    }
+
+                                html += '</div></td>'
                             } else {
                                 html += '<td></td>';
                             }
@@ -54,7 +86,6 @@
                     }
                     html += '</tbody>\n';
                     window.html = html
-                    console.log(html);
                     $(html).appendTo("#table");
                 }
             });
