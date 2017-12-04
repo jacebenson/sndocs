@@ -79,7 +79,21 @@
         "https://mozilladev.service-now.com/stats.do",
         "https://tideworks.service-now.com/stats.do",
         "https://empdslusher.service-now.com/stats.do",
-        "https://empjnerius.service-now.com/stats.do"
+        "https://empjnerius.service-now.com/stats.do",
+        "https://nwnit.service-now.com/stats.do",
+        "https://umichprod.service-now.com/stats.do",
+        "https://ey.service-now.com/stats.do",
+        "https://tcf.service-now.com/stats.do",
+        "https://macys.service-now.com/stats.do",
+        "https://costcotravel.service-now.com/stats.do",
+        "https://paypal.service-now.com/stats.do",
+        "https://fruitionpartners.service-now.com/stats.do",
+        "https://redrobin.service-now.com/stats.do",
+        "https://minneapolis.service-now.com/stats.do",
+        "https://mn.service-now.com/stats.do",
+        "https://ohiohealth.service-now.com/stats.do"
+
+
     ],
     "endpoints":[
             "/scripts/js_includes_sp.jsx",
