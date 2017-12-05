@@ -14,8 +14,20 @@
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
             crossorigin="anonymous">
     </header>
-    <div class="container">
-        <table id="table" class="table table-responsive table-hover"></table>
+    <div class="container-fluid">
+        <table id="table" class="table table-responsive table-hover"
+        data-toolbar="#toolbar"
+        data-search="true"
+        data-show-toggle="true"
+        data-show-columns="true"
+        data-sort-name="1"
+        data-sort-order="asc"
+        data-click-to-select="true"
+        data-classes="table table-hover table-no-bordered"
+        data-maintain-selected="true"
+        >
+        ></table>
+        
     </div>
     <style>
 .file-text { font-size: 8px;
@@ -24,18 +36,37 @@ margin-left: -1.5em;}
     <script>
         $(document).ready(function () {
             $.ajax({
-                url: 'js/data.json?id=' + new Date(),
+                url: 'js/data.json?id=' + new Date().getTime(),
                 dataType: 'json',
+                error: function(jqXHR, status, errorThrown){
+                    console.log(status);
+                },
                 success: function (data) {
+                    try{
                     console.log(data);
                     window.colspan = 1;
                     window.dataJson = data;
-                    var html = '<thead>\n\t<tr class="thead">\n';
-                        html += '\t\t<th class="">Version</th>\n';
-                        html += '\t\t<th colspan="15" class="">Patches</th>\n';
+                    var dataLength = data.length-1;
+                    for (var x = dataLength; x >= 0; x--) {
+                        var version = data[x];
+                        console.log(x + ' : data.length - 1 ' + dataLength);
+                        if (x === data.length - 1) {
+                            console.log('in if');
+                            console.log('version.name: ' + version.name);
+                            var html = '<thead>\n\t<tr class="thead">\n';
+                            html += '\t\t<th class="" data-field="1">Version</th>\n';
+                            html += '\t\t<th colspan="15" class="" data-field="2">Patches</th>\n';
+                            var allFeatures = [];
+                            for(var a = 0;a<data.length;a++){
+                                allFeatures = allFeatures.concat(data[a].features);
+                            }
+                            console.log(allFeatures);
+                            for (var f = 0; f < allFeatures.length; f++) {
+                                var fieldCount = f+2;
+                                html += '<th data-field="'+fieldCount+'">' + allFeatures[f] + '</th>'
+                            }
+                        }
                         html += '\t</tr>\n</thead>\n<tbody>\n\t<tr>\n';
-                        for(var x = data.length-1;x>0;x--){
-                            var version = data[x];
                         html += '\t<tr class="section-header"><td class="section-header" colspan="' + window.colspan + '">';
                         html += '<a href="'+version.url+'">' 
                         html += version.name;
@@ -85,11 +116,18 @@ margin-left: -1.5em;}
                                 html += '<td></td>';
                             }
                         }
+                        for (var feature in version.features) {
+                            html+='<td>'+version.features[feature].name+'</td>'
+                        }
                         html += '</tr>\n';
                     }
+                    
                     html += '</tbody>\n';
                     window.html = html
                     $(html).appendTo("#table");
+                    }catch(error){
+                        console.log(error);
+                    }
                 }
             });
         });
