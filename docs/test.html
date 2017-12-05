@@ -47,6 +47,10 @@ margin-left: -1.5em;}
                         }
                         for (var patch in version.patches) {
                             var patchNum = parseInt(patch,10) + 1;
+                            if(version.patches[patch].number){
+                                console.log(version.patches[patch].number);
+                                patchNum = version.patches[patch].number;
+                            }
                             var thisPatch = version.patches[patch];
                             var hasHi = thisPatch.hi;
                             console.log('hasHi: ' + hasHi);
@@ -54,25 +58,24 @@ margin-left: -1.5em;}
                                     html += '<td><div class="row">';
                                     //release notes
                                     html += '<div class="col-6">';
-                                    html += '<a title="'+thisPatch.name+'"href="'+thisPatch.url+'">';
-                                    html += '<span class="fa-stack fa-3">';
-                                    html += '<i class="fa fa-file-o fa-stack-2"></i>'
-                                    html += '<strong class="fa-stack-1 fa-stack-text file-text">'+patchNum+'</strong>';
-                                    html += '</span>';
-                                    html += '</a>';
+                                    if(thisPatch.url === '#'){
+                                        html += '<span title="' + thisPatch.name + ' Notes' + '"><strong>'+patchNum+'</strong></span>';
+                                    } else {
+                                        html += '<a title="' + thisPatch.name + ' Notes' + '" href="'+thisPatch.url+'"><strong>'+patchNum+'</strong></a>';
+                                    }
                                     html += '</div>';
                                     //end release notes
                                     if(thisPatch.hi !== undefined){
                                     //hi security notes
                                     html += '<div class="col-6">';
-                                    html += '<i class="fa fa-power-off"></i>';
+                                    html += '<a title="'+thisPatch.name + ' Security KB'+ '" href="'+thisPatch.hi+'"><i class="fa fa-power-off"></i></a>';
                                     html += '</div>';
                                     }
                                     //end hi security notes
                                     if(thisPatch.git){
                                     //saved off code
                                     html += '<div class="col-6">';
-                                    html += '<i class="fa fa fa-code-fork"></i>';
+                                    html += '<a title="'+thisPatch.name + ' Code'+ '" href="'+thisPatch.git+'"><i class="fa fa-code-fork"></i></a>';
                                     html += '</div>';
                                     //end saved off code
                                     }

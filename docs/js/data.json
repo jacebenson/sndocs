@@ -1,2483 +1,3149 @@
 [
   {
     "name": "Summer 2007",
-    "url": "https://web.archive.org/web/20170513212222/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513212222/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Release_Notes",
     "date": "2007-07-05",
     "patches": [
       {
         "name": "Summer 2007 Enhancement Patch",
-        "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
+        "url":
+          "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
         "date": "2007-07-29"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2007",
-    "url": "https://web.archive.org/web/20170513191036/http://wiki.servicenow.com:80/index.php?title=Fall_2007_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513191036/http://wiki.servicenow.com:80/index.php?title=Fall_2007_Release_Notes",
     "date": "2007-11-23",
     "patches": [
       {
         "name": "Fall 2007 Enhancement Patch",
-        "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
+        "url":
+          "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
         "date": "2007-11-30"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Summer 2008",
-    "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes",
     "date": "2008-08-22",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       },
       {
         "name": "Graphical Workflow",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       },
       {
         "name": "Service Level Management",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       },
       {
         "name": "Human Resources Management",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       }
     ]
   },
   {
     "name": "Summer 2008 Stable 1",
-    "url": "https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1",
+    "url":
+      "https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1",
     "date": "2008-09-17",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       },
       {
         "name": "Graphical Workflow",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       },
       {
         "name": "Service Level Management",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       },
       {
         "name": "Human Resources Management",
-        "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
+        "url":
+          "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes#gsc.tab=0"
       }
     ]
   },
   {
     "name": "Summer 2008 Stable 2",
-    "url": "https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2",
+    "url":
+      "https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2",
     "date": "2008-10-31",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Summer 2008 Stable 3",
-    "url": "https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3",
+    "url":
+      "https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3",
     "date": "2008-12-05",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2009",
-    "url": "https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes",
     "date": "2009-01-09",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2009 Stable 1",
-    "url": "https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1",
+    "url":
+      "https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1",
     "date": "2009-02-13",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2009 Stable 2",
-    "url": "https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2",
+    "url":
+      "https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2",
     "date": "2009-03-13",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2009 Stable 3",
-    "url": "https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3",
+    "url":
+      "https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3",
     "date": "2009-04-10",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2009 Stable 4",
-    "url": "https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4",
+    "url":
+      "https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4",
     "date": "2009-05-01",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2009",
-    "url": "https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes",
     "date": "2009-05-29",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2009 Stable 1",
-    "url": "https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1",
+    "url":
+      "https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1",
     "date": "2009-06-26",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2009 Stable 2",
-    "url": "https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2",
+    "url":
+      "https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2",
     "date": "2009-05-29",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2009 Stable 3",
-    "url": "https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3",
+    "url":
+      "https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3",
     "date": "2009-08-28",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2009",
-    "url": "https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes",
     "date": "2009-09-25",
     "patches": [
       {
         "name": "Fall 2009 Update",
-        "url": "https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update",
+        "url":
+          "https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update",
         "date": "Unknown"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2009 Stable 1",
-    "url": "https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1",
+    "url":
+      "https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1",
     "date": "2009-10-23",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2009 Stable 2",
-    "url": "https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2",
+    "url":
+      "https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2",
     "date": "2009-11-20",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2009 Stable 3",
-    "url": "https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3",
+    "url":
+      "https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3",
     "date": "2009-12-18",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2010",
-    "url": "https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes",
     "date": "2010-01-22",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2010 Stable 1",
-    "url": "https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes",
     "date": "2010-02-19",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2010 Stable 2",
-    "url": "https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes",
     "date": "2010-03-19",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2010 Stable 3",
-    "url": "https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes",
     "date": "2010-04-16",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2010",
-    "url": "https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes",
     "date": "2010-07-04",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2010 Stable 1",
-    "url": "https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes",
     "date": "2010-07-09",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2010 Stable 2",
-    "url": "https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes",
     "date": "2010-08-06",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Spring 2010 Stable 3",
-    "url": "https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes",
     "date": "2010-09-03",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2010",
-    "url": "https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes",
     "date": "2010-10-01",
     "patches": [
       {
         "name": "Fall 2010 Update",
-        "url": "https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update",
+        "url":
+          "https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update",
         "date": "2010-10-08"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2010 Stable 1",
-    "url": "https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes",
     "date": "2010-10-29",
     "patches": [
       {
         "name": "Fall 2010 Stable 1 Update",
-        "url": "https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update",
+        "url":
+          "https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update",
         "date": "2010-11-12"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2010 Stable 2",
-    "url": "https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes",
     "date": "2010-12-03",
     "patches": [
       {
         "name": "Fall 2010 Stable 2 Update",
-        "url": "https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update",
+        "url":
+          "https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update",
         "date": "2010-12-08"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fall 2010 Stable 3",
-    "url": "https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes",
     "date": "2011-01-07",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Winter 2011",
-    "url": "https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes",
     "date": "2011-02-04",
     "patches": [
       {
         "name": "Winter 2011 Update",
-        "url": "https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update",
+        "url":
+          "https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update",
         "date": "2011-03-10"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "June 2011 Preview 1",
-    "url": "https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes",
     "date": "2011-03-04",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "June 2011 Preview 2",
-    "url": "https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes",
     "date": "2011-04-08",
     "patches": [],
     "features": []
   },
   {
     "name": "June 2011 Preview 3",
-    "url": "https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes",
     "date": "2011-05-06",
     "patches": [],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "June 2011",
-    "url": "https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes",
     "date": "2011-06-17",
     "patches": [
       {
         "name": "June 11 Update",
-        "url": "https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update",
+        "url":
+          "https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update",
         "date": "2011-06-17"
       },
       {
         "name": "June 11 Patch 2",
-        "url": "https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2",
         "date": "2011-10-21"
       },
       {
         "name": "June 11 Patch 3",
-        "url": "https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3",
+        "url":
+          "https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3",
         "date": "2011-11-22"
       },
       {
         "name": "June 11 Patch 4",
-        "url": "https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4",
         "date": "2012-03-07"
       },
       {
         "name": "June 11 Patch 5",
-        "url": "https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5",
         "date": "2012-07-07"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Aspen aka October 2011",
-    "url": "https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes",
     "date": "2011-12-01",
     "patches": [
       {
         "name": "Aspen Patch 1",
-        "url": "https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1",
+        "url":
+          "https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1",
         "date": "2011-12-21"
       },
       {
         "name": "Aspen Patch 2",
-        "url": "https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2",
         "date": "2012-01-16"
       },
       {
         "name": "Aspen Patch 3",
-        "url": "https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3",
+        "url":
+          "https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3",
         "date": "2012-04-25"
       },
       {
         "name": "Aspen Patch 4",
-        "url": "https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4",
         "date": "2012-05-18"
       },
       {
         "name": "Aspen Patch 5",
-        "url": "https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5",
         "date": "2012-06-14"
       },
       {
         "name": "Aspen Patch 6",
-        "url": "https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6",
+        "url":
+          "https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6",
         "date": "2012-07-06"
       },
       {
         "name": "Aspen Patch 7",
-        "url": "https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7",
+        "url":
+          "https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7",
         "date": "2012-08-06"
       },
       {
         "name": "Aspen Patch 8",
-        "url": "https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8",
+        "url":
+          "https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8",
         "date": "2012-09-11"
       },
       {
         "name": "Aspen Patch 9",
-        "url": "https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9",
+        "url":
+          "https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9",
         "date": "2012-10-15"
       },
       {
         "name": "Aspen Patch 10",
-        "url": "https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10",
+        "url":
+          "https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10",
         "date": "2012-11-15"
       },
       {
         "name": "Aspen Patch 11",
-        "url": "https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11",
+        "url":
+          "https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11",
         "date": "2012-12-20"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Berlin",
-    "url": "https://web.archive.org/web/20171126031424/http://wiki.servicenow.com/index.php?title=Berlin_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20171126031424/http://wiki.servicenow.com/index.php?title=Berlin_Release_Notes",
     "date": "2012-07-02",
     "patches": [
       {
         "name": "Berlin Patch 1",
-        "url": "https://web.archive.org/web/20170513192932/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_1",
+        "url":
+          "https://web.archive.org/web/20170513192932/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_1",
         "date": "2012-08-29"
       },
       {
         "name": "Berlin Patch 2",
-        "url": "https://web.archive.org/web/20170513212131/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170513212131/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_2",
         "date": "2012-09-21"
       },
       {
         "name": "Berlin Patch 3",
-        "url": "https://web.archive.org/web/20170513193237/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_3",
+        "url":
+          "https://web.archive.org/web/20170513193237/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_3",
         "date": "2012-11-01"
       },
       {
         "name": "Berlin Patch 4",
-        "url": "https://web.archive.org/web/20170513192807/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513192807/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_4",
         "date": "2012-11-19"
       },
       {
         "name": "Berlin Patch 5",
-        "url": "https://web.archive.org/web/20170513214631/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513214631/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_5",
         "date": "2012-12-12"
       },
       {
         "name": "Berlin Patch 6",
-        "url": "https://web.archive.org/web/20170513211944/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_6",
+        "url":
+          "https://web.archive.org/web/20170513211944/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_6",
         "date": "2013-01-16"
       },
       {
         "name": "Berlin Patch 7",
-        "url": "https://web.archive.org/web/20170513194717/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_7",
+        "url":
+          "https://web.archive.org/web/20170513194717/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_7",
         "date": "2013-02-21"
       },
       {
         "name": "Berlin Patch 8",
-        "url": "https://web.archive.org/web/20170520100718/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_8",
+        "url":
+          "https://web.archive.org/web/20170520100718/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_8",
         "date": "2013-03-14"
       },
       {
         "name": "Berlin Patch 9",
-        "url": "https://web.archive.org/web/20170520093317/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_9",
+        "url":
+          "https://web.archive.org/web/20170520093317/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_9",
         "date": "2013-04-10"
       },
       {
         "name": "Berlin Patch 10",
-        "url": "https://web.archive.org/web/20170513213522/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_10",
+        "url":
+          "https://web.archive.org/web/20170513213522/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_10",
         "date": "2013-04-10"
       },
       {
         "name": "Berlin Patch 11",
-        "url": "https://web.archive.org/web/20170513203821/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_11",
+        "url":
+          "https://web.archive.org/web/20170513203821/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_11",
         "date": "2013-06-05"
       },
       {
         "name": "Berlin Patch 12",
-        "url": "https://web.archive.org/web/20170513214627/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_12",
+        "url":
+          "https://web.archive.org/web/20170513214627/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_12",
         "date": "2013-07-03"
       },
       {
         "name": "Berlin Patch 13",
-        "url": "https://web.archive.org/web/20170513193836/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_13",
+        "url":
+          "https://web.archive.org/web/20170513193836/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_13",
         "date": "2013-08-15"
       },
       {
         "name": "Berlin Patch 14",
-        "url": "https://web.archive.org/web/20171126170228/http://wiki.servicenow.com/index.php?title=Release:Berlin_Patch_14",
+        "url":
+          "https://web.archive.org/web/20171126170228/http://wiki.servicenow.com/index.php?title=Release:Berlin_Patch_14",
         "date": ""
       },
       {
         "name": "Berlin Patch 15",
-        "url": "https://web.archive.org/web/20170513194712/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_15",
+        "url":
+          "https://web.archive.org/web/20170513194712/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_15",
         "date": "2013-12-17"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Calgary",
-    "url": "https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes",
     "date": "2013-02-28",
     "patches": [
       {
         "name": "Calgary Patch 1",
-        "url": "https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1",
+        "url":
+          "https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1",
         "date": "2013-07-22"
       },
       {
         "name": "Calgary Patch 2",
-        "url": "https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2",
         "date": "2013-08-08"
       },
       {
         "name": "Calgary Patch 3",
-        "url": "https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3",
+        "url":
+          "https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3",
         "date": "2013-11-12"
       },
       {
         "name": "Calgary Patch 4",
-        "url": "https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4",
         "date": "2013-12-17"
       },
       {
         "name": "Calgary Patch 5",
-        "url": "https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5",
         "date": "2014-03-18"
       },
       {
         "name": "Calgary Patch 6",
-        "url": "https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6",
+        "url":
+          "https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6",
         "date": "2014-05-27"
       },
       {
         "name": "Calgary Patch 7",
-        "url": "https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7",
+        "url":
+          "https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7",
         "date": "2014-08-05"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Dublin",
-    "url": "https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes",
     "date": "2013-10-22",
     "patches": [
       {
         "name": "Dublin Patch 1",
-        "url": "https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1",
+        "url":
+          "https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1",
         "date": "2014-04-04"
       },
       {
         "name": "Dublin Patch 2",
-        "url": "https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2",
         "date": "2014-05-13"
       },
       {
         "name": "Dublin Patch 3",
-        "url": "https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3",
+        "url":
+          "https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3",
         "date": "2014-06-12"
       },
       {
         "name": "Dublin Patch 4",
-        "url": "https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4",
         "date": "2014-07-07"
       },
       {
         "name": "Dublin Patch 5",
-        "url": "https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5",
         "date": "2014-07-29"
       },
       {
         "name": "Dublin Patch 6",
-        "url": "https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6",
+        "url":
+          "https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6",
         "date": "2014-09-23"
       },
       {
         "name": "Dublin Patch 7",
-        "url": "https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7",
+        "url":
+          "https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7",
         "date": "2014-11-18"
       },
       {
         "name": "Dublin Patch 8",
-        "url": "https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8",
+        "url":
+          "https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8",
         "date": "2015-02-24"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Eureka",
-    "url": "https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes",
     "date": "2014-05-06",
     "patches": [
       {
         "name": "Eureka Patch 1",
-        "url": "https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1",
+        "url":
+          "https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1",
         "date": "2014-06-03"
       },
       {
         "name": "Eureka Patch 2",
-        "url": "https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2",
+        "url":
+          "https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2",
         "date": "2014-06-25"
       },
       {
         "name": "Eureka Patch 3",
-        "url": "https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3",
+        "url":
+          "https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3",
         "date": "2014-07-21"
       },
       {
         "name": "Eureka Patch 4",
-        "url": "https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4",
+        "url":
+          "https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4",
         "date": "2014-08-19"
       },
       {
         "name": "Eureka Patch 5",
-        "url": "https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5",
         "date": "2014-09-09"
       },
       {
         "name": "Eureka Patch 6",
-        "url": "https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6",
+        "url":
+          "https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6",
         "date": "2014-10-19"
       },
       {
         "name": "Eureka Patch 7",
-        "url": "https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7",
+        "url":
+          "https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7",
         "date": "2014-11-07"
       },
       {
         "name": "Eureka Patch 8",
-        "url": "https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8",
+        "url":
+          "https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8",
         "date": "2015-01-08"
       },
       {
         "name": "Eureka Patch 9",
-        "url": "https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9",
+        "url":
+          "https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9",
         "date": "2015-02-04"
       },
       {
         "name": "Eureka Patch 10",
-        "url": "https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10",
+        "url":
+          "https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10",
         "date": "2015-04-02"
       },
       {
         "name": "Eureka Patch 11",
-        "url": "https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11",
+        "url":
+          "https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11",
         "date": "2015-05-19"
       },
       {
         "name": "Eureka Patch 12",
-        "url": "https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12",
+        "url":
+          "https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12",
         "date": "2015-08-25"
       },
       {
         "name": "Eureka Patch 13",
-        "url": "https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13",
+        "url":
+          "https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13",
         "date": "2015-11-17"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Fuji",
-    "url": "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",
+    "url":
+      "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",
     "date": "2015-01-23",
     "patches": [
       {
         "name": "Fuji Patch 1",
-        "url": "https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1",
+        "url":
+          "https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1",
         "date": "2015-02-21"
       },
       {
         "name": "Fuji Patch 2",
-        "url": "https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2",
+        "url":
+          "https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2",
         "date": "2015-03-16"
       },
       {
         "name": "Fuji Patch 3",
-        "url": "https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3",
+        "url":
+          "https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3",
         "date": "2015-04-14"
       },
       {
         "name": "Fuji Patch 4",
-        "url": "https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4",
+        "url":
+          "https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4",
         "date": "2015-05-14"
       },
       {
         "name": "Fuji Patch 5",
-        "url": "https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5",
+        "url":
+          "https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5",
         "date": "2015-06-09"
       },
       {
         "name": "Fuji Patch 6",
-        "url": "https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6",
+        "url":
+          "https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6",
         "date": "2015-07-13"
       },
       {
         "name": "Fuji Patch 7",
-        "url": "https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7",
+        "url":
+          "https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7",
         "date": "2015-08-03"
       },
       {
         "name": "Fuji Patch 8",
-        "url": "https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8",
+        "url":
+          "https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8",
         "date": "2015-09-03"
       },
       {
         "name": "Fuji Patch 9",
-        "url": "https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9",
+        "url":
+          "https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9",
         "date": "2015-09-25"
       },
       {
         "name": "Fuji Patch 10",
-        "url": "https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10",
+        "url":
+          "https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10",
         "date": "2015-10-29"
       },
       {
         "name": "Fuji Patch 11",
-        "url": "https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11",
+        "url":
+          "https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11",
         "date": "2015-11-30"
       },
       {
         "name": "Fuji Patch 12",
-        "url": "https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12",
+        "url":
+          "https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12",
         "date": "2016-02-11"
       },
       {
         "name": "Fuji Patch 13",
-        "url": "https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13",
+        "url":
+          "https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13",
         "date": "2016-05-04"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Geneva",
-    "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html",
+    "url":
+      "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html",
     "date": "2015-11-03",
     "patches": [
       {
         "name": "Geneva Patch 1",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html",
         "date": "2015-11-25"
       },
       {
         "name": "Geneva Patch 2",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
         "date": "2016-01-22"
       },
       {
         "name": "Geneva Patch 3",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
         "date": "2016-01-22"
       },
       {
         "name": "Geneva Patch 4",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html",
         "date": "2016-02-16"
       },
       {
         "name": "Geneva Patch 5",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html",
         "date": "2016-03-23"
       },
       {
         "name": "Geneva Patch 6",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html",
         "date": "2016-04-19"
       },
       {
         "name": "Geneva Patch 7",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html",
         "date": "2016-05-21"
       },
       {
         "name": "Geneva Patch 8",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html",
         "date": "2016-08-16"
       },
       {
         "name": "Geneva Patch 9",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html",
         "date": "2016-09-28"
       },
       {
         "name": "Geneva Patch 10",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html",
         "date": "2016-11-24"
       },
       {
         "name": "Geneva Patch 11",
-        "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
+        "url":
+          "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
         "date": "2017-02-23"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Helsinki",
-    "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html",
+    "url":
+      "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html",
     "date": "2016-04-28",
     "patches": [
       {
         "name": "Helsinki Patch 1",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html",
         "date": "2016-06-10",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0594814"
       },
       {
         "name": "Helsinki Patch 2",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html",
         "date": "2016-07-07",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0596138"
       },
       {
         "name": "Helsinki Patch 3",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html",
         "date": "2016-08-05",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0596689"
       },
       {
         "name": "Helsinki Patch 4",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html",
         "date": "2016-08-31",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597395"
       },
       {
         "name": "Helsinki Patch 5",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
         "date": "2016-09-21",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597668"
       },
       {
         "name": "Helsinki Patch 6",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html",
         "date": "2016-10-20",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598105"
       },
       {
         "name": "Helsinki Patch 7",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html",
         "date": "2016-11-17",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0596689"
       },
       {
         "name": "Helsinki Patch 8",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html",
-        "date": "2016-12-15"
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html",
+        "date": "2016-12-15",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0596689"
       },
       {
         "name": "Helsinki Patch 9",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html",
-        "date": "2017-02-14"
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html",
+        "date": "2017-02-14",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621356"
       },
       {
+        "number": "9a",
+        "name": "Helsinki Patch 9a",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9a.html",
+        "date": "2017-03-22"
+      },
+      {
+        "number": "10",
         "name": "Helsinki Patch 10",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html",
-        "date": "2017-05-04"
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html",
+        "date": "2017-05-04",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622459"
       },
       {
+        "number": "11",
         "name": "Helsinki Patch 11",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
-        "date": "2017-06-09"
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
+        "date": "2017-06-09",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623092",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11/scripts/"
       },
       {
+        "number": "11b",
+        "name": "Helsinki Patch 11b",
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
+        "date": "2017-06-09",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623092",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11/scripts/"
+      },
+      {
+        "number": "12",
         "name": "Helsinki Patch 12",
-        "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html",
-        "date": "2017-08-24"
+        "url":
+          "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html",
+        "date": "2017-08-24",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12/scripts/"
+      },
+      {
+        "number": "12a",
+        "name": "Helsinki Patch 12a",
+        "url": "#",
+        "date": "2017-08-24",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12a/scripts/"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Istanbul",
-    "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html",
+    "url":
+      "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html",
     "date": "2016-11-28",
     "patches": [
       {
         "name": "Istanbul Patch 1",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
-        "date": "2017-01-13"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
+        "date": "2017-01-13",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598954",
+        "git": ""
       },
       {
         "name": "Istanbul Patch 2",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html",
-        "date": "2017-02-01"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html",
+        "date": "2017-02-01",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0610519"
       },
       {
         "name": "Istanbul Patch 3",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html",
-        "date": "2017-02-28"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html",
+        "date": "2017-02-28",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621511"
       },
       {
+        "number": "3a",
+        "name": "Istanbul Patch 3a",
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3a.html",
+        "date": "2017-03-22"
+      },
+      {
+        "number": "4",
         "name": "Istanbul Patch 4",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html",
-        "date": "2017-03-27"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html",
+        "date": "2017-03-27",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/4/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621819"
       },
       {
+        "number": "5",
         "name": "Istanbul Patch 5",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html",
-        "date": "2017-04-20"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html",
+        "date": "2017-04-20",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/5/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622081"
       },
       {
+        "number": "6",
         "name": "Istanbul Patch 6",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html",
-        "date": "2017-06-05"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html",
+        "date": "2017-06-05",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/6/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622599"
       },
       {
+        "number": "6a",
+        "name": "Istanbul Patch 6a",
+        "url": "#",
+        "date": "Unknown",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/6a/scripts/"
+      },
+      {
+        "number": "7",
         "name": "Istanbul Patch 7",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html",
-        "date": "2017-07-06"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html",
+        "date": "2017-07-06",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/7/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623231"
       },
       {
+        "number": "8",
         "name": "Istanbul Patch 8",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html",
-        "date": "2017-07-28"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html",
+        "date": "2017-07-28",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/8/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623642"
       },
       {
+        "number": "9",
         "name": "Istanbul Patch 9",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html",
-        "date": "2017-08-31"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html",
+        "date": "2017-08-31",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623814"
       },
       {
+        "number": "9a",
+        "name": "Istanbul Patch 9a",
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html",
+        "date": "2017-08-31",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9a/scripts/"
+      },
+      {
+        "number": "10",
         "name": "Istanbul Patch 10",
-        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html",
-        "date": "2017-10-25"
+        "url":
+          "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html",
+        "date": "2017-10-25",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0635465"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Jakarta",
-    "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html",
+    "url":
+      "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html",
     "date": "2017-06-15",
     "patches": [
       {
         "name": "Jakarta Patch 1",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html",
-        "hi": "#",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623601",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/1/scripts/",
         "date": "2017-07-31"
       },
       {
         "name": "Jakarta Patch 2",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0634632",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/2/scripts/",
         "date": "2017-08-18"
       },
       {
         "name": "Jakarta Patch 3",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623769",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3/scripts/",
         "date": "2017-09-13"
       },
       {
+        "number": "3a",
+        "name": "Jakarta Patch 3a",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3-hf-1-PO.html",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
+        "date": "2017-09-21"
+      },
+      {
+        "number": "4",
         "name": "Jakarta Patch 4",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623601",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/4/scripts/",
         "date": "2017-10-06"
       },
       {
+        "number": "5",
         "name": "Jakarta Patch 5",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html",
+        "url":
+          "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/5/scripts/",
         "date": "2017-11-02"
       }
     ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   },
   {
     "name": "Kingston",
-    "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html",
+    "url":
+      "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html",
     "date": "2017-11-16",
-    "patches": [],
+    "patches": [
+      {
+        "number": "0",
+        "name": "Kingston Patch 0",
+        "url":
+          "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
+        "git":
+          "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/0/scripts/",
+        "date": "2017-11-16"
+      }
+    ],
     "features": [
       {
         "name": "Incident",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Problem",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Change",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "Release",
-        "url": "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
+        "url":
+          "https://web.archive.org/web/20081122001234/http://www.service-now.com/what-we-do/itil-processes/"
       },
       {
         "name": "CMDB",
-        "url": "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
+        "url":
+          "https://web.archive.org/web/20081122013618/http://www.service-now.com/what-we-do/cmdb"
       },
       {
         "name": "Discovery",
-        "url": "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
+        "url":
+          "https://web.archive.org/web/20081121233642/http://www.service-now.com/what-we-do/discovery"
       },
       {
         "name": "Service Catalog",
-        "url": "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
+        "url":
+          "https://web.archive.org/web/20081121235242/http://www.service-now.com/what-we-do/service-catalog"
       },
       {
         "name": "Asset Management",
-        "url": "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
+        "url":
+          "https://web.archive.org/web/20081121212010/http://www.service-now.com/what-we-do/asset-management"
       }
     ]
   }
