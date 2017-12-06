@@ -8,7 +8,7 @@ var beautify = require("js-beautify").js_beautify;
 var mkdirp = require("mkdirp");
 var wd = process.env.PWD;
 var versions = {};
-//console.log(JSON.stringify(config));
+console.log(JSON.stringify(config));
 //config.instances.length = 3;
 var counter = 0;
 var instances = config.instances.map(function(url) {
@@ -31,10 +31,14 @@ function addToVersions(obj) {
     var body = obj.body.toString();
     var url = obj.url;
     counter++;
-    var family = body
+    try{
+      var family = body
       .split("<br/>Build name: ")[1]
       .split("<br/>")[0]
       .toLowerCase();
+    } catch (error) {
+      console.log(error);
+    }
     var patch = body.split("__patch")[1].split("-")[0];
     var url = url.split("/stats.do")[0];
     if (
@@ -44,12 +48,12 @@ function addToVersions(obj) {
       versions[family][patch] == "done"
     ) {
     } else {
-      //console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
+      console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
       if (versions && versions[family]) {
         //family exists...
-        //console.log("family exists: " + family);
+        console.log("family exists: " + family);
         if (versions[family] && versions[family][patch]) {
-          //console.log("Found " + family + " patch " + patch + " @ " + url);
+          console.log("Found " + family + " patch " + patch + " @ " + url);
           versions[family][patch] = url;
         } else {
           versions[family][patch] = url;
@@ -65,7 +69,7 @@ function addToVersions(obj) {
       createSources();
     }
   } catch (err) {
-    //console.log(err);
+    console.log(err);
   }
 }
 
