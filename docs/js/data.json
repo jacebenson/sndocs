@@ -994,7 +994,8 @@
       "ServiceMapping",
       "Event Management",
       "UI16",
-      "Surveys"
+      "Surveys",
+      "Customer Service Management (Scoped)"
     ]
   },
   {
@@ -1098,7 +1099,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0635465"
       }
     ],
-    "features": []
+    "features": [
+      "Automated Testing Framework",
+      "Email API",
+      "Script Debugger",
+      "Application Portfolio Management",
+      "HR Service Management (Scoped)"
+    ]
   },
   {
     "name": "Jakarta",
@@ -1157,7 +1164,13 @@
         "date": "2017-11-02"
       }
     ],
-    "features": []
+    "features": [
+      "Embedded Help",
+      "MetricBase",
+      "Benchmarks",
+      "Trusted Security Circles",
+      "Communities"
+    ]
   },
   {
     "name": "Kingston",
@@ -1174,17 +1187,13 @@
       }
     ],
     "features": [
-      "Incident",
-      "Problem",
-      "Change",
-      "Release",
-      "CMDB",
-      "Discovery",
-      "Service Catalog",
-      "Asset Management",
-      "Graphical Workflow",
-      "Service Level Management",
-      "Facilities Management"
+      "Agent Intelligence",
+      "Flow Designer",
+      "Function fields",
+      "IntregrationHub",
+      "State Management",
+      "Enterprise Release Management",
+      "Configuration Compliance"
     ]
   }
 ]

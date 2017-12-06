@@ -56,6 +56,8 @@ margin-left: -1.5em;}
                             var html = '<thead>\n\t<tr class="thead">\n';
                             html += '\t\t<th class="" data-field="1">Version</th>\n';
                             html += '\t\t<th colspan="15" class="" data-field="2">Patches</th>\n';
+                            html += '\t\t<th colspan="1" class="" data-field="3">Features</th>\n';
+                            
                             /*
                             var allFeatures = [];
                             for(var a = 0;a<data.length;a++){
@@ -118,11 +120,11 @@ margin-left: -1.5em;}
                                 html += '<td></td>';
                             }
                         }
-                        /*
+                        html+='<td>';
                         for (var feature in version.features) {
-                            html+='<td>'+version.features[feature].name+'</td>'
+                            html+= '<a href="https://docs.servicenow.com/search?q=' + version.features[feature] +'">'+version.features[feature]+'</a>'+'<br/>'
                         }
-                        */
+                        html+='</td>';
                         html += '</tr>\n';
                     }
                     
