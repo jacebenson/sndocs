@@ -1136,8 +1136,8 @@
       {
         "number": "3b",
         "name": "Jakarta Patch 3b",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3-hf-1-PO.html",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
+        "url": "#",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3b/scripts/",
         "date": "2017-12-06"
       },
       {
