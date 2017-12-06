@@ -877,7 +877,8 @@
       {
         "name": "Geneva Patch 11",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
-        "date": "2017-02-23"
+        "date": "2017-02-23",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/geneva/11/scripts/"
       }
     ],
     "features": [
@@ -973,7 +974,7 @@
         "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
         "date": "2017-06-09",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623092",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11b/scripts/"
       },
       {
         "number": "12",
