@@ -1,7 +1,105 @@
 [
+ {
+   "name": "Glidesoft 2004",
+   "url": "https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm",
+   "date": "2004-12-04",
+   "patches": [],
+   "features": [
+     "Incident",
+     "Problem",
+     "Change",
+     "Knowledge",
+     "Legacy Surveys"
+   ]
+ },
   {
-    "name": "Summer 2007",
-    "url": "https://web.archive.org/web/20170513212222/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Release_Notes",
+    "name": "January 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-01-27",
+    "patches": [],
+    "features": [
+      "Release",
+      "Discovery",
+      "Service Catalog"
+    ]
+  },
+  {
+    "name": "February 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-02-12",
+    "patches": [],
+    "features": []
+  },
+  {
+    "name": "March 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-03-18",
+    "patches": [],
+    "features": []
+  },
+  {
+    "name": "April 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-04-15",
+    "patches": [],
+    "features": [
+    ]
+  },
+  {
+    "name": "May 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-05-21",
+    "patches": [],
+    "features": [
+      "Inactivity Monitors",
+      "Enhanced list and form personalization",
+      "Home Pages"
+    ]
+  },
+  {
+    "name": "July 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-07-04",
+    "patches": [],
+    "features": [
+      "Field Status Indicators",
+      "Delegates"
+    ]
+  },
+  {
+    "name": "August 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-08-28",
+    "patches": [],
+    "features": [
+      "Computer Telephony Integration",
+      "Client Scripts"
+    ]
+  },  
+  {
+    "name": "November 2006",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2006-11-17",
+    "patches": [],
+    "features": [
+      "CMDB",
+      "Email Client"
+    ]
+  },
+  {
+    "name": "March 2007",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
+    "date": "2007-03-02",
+    "patches": [],
+    "features": [
+      "IP Based Access Control",
+      "XLS Export",
+      "CSV Export"
+    ]
+  },
+  {
+    "name": "Summer 2007 aka July 2007",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
     "date": "2007-07-05",
     "patches": [
       {
@@ -11,21 +109,16 @@
       }
     ],
     "features": [
-      "Incident",
-      "Problem",
-      "Change",
-      "Release",
-      "CMDB",
-      "Discovery",
-      "Service Catalog",
       "Asset Management",
-      "Knowledge",
-      "Legacy Surveys"
+      "Update Sets",
+      "Access Controls",
+      "Impersonation",
+      "Service Level Management"
     ]
   },
   {
     "name": "Fall 2007",
-    "url": "https://web.archive.org/web/20170513191036/http://wiki.servicenow.com:80/index.php?title=Fall_2007_Release_Notes",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
     "date": "2007-11-23",
     "patches": [
       {
@@ -34,17 +127,20 @@
         "date": "2007-11-30"
       }
     ],
-    "features": []
+    "features": [
+      "Variable Sets",
+      "UI Policies for Forms"
+    ]
   },
   {
     "name": "Summer 2008",
-    "url": "https://web.archive.org/web/20170330185624/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Release_Notes",
+    "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
     "date": "2008-08-22",
     "patches": [],
     "features": [
       "Graphical Workflow",
-      "Service Level Management",
-      "Facilities Management"
+      "Facilities Management",
+      "View Management"
     ]
   },
   {
@@ -65,7 +161,6 @@
       "Global UI Scripts",
       "Homepage Layouts",
       "Global Text Search",
-      "Project Management",
       "Mobile Support"
     ]
   },
@@ -81,7 +176,9 @@
     "url": "https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes",
     "date": "2009-01-09",
     "patches": [],
-    "features": []
+    "features": [
+      "Project Management"
+    ]
   },
   {
     "name": "Winter 2009 Stable 1",
@@ -213,7 +310,6 @@
     "date": "2010-03-19",
     "patches": [],
     "features": [
-      "Delegates",
       "Upgrade History"
     ]
   },
