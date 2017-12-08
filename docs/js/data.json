@@ -741,6 +741,7 @@
       }
     ],
     "features": [
+      "Performance Analytics",
       "Vendor Management",
       "Resource Management",
       "HR Service Management",
