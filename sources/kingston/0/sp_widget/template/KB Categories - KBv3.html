@@ -1,0 +1,19 @@
+<div class="panel panel-{{::c.options.color}} b">
+  <div class="panel-heading">
+    <h1 class="h4 panel-title" ng-bind="::c.options.title">
+      <fa ng-if="c.options.glyph" name="{{c.options.glyph}}" />
+    </h1>
+  </div>
+  <div class="panel-body">
+    <ul class="list-group">
+      <li ng-repeat="category in c.data.categories | orderBy:'label'"
+          ng-if="category.count"
+          class="list-group-item">
+        <a tabindex="0" ng-click="c.setCategory($event, category.value)" ng-href="?id=kb_category&kb_category={{::category.value}}">
+          <span class="label label-as-badge label-primary" ng-if="category.count > 0" tabindex="-1">{{::category.count}}</span>
+          {{::category.label}}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

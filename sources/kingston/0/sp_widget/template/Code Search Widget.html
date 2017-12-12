@@ -1,0 +1,72 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">${Code Search}</h3>
+  </div>
+  <div class="panel-body col-12">
+    <form class="navbar-form col-12" ng-submit="c.doSearch()">
+      <div class="row">
+        <div class="input-group" style="display:flex;">
+          <input id="search-term" type="text" placeholder="${Search term}" class="form-control" ng-model="c.data.searchTerm" /> 
+          <span class="input-group-btn">
+            <button class="btn btn-primary" ng-click="c.doSearch()"><i class="glyphicon glyphicon-search" aria-hidden="true"></i></button>
+          </span>
+        </div><!-- /input-group -->
+      </div>
+    </form>
+  </div>
+</div>
+<div class="panel panel-default" ng-if="!records && startSearchSysid">
+  <h1 class="text-center">
+    Searching sys_ids...
+  </h1>
+</div>
+<div class="panel panel-default" ng-if="records.length>0 && startSearchSysid">
+  <h1 class="text-center">
+    Exact sys_id matches
+  </h1>
+  <div class="panel-body">
+    <div class="row container" ng-repeat="record in records">
+      <p>
+        <a href={{record.url}} target="_blank">{{record.displayValue}} on {{record.table}}</a>
+      </p>
+    </div>
+  </div>
+</div>
+<div class="panel panel-default" ng-if="!response && startSearchCode">
+  <h1 class="text-center">
+    Searching code...
+  </h1>
+</div>
+<div class="panel panel-default" ng-if="response.result && startSearchCode">
+  <h1 class="text-center">
+    Code matches
+  </h1>
+  <div class="panel-body">
+    <div ng-repeat="table in response.result">
+      <div class="row container" ng-if="table.hits.length>0">
+        <p>
+          <a href="#{{table.recordType}}">{{table.tableLabel}} has {{table.hits.length}} matching records.</a>
+        </p>
+      </div>
+    </div>
+    <div ng-repeat="table in response.result">
+      <div class="row" id="{{table.recordType}}" ng-if="table.hits.length>0">
+        <h1 class="text-center">
+          {{table.tableLabel}}
+        </h1>
+      </div>
+      <div class="row" ng-if="table.hits.length>0">
+        <div class="row container" ng-repeat="hit in table.hits">
+          <div class="col-sm-2">
+            <a ng-href="{{hit.className}}.do?sys_id={{hit.sysId}}" target="_blank">{{hit.name}}</a>
+          </div>
+          <div class="col-sm-10">
+            <div ng-repeat="match in hit.matches"> 
+              <pre><code class="javascript"><span ng-repeat="context in match.lineMatches"><span>Line {{context.line}}</span>: <span>{{context.context}}</span><br/></span></code></pre> 
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

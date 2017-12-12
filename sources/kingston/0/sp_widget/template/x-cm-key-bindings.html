@@ -1,0 +1,67 @@
+<div class="key-bindings">
+  <h4>${Editor key bindings - General}</h4>
+  <dl>
+    <dt>{{c.ctrl}} m</dt>
+    <dd>${full screen toggle}</dd><br>
+    <dt>⇧ tab</dt>
+    <dd>${format code (formats selection)}</dd><br>
+    <dt>{{c.cmd}} f</dt>
+    <dd>${find (highlights found characters)}</dd><br>
+    <dt>{{c.cmd}} d</dt>
+    <dd>${delete current line}</dd><br>
+    <dt>{{c.cmd}} z</dt>
+    <dd>${undo}</dd><br>
+    <dt>{{c.cmd}} s</dt>
+    <dd>${save}</dd><br>
+  </dl>
+
+  <h4>${Cursor movement}</h4>
+  <dl ng-if="!c.windows">
+    <dt>{{c.ctrl}} + v</dt>
+    <dd>${page down}</dd><br>
+    <dt>{{c.ctrl}} ⇧ + v</dt>
+    <dd>${page up}</dd><br>
+    <dt>{{c.ctrl}} a</dt>
+    <dd>${beginning of line}</dd><br>
+    <dt>{{c.ctrl}} e</dt>
+    <dd>${end of line}</dd><br>
+    <dt>{{c.cmd}} ↑</dt>
+    <dd>${top of document}</dd><br>
+    <dt>{{c.cmd}} ↓</dt>
+    <dd>${end of document}</dd><br>
+    <dt>{{c.alt}} →</dt>
+    <dd>${word right}</dd><br>
+    <dt>{{c.alt}} ←</dt>
+    <dd>${word left}</dd><br>
+  </dl>
+  
+  <dl ng-if="c.windows">
+    <dt>PgDn</dt>
+    <dd>${page down}</dd><br>
+    <dt>PgUp</dt>
+    <dd>${page up}</dd><br>
+    <dt>Home</dt>
+    <dd>${beginning of line}</dd><br>
+    <dt>End</dt>
+    <dd>${end of line}</dd><br>
+    <dt>{{c.cmd}} Home</dt>
+    <dd>${top of document}</dd><br>
+    <dt>{{c.cmd}} End</dt>
+    <dd>${end of document}</dd><br>
+    <dt>{{c.ctrl}} →</dt>
+    <dd>${word right}</dd><br>
+    <dt>{{c.ctrl}} ←</dt>
+    <dd>${word left}</dd><br>
+  </dl>  
+
+  <div ng-if="c.showOther">
+    <h4>${Other}</h4>
+    <dl>
+      <dt>{{c.accesskey}} + h</dt>
+      <dd>${toggles this panel}</dd><br>
+    </dl>    
+  </div>
+  <div ng-if="c.ua">
+  {{c.ua.browser.family}} {{c.ua.browser.major}} • {{c.ua.os.name}}
+  </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="panel panel-default">
+	<h1 class="padder-md h3">${Order Confirmation}
+    <span class="text-base">
+  	  <i class="fa fa-close pull-right text-base" ng-click="c.cancel()"></i>
+     </span>
+  </h1>
+	<div class="wrapper-md clearfix b-t">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-sm-8">
+					<label for="requested-for">${Request For} <i class="fa fa-info-circle" uib-tooltip="${Request for yourself or on behalf of another person}" tooltip-placement="right" tooltip-append-to-body="true"></i></label>
+					<sn-record-picker id="requested-for" 
+                            field="c.requestedFor" 
+                            table="'sys_user'" 
+                            display-field="'name'" 
+                            display-fields="c.data.reqForDispCols" 
+                            value-field="'sys_id'" 
+                            search-fields="c.data.reqForDispCols"
+                            default-query="c.data.reqForQuery"
+                            page-size="100" 
+                            sn-disabled="!c.data.disable_req_for">
+          </sn-record-picker>
+				</div>
+				<div class="padder-v col-sm-12">
+					<label for="deliver-to" ng-click="c.showDeliveryAddr = !c.showDeliveryAddr" tabindex="0">${Delivery Information} <span class="text-muted"> ${(Optional)}</span>
+          				<i ng-class="c.showDeliveryAddr ? 'fa fa-minus-square-o' : 'fa fa-plus-square-o'" aria-expanded="{{c.showDeliveryAddr}}" class="m-t-xs pull-left accordion-toggle"></i>
+          </label>
+					<textarea class="form-control" ng-if="c.showDeliveryAddr" ng-model="c.deliverTo"  id="deliver-to" ng-model-options="{ updateOn: 'blur' }" ng-change="c.changeShippingInfo()" rows="3"></textarea>
+				</div>
+        <div class="col-sm-12">
+					<label for="special-instructions" ng-click="c.showSpecialInstructions = !c.showSpecialInstructions" tabindex="0">${Special Instructions} <span class="text-muted"> ${(Optional)}</span>
+						<i ng-class="c.showSpecialInstructions ? 'fa fa-minus-square-o' : 'fa fa-plus-square-o'" aria-expanded="{{c.showSpecialInstructions}}" class="m-t-xs pull-left accordion-toggle"></i>
+					</label>
+					<textarea class="form-control" ng-if="c.showSpecialInstructions" ng-model="c.special_instructions" id="special-instructions" ng-model-options="{ updateOn: 'blur' }" ng-change="c.changeShippingInfo()" rows="3"></textarea>
+				</div>
+		</div>
+    </div>
+	</div>
+	<div class="panel-footer clearfix">
+    <div class="attachment-list" ng-if="c.data.action !== 'order_now'">
+			<now-attachments-list template="sp_attachment_single_line" class="padder-b"></now-attachments-list>
+    </div>
+		<div>
+				<label ng-if="c.data.action !== 'order_now'" style="font-weight:normal;cursor:pointer;" class="padding-top-s">
+					<sp-attachment-button></sp-attachment-button>
+					<span style="padding-left:4px;">${Add attachments}</span>
+				</label>
+				<sp-message-dialog name="delete_attachment" title="{{::m.dialogTitle}}" message="{{::m.dialogMessage}}" ok="{{::m.dialogOK}}" cancel="{{::m.dialogCancel}}" dialog-class="delete-dialog"></sp-message-dialog>
+			<button ng-disabled="c.checkoutInProgress" name="submit" ng-click="c.triggerCheckout()" class="btn sc-btn btn-primary pull-right m-l-xs">
+				<span ng-show="!c.checkoutInProgress">${Checkout}</span>
+				<span ng-show="c.checkoutInProgress">${Ordering...}</span>
+			</button>
+      <button name="cancel" ng-disabled="c.checkoutInProgress" ng-click="c.cancel()" class="btn btn-default pull-right">${Cancel}</button>
+		</div>
+	</div>
+</div>

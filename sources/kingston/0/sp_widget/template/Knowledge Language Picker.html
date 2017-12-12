@@ -1,0 +1,29 @@
+<div class="kb-language-block" ng-cloak>
+  <div class="kb-language" ng-if="c.languages.length > 1">
+    <div class="dropdown">
+      <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
+        <span class="lang-icon"><i class="fa fa-globe" aria-hidden="true"></i></span>
+        <span class="lang-data hidden-xs">${{{c.selectedLanguage}}}</span>
+      </a>
+     <ul class="dropdown-menu dd-right-menu">
+       <li ng-repeat="item in c.languages"><a title="${{{item.label}}}" role="button" ng-click="c.updateLanguage(item)" href="javascript:void(0);">${{{item.label}}}</a></li>
+    </ul>
+    </div>
+  </div>
+</div>
+<style>
+  @media only screen and (max-width :768px){
+    .kb-language-block .dd-right-menu{
+      left: auto;
+      right: 0; 
+    }
+    .kb-language-block .kb-language{
+      padding-left : 15px;
+    }
+  }
+  @media only screen and (max-width :991px){
+  	.kb-language-block .lang-icon {
+			font-size : 18px;		
+    }
+  }
+</style>

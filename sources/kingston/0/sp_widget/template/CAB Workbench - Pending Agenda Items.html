@@ -1,0 +1,89 @@
+<div id="pending-agenda-item-widget" class="panel panel-default" role="region" tabindex="0" aria-label="${Agenda Items Widget}">
+    <div class="panel-heading heading widget-heading" ng-class="{'heading-inactive': isViewingCurrent()}">
+      	<label for="cab-pending-agenda-filter" class="sr-only">${Agenda list filter}</label>
+        <select id="cab-pending-agenda-filter" class="sn-select-basic" ng-model="selectedItem" ng-init="selectedItem = 'pending'">
+            <option ng-repeat="selectOption in data.i18n.agendaSelectOptions" value="{{selectOption.value}}">{{selectOption.display}}</option>
+        </select>
+    </div>
+    <div class="panel-body" style="overflow: scroll; height: 86vh;" role="list" tabindex = "0" aria-label="${Agenda items list}">
+        <div role="listitem"
+             ng-attr-id="agenda_item_{{item.sys_id.value}}"
+             ng-click="item.task.record && setViewAgendaItem(item, $first)"
+             class="row info-row"
+             ng-repeat="item in agenda | agendaItemFilter:selectedItem:data.userId track by item.sys_id.value"
+             ng-attr-aria-label="{{getAgendaAriaLabel(item)}}">
+            <div ng-class="{'agenda-item-halo': isViewAgendaItem(item.sys_id.value)}">
+                <div ng-if="item.task.record" class="agenda-item" ng-class="isViewAgendaItem(item.sys_id.value) ? 'agenda-item-big' : 'agenda-item-small'">
+                    <div class="col-xs-9 agenda-item-detail">
+                        <div>
+                            <div class="tasknumber">{{::item.task.display_value}}</div>
+                            <div class="description"><sn-cab-line-clamp text="{{::item.task.record.short_description.display_value}}" max-lines="2"/></div>
+                            <table class="agenda-task-detail">
+                                <tr>
+                                    <td>${Assignment group}</td>
+                                    <td class="single-line-clamp">{{::item.task.record.assignment_group.display_value}}</td>
+                                </tr>
+                                <tr>
+                                    <td>${Assigned to}</td>
+                                    <td class="single-line-clamp">{{::item.task.record.assigned_to.display_value}}</td>
+                                </tr>
+                                <tr>
+                                    <td>${State}</td>
+                                    <td>{{item.task.record.state.display_value}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div ng-if="!isMeetingCancelled()" class="agenda-link-control">
+                            <div>
+                                <a href="javascript:void(0)"
+                                   ng-attr-aria-label="{{getNotifyAriaLabel(item)}}"
+                                   class="notifyme"
+                                   role="button"
+                                   ng-if="!isCABManager() && notifyAvailable(item) && !alreadyBeingNotified(item)"
+                                   ng-click="notifyMe($event, item, 'agenda_item_'+item.sys_id.value)">
+                                    <i class="notifymeicon icon-notification-bell"></i>{{data.i18n.notifyMe}}
+                                </a>
+                                <a href="javascript:void(0)"
+                                   role="button"
+                                   ng-attr-aria-label="{{getPromoteAriaLabel(item)}}"
+                                   ng-if="isCABManager() && !$first && item.state.value == 'pending'"
+                                   ng-click="promoteItem($event, item, 'agenda_item_'+item.sys_id.value)">${Promote}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3 donutprogress">
+                        <div ng-if="item.state.value != 'paused'" style="width: 46px; margin: 0 auto;">
+                            <sn-donut-timer x-aria-parent-label="{{getDonutAriaLabel(item.task.display_value)}}" name="{{item.sys_id.value}}" duration="{{item.alotted_time.value_ms}}" elapsed="{{item.elapsed_time.value_ms}}" size="46px" show-duration-before-start="true"></sn-donut-timer>
+                        </div>
+                        <div ng-if="item.state.value == 'paused'" style="position: relative; width: 46px; height: 46px; margin: 0 auto;">
+                            <div class="timer-paused-centered">
+                                <div class="paused-timer-scaled-text">${Paused}</div>
+                            </div>
+                            <div class="timer-paused">
+                            </div>
+                        </div>
+
+                        <div class="agenda-change-decision" ng-if="item.decision.value == 'approved' || item.decision.value == 'preapproved'">
+                            ${Approved}
+                        </div>
+                        <div class="agenda-change-decision" ng-if="item.decision.value == 'rejected'">
+                            ${Rejected}
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="!item.task.record" class="agenda-item agenda-item-small">
+                    <div class="col-xs-9 agenda-item-detail" style="padding-top: 6%">
+                        <div>
+                          <div><sn-cab-line-clamp text="${You are not allowed to view this Agenda Item}" max-lines="2"/></div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3 donutprogress">
+                        <div style="height: 100%; width: 46px; margin: 0 auto;">
+                          <sn-donut-timer name="{{item.sys_id.value}}" duration="{{item.alotted_time.value_ms}}" elapsed="{{item.elapsed_time.value_ms}}" size="46px" show-duration-before-start="true"></sn-donut-timer>
+                      	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

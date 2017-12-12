@@ -1,0 +1,40 @@
+.color-positive {
+  color: $brand-success;
+}
+.color-accent {
+  color: $brand-primary;
+}
+.color-negative {
+  color: $brand-danger;
+}
+.requested-items-flex-container {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+}
+/**/
+.stage-on .icon, .stage-off .icon{ margin-right:6px; }
+.stage-on, .stage-off { margin-bottom: 6px; }
+
+.l-h-40 {
+  line-height: 40px;
+}
+.list-action {
+  display:block;
+  padding:0 6px;
+  cursor: pointer;
+}
+.list-action:hover {
+  background-color: #fff;
+}
+
+button.flex-item {
+  padding:0;
+  background-color: inherit;
+  border: none;
+  height: 16px;
+}
+button.flex-item:focus {
+  box-shadow: none;
+}

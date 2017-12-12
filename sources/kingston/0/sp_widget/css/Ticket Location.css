@@ -1,0 +1,25 @@
+.panel-heading {
+  border-radius:2px;
+} 
+
+.sp-geo-canvas-container {
+  height: 400px; 
+  width: 100%;
+}
+
+.other-name {
+  vertical-align:bottom;
+  padding-left:4px;
+  font-size:0.9em;
+}
+
+.other-item {
+  padding:2px;
+  white-space:nowrap;
+}
+
+.map-icon {
+  vertical-align:bottom;
+  height:30px;
+  padding:4px 0px 4px 4px;
+}  

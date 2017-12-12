@@ -1,0 +1,31 @@
+<div ng-show="c.visible && c.alternatePhrasesFound">
+  <div class="kb-suggestion-block" ng-class="$root.showFacet? 'kb-suggestion-display-none':''" ng-cloak >
+    <div ng-class="::{'hidden-xs' : options.hide_xs}">
+      <div class="panel panel-{{::c.options.color}}">
+        <div class="panel-heading">
+          <div class="kb-breadcrumb row">
+            <div class="bd-title">
+              <span class="alert-danger did-you-mean">
+                ${Did you mean}:
+              </span>
+            </div>
+            <div class="bd-items" ng-show="c.items.length > 0">
+              <span class="suggestion-item" ng-repeat="item in c.items"><a href="javascript:void(0);" ng-click="c.updateKeyword(item)">{{item}}</a><span ng-if="$index+1!=c.items.length"> , </span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+
+@media only screen and (max-width: 991px) {
+  .kb-suggestion-display-none {
+  	display :none !important;
+  }
+  
+}
+  </style>
+

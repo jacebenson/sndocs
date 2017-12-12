@@ -1,0 +1,58 @@
+<div class="header">
+	<div class="container" role="region" aria-label="${CAB Header Widget}" tabindex="0">
+		<div class="header-timer">
+			<sn-donut-timer x-aria-parent-label="${CAB Meeting}" name="{{data.meetingId}}" size="66px" minutes-label="true" show-before-start="false" max-display-value="9999" />
+		</div>
+		<div class="title" role="group" aria-labelledby="cab_header_title" tabindex="0">
+			<h4 id="cab_header_title" class="ng-cloak">{{::getMeetingTitle()}}<br/>
+				<small ng-if="!isMeetingCancelled()">{{display.scheduled_for}}</small>
+				<small ng-if="isMeetingCancelled()">${This meeting has been cancelled.}</small>
+          	</h4>
+		</div>
+		<div ng-if="isCABManager() && isMeetingPending()">
+			<button ng-click="startMeeting()" class="btn cab-start-meeting">${Start meeting}</button>
+		</div>
+		<div class="nav-section">
+			<ul class="nav nav-pills" role="toolbar" aria-label="${Meeting toolbar}">
+				<li ng-repeat="nav in c.data.navs"
+                    ng-click="c.toggle(nav, $index);"
+                    ng-attr-tabindex="{{$first?0:-1}}"
+                    ng-keydown="navigateToolbar($event, $index)"
+                    ng-attr-id="header_nav_item_{{$index}}"
+                    ng-attr-aria-label="{{::nav.title}} {{nav.count}}">
+					<a tabindex="-1" aria-hidden="true" href="javascript:void(0);">{{::nav.title}}<span ng-if="!isMeetingCancelled()" class="badge">{{nav.count}}</span></a>
+					<div ng-if="!nav.show_in_modal && nav.widget_data" style="position:relative;">
+						<sn-float-box
+							show="nav.show"
+							count="{{nav.count}}"
+                            on-focus-outside="focus('header_nav_item_' + $index)"
+							title="{{::nav.title}}"
+							width="{{::nav.width}}">
+							<sp-widget widget="nav.widget_data"></sp-widget>
+						</sn-float-box>
+					</div>
+					<div ng-if="nav.show_in_modal && nav.widget_data">
+						<sn-vcab-modal id="{{nav.id}}"
+							open="nav.show"
+                        	ng-attr-aria-hidden="{{!nav.show}}"
+							title="{{nav.title}}"
+							ok-btn-label="${Save}"
+							widget-data="nav.widget_data"></sn-vcab-modal>
+					</div>
+				</li>
+				<li uib-popover-html="c.data.meeting.conference_details.html"
+                    ng-keydown="navigateToolbar($event, c.data.navs.length)"
+                    ng-attr-id="header_nav_item_{{c.data.navs.length}}"
+                    tabindex="-1"
+                    role="button"
+                    aria-haspopup="true"
+                    popover-placement="bottom"
+                    ng-keypress="toggleConfInfoPopover($event)"
+                    popover-trigger="click outsideClick" popover-is-open="isPopoverOpen">
+					<a href="javascript:void(0);" tabindex="-1">{{::c.data.msg.conf_info}}</a>
+				</li>
+			</ul>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+</div>

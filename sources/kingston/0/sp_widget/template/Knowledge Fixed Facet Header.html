@@ -1,0 +1,26 @@
+<div class="kb-fixed-facet-block hidden-xs hidden-sm hidden-md hidden-lg" ng-if="$root.facetSubscribed" ng-class="$root.showFacet ? 'show-FixedFacet' : '' ">
+    <div class="panel panel-{{::options.color}}">  
+      <div class="panel-heading" ng-class="{'remove-bottom-border':!c.isLoading}">
+        <span class="clear-all">
+            <span ng-show="c.clearAllEnable" ng-click="c.clearAllFiters()" class="clear-enable">${Clear All}</span>
+          <span ng-hide="c.clearAllEnable"  class="clear-disable">${Clear All}</span>
+        </span>
+          <span class="panel-title panel-center">
+            <span ng-if="::options.glyph"><fa name="{{::options.glyph}}" /></span>{{::options.title}}
+          </span>
+          <span class="doneCls"  ng-click="c.doneClick()">${Done}</span>
+       </div>
+  		<div class="facet-data visible-xs visible-sm" ng-click="c.doneClick()" >{{c.articleCount}}</div>  
+  </div>
+  </div>
+<style>
+@media only screen and (max-width: 991px) {
+  .show-FixedFacet{
+		display : block !important;
+  }
+  .kb-fixed-facet-column {
+  	padding-left : 0px !important;
+    padding-right : 0px !important;
+  }
+}
+</style>

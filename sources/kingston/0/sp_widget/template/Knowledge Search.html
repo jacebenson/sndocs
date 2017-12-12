@@ -1,0 +1,36 @@
+<div class="kb-search-block" ng-class="$root.showFacet? 'kb-search-display-none':''" ng-cloak>
+  <div class="filter-icon-padding visible-xs visible-sm col-xs-1 col-sm-1 ">
+    <span class=" filter-icon" ng-click ="c.toggleFacets()" ng-class="c.applycolor ? 'selected-filter-color' : 'filter-color'" ><i class="fa fa-filter filter-size" aria-hidden="true"></i>
+      <span class="check-position" ng-show="c.applycolor"><i class="fa fa-check float-left"  aria-hidden="true"></i></span></span>
+  </div>
+  <div class="col-md-6 col-xs-10 col-sm-7 no-pad pad-bottom">
+    <div class="input-group input-group-{{::c.options.size}}">
+      <input id="kb_search_input" name="q" type="text" ng-model="c.keyword" aria-label="{{::options.title}}"  placeholder="{{::options.title}}" class="form-control">
+      <span class="input-group-btn">
+        <button name="search" type="submit" aria-label="search" class="btn btn-{{::c.options.color}}" ng-click="c.keywordChanged('')">
+          <i ng-if="::c.options.glyph" class="fa fa-{{::c.options.glyph}}"></i>
+        </button>
+      </span>
+    </div>
+  </div>
+  <div class="col-md-6 col-sm-4 col-xs-1 no-pad">
+     <sp-widget widget="c.data.language_picker"></sp-widget>
+  </div>
+</div>
+<style>
+
+@media only screen and (max-width: 991px) {
+  .kb-search-block {
+    padding-top : 7px !important;
+  }
+  .filter-icon-padding {
+  	padding-left : 0px !important;
+    padding-right : 0px !important;
+    text-align : center;
+  }
+  .kb-search-display-none {
+  	display :none !important;
+  }
+  
+}
+  </style>

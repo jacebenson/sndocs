@@ -1,0 +1,40 @@
+<div ng-class="{'hidden-xs' : hideCategoryWidgetInXS}" class="panel panel-{{::options.color}} category-widget no-border">
+  <div class="panel-heading">
+    <h1 class="h4 panel-title">
+      <span class="pull-right visible-xs" >
+      	<i class="fa fa-times-circle" ng-click="hideBrowseCategory()" aria-label="${Show Items}" tabindex="0"/>
+      </span>
+      <span ng-if="::options.glyph">
+        <fa name="{{::options.glyph}}" />
+      </span>{{::options.title}}</h1>
+  </div>
+  <div class="list-group category-list" role="list">
+    <span class="list-group-item text-overflow-ellipsis" ng-if="category.totalCount > 0" ng-include="'category-template.html'" ng-repeat="category in data.categoriesList track by category.sys_id">
+    </span>
+  </div>
+  <div class="panel-footer text-center" ng-if="data.windowSize !== -1 && data.total > data.categoriesList.length">
+    <a href="javascript:void(0)" role="button" class="text-center" ng-click="loadCompleteList()" >{{data.showAll}}</a>
+    <div class="text-muted text-center">
+      {{data.loadAllMsg}}
+    </div>
+  </div>
+</div>
+
+<script type="text/ng-template" id="category-template.html">
+  	<i ng-if="::category.subcategories.length > 0 && category.totalCount > category.count" class="l-h-1_6x pull-left fa" ng-class="{true: 'fa-minus-square-o', false: 'fa-plus-square-o'}[category.showChildren]" aria-hidden="true" ng-click="displayChildren($event, category)"></i>
+  	<a href="#" class="block text-overflow-ellipsis category" 
+    		ng-enabled="category.totalCount > 0" ng-class="{true: 'text-{{::options.color}}', false: ''}[category.sys_id == data.categoryId]" id="{{::category.sys_id}}" 
+        ng-click="categorySelected(category)" 
+        sn-focus="category.sys_id == data.categoryId"
+        title="{{::category.title}}">
+	    	{{::category.title}}
+    		<span class="badge pull-right pointer" ng-if="options.omit_badges != 'true'">{{::category.totalCount}}</span>
+      	<span class="sr-only">${items}</span>
+  	</a>
+ 	 	<div ng-if="category.showChildren">
+  		<div class="list-group sub-category-list" role="list" ng-if="category.subcategories.length > 0" ng-class="{true: 'no-indent', false: ''}[category.level > 2]">
+    		<span class="list-group-item no-border text-overflow-ellipsis" ng-include="'category-template.html'" ng-repeat="category in category.subcategories track by category.sys_id" ng-if="category.totalCount > 0">
+      	</span>
+    	</div>
+  	</div>
+</script>

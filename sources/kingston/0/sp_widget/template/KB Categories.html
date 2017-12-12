@@ -1,0 +1,10 @@
+<div class="panel panel-{{options.color}} b">
+  <div class="panel-heading">
+	<h4 class="panel-title">${Categories}</h4>
+  </div>
+  <div class="panel-body">
+    <div ng-repeat="a in data.categories | orderBy:'label'" class="m-b">
+      <a href="?id=kb_category&kb_category={{::a.value}}">{{::a.label}}</a>
+    </div>
+  </div>
+</div>

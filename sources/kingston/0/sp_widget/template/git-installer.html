@@ -1,0 +1,32 @@
+<div class="container">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Application Loader</h3>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        Repo name
+      </div>
+      <div class="col-md-6">
+        Repo Description
+      </div>
+      <div class="col-md-2">
+        Actions
+      </div>
+    </div>
+    <div class="row" ng-repeat="repo in c.data.repoObjs">
+      <div class="col-md-4">
+        <a target="_blank" 
+           ng-href="{{repo.git}}">
+          {{repo.name}}
+        </a>
+      </div>
+      <div class="col-md-6">
+        {{repo.description}}
+      </div>
+      <div class="col-md-2">
+        INSTALL
+      </div>
+    </div>
+  </div>
+</div>

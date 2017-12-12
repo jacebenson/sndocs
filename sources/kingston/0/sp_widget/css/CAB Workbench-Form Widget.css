@@ -1,0 +1,175 @@
+
+  #vcab_bootstrap_override {
+	    .nav-tabs {
+	       	margin-bottom: 30px;
+	    }
+	    .nav-tabs > li.active {
+	      	border-bottom: 4px solid #278EFC !important;
+	   	}
+	   	.nav-tabs > li, .nav-tabs > li.active {
+	      >a, >a:hover, >a:focus {
+	          background-color: #FFFFFF;
+	          border: 0px !important;
+	      }
+	   }
+	   	.field-set {
+	       padding-left: 10px;
+	       padding-right: 10px;
+	    }
+	}
+
+	.form-modal-icon {
+		cursor: pointer;
+		float: right;
+		.icon-edit {
+			padding: 5px 6px 2px 6px !important;
+			margin-top: 3px;
+		}
+	}
+
+	.icon-edit:before {
+		vertical-align: initial;
+		font-size: 20px;
+	}
+
+	.icon-edit:hover {
+		color: #278EFC;
+	}
+
+	.no-record-msg-box {
+		text-align: center;
+		height: 500px;
+		background-color: #FFFFFF;
+		padding-top: 130px;
+		.no-record-msg {
+			border: 1px solid $color-lightest;
+			padding: 75px;
+			border-radius: 5px;
+		}
+		.meeting-status {
+			cursor: pointer;
+			color: #3696F8;
+		}
+		.no-record-msg, .meeting-status {
+			font-size: 18px;
+		}
+	}
+
+	.message-icon-box  {
+		text-align: center;
+		padding-right: 70px; /* width of body - width of msg-box */
+		padding-bottom: 112px; /* 72px(message pad) + 40px(icon width) */
+		.circle {
+			width: 72px;
+			height: 72px;
+			background: $color-accent;
+			-moz-border-radius: 50%;
+			-webkit-border-radius: 50%;
+			border-radius: 50%;
+			position: absolute; /* history icon should see above the line of msg-box */
+			z-index: 2;
+			margin: auto;
+			left: 0px;
+			right: 0px;
+			.icon-history {
+				font-size: 40px;
+				color: #FFFFFF !important;
+			}
+			.icon-history:before {
+				padding-top: 10px; /* Align icon to center of circle */
+			}
+		}
+	}
+
+	.comment {
+	    font-weight: bold;
+	    margin-top: 2px;
+	    margin-bottom: 2px;
+	}
+
+	.mce-panel, .mce-btn {
+	    background-image: none;
+	    background-color: #f0f3f4;
+	}
+
+	.action-btn {
+	    margin-right: 5px;
+	}
+
+	.timeline-container {
+	    max-height: 50vh;
+	    height: 100%;
+	    overflow-y: auto;
+	}
+
+	.panel .panel {
+	    height: auto !important;
+	}
+
+	.panel-default {
+	    border: 0px !important;
+	}
+
+	.attachment-button {
+	    .glyphicon-paperclip {
+	        font-size: 18px;
+	    }
+	}
+	textarea {
+		max-height: 15em;
+		overflow-y: auto !important;
+	}
+
+	.empty-state-wrapper {
+	  width: 100%;
+	  height: 100%;
+	  align-items: center;
+	  display: flex;
+	  flex-direction: column;
+	  padding: 10vh 20px 20px;
+
+	  .empty-state {
+	    border: 1px solid #e7e9eb;
+	    border-radius: 10px;
+	    max-width: 700px;
+	    padding: 30px 40px 20px;
+	    position: relative;
+
+	    .empty-state-badge {
+	      top: -36px;
+	      left: 50%;
+	      position: absolute;
+	      height: 72px;
+	      width: 72px;
+	      -webkit-align-items: center;
+	      -ms-flex-align: center;
+	      align-items: center;
+	      border-radius: 100%;
+	      color: #ffffff;
+	      display: -webkit-flex;
+	      display: -ms-flexbox;
+	      display: flex;
+	      font-size: 40px;
+	      -webkit-justify-content: center;
+	      -ms-flex-pack: center;
+	      justify-content: center;
+	      margin-left: -36px;
+	      text-align: center;
+	    }
+
+	    .empty-state-header {
+	      font-size: 30px;
+	      text-align: center;
+	      color: #343d47;
+	    }
+
+	    .empty-state-content {
+	      ul {
+	        list-style: disc outside;
+	        margin: 0 0 10px 0;
+	        padding: 0 0 0 30px;
+	      }
+	    }
+	  }
+	}
+}

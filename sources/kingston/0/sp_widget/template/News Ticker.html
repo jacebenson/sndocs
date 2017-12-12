@@ -1,0 +1,44 @@
+<div ng-if="data.list.length > 0">
+  <div class="panel panel-{{options.color}}">
+    <div class="panel-heading">
+      <h4 class="panel-title">{{::options.title}}</h4>
+    </div>
+    <div sp-ticker timing="{{data.interval}}" direction="{{data.direction}}" class="list-group">
+      <a ng-href="{{item.url}}" ng-repeat="item in data.list" class="list-group-item">
+        <span ng-if="options.image_field" class="pull-left thumb-sm avatar m-r">
+          <img ng-src="{{item.image_field}}" alt="..." class="img-circle">
+        </span>
+        {{::item.display_field}}<br>
+        <small class="text-muted" ng-repeat="f in item.secondary_fields">
+          <span ng-if="!$first"> • </span>
+          <span ng-switch="f.type" title="{{::f.label}}">
+            <span ng-switch-when="glide_date"><sn-time-ago timestamp="::f.value" /></span>
+            <span ng-switch-when="glide_date_time"><sn-time-ago timestamp="::f.value" /></span>
+            <span ng-switch-default="">{{f.display_value}}</span>
+          </span>
+        </small>
+      </a>
+    </div>
+  </div>
+
+  <style>
+    [sp-ticker].active {
+      display: block;
+      height: {{data.height}}px;
+      overflow-y: hidden
+    }
+    [sp-ticker] a {
+      height: {{data.line_height}}px;
+      overflow: hidden;
+      transition: opacity 0.5s ease, margin 0.5s ease;
+      white-space: nowrap;
+    }
+    [sp-ticker] a.fade-out {
+      opacity: 0;
+    }
+    [sp-ticker] a.minus-margin-top {
+      margin-top: -{{data.line_height}}px;
+    }
+  </style>
+
+</div>

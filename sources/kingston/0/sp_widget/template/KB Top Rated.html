@@ -1,0 +1,15 @@
+<div class="panel panel-{{options.color}} b" ng-if="::(data.articles.length > 0)">
+  <div class="panel-heading"> <h2 class="h4 panel-title" ng-bind="::options.title">
+    <fa ng-if="::options.glyph.length" name="::{{options.glyph}}" class="m-r-sm" /></h2>
+  </div>
+  <div class="panel-body">
+    <ul class="list-group">
+      <li class="list-group-item" ng-repeat="a in ::data.articles">
+        <a href="?id=kb_article&sys_id={{::a.sys_id}}">{{::a.short_description}}</a>
+        <div>
+          <span uib-rating ng-model="::a.rating" max="5" readonly="true" aria-label="${Article rating} - ${Read Only}"/>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

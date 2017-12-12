@@ -1,0 +1,10 @@
+.guide-image {
+  max-height: 240px;
+  max-width: 360px;
+  padding: 20px;
+}
+
+.guide-item-image {
+  max-height: 150px;
+  padding: 10px;
+}

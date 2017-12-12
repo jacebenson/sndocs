@@ -1,0 +1,68 @@
+<form>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        ${Create New Bundle}
+      </h4>
+    </div>
+    <div class="panel-body">
+      <div ng-if="c.data.error"class="alert alert-danger">
+        <span>{{c.data.error}}</span>
+      </div>
+      <p>${Here, you can save the current contents of your cart as a bundle, which can be restored at any time.}</p>
+      <p>${To create a new bundle, provide a name for your bundle, select the items you would like to include in the bundle, and press save.}</p>
+      <div class='form-group'>
+        <label for="bundlename">
+        	<strong>${Bundle Name}</strong>
+        </label>
+        <input id="bundlename" placeholder="New Bundle Name" type='text' class='form-control' placeholder='' ng-model='c.data.newCartName' maxlength="40">
+      </div>
+
+      <table id="cart" class="table table-hover table-condensed">
+        <tbody>
+          <tr class="sr-only">
+            <th>${Include Item}</th>
+            <th>${Product}</th>
+            <th>${Price}</th>
+            <th>${Quantity}</th>
+            <th>${Subtotal}</th>
+          </tr>
+          <tr ng-repeat="item in c.data.cartItems track by item.sys_id | orderBy: 'order'">
+            <td>
+              <input type="checkbox" ng-model="item.selected" aria-label="${Include} {{item.name}} ${in bundle}">
+            </td>
+            <td>
+              <div class="row">
+                <div class="col-sm-2 hidden-xs"><img ng-show="item.picture" ng-src="{{item.picture}}" alt="{{item.name}}" class="img-responsive item-image"/></div>
+                <div class="col-sm-10">
+                  <h4 class="nomargin">{{item.name}}</h4>
+                  <p class="hidden-xs">{{item.short_description}}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <strong>{{item.display_price}}</strong>
+              <div ng-show="item.recurring_price > 0">+ {{item.display_recurring_price}} {{item.recurring_frequency_display}}</div>
+            </td>
+            <td>
+              <span aria-label="${Quantity} {{item.quantity}}" ng-if="item.show_quantity">{{item.quantity}}</span>
+              <span aria-label="${Quantity not applicable}" ng-if="!item.show_quantity">-</span>
+            </td>
+            <td>
+              <strong aria-label="${Subtotal price} {{item.subtotal_price}}">{{item.subtotal_price}}</strong>
+              <div aria-label="${Recurring subtotal price} {{item.recurring_subtotal_price}}" ng-show="item.recurring_subtotal > 0">+ {{item.recurring_subtotal_price}} {{item.recurring_frequency_display}}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-footer">
+      <button type='submit'
+              class='btn btn-primary pull-right'
+              ng-click='c.saveCart()'
+              ng-disabled='!c.enableSave()'
+              tabindex="0">${Save}</button>
+      <i class="clearfix"></i>
+    </div>
+  </div>
+</form>

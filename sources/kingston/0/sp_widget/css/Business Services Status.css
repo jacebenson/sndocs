@@ -1,0 +1,65 @@
+.title {
+  font-size: 1.5rem;
+  color: $gray-darker;
+  font-weight: 500;
+  width: 58.33333%;
+  margin: 0px;
+}
+
+.category {
+padding-top:15px;
+}
+
+.subscribed {
+  color: $text-mutted;
+  white-space: nowrap;
+}
+
+/* Status Icons */
+.fa-check-circle {
+  color: $brand-success;
+}
+
+.fa-plus-circle {
+  color: $brand-primary;
+}
+
+.fa-exclamation-circle {
+  color: $brand-danger;
+}
+
+.fa-minus-circle{
+  color: $brand-warning;
+}
+
+.fa-info-circle {
+  color: $brand-info;
+}
+
+.tb {
+  margin-top: -45px;
+  width: 100%;
+}
+
+.tb th {
+padding-bottom: 4px;
+}
+
+.outage-row {
+  text-align: center;
+	padding: 5px;
+}
+
+.fa {
+  cursor: pointer;
+font-size: 18px;
+}
+
+.date-column {
+  width: 8.3333%;
+  white-space: nowrap;
+	text-align: center;
+  font-size: 13px;
+  color: $gray-darker;
+  font-weight: 500;
+}

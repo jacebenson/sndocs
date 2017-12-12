@@ -1,0 +1,54 @@
+.panel{
+  border-radius: 5px 5px 0 0;
+  border: 1px solid #DDDDDD;
+  margin-bottom:0px;
+}
+.panel-heading{
+  padding: 10px 15px;
+  margin-bottom:0px;
+  height :40px;
+}
+.panel-title{
+  color: #3A3F51;
+  font-size:16px;
+}
+.loading-icon{
+  text-align: center;
+  padding: 10px;
+}
+.remove-bottom-border{
+  border-bottom:0px;
+}
+.float-left{
+  float:right;
+}
+.clear-all{
+  float: left;
+  width: 18%;
+  font-size :15px;
+}
+.panel-center{
+	display: block;
+  width: 64%;
+  text-align: center;
+  float:left;
+}
+.doneCls{
+  color: #428bca;
+  float: right;
+  font-size : 15px !important;
+  width: 18%;
+  text-align: right;
+}
+.facet-data{
+	  text-align: center;
+    height: 40px;
+    padding-top: 11px;
+  	color: #428bca;
+}
+.clear-enable{
+	color: #428bca;
+}
+.clear-disable {
+	color : #979797;
+}

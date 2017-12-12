@@ -1,0 +1,28 @@
+.file-name {
+  display:inline;
+  float:left;
+  width:45%;
+}
+a.get-attachment {
+  max-width: 10px;
+}
+div.tools {
+  display:inline;
+  float:right;
+  width:50%;
+}
+div.btn-group + div {
+  float:left;
+}
+.list-group-item:before {
+  content: " ";
+  display:table;
+  box-sizing: border-box;
+}
+.list-group-item:after {
+  clear:both;
+  content: " ";
+  display:table;
+  box-sizing: border-box;
+  clear:both;
+}

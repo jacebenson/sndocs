@@ -1,0 +1,1 @@
+angular.module("sn.change_management.cab.attendees", ['ng.amb', 'sn.app_common', 'sn.change_management.cab.core']);

@@ -1,3 +1,6 @@
+# Servicenow Sync JSON
+service-now.json
+
 # Logs
 logs
 *.log

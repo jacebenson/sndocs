@@ -1,0 +1,96 @@
+<div class="panel-shift">
+  <div class="panel panel-default">
+    <div class="panel-heading clearfix">
+      <span class="panel-title pull-left">
+        ${Widget Options Schema} - {{data.title}} <span ng-if="data.widgetID && data.widgetID != data.title">({{data.widgetID}})</span>
+      </span>
+      <div ng-if="data.canWrite" class="btn-group pull-right">
+        <button type="button" class="btn btn-default" ng-click="c.add()" title="{{::data.addOptionMsg}}"><fa name="plus" /></button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div ng-show="data.sys_id">
+        <div ng-if="c.data.optionsError" class="options-error">
+          ${Widget option schema cannot be parsed} - ${Clicking [+] will replace the current invalid option schema, or you can go to the sp_widget record in the Platform UI to fix the invalid JSON syntax}
+        </div>
+        <div ng-repeat="opt in c.data.options" class="option" ng-class="{'option-new': (opt.name.length == 0 && opt.label.length == 0)}">
+          <form>
+            <div class="form-group remove-wrp">
+              <div class="pull-right">
+                <button class="btn btn-default remove-btn" title="{{::data.removeOptionMsg}}" ng-click="c.remove(opt, $index)"><fa name="minus" /></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="optLabel"><span class="fa fa-asterisk mandatory" ng-class="{'mandatory-filled': opt.label.length > 0}"></span> {{::data.labelMsg}}</label>
+              <input id="optLabel" ng-disabled="!data.canWrite" class="form-control" ng-model="opt.label" ng-blur="c.updateName(opt, $index)" placeholder="{{::data.optionLabelMsg}}">
+            </div>
+            <div class="form-group">
+              <label for="optName"><span class="fa fa-asterisk mandatory" ng-class="{'mandatory-filled': opt.name.length > 0}"></span> {{::data.nameMsg}}</label>
+              <input id="optName" ng-disabled="!data.canWrite" class="form-control" ng-model="opt.name" ng-blur="c.fixName(opt)" placeholder="{{::data.nameMsg}}">
+            </div>
+            <div class="form-group">
+              <label for="optType"><span class="fa fa-asterisk mandatory" ng-class="{'mandatory-filled': opt.type.length > 0}"></span> {{::data.typeMsg}}</label>
+              <select id="optType" ng-disabled="!data.canWrite" ng-model="opt.type" class="sn-select-basic">
+                  <option ng-repeat="item in c.type_options" value="{{item}}">{{item}}</option>
+                </select>
+            </div>
+            <!-- additional controls per type -->
+            <div class="form-group" ng-if="opt.type == 'reference' || opt.type == 'glide_list'">
+              <label for="optReference">{{::data.referencedTableMsg}}</label>
+              <sn-record-picker id="optReference" sn-disabled="!data.canWrite" field="opt.field" table="'sys_db_object'"
+                                display-field="'label'"
+                                value-field="'name'"
+                                display-fields="'name'"
+                                placeholder="{{::data.selectTableMsg}}"
+                                search-fields="'label,name'" page-size="100"></sn-record-picker>
+            </div>
+
+            <div class="form-group we20-choices" ng-if="opt.type == 'choice'" title="{{::data.choicesMsg}}">
+              <label for="optChoices">${Choices}</label>
+              <textarea id="optChoices" sn-resize-height="trim" class="form-control" rows="2" ng-disabled="!data.canWrite" ng-model="opt.choices" placeholder="{{::data.oneLinePerChoiceMsg}}"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="optHint">{{::data.hintOptionalMsg}}</label>
+              <input id="optHint" ng-disabled="!data.canWrite" class="form-control" ng-model="opt.hint" placeholder="{{::data.hintOptionalMsg}}">
+            </div>
+
+						<div class="form-group">
+              <label for="defaultValue">{{::data.defaultValueMsg}}</label>
+              <input id="defaultValue" ng-if="opt.type !== 'glyphicon'" ng-disabled="!data.canWrite" class="form-control" ng-model="opt.default_value" placeholder="{{::data.defaultValueMsg}}">
+              <sp-glyph-picker ng-if="opt.type === 'glyphicon'" field="opt.field" sn-on-change="c.onGlyphChange(opt)" />
+            </div>
+            
+            <div class="form-group">
+              <label for="sectionValue"><span class="fa fa-asterisk mandatory" ng-class="{'mandatory-filled': opt.section.length > 0}"></span> {{::data.formSectionMsg}}</label>
+             <!-- <sn-record-picker id="sectionValue" field="opt.section" sn-disabled="!data.canWrite" table="'sys_ui_section'" 
+                                display-field="'sys_name'" value-field="'caption'" display-fields="'caption'"
+                                search-fields="'sys_name, caption'" page-size="100" 
+                                default-query="'view='+c.SP_INSTANCE_CONFIG_VIEW_SYS+'^name='+c.data.data_table"
+                                placeholder="${Other options}"
+                                ></sn-record-picker> -->
+       
+              <select id="sectionValue" ng-disabled="!data.canWrite" ng-model="opt.section" class="sn-select-basic">
+                  <option ng-repeat="section in data.section_options track by $index" value="{{section}}">{{section}}</option>
+                	<option value="other">${Other options}</option>
+              </select>
+            </div>
+            
+            <div class="form-group" ng-if="opt.type == 'field_name' || opt.type == 'field_list'">
+              {{opt.label}} ${Depends on value in field 'table' from widget instance}
+            </div>
+          </form>
+        </div>
+        <h4 ng-if="c.data.options.length == 0" class="empty-state">
+          ${Use the [+] button to add a new option}
+        </h4>
+      </div>
+    </div>
+    <div class="panel-footer clearfix">
+      <div ng-if="data.canWrite">
+        <button type="button" class="btn btn-primary pull-right" ng-click="c.save()" title="{{::data.saveMsg}}">{{::data.saveMsg}} <span ng-if="c.saveButtonSuffix">({{c.saveButtonSuffix}})</span></button>
+        <span ng-if="saveMsg" style="vertical-align:middle; padding-left:8px;">{{${saveMsg}}}</span>
+      </div>
+    </div>
+  </div>
+</div>

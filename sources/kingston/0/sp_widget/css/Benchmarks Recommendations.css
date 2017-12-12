@@ -1,0 +1,83 @@
+.recommendations-menu {
+  margin-bottom: 12px;
+
+  .nav-tabs .item a {
+    color: inherit;
+    text-transform: uppercase;
+  }
+
+  .nav-tabs .item a:hover {
+    border-bottom-width: 3px;
+  }
+
+  .nav-tabs .item a.selected {
+    font-weight: 600;
+    border-bottom: 3px solid #428bca;
+  }
+}
+
+.recommendations-container {
+  margin-bottom: 50px;
+
+  .panel-body {
+    padding: 20px 30px;
+  }
+
+  .recommendation {
+
+    .r-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .remove-icon {
+      color: inherit;
+    }
+
+    .r-content > ol,
+    .r-content > ul {
+      list-style-position:outside;
+      padding-left: 14px;
+    }
+
+    .r-actions {
+      .btn.btn-link {padding-left: 0;}
+      .btn.r-get-started { border-radius:3px; }
+      .btn { margin-right: 40px; }
+      .btn:last-child { margin-right: 0 }
+
+      .r-state-info {
+        display: inline-block;
+        padding: 6px 12px 6px 0;
+        color: #999;
+      }
+    }
+
+    .implemented-container {
+      min-width: 50px;
+      max-width: 50px;
+    }
+
+    .implemented-number {
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    .r-dib {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .r-actions,
+    .implemented-number {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .r-actions .btn { margin-right: 200px !important; }
+  .r-actions .btn-primary { margin-bottom:10px; }
+}
