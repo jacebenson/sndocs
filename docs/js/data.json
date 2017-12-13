@@ -1243,9 +1243,10 @@
       {
         "number": "3a",
         "name": "Jakarta Patch 3a",
-        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3-hf-1-PO.html",
+        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
-        "date": "2017-09-21"
+        "hi":"https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
+        "date": "2017-11-13"
       },
       {
         "number": "3b",
