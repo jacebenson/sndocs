@@ -48,18 +48,18 @@ function addToVersions(obj) {
       versions[family][patch] == "done"
     ) {
     } else {
-      console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
+      //console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
       if (versions && versions[family]) {
         //family exists...
-        console.log("family exists: " + family);
+        //console.log("family exists: " + family);
         if (versions[family] && versions[family][patch]) {
-          console.log("Found " + family + " patch " + patch + " @ " + url);
+          //console.log("Found " + family + " patch " + patch + " @ " + url);
           versions[family][patch] = url;
         } else {
           versions[family][patch] = url;
         }
       } else {
-        //console.log("creating family: " + family);
+        console.log("creating family: " + family);
         // family doesn't exist, create it
         versions[family] = {};
         versions[family][patch] = url;
