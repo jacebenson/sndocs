@@ -32,10 +32,13 @@ function addToVersions(obj) {
     var url = obj.url;
     counter++;
     try{
-      var family = body
-      .split("<br/>Build name: ")[1]
-      .split("<br/>")[0]
-      .toLowerCase();
+      var key = "Build tag: ";
+      var familyLoc = body.indexOf(key);
+      if(familyLoc>=0){
+        var family = body.split(key)[1].split('-')[1];
+        var patch = body.split(key)[1].split('__')[1].split('-')[0].replace('patch','');
+        console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url);
+      }
     } catch (error) {
       console.log(error);
     }
