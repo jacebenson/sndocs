@@ -8,7 +8,6 @@ var beautify = require("js-beautify").js_beautify;
 var mkdirp = require("mkdirp");
 var wd = process.env.PWD;
 var versions = {};
-console.log(JSON.stringify(config));
 //config.instances.length = 3;
 var counter = 0;
 var instances = config.instances.map(function(url) {
@@ -113,7 +112,7 @@ function downloadEndpoints(obj) {
               body += d;
             });
             data.on("end", () => {
-              ////console.log('downloading ' + obj.url + file + ' to ' + obj.path + justFile);
+              console.log('downloading ' + obj.url + file + ' to ' + obj.path + justFile);
               if (justFile.split(".")[1].toLowerCase() == "js") {
                 //if .js file download it.
                 //console.log(file);
@@ -147,7 +146,7 @@ function downloadEndpoints(obj) {
                       ) {
                         //if the file dose not include min.js in the name,
                         var url = obj.url + jsFile;
-                        //console.log('downloading ' + jsFile + ' from ' + url);
+                        console.log('downloading ' + jsFile + ' from ' + url);
                         https
                           .get(obj.url + jsFile, data => {
                             var jsBody = "";
@@ -155,7 +154,7 @@ function downloadEndpoints(obj) {
                               jsBody += d;
                             });
                             data.on("end", () => {
-                                //console.log(jsFile);
+                                console.log(jsFile);
                               var justFile = jsFile.split("/");
                               justFile = justFile[justFile.length - 1].replace(
                                 " ",
@@ -180,7 +179,7 @@ function downloadEndpoints(obj) {
                                   if (err) {
                                     //console.log(err.message);
                                   }
-                                  ////console.log('downloaded ' + obj.path + justFile + ' from ' + url);
+                                  console.log('downloaded ' + obj.path + justFile + ' from ' + url);
                                 }
                               );
                             });

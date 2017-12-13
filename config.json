@@ -132,7 +132,6 @@
         "https://csc.service-now.com/stats.do"
     ],
     "endpoints":[
-            "/scripts/js_includes_sp.jsx",
             "/scripts/js_includes_amb.jsx",
             "/scripts/js_includes_customer.jsx",
             "/scripts/js_includes_form_presence.jsx",
@@ -140,7 +139,6 @@
             "/scripts/js_includes_sorting_new.jsx",
             "/scripts/js_includes_ui16_form.jsx",
             "/scripts/classes/doctype/js_includes_listv2_doctype.jsx",
-            "/scripts/doctype/js_includes_doctype.jsx",
             "/scripts/doctype/js_includes_last_doctype.jsx",
             "/scripts/doctype/z_last_include.js",
             "/scripts/sn/concourse/js_includes_concourse.jsx",
@@ -151,6 +149,6 @@
             "/scripts/form_tags.jsx",
             "/scripts/lib/newtag-it.jsx",
             "/scripts/magellan.CreateFavoriteModal.jsx",
-            "/scripts/transaction_scope_includes.jsx"            
+            "/scripts/transaction_scope_includes.jsx"  
     ]
 }
