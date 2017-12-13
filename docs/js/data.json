@@ -901,7 +901,8 @@
       {
         "name": "Fuji Patch 13",
         "url": "https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13",
-        "date": "2016-05-04"
+        "date": "2016-05-04",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/fuji/13/scripts/"
       }
     ],
     "features": [
