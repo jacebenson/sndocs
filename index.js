@@ -10,7 +10,7 @@ var wd = process.env.PWD;
 var versions = {};
 //config.instances.length = 3;
 var counter = 0;
-var instances = config.instances.map(function(url) {
+config.instances.map(function (url) {
   var body = "";
   https.get(url, data => {
     data.on("data", d => {
@@ -30,13 +30,17 @@ function addToVersions(obj) {
     var body = obj.body.toString();
     var url = obj.url;
     counter++;
-    try{
+    try {
       var key = "Build tag: ";
       var familyLoc = body.indexOf(key);
-      if(familyLoc>=0){
-        var family = body.split(key)[1].split('-')[1];
-        var patch = body.split(key)[1].split('__')[1].split('-')[0].replace('patch','');
-        console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url);
+      if (familyLoc >= 0) {
+        var family = body.split(key)[1].split("-")[1];
+        var patch = body
+          .split(key)[1]
+          .split("__")[1]
+          .split("-")[0]
+          .replace("patch", "");
+        console.log("family: " + family + " " + patch + " -- " + obj.url);
       }
     } catch (error) {
       console.log(error);
@@ -112,7 +116,9 @@ function downloadEndpoints(obj) {
               body += d;
             });
             data.on("end", () => {
-              console.log('downloading ' + obj.url + file + ' to ' + obj.path + justFile);
+              console.log(
+                "downloading " + obj.url + file + " to " + obj.path + justFile
+              );
               if (justFile.split(".")[1].toLowerCase() == "js") {
                 //if .js file download it.
                 //console.log(file);
@@ -124,7 +130,7 @@ function downloadEndpoints(obj) {
                 //console.log("file: " + path);
                 mkdirp(path);
                 body = beautify(body, { indent_size: 2 });
-                path.replace(/\//g,'//');
+                path.replace(/\//g, "//");
                 fs.writeFile(path + justFile, body, function(err) {
                   if (err) {
                     //console.log(err.message);
@@ -146,7 +152,7 @@ function downloadEndpoints(obj) {
                       ) {
                         //if the file dose not include min.js in the name,
                         var url = obj.url + jsFile;
-                        console.log('downloading ' + jsFile + ' from ' + url);
+                        console.log("downloading " + jsFile + " from " + url);
                         https
                           .get(obj.url + jsFile, data => {
                             var jsBody = "";
@@ -154,7 +160,7 @@ function downloadEndpoints(obj) {
                               jsBody += d;
                             });
                             data.on("end", () => {
-                                console.log(jsFile);
+                              console.log(jsFile);
                               var justFile = jsFile.split("/");
                               justFile = justFile[justFile.length - 1].replace(
                                 " ",
@@ -166,22 +172,24 @@ function downloadEndpoints(obj) {
                               jssubdir = jssubdir.join("/");
                               jssubdir = jssubdir.substring(1);
                               //jssubdir = jssubdir.replace(/\//g,'//');
-                              var jspath = obj.path + jssubdir + '/';
+                              var jspath = obj.path + jssubdir + "/";
                               mkdirp(jspath);
                               jspath = jspath + justFile;
                               //console.log('jspath: ' + jspath);
                               jsBody = beautify(jsBody, { indent_size: 2 });
 
-                              fs.writeFile(
-                                jspath,
-                                jsBody,
-                                function(err) {
-                                  if (err) {
-                                    //console.log(err.message);
-                                  }
-                                  console.log('downloaded ' + obj.path + justFile + ' from ' + url);
+                              fs.writeFile(jspath, jsBody, function(err) {
+                                if (err) {
+                                  //console.log(err.message);
                                 }
-                              );
+                                console.log(
+                                  "downloaded " +
+                                    obj.path +
+                                    justFile +
+                                    " from " +
+                                    url
+                                );
+                              });
                             });
                           })
                           .on("error", e => {
