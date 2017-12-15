@@ -983,7 +983,8 @@
       "Security Operations",
       "Scripted REST APIs",
       "Attachment REST API",
-      "Expense Lines"
+      "Expense Lines",
+      "Edge Encryption"
     ]
   },
   {
@@ -1095,7 +1096,8 @@
       "UI16",
       "Surveys",
       "Customer Service Management (Scoped)",
-      "ECMA5"
+      "ECMA5",
+      "Service Portal"
     ]
   },
   {
@@ -1286,8 +1288,7 @@
       "Benchmarks",
       "Trusted Security Circles",
       "Communities",
-      
-      "Guided Tour Designer",
+      "Guided Tours",
       "Global Search:Improvements",
       "Convience table.config",
       "UI: Double tap to open context menus on touch devices",
@@ -1320,7 +1321,16 @@
       "IntregrationHub",
       "State Management",
       "Enterprise Release Management",
-      "Configuration Compliance"
+      "Configuration Compliance",
+      "Email Digests",
+      "Service Portal Announcements",
+      "Serivce Portal Catalog Wishlist",
+      "Service Portal Catalog Order Guide Widget",
+      "Service Portal Catalog Order Status Widget",
+      "Service Portal Dynamic Page Titles",
+      "Standard Error Codes API",
+      "Guided Tours Auto Launch",
+      "Guided Tours Domain Seperation"
     ]
   }
 ]
