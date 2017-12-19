@@ -1,0 +1,6 @@
+<div class="breadcrumbs">
+  <span ng-repeat="crumb in data.breadcrumbs track by crumb.value">
+    <a href="javascript:void(0)" ng-if="!$first" class="sp-breadcrumb-link sp-breadcrumb-remove-condition" ng-click="adjustFilter(crumb, true)">&gt;</a>
+    <a href="javascript:void(0)" class="sp-breadcrumb-link" ng-click="adjustFilter(crumb, false)">{{crumb.label}}</a>
+  </span>
+</div>

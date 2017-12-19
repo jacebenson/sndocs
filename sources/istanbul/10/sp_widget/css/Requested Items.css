@@ -1,0 +1,24 @@
+.requested-items-flex-container {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+}
+
+/**/
+.stage-on IMG, .stage-off IMG{ margin-right:6px; }
+.stage-on, .stage-off { margin-bottom: 6px; }
+.stage-on{font-weight:700;}
+.stage-off{/*color:#999;*/ font-weight:300;}
+
+.l-h-40 {
+  line-height: 40px;
+}
+.list-action {
+  display:block;
+  padding:0 6px;
+  cursor: pointer;
+}
+.list-action:hover {
+  background-color: #fff;
+}

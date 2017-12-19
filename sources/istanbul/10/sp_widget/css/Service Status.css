@@ -1,0 +1,18 @@
+.description {
+  padding-bottom: 15px;  
+}
+
+.day {
+  float: left;
+  margin: 0px 1px 0px 1px; 
+  width: 9.984px; 
+  max-width: 9.984px; 
+  min-width: 9.984px; 
+  height: 30px; 
+  border-radius: 3px; 
+}
+
+.multiple-issues {
+  position: relative;
+  top: -5px;
+}

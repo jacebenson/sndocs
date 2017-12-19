@@ -1,0 +1,17 @@
+.panel-button {
+  float: none;
+}
+
+.p-t-none {
+  padding-top: 0 !important;
+}
+
+.file-list-wrap {
+	margin-bottom: 10px;
+}
+
+.quantity-selector {
+  display: inline-block;
+  width: 65px;
+  padding-top: 2px;
+}

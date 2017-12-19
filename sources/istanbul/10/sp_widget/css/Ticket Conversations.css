@@ -1,0 +1,20 @@
+.timeline-body > p {
+  white-space: pre-wrap;
+}
+
+.no-resize {
+  resize: none;
+}
+
+.journal-field-indicator {
+	width: 5px;
+  height: 23px;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  z-index: 3;
+}
+
+.panel-heading {
+ word-wrap: break-word;
+}

@@ -1,0 +1,13 @@
+<div ng-if="options.cartTemplate">
+	<div ng-include="options.cartTemplate"></div>
+
+  <sp-widget widget="c.editVariablesModal" ng-if="c.editVariablesModal"></sp-widget>
+  <sp-widget widget="c.saveCartModal" ng-if="c.saveCartModal"></sp-widget>
+</div>
+
+<div ng-if="!options.cartTemplate">
+  <div class="alert alert-danger" role="alert">
+    <strong>${Error}: </strong>
+    ${Please provide a cart template to render.}
+  </div>
+</div>

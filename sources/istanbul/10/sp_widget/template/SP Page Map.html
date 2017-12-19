@@ -1,0 +1,6 @@
+<div class="m-t-sm" ng-controller="PageMap">  
+  <sn-record-picker field="page" table="'sp_page'" display-field="'title'" value-field="'id'" 
+                    display-fields="'id'" search-fields="'id,title'" page-size="100" placeholder="{{data.placeholderMsg}}"></sn-record-picker>
+  <div ng-if="data.title" class="designer-link"><a ng-href="$spd.do#/{{portal.url_suffix}}/editor/{{data.id}}/" target="_spd">${Edit <b>{{data.title}} ({{data.id}})</b> page in Designer} ➚</a></div>
+  <div id="page_map" class="page-map" ng-show="data.id"></div>
+</div>

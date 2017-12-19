@@ -1,0 +1,27 @@
+<div ng-if="data.service" class="panel panel-{{options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title">${Service History} - {{::data.serviceName}}</h4>
+  </div>
+
+  <div class="panel-body">
+    <div ng-if="data.outages.length">${From most recent to oldest, this list shows all outages, degradations and planned maintenance for this service}</div>
+    <div ng-if="!data.outages.length">
+      ${No past issues have been recorded for this service}
+    </div>
+    <div ng-if="data.outages.length > 0" >
+      <div class="timeline-item" ng-repeat="e in data.outages">
+        <div class="bs-callout bs-callout-{{e.typeValue}}">
+          <div class="timeline-heading">
+            <h4 class="timeline-title">{{::e.type}} - {{data.serviceName}}</h4>
+            <small class="text-muted">
+              <span class="glyphicon glyphicon-time " />
+              <sn-time-ago timestamp="::e.beginValue"></sn-time-ago>
+              <div>${Started} {{e.beginDisplay}}<span ng-if="e.duration">, ${Duration} {{e.duration}}</span></div>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
