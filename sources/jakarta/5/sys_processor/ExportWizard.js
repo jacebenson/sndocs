@@ -1,0 +1,10 @@
+var sysid = g_request.getParameter('sysparm_sys_id');
+var exporter = new ExportWithRelatedLists('expert', sysid);
+exporter.addRelatedList('expert_panel', 'expert');
+exporter.addRelatedList('expert_variable', 'expert');
+exporter.addRelatedList('expert_banner_step', 'expert');
+exporter.addRelatedList('expert_script_client', 'expert');
+exporter.addRelatedList('expert_panel_variable', 'expert_panel.expert');
+exporter.addRelatedList('expert_panel_transition', 'from_panel.expert');
+exporter.addRelatedList('question_choice', 'question.expert');
+exporter.exportRecords(g_response);

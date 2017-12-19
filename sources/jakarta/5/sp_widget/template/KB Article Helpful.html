@@ -1,0 +1,9 @@
+<div ng-if="data.isValidArticle && !c.hide">
+  <span ng-if="!c.submitted" class="sp-helpful-text">{{::data.title}}</span>
+  <button type="button" ng-if="!c.submitted" name="useful_yes" class="btn btn-success btn-question" ng-click="c.action('useful_yes')">${Yes}</button>
+  <button type="button" ng-if="!c.submitted" name="useful_no" class="btn btn-default btn-question" ng-click="c.action('useful_no')">${No}</button>
+  <span ng-if="c.showPercentHelpful()" class="sp-helpful-percent">{{c.data.percent}}% found this helpful</span>
+  <span class="sp-helpful-response" ng-if="c.data.response">
+    {{c.data.response}}
+  </span>
+</div>

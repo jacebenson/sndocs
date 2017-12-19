@@ -1,0 +1,178 @@
+<div class="fill-section flex-column">
+  <div ng-if="c.data.sys_id" class="flex-row toolbar">
+    <div class="flex-grow flex-row items-center">
+      <label>${Widget}</label>
+      <div class="rp">
+        <sn-record-picker field="c.ed_widget" table="'sp_widget'"
+                          display-field="'name'" value-field="'sys_id'"
+                          display-fields="'id'" search-fields="'id,name'" page-size="300" 
+                          options="{cache: true, allowClear: false}"></sn-record-picker>
+      </div>
+      <label class="group">${Show}</label>
+      <span class="check" ng-repeat="(key, section) in c.getCodeBlocks()" ng-if="section.enabled">
+        <label ng-class="{'has-content': (data.f._fields[key].value.length)}">
+          <input type="checkbox" ng-model="section.display" ng-change="c.saveLayout()" />{{section.title}}
+        </label>
+      </span>
+
+
+      <div ng-if="c.data.angularProviders.length" class="rp">
+        <sp-dep-manager options="c.data.angularProviders" label="c.data.depsMsg" prefs="c.data.providersPref" type="'provider'"></sp-dep-manager>
+      </div>
+
+      <div ng-if="c.data.ngTemplates.length" class="rp">
+        <sp-dep-manager options="c.data.ngTemplates" label="c.data.templatesMsg" prefs="c.data.templatesPref" type="'template'"></sp-dep-manager>
+      </div>
+
+    </div>
+    <div class="button-nav">
+      <!-- access / hot keys -->
+      <div class="btn-group" uib-dropdown>
+        <button type="button" accesskey="h" class="btn btn-default" uib-dropdown-toggle 
+                uib-tooltip="${Keymap information}" tooltip-placement="bottom">
+          <fa name="info" />
+        </button>
+        <div class="dropdown-menu dropdown-menu-right" uib-dropdown-menu role="menu">
+          <widget id="x-cm-key-bindings" options="{editor: 'ed'}"></widget>              
+        </div>
+      </div>
+      <!-- preview -->
+      <button type="button" ng-click="c.toggle('preview')" class="btn  btn-group" ng-class="{true: 'btn-primary', false: 'btn-default'}[c.codeBlocks.preview.display && c.data.f._fields.has_preview.value == 'true']" ng-disabled="c.data.f._fields.has_preview.value == 'false'"
+              uib-tooltip="${Preview widget (available when widget is marked as having the preview capability)}" tooltip-placement="bottom">
+        <span class="glyphicon" ng-class="(c.data.f._fields.has_preview.value == 'true') ? 'glyphicon-eye-open': 'glyphicon-eye-close'"></span>
+      </button>
+      <button ng-if="c.documentation" type="button btn-group" ng-click="c.toggle('documentation')" class="btn" ng-class="{true: 'btn-primary', false: 'btn-default'}[c.codeBlocks.documentation.display]"><fa name="info-circle" /></button>
+      <!-- save -->
+      <button ng-if="c.data.canWrite" type="submit" ng-click="c.save()" class="btn btn-primary btn-group"
+              uib-tooltip="${Save updates}" tooltip-placement="bottom">${Save} <span ng-if="c.saveButtonSuffix">({{c.saveButtonSuffix}})</span></button>
+      <!-- dropdown menu -->
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <fa name="bars" />
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right config-dropdown">
+          <li ng-show="c.data.f._fields.id.value != ''" class="dropdown-header">{{c.data.f._fields.id.value}}</li>
+          <li ng-if="!data.f._fields.public.sys_readonly">
+            <div class="checkbox m-l">
+              <label>
+                <input type="checkbox" ng-model="c.data.f._fields.public.value" ng-true-value="'true'" ng-false-value="'false'">
+                ${Public Widget}
+              </label>
+            </div>
+          </li>
+          <li ng-if="!data.f._fields.has_preview.sys_readonly">
+            <div class="checkbox m-l">
+              <label>
+                <input type="checkbox" ng-model="c.data.f._fields.has_preview.value" ng-true-value="'true'" ng-false-value="'false'">
+                ${Enable Preview}
+              </label>
+            </div>
+          </li>
+          <li ng-if="!data.f._fields.option_schema.sys_readonly">
+            <a href="javascript:void(0)" ng-click="c.editOptionSchema($event)">${Edit option schema}</a>
+          </li>
+          <li ng-if="data.canCreate && !data.f._fields.option_schema.sys_readonly || !data.f._fields.public.sys_readonly || !data.f._fields.has_preview.sys_readonly" role="separator" class="divider"></li>
+          <li ng-if="data.canCreate"><a href="javascript:void(0)" ng-click="c.add()"><span class="fa fa-plus dropdown-icon"></span>${Create New Widget}</a></li>
+          <li ng-if="data.canCreate"><a href="javascript:void(0)" ng-click="c.clone()"><span class="fa fa-copy dropdown-icon"></span>${Clone "{{data.title}}"}</a></li>
+          <li role="separator" class="divider"></li>
+          <li><a ng-href="/sp_widget.do?sys_id={{c.data.sys_id}}" target="_blank">${Open in platform}</a></li>
+        </ul>
+      </div>
+    </div>
+    <span>{{c.status}}</span>
+  </div>
+  <!-- no permission to view -->
+  <div ng-if="c.data.sys_id && !c.data.canRead" class="read-only-message">
+    <div class="alert alert-info" role="alert">
+      <p>${You do not have permission to view this widget}</p>
+    </div>
+  </div>
+  <!-- readOnly -->
+  <div ng-if="c.readOnly" class="read-only-message">
+    <div class="alert alert-info" role="alert">
+      <p ng-if="!c.data.outOfScope">${This widget is <strong>read only</strong> and cannot be edited<span ng-if="!c.data.f._fields.public.sys_readonly"> except for the <strong>Public</strong> checkbox</span>.} <span ng-if="data.canCreate">${You can clone this widget by clicking the <span class="fa fa-bars"></span> button in the top right corner of the editor}</span></p>
+      <p ng-if="c.data.outOfScope">${This widget is in the <strong>{{data.recordScopeLabel}}</strong> application, but <strong>{{data.currentScopeLabel}}</strong> is your current application}. <span ng-if="data.canCreate">${You can clone this widget by clicking the <span class="fa fa-bars"></span> button in the top right corner of the editor}</span></p>
+    </div>
+  </div>
+  <!-- code columns -->
+  <div ng-if="c.data.sys_id && c.data.f._fields.template" class="code-container flex-row flex" role="editor-container" data-readonly="{{c.readOnly}}">
+
+    <div ng-repeat="(key, section) in c.getCodeBlocks()" ng-if="section.display" class="animate flex flex-column" sp-on-transition="c.transition">
+      <div class="minibar flex-row">
+        <div class="flex-grow">{{section.title}}</div>
+        <button class="btn btn-default btn-xs" ng-click="c.closeBlock(section)"><fa name="close"/></button>
+      </div>
+      <div ng-switch="section.type" class="flex-grow flex-column relative">
+        <div ng-switch-when="html" class="fill-section">
+          <sp-html-editor field="data.f._fields[key]" data-length="4000" sn-disabled="c.isReadOnly(c.data.f._fields[key].sys_readonly)" ng-if="c.updated" />
+        </div>
+        <div ng-switch-when="css" class="fill-section">
+          <sp-css-editor field="data.f._fields[key]" data-length="4000" sn-disabled="c.isReadOnly(c.data.f._fields[key].sys_readonly)" ng-if="c.updated" />
+        </div>
+        <div ng-switch-default class="fill-section">
+          <sp-script-editor field="data.f._fields[key]" data-length="4000" sn-disabled="c.isReadOnly(c.data.f._fields[key].sys_readonly)" ng-if="c.updated" />
+        </div>
+      </div>
+    </div>
+
+    <div ng-repeat="provider in c.data.angularProviders" ng-if="provider.show" class="animate flex-grow flex flex-column" sp-on-transition="c.transition">
+      <div class="minibar flex-row">
+        <div class="flex-grow">{{provider.name}}</div>
+        <button class="btn btn-default btn-xs" ng-click="c.closeDep(provider, 'provider')"><fa name="close"/></button>
+      </div>
+      <div  class="flex-grow flex-column relative">
+        <div class="fill-section">
+          <sp-script-editor field="provider.f._fields.script" data-length="4000" ng-if="c.updated"
+                            sn-disabled="c.isReadOnly(provider.f._fields.script.sys_readonly)" ng-change="c.codeHasChanged = true"/>
+
+        </div>
+      </div>
+    </div>
+
+    <div ng-repeat="template in c.data.ngTemplates" ng-if="template.show" class="animate flex-grow flex flex-column" sp-on-transition="c.transition">
+      <div class="minibar flex-row">
+        <div class="flex-grow">{{template.name}}</div>
+        <button class="btn btn-default btn-xs" ng-click="c.closeDep(template, 'template')"><fa name="close"/></button>
+      </div>
+      <div  class="flex-grow flex-column relative">
+        <div class="fill-section">
+          <sp-html-editor field="template.f._fields.template" data-length="4000" ng-if="c.updated"
+                          sn-disabled="c.isReadOnly(template.f._fields.template.sys_readonly)" ng-change="c.codeHasChanged = true"/>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- preview -->
+    <div ng-if="c.codeBlocks.preview.display && c.data.f._fields.has_preview.value == 'true'" class="flex-column flex-grow flex" sp-on-transition="c.transition">
+      <div class="minibar flex-row preview-header">
+        <div class="flex-grow">${Preview}</div>
+        <button class="btn btn-default btn-xs" ng-click="c.closeBlock(c.codeBlocks.preview)"><fa name="close"/></button>
+      </div>
+      <div class="flex-grow relative">
+        <div class="fill-section" ng-if="c.codeBlocks.preview.widget">
+          <sp-preview options="c.data.sys_id"></sp-preview>
+        </div>
+      </div>
+    </div>
+    <!-- documentation -->
+    <div ng-if="c.codeBlocks.documentation.display" class="animate flex flex-column" sp-on-transition="c.transition">
+      <div class="doc flex-grow">
+        <div class="doc-icons">
+          <button type="button" class="btn btn-default" ng-click="c.docToggleMode()">
+            <span class="glyphicon" ng-class="{edit: 'glyphicon-eye-open', preview: 'glyphicon-pencil'}[c.codeBlocks.documentation.mode]"></span>
+          </button>
+        </div>
+        <div>
+          <sp-epiceditor field="c.data.updatedDocContent" ng-if="c.updated"></sp-epiceditor>
+        </div>
+      </div>
+    </div>
+  </div>
+  <sp-widget widget="c.widgetOptionSchemaModal" ng-if="c.widgetOptionSchemaModal"></sp-widget>
+
+  <!-- Empty state -->
+  <div ng-if="!c.data.sys_id">
+    <widget id="x-we-empty-state" options="{shared: {}}"></widget>
+  </div>
+</div>

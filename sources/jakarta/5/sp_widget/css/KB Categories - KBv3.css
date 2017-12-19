@@ -1,0 +1,28 @@
+.label {
+  float: right;
+}
+
+.panel-body {
+	padding: 0;
+}
+
+fa {
+  margin-right: 10px;
+}
+
+.panel-body > .list-group {
+  margin-bottom: 0px;
+  padding: 10px;
+
+  li.list-group-item {
+    color: #428bca;
+  	border: 0;
+    padding: 5px 5px;
+    margin-bottom: 2px;
+
+    .label {
+      border-radius: 1em;
+      float: right;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+<div ng-if="c.data.isValid" class="panel panel-{{::c.options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title" ng-if="c.data.isMine && (c.data.state == 'requested')">${This {{c.data.label}} requires your approval}</h4>
+    <h4 class="panel-title" ng-if="!c.data.isMine && (c.data.state == 'requested')">${This {{c.data.label}} requires approval <span ng-if="c.data.approver"> by {{c.data.approver}}}</span></h4>
+    <h4 class="panel-title" ng-if="c.data.state == 'approved'">${Approved} <sn-time-ago timestamp="::c.data.sys_updated_on" /></h4>
+    <h4 class="panel-title" ng-if="c.data.state == 'rejected'">${Rejected} <sn-time-ago timestamp="::c.data.sys_updated_on" /></h4>
+  </div>  
+  <div class="panel-body">
+    <form ng-submit="$event.preventDefault()" class="form-horizontal">
+      <div ng-if="c.data.fields.length > 0">
+        <div ng-repeat="field in c.data.fields" class="m-b-xs" ng-if="field.value">
+          <label class="m-n">{{field.label}}</label>
+          <span ng-switch="field.type">
+            <div ng-switch-when="glide_date_time" title="{{field.display_value}}"><sn-time-ago timestamp="::field.value" /></div>
+            <div ng-switch-default >{{field.display_value}}</div>
+          </span>
+        </div>
+      </div>
+      <div ng-if="c.data.isMine && (c.data.state == 'requested')" class="question">
+        <button type="button" name="approve" class="btn btn-success btn-question" ng-click="c.action('approved')">${Approve}</button>
+        <div class="spacer"></div>
+        <button type="button" name="reject" class="btn btn-default btn-question" ng-click="c.action('rejected')">${Reject}</button>
+      </div>
+    </form>
+  </div>  
+</div>

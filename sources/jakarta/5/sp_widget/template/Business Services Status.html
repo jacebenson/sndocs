@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+  <div class="panel-heading">&nbsp;</div>
+  <div class="panel-body">
+    <table class="tb">
+      <thead>
+        <th scope="col">
+          <h2 class="panel-title title">
+          ${Status History}
+          </h2></th>
+        <th scope="col" ng-repeat="date in ::data.dates" class="date-column">{{::date.month}} {{::date.day}}</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat-start="category in ::c.data.categories" aria-hidden="true">
+          <th scope="col" colspan="6" title="{{::category.label}}"><h3 class="title category" ng-bind-html="::category.label"></h3></th>
+        </tr>
+        <tr ng-repeat-end ng-repeat="service in ::category.services">
+          <td scope="row">
+            <small ng-if="::service.subscribed" class="subscribed" title="${Subscribed to updates}" aria-label="${Subscribed to updates}"><i class="fa fa-envelope"></i></small>
+            <a ng-href="?id=service_status&service={{::service.sys_id}}" ng-bind-html="::service.name"></a>
+          </td>
+          <td ng-repeat="n in [0,1,2,3,4] track by $index" class="outage-row">
+            <span class="fa" ng-class="::service.outages[4-$index].icon" sp-tooltip
+                 	aria-label="{{::data.dates[$index].month + ' ' + data.dates[$index].day + ' - ' + service.outages[4-$index].msg}}"
+									role="application" tooltip-smart="true"
+                  tooltip-template="{{::service.outages[4-$index].msg + ' - ' + data.dates[$index].month + ' ' + data.dates[$index].day}}">
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
