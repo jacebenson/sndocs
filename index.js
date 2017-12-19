@@ -1,215 +1,221 @@
 // SNDocs
 // ======
 // SNDocs is the unofficial documentation for Servicenow
-var config = require("./config"); /* Load the config.instances, and config.endpoints */
-var fs = require("fs");
-var https = require("https");
-var beautify = require("js-beautify").js_beautify;
-var mkdirp = require("mkdirp");
-var wd = process.env.PWD;
-var versions = {};
-//config.instances.length = 3;
-var counter = 0;
+var config = require('./config') /* Load the config.instances, and config.endpoints */
+var fs = require('fs')
+var https = require('https')
+var beautify = require('js-beautify').js_beautify
+var mkdirp = require('mkdirp')
+// var wd = process.env.PWD
+var versions = {}
+// config.instances.length = 3;
+var counter = 0
 config.instances.map(function (url) {
-  var body = "";
+  var body = ''
   https.get(url, data => {
-    data.on("data", d => {
-      body += d;
-    });
-    data.on("end", () => {
+    data.on('data', d => {
+      body += d
+    })
+    data.on('end', () => {
       addToVersions({
         body: body,
         url: url
-      });
-    });
-  });
-});
+      })
+    })
+  })
+})
 
-function addToVersions(obj) {
+function addToVersions (obj) {
   try {
-    var body = obj.body.toString();
-    var url = obj.url;
-    counter++;
+    var body = obj.body.toString()
+    var url = obj.url
+    counter++
     try {
-      var key = "Build tag: ";
-      var familyLoc = body.indexOf(key);
+      var key = 'Build tag: '
+      var familyLoc = body.indexOf(key)
       if (familyLoc >= 0) {
-        var family = body.split(key)[1].split("-")[1];
+        var family = body.split(key)[1].split('-')[1]
         var patch = body
           .split(key)[1]
-          .split("__")[1]
-          .split("-")[0]
-          .replace("patch", "");
-        console.log("family: " + family + " " + patch + " -- " + obj.url);
+          .split('__')[1]
+          .split('-')[0]
+          .replace('patch', '')
+        console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url)
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-    var patch = body.split("__patch")[1].split("-")[0];
-    var url = url.split("/stats.do")[0];
+    // var patch = body.split('__patch')[1].split('-')[0]
+    url = url.split('/stats.do')[0]
     if (
       versions &&
       versions[family] &&
       versions[family][patch] &&
-      versions[family][patch] == "done"
+      versions[family][patch] === 'done'
     ) {
     } else {
-      //console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
+      // console.log("missing stuff\nfamily:" + family + "\npatch:" + patch);
       if (versions && versions[family]) {
-        //family exists...
-        //console.log("family exists: " + family);
+        // family exists...
+        // console.log("family exists: " + family);
         if (versions[family] && versions[family][patch]) {
-          //console.log("Found " + family + " patch " + patch + " @ " + url);
-          versions[family][patch] = url;
+          console.log("Found " + family + " patch " + patch + " @ " + url);
+          versions[family][patch] = url
         } else {
-          versions[family][patch] = url;
+          versions[family][patch] = url
         }
       } else {
-        console.log("creating family: " + family);
+        console.log('creating family: ' + family)
         // family doesn't exist, create it
-        versions[family] = {};
-        versions[family][patch] = url;
+        versions[family] = {}
+        if(typeof patch === 'undefined'){
+          patch = 0;
+        }
+        versions[family][patch] = url
       }
     }
-    if (counter == config.instances.length) {
-      createSources();
+    if (counter === config.instances.length) {
+      createSources()
     }
   } catch (err) {
-    console.log(err);
+    console.log(err)
   }
 }
 
-function createSources() {
-  console.log(JSON.stringify(versions, "", "  "));
-  //check for directories...
+function createSources () {
+  console.log(JSON.stringify(versions, '', '  '))
+  // check for directories...
   // ./sources/family/patch
   // ./docs/family/patch
-  var sourceFolder = "./sources/";
-  for (family in versions) {
-    var familyFolder = sourceFolder + family + "/";
-    for (patch in versions[family]) {
-      var patchFolder = familyFolder + patch + "/";
+  var sourceFolder = './sources/'
+  for (var family in versions) {
+    if(family !== 'undefined'){
+    var familyFolder = sourceFolder + family + '/'
+    for (var patch in versions[family]) {
+
+      var patchFolder = familyFolder + patch + '/'
       if (fs.existsSync(patchFolder) === false) {
-        console.log("mkdir: " + patchFolder);
-        mkdirp(patchFolder);
+        console.log('mkdir: ' + patchFolder)
+        mkdirp(patchFolder)
         downloadEndpoints({
           url: versions[family][patch],
           path: patchFolder
-        });
+        })
       }
     }
   }
+  }
 }
 
-function downloadEndpoints(obj) {
-  config.endpoints.map(function(file) {
-    var justFile = file.split("/");
-    justFile = justFile[justFile.length - 1];
-    var url = obj.url + file;
+function downloadEndpoints (obj) {
+  config.endpoints.map(function (file) {
+    var justFile = file.split('/')
+    justFile = justFile[justFile.length - 1]
+    var url = obj.url + file
     try {
-      ////console.log(obj.url);
+      /// /console.log(obj.url);
       if (obj.url) {
         https
           .get(url, data => {
-            var body = "";
-            data.on("data", d => {
-              body += d;
-            });
-            data.on("end", () => {
+            var body = ''
+            data.on('data', d => {
+              body += d
+            })
+            data.on('end', () => {
               console.log(
-                "downloading " + obj.url + file + " to " + obj.path + justFile
-              );
-              if (justFile.split(".")[1].toLowerCase() == "js") {
-                //if .js file download it.
-                //console.log(file);
-                var subdir = file.split("/");
-                subdir.length = subdir.length - 1;
-                subdir = subdir.join("/");
-                subdir = subdir.substring(1);
-                var path = obj.path + subdir;
-                //console.log("file: " + path);
-                mkdirp(path);
-                body = beautify(body, { indent_size: 2 });
-                path.replace(/\//g, "//");
-                fs.writeFile(path + justFile, body, function(err) {
+                'downloading ' + obj.url + file + ' to ' + obj.path + justFile
+              )
+              if (justFile.split('.')[1].toLowerCase() === 'js') {
+                // if .js file download it.
+                // console.log(file);
+                var subdir = file.split('/')
+                subdir.length = subdir.length - 1
+                subdir = subdir.join('/')
+                subdir = subdir.substring(1)
+                var path = obj.path + subdir
+                // console.log("file: " + path);
+                mkdirp(path)
+                body = beautify(body, { indent_size: 2 })
+                path.replace(/\//g, '//')
+                fs.writeFile(path + justFile, body, function (err) {
                   if (err) {
-                    //console.log(err.message);
+                    // console.log(err.message);
                   }
-                });
+                })
               } else {
-                //else, get RESOURCES
-                var regex = /(\/\*\! RESOURCE: )(.+)\*\//g;
-                var found_resources = body.match(regex); //array of comments
+                // else, get RESOURCES
+                var regex = /(\/\*! RESOURCE: )(.+)\*\//g
+                var foundResources = body.match(regex) // array of comments
                 try {
-                  if (typeof found_resources) {
-                    found_resources.map(function(jsFile) {
-                      jsFile = jsFile.split("/*! RESOURCE: ")[1].split("*/")[0];
+                  if (typeof foundResources === 'object') {
+                    foundResources.map(function (jsFile) {
+                      jsFile = jsFile.split('/*! RESOURCE: ')[1].split('*/')[0]
                       if (
-                        jsFile.indexOf(".jsx") == -1 &&
-                        jsFile.indexOf("min.js") == -1 &&
-                        jsFile.indexOf("_min_") == -1 &&
-                        jsFile.indexOf(".js") >= 0
+                        jsFile.indexOf('.jsx') === -1 &&
+                        jsFile.indexOf('min.js') === -1 &&
+                        jsFile.indexOf('_min_') === -1 &&
+                        jsFile.indexOf('.js') >= 0
                       ) {
-                        //if the file dose not include min.js in the name,
-                        var url = obj.url + jsFile;
-                        console.log("downloading " + jsFile + " from " + url);
+                        // if the file dose not include min.js in the name,
+                        var url = obj.url + jsFile
+                        console.log('downloading ' + jsFile + ' from ' + url)
                         https
                           .get(obj.url + jsFile, data => {
-                            var jsBody = "";
-                            data.on("data", d => {
-                              jsBody += d;
-                            });
-                            data.on("end", () => {
-                              console.log(jsFile);
-                              var justFile = jsFile.split("/");
+                            var jsBody = ''
+                            data.on('data', d => {
+                              jsBody += d
+                            })
+                            data.on('end', () => {
+                              console.log(jsFile)
+                              var justFile = jsFile.split('/')
                               justFile = justFile[justFile.length - 1].replace(
-                                " ",
-                                ""
-                              );
-                              //console.log('justFile: ' + justFile);
-                              var jssubdir = jsFile.split("/");
-                              jssubdir.length = jssubdir.length - 1;
-                              jssubdir = jssubdir.join("/");
-                              jssubdir = jssubdir.substring(1);
-                              //jssubdir = jssubdir.replace(/\//g,'//');
-                              var jspath = obj.path + jssubdir + "/";
-                              mkdirp(jspath);
-                              jspath = jspath + justFile;
-                              //console.log('jspath: ' + jspath);
-                              jsBody = beautify(jsBody, { indent_size: 2 });
+                                ' ',
+                                ''
+                              )
+                              // console.log('justFile: ' + justFile);
+                              var jssubdir = jsFile.split('/')
+                              jssubdir.length = jssubdir.length - 1
+                              jssubdir = jssubdir.join('/')
+                              jssubdir = jssubdir.substring(1)
+                              // jssubdir = jssubdir.replace(/\//g,'//');
+                              var jspath = obj.path + jssubdir + '/'
+                              mkdirp(jspath)
+                              jspath = jspath + justFile
+                              // console.log('jspath: ' + jspath);
+                              jsBody = beautify(jsBody, { indent_size: 2 })
 
-                              fs.writeFile(jspath, jsBody, function(err) {
+                              fs.writeFile(jspath, jsBody, function (err) {
                                 if (err) {
-                                  //console.log(err.message);
+                                  // console.log(err.message);
                                 }
                                 console.log(
-                                  "downloaded " +
+                                  'downloaded ' +
                                     obj.path +
                                     justFile +
-                                    " from " +
+                                    ' from ' +
                                     url
-                                );
-                              });
-                            });
+                                )
+                              })
+                            })
                           })
-                          .on("error", e => {
-                            ////console.error(e);
-                          });
+                          .on('error', e => {
+                            /// /console.error(e);
+                          })
                       }
-                    });
+                    })
                   }
                 } catch (error) {
-                  ////console.log(error.message);
+                  /// /console.log(error.message);
                 }
               }
-            });
+            })
           })
-          .on("error", e => {
-            ////console.error(e);
-          });
+          .on('error', e => {
+            /// /console.error(e);
+          })
       }
     } catch (err) {
-      ////console.log(err);
+      /// /console.log(err);
     }
-  });
+  })
 }

@@ -1,8 +1,5 @@
 {
     "instances":[
-        "https://osuitsm.service-now.com/stats.do",
-        "https://osuitsmtest.service-now.com/stats.do",
-        "https://osuitsmdev.service-now.com/stats.do",
         "https://csus.service-now.com/stats.do",
         "https://csusdev.service-now.com/stats.do",
         "https://slcc.service-now.com/stats.do",
@@ -16,7 +13,6 @@
         "https://expedia.service-now.com/stats.do",
         "https://expediatest.service-now.com/stats.do",
         "https://expediadev.service-now.com/stats.do",
-        "https://army.service-now.com/stats.do",
         "https://blizzard.service-now.com/stats.do",
         "https://blizzardtest.service-now.com/stats.do",
         "https://blizzarddev.service-now.com/stats.do",
@@ -26,8 +22,6 @@
         "https://domo.service-now.com/stats.do",
         "https://domodev.service-now.com/stats.do",
         "https://mn.service-now.com/stats.do",
-        "https://nike.service-now.com/stats.do",
-        "https://nikedev.service-now.com/stats.do",
         "https://medtronic.service-now.com/stats.do",
         "https://medtronictest.service-now.com/stats.do",
         "https://medtronicdev.service-now.com/stats.do",
