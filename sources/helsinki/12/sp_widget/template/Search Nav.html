@@ -1,0 +1,7 @@
+<div class="list-group">
+  <a ng-class="{active: !data.t}" class="list-group-item" ng-href="?id=search&q={{data.q}}"><i class="fa fa-chevron-right"/><span class="m-l-sm">${All}</span></a>
+  <a ng-if="data.hasKB" ng-class="{active: data.t=='kb'}" class="list-group-item" ng-href="?id=search&t=kb&q={{data.q}}"><i class="fa fa-chevron-right"/><span class="m-l-sm">${Knowledge Base}</span></a>
+  <a ng-if="data.isLoggedIn && data.hasCatalog" ng-class="{active: data.t=='sc'}" class="list-group-item" ng-href="?id=search&t=sc&q={{data.q}}"><i class="fa fa-chevron-right"/><span class="m-l-sm">${Service Catalog}</span></a>
+  <a ng-if="data.sqandaEnabled" ng-class="{active: data.t=='qa'}" class="list-group-item" ng-href="?id=search&t=qa&q={{data.q}}"><i class="fa fa-chevron-right"/><span class="m-l-sm">${Questions and Answers}</span></a>
+  <a ng-repeat="group in data.searchGroups" ng-class="{active: data.t==group.table}" class="list-group-item" ng-href="?id=search&t={{group.table}}&q={{data.q}}"><i class="fa fa-chevron-right"/><span class="m-l-sm">{{group.label || group.table}}</span></a>
+</div>

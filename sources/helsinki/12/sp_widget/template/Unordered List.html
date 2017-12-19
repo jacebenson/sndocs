@@ -1,0 +1,10 @@
+<div class="simple-ul">
+  <h3>{{options.title}}</h3>
+  <ul class="list-group">
+    <li ng-repeat="item in data.list">
+      <a ng-href="{{item.url}}">
+        {{item.display_field}}
+      </a>
+    </li>
+  </ul>
+</div>

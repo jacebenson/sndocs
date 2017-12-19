@@ -1,0 +1,15 @@
+.as-sortable-placeholder {
+  display:block;
+  background-color: #eee;
+  height:40px;
+}
+
+.list-group-item {
+  border-top: 0px solid transparent;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.sortable-container {
+  overflow-y: scroll;
+  overflow-x:hidden;
+}

@@ -1,0 +1,84 @@
+<div>
+
+  <div class="panel panel-default">
+
+    <div ng-if="data.results.length==0">
+      <div class="panel-heading"><h4 class="panel-title">${No results}</h4></div>
+      <div class="panel-body wrapper break-word">
+        <p>${Your search - <b>{{data.q}}</b> - did not match any documents}</p>
+        <p>${Suggestions}:</p>
+        <ul>
+          <li>${Make sure all words are spelled correctly}</li>
+          <li>${Try different, more general, or fewer keywords}</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div ng-if="data.results.length>0" class="panel-heading break-word"><h4 class="panel-title">${Search results for '{{data.q}}'}</h4></div>
+
+    <div ng-repeat="item in data.results | orderBy:'score':true | limitTo:data.limit" class="panel-body b-b ">
+
+      <div ng-if="item.type == 'kb'">
+        <a href="?id=kb_article&amp;sys_id={{item.sys_id}}" class="h4 text-primary m-b-sm block">
+          <i class="fa fa-book m-r-sm"></i>
+          <span ng-bind-html="highlight(item.short_description, data.q)"></span></a>
+        <p ng-bind-html="highlight(item.text, data.q)"></p>
+        <span class="text-muted">${Article}: {{item.number}}</span>
+        <span class="text-muted">
+          <span class="m-l-xs m-r-xs"> &middot; </span>
+          ${Published}: <sn-day-ago date="item.publishedUTC"/>
+        </span>
+      </div>
+
+      <div ng-if="item.type == 'sc_content'">
+        <a ng-if="item.content_type == 'external'" ng-href="{{::item.url}}" target="_blank" class="h4 text-primary m-b-sm block"><span ng-bind-html="highlight(item.name, data.q)"></span> ➚</a>
+        <a ng-if="item.content_type == 'kb'" ng-href="?id=kb_article&sys_id={{::item.kb_article}}" class="h4 text-primary m-b-sm block">
+        	<i class="fa m-r-sm fa-file-text-o"></i>
+          <span ng-bind-html="highlight(item.name, data.q)"></span>
+        </a>
+        <a ng-if="item.content_type == 'literal'" ng-href="?id={{item.page}}&sys_id={{item.sys_id}}" class="h4 text-primary m-b-sm block">
+          <i class="fa m-r-sm fa-file-text-o"></i>
+          <span ng-bind-html="highlight(item.name, data.q)"></span></a>
+        <div ng-style="getBGImage(item)" ng-if="item.picture" class="img-responsive m-r item-image pull-left"></div>
+        <p ng-bind-html="highlight(item.short_description, data.q)"></p>
+      </div>
+      
+      <div ng-if="item.type == 'sc'">
+        <a href="?id={{item.page}}&amp;sys_id={{item.sys_id}}" class="h4 text-primary m-b-sm block">
+          <i class="fa m-r-sm fa-shopping-cart"></i>
+          <span ng-bind-html="highlight(item.name, data.q)"></span></a>
+        <div ng-style="getBGImage(item)" ng-if="item.picture" class="img-responsive m-r item-image pull-left"></div>
+        <p ng-bind-html="highlight(item.short_description, data.q)"></p>
+        <span class="text-muted m-r-sm" ng-if="data.showPrices && item.price != '$0.00'">{{item.price}}</span>
+      </div>
+      
+      <div ng-if="item.type == 'qa'">
+        <a href="?id=kb_social_qa_question&amp;question_id={{item.sys_id}}" class="h4 text-primary m-b-sm block">
+          <i class="fa fa-comments-o m-r-sm"></i>
+          <span ng-bind-html="highlight(item.label, data.q)"></span></a>
+        <p ng-bind-html="highlight(item.text, data.q)"></p>
+        <div>
+          <a ng-repeat="tag in item.tags" ng-href="?id=sqa_tagged_questions&sys_id={{tag.sys_id}}" class="question-tag">{{tag.name}}</a>
+        </div>
+        <span class="text-muted">${Asked} <sn-day-ago date="item.createdUTC"/></span>
+        <span class="text-muted">
+          <span class="m-l-xs m-r-xs" ng-if="!$first"> &middot; </span>
+          ${Score}: {{item.votes}}
+        </span>
+      </div>
+      
+      <div ng-if="item.type == 'rec'">
+        <a href="?id={{item.page}}&amp;sys_id={{item.sys_id}}&amp;table={{item.table}}" class="h4 text-primary m-b-sm block">
+          <span ng-bind-html="highlight(item.label, data.q)"></span>
+        </a>
+        <span class="text-muted" ng-repeat="f in item.fields | limitTo: 4">
+          <span class="m-l-xs m-r-xs" ng-if="!$first"> &middot; </span>
+          {{f.label}}: <span ng-bind-html="highlight(f.display_value, data.q)"></span>
+        </span>
+      </div>
+
+      <div class="clearfix"></div>
+
+    </div>
+  </div>
+</div>

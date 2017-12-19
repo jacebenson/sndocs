@@ -1,0 +1,55 @@
+<div>
+<div class="panel panel-{{::options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title">${Approval request for {{::task.table}} {{::task.number.display_value}}}</h4>
+  </div>
+
+  <div class="panel-body">
+    <div ng-if="task.short_description">{{::task.short_description.display_value}}</div>
+    <div ng-if="task.opened_by"><label>${Opened by}</label> {{::task.opened_by.display_value}}</div>
+    <div ng-if="task.requested_by"><label>${Requestor}</label> {{::task.requested_by.display_value}}</div>
+    <div ng-if="task.start_date"><label>${Start}</label> {{::task.start_date.display_value}}</div>
+    <div ng-if="task.end_date"><label>${End}</label> {{::task.end_date.display_value}}</div>
+    <div ng-if="task.price.value > 0"><label>${Price}</label> {{::task.price.display_value}}
+      <span ng-if="task.recurring_frequency.value != null"><label>${Recurring price}</label> {{::task.recurring_price.display_value}} {{task.recurring_frequency.display_value}}</span>
+    </div>
+
+    <div ng-if="data.items.length > 0">
+      <h4>${Items in this Request}</h4>
+      <div ng-repeat="item in data.items">
+        <h4>
+          {{::item.short_description}}
+        </h4>
+
+        <div ng-if="item.price">${Price} {{::item.price}}
+          <span ng-if="item.recurring_price">${Recurring price} {{::item.recurring_price}} {{::item.recurring_frequency}}</span>
+        </div>
+
+        <div ng-if="item.variables.length > 0" ng-init="variable_toggle=false">
+          <h5 ng-click="variable_toggle = !variable_toggle" style="cursor: pointer;">
+            <span class="glyphicon" ng-class="{'glyphicon-chevron-down': !variable_toggle, 'glyphicon-chevron-up': variable_toggle}"></span>
+            ${Options}
+          </h5>
+          <div ng-repeat="variable in item.variables" class="m-b-xs" ng-if="variable_toggle">
+            <label>{{::variable.label}}</label>
+            <div>{{::variable.display_value}}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div ng-if="data.variables.length > 0" ng-init="variable_toggle=true">
+      <h4 ng-click="variable_toggle = !variable_toggle" style="cursor: pointer;">
+        <span class="glyphicon" ng-class="{'glyphicon-chevron-down': !variable_toggle, 'glyphicon-chevron-up': variable_toggle}"></span>
+        ${Options}
+      </h4>
+      <div ng-repeat="variable in data.variables" ng-if="variable_toggle">
+        <label>{{::variable.label}}</label>
+        <div>{{::variable.display_value}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+  <sp-widget widget="data.ticketConversation" />
+</div>

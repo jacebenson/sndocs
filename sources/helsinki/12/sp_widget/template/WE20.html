@@ -1,0 +1,76 @@
+<div class="panel-shift">
+  <div class="panel panel-default">
+    <div class="panel-heading clearfix">
+      <span class="panel-title pull-left">
+        ${Widget Options Schema} - {{data.title}} <span ng-if="data.widgetID && data.widgetID != data.title">({{data.widgetID}})</span>
+      </span>
+      <div ng-if="data.canWrite" class="btn-group pull-right">
+        <button type="button" class="btn btn-default" ng-click="c.add()" title="{{::data.addOptionMsg}}"><fa name="plus" /></button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div ng-show="data.sys_id">
+        <div ng-repeat="opt in c.data.options" class="option">
+          <form class="form-inline">
+            <div ng-if="data.canWrite" class="form-group">
+              <label class="sr-only">${Remove}</label>
+              <button class="btn btn-default" title="{{::data.removeOptionMsg}}" ng-click="c.remove(opt, $index)"><fa name="remove" /></button>
+            </div>
+            <div class="form-group" title="{{::data.labelMsg}}">
+              <label class="sr-only">{{::data.labelMsg}}</label>
+              <input ng-disabled="!data.canWrite" class="form-control" ng-model="opt.label" ng-blur="c.updateName(opt, $index)" id="exampleInputPassword3" placeholder="{{::data.optionLabelMsg}}">
+            </div>
+            <div class="form-group" title="{{::data.nameMsg}}">
+              <label class="sr-only">{{::data.nameMsg}}</label>
+              <input ng-disabled="!data.canWrite" class="form-control" ng-model="opt.name" ng-blur="c.fixName(opt)" placeholder="{{::data.nameMsg}}">
+            </div>
+            <div class="form-group" title="{{::data.typeMsg}}">
+              <label class="sr-only">{{::data.typeMsg}}</label>
+              <div style="display: inline-block; width: 15em">
+                <select ng-disabled="!data.canWrite" ng-model="opt.type" class="sn-select-basic">
+                  <option ng-repeat="item in c.type_options" value="{{item}}">{{item}}</option>
+                </select>
+              </div>
+            </div>
+            <!-- additional controls per type -->
+            <div class="form-group" ng-if="opt.type == 'reference'" title="{{::data.referencedTableMsg}}">
+              <sn-record-picker sn-disabled="!data.canWrite" field="opt.field" table="'sys_db_object'"
+                                display-field="'label'"
+                                value-field="'name'"
+                                display-fields="'name'"
+                                placeholder="{{::data.selectTableMsg}}"
+                                search-fields="'label,name'" page-size="100"></sn-record-picker>
+            </div>
+            <div class="form-group we20-choices" ng-if="opt.type == 'choice'" title="{{::data.choicesMsg}}">
+              <textarea sn-resize-height="trim" class="form-control" rows="2" ng-disabled="!data.canWrite" ng-model="opt.choices" placeholder="{{::data.oneLinePerChoiceMsg}}"></textarea>
+            </div>
+            <div class="form-group" title="{{::data.hintOptionalMsg}}">
+              <label class="sr-only">{{::data.hintOptionalMsg}}</label>
+              <input ng-disabled="!data.canWrite" class="form-control" ng-model="opt.hint" placeholder="{{::data.hintOptionalMsg}}">
+            </div>
+            <div class="form-group" ng-if="opt.type == 'field_name' || opt.type == 'field_list'">
+              {{opt.label}} ${Depends on value in field 'table' from widget instance}
+            </div>
+          </form>
+        </div>
+        <h4 ng-if="c.data.options.length == 0">
+          ${Use the [+] button to add a new option}
+        </h4>
+      </div>
+    </div>
+    <div class="panel-footer clearfix">
+      <div ng-if="data.canWrite">
+        <button type="button" class="btn btn-primary pull-right" ng-click="c.save()" title="{{::data.saveMsg}}">{{::data.saveMsg}} <span ng-if="c.saveButtonSuffix">({{c.saveButtonSuffix}})</span></button>
+        <span ng-if="saveMsg" style="vertical-align:middle; padding-left:8px;">{{${saveMsg}}}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+

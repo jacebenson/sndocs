@@ -1,0 +1,15 @@
+<div class="panel panel-{{c.options.color}} b" ng-if="c.data.questions.length > 0">
+  <div class="panel-heading">${My Subscribed Questions}</div>
+  <div class="list-group" style="max-height: none; overflow-y: auto;">
+    <div ng-repeat="question in c.data.questions" class="list-group-item">
+      <a ng-click="c.clickQuestion($event, question)" href="javascript:void(0)">
+        <div>
+          <div>{{question.question}}</div>
+          <small class="text-muted m-r-sm"><i class="fa" ng-class="c.questionVoteDirection(question.votes)"></i><span style="padding-left: 4px;">{{question.votes}}</span></small>
+          <small class="text-muted m-r-sm"><i class="fa fa-comments"></i><span style="padding-left: 4px;">{{question.answers}}</span></small>
+          <small style="white-space: nowrap;" class="text-muted"><i class="fa fa-user"></i><span style="padding-left: 5px;">{{question.profile}}</span></small>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
