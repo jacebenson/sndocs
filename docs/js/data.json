@@ -762,67 +762,87 @@
     "date": "2014-05-06",
     "patches": [
       {
+        "name": "Eureka Patch 0",
+        "number": "0",
+        "url": "#",
+        "date": "2014-05-06",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/eureka/0/scripts/"
+      },
+      {
         "name": "Eureka Patch 1",
+        "number": "1",
         "url": "https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1",
         "date": "2014-06-03"
       },
       {
         "name": "Eureka Patch 2",
+        "number": "2",
         "url": "https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2",
         "date": "2014-06-25"
       },
       {
         "name": "Eureka Patch 3",
+        "number": "3",
         "url": "https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3",
         "date": "2014-07-21"
       },
       {
         "name": "Eureka Patch 4",
+        "number": "4",
         "url": "https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4",
         "date": "2014-08-19"
       },
       {
         "name": "Eureka Patch 5",
+        "number": "5",
         "url": "https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5",
         "date": "2014-09-09"
       },
       {
         "name": "Eureka Patch 6",
+        "number": "6",
         "url": "https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6",
         "date": "2014-10-19"
       },
       {
         "name": "Eureka Patch 7",
+        "number": "7",
         "url": "https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7",
         "date": "2014-11-07"
       },
       {
         "name": "Eureka Patch 8",
+        "number": "8",
         "url": "https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8",
         "date": "2015-01-08"
       },
       {
         "name": "Eureka Patch 9",
+        "number": "9",
         "url": "https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9",
         "date": "2015-02-04"
       },
       {
         "name": "Eureka Patch 10",
+        "number": "10",
         "url": "https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10",
         "date": "2015-04-02"
       },
       {
         "name": "Eureka Patch 11",
+        "number": "11",
         "url": "https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11",
         "date": "2015-05-19"
       },
       {
         "name": "Eureka Patch 12",
+        "number": "12",
         "url": "https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12",
         "date": "2015-08-25"
       },
       {
         "name": "Eureka Patch 13",
+        "number": "13",
         "url": "https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13",
         "date": "2015-11-17"
       }
