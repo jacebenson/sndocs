@@ -119,7 +119,16 @@
         "chipotle",
         "cityofchicago",
         "tacoma",
-        "csc"
+        "csc",
+        "hi",
+        "osuitsm",
+        "osuitsmtest",
+        "osuitsmdev",
+        "army",
+        "demonightlyeureka",
+        "src",
+        "srctest",
+        "srcdev"
     ],
     "endpoints":[
             "/scripts/js_includes_last.jsx",
@@ -151,5 +160,6 @@
             "/sn.dragdrop.jsdbx",
             
             "/scripts/lib/newtag-it.jsx"
-    ]
+    ],
+    "payload": "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ins='http://www.service-now.com/InstanceInfo'>\n<soapenv:Header/>\n\t<soapenv:Body>\n\t\t<ins:execute/>\n\t</soapenv:Body>\n</soapenv:Envelope>"
 }

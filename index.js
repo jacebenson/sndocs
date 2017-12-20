@@ -2,6 +2,9 @@
 // ======
 // SNDocs is the unofficial documentation for Servicenow
 var config = require('./config') /* Load the config.instances, and config.endpoints */
+var request = require('request')
+var xpath = require('xpath')
+var dom = require('xmldom').DOMParser
 var fs = require('fs')
 var https = require('https')
 var beautify = require('js-beautify').js_beautify
@@ -10,45 +13,40 @@ var mkdirp = require('mkdirp')
 var versions = {}
 // config.instances.length = 3;
 var counter = 0
-config.instances.map(function (url) {
-  var body = ''
-  url = 'https://' + url + '.service-now.com/stats.do'
-  https.get(url, data => {
-    data.on('data', d => {
-      body += d
-    })
-    data.on('end', () => {
-      addToVersions({
-        body: body,
-        url: url
-      })
-    })
-  })
+//config.instances = ['hi', 'csus']
+// var xmlStr = "<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><executeResponse xmlns="http://www.service-now.com/InstanceInfo"><result><install_name>Demo Server</install_name><instance_name>csus</instance_name><instance_id>08ede02a4a36232b002a52c083a0a228</instance_id><build_date>09-12-2017_1404</build_date><build_tag>glide-helsinki-03-16-2016__patch12a-08-25-2017</build_tag><system_id>app128152.iad106.service-now.com:csus025</system_id><node_id>8af278dcc593c8df4e4a10f7fc40941a</node_id><instance_ip>10.59.128.152</instance_ip><mid_buildstamp>helsinki-03-16-2016__patch12a-08-25-2017_09-12-2017_1404</mid_buildstamp><mid_version>09-12-2017_1404</mid_version></result></executeResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+// var doc = new dom.parseFromString(xmlStr);
+config.instances = config.instances.sort();
+config.instances.map(function (instance) {
+  var url = 'https://' + instance + '.service-now.com'
+  request({
+    url: url + '/InstanceInfo.do?SOAP',
+    method: 'POST',
+    body: config.payload
+  }, function (error, response, body) {
+    //console.log(url)
+    //console.log(response.body)
+    var doc = new dom().parseFromString(response.body)
+    var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
+    //console.log(instance + ' BUILDTAG: ' + buildTag)
+    addToVersions({
+     url: 'https://' + instance + '.service-now.com/',
+     buildTag: buildTag
+   });
+  }
+)
 })
 
 function addToVersions (obj) {
   try {
-    var body = obj.body.toString()
+    //console.log('trying ' + obj.url + ' -- ' + obj.buildTag)
     var url = obj.url
     counter++
-    try {
-      var key = 'Build tag: '
-      var familyLoc = body.indexOf(key)
-      if (familyLoc >= 0) {
-        var family = body.split(key)[1].split('-')[1]
-        //console.log(body.split(key)[1].split('__')[1])
-        var patch = body
-          .split(key)[1]
-          .split('__')[1]
-          .split('-')[0]
-          .replace('patch', '')
-        //console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url)
-      }
-    } catch (error) {
-      console.log(error)
+    var family = obj.buildTag.split('glide-')[1].split('-')[0]
+    var patch = 0
+    if (obj.buildTag.indexOf('patch') >= 0) {
+      patch = obj.buildTag.split('patch')[1].split('-')[0]
     }
-    // var patch = body.split('__patch')[1].split('-')[0]
-    url = url.split('/stats.do')[0]
     if (
       versions &&
       versions[family] &&
@@ -61,23 +59,23 @@ function addToVersions (obj) {
         // family exists...
         // console.log("family exists: " + family);
         if (versions[family] && versions[family][patch]) {
-          console.log("Found " + family + " patch " + patch + " @ " + url);
+          console.log('Found ' + family + ' patch ' + patch + ' @ ' + url)
           versions[family][patch] = url
         } else {
           versions[family][patch] = url
         }
       } else {
-        console.log('creating family: ' + family)
+        console.log('creating family: ' + family + ' for ' + url)
         // family doesn't exist, create it
         versions[family] = {}
-        if(typeof patch === 'undefined'){
-          patch = 0;
+        if (typeof patch === 'undefined') {
+          patch = 0
         }
         versions[family][patch] = url
       }
     }
     if (counter === config.instances.length) {
-      createSources()
+       createSources()
     }
   } catch (err) {
     console.log(err)
@@ -91,21 +89,20 @@ function createSources () {
   // ./docs/family/patch
   var sourceFolder = './sources/'
   for (var family in versions) {
-    if(family !== 'undefined'){
-    var familyFolder = sourceFolder + family + '/'
-    for (var patch in versions[family]) {
-
-      var patchFolder = familyFolder + patch + '/'
-      if (fs.existsSync(patchFolder) === false) {
-        console.log('mkdir: ' + patchFolder)
-        mkdirp(patchFolder)
-        downloadEndpoints({
-          url: versions[family][patch],
-          path: patchFolder
-        })
+    if (family !== 'undefined') {
+      var familyFolder = sourceFolder + family + '/'
+      for (var patch in versions[family]) {
+        var patchFolder = familyFolder + patch + '/'
+        if (fs.existsSync(patchFolder) === false) {
+          console.log('mkdir: ' + patchFolder)
+          mkdirp(patchFolder)
+          downloadEndpoints({
+            url: versions[family][patch],
+            path: patchFolder
+          })
+        }
       }
     }
-  }
   }
 }
 
