@@ -9,13 +9,8 @@ var fs = require('fs')
 var https = require('https')
 var beautify = require('js-beautify').js_beautify
 var mkdirp = require('mkdirp')
-// var wd = process.env.PWD
 var versions = {}
-// config.instances.length = 3;
 var counter = 0
-// config.instances = ['hi', 'csus']
-// var xmlStr = "<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><executeResponse xmlns="http://www.service-now.com/InstanceInfo"><result><install_name>Demo Server</install_name><instance_name>csus</instance_name><instance_id>08ede02a4a36232b002a52c083a0a228</instance_id><build_date>09-12-2017_1404</build_date><build_tag>glide-helsinki-03-16-2016__patch12a-08-25-2017</build_tag><system_id>app128152.iad106.service-now.com:csus025</system_id><node_id>8af278dcc593c8df4e4a10f7fc40941a</node_id><instance_ip>10.59.128.152</instance_ip><mid_buildstamp>helsinki-03-16-2016__patch12a-08-25-2017_09-12-2017_1404</mid_buildstamp><mid_version>09-12-2017_1404</mid_version></result></executeResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>";
-// var doc = new dom.parseFromString(xmlStr);
 config.instances = config.instances.sort()
 config.instances.map(function (instance) {
   var url = 'https://' + instance + '.service-now.com'
@@ -23,7 +18,7 @@ config.instances.map(function (instance) {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload
-  }, function (error, response, body) {
+  }, function (error, response, body) {// eslint-disable-line 
     // console.log(url)
     // console.log(response.body)
     var doc = new DOM().parseFromString(response.body)
