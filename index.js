@@ -12,6 +12,7 @@ var versions = {}
 var counter = 0
 config.instances.map(function (url) {
   var body = ''
+  url = 'https://' + url + '.service-now.com/stats.do'
   https.get(url, data => {
     data.on('data', d => {
       body += d
@@ -35,12 +36,13 @@ function addToVersions (obj) {
       var familyLoc = body.indexOf(key)
       if (familyLoc >= 0) {
         var family = body.split(key)[1].split('-')[1]
+        //console.log(body.split(key)[1].split('__')[1])
         var patch = body
           .split(key)[1]
           .split('__')[1]
           .split('-')[0]
           .replace('patch', '')
-        console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url)
+        //console.log('family: ' + family + ' ' + patch + ' -- ' + obj.url)
       }
     } catch (error) {
       console.log(error)
