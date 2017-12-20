@@ -3454,4 +3454,169 @@
           a.toWatch = [];
           break;
         case t.LocalsExpression:
-          a.constant = !1, a.t
+          a.constant = !1, a.toWatch = []
+      }
+    }
+
+    function Cd(a) {
+      if (1 === a.length) {
+        a = a[0].expression;
+        var b = a.toWatch;
+        return 1 !== b.length ? b : b[0] !== a ? b : void 0
+      }
+    }
+
+    function Dd(a) {
+      return a.type === t.Identifier || a.type === t.MemberExpression
+    }
+
+    function Ed(a) {
+      if (1 === a.body.length && Dd(a.body[0].expression)) return {
+        type: t.AssignmentExpression,
+        left: a.body[0].expression,
+        right: {
+          type: t.NGValueParameter
+        },
+        operator: "="
+      }
+    }
+
+    function Fd(a) {
+      return 0 === a.body.length || 1 === a.body.length && (a.body[0].expression.type ===
+        t.Literal || a.body[0].expression.type === t.ArrayExpression || a.body[0].expression.type === t.ObjectExpression)
+    }
+
+    function Gd(a, b) {
+      this.astBuilder = a;
+      this.$filter = b
+    }
+
+    function Hd(a, b) {
+      this.astBuilder = a;
+      this.$filter = b
+    }
+
+    function Lb(a) {
+      return "constructor" === a
+    }
+
+    function lc(a) {
+      return C(a.valueOf) ? a.valueOf() : Fg.call(a)
+    }
+
+    function Hf() {
+      var a = V(),
+        b = V(),
+        d = {
+          "true": !0,
+          "false": !1,
+          "null": null,
+          undefined: void 0
+        },
+        c, f;
+      this.addLiteral = function(a, b) {
+        d[a] = b
+      };
+      this.setIdentifierFns = function(a, b) {
+        c = a;
+        f = b;
+        return this
+      };
+      this.$get = ["$filter",
+          function(e) {
+            function g(c, d, f) {
+              var g, k, H;
+              f = f || K;
+              switch (typeof c) {
+                case "string":
+                  H = c = c.trim();
+                  var q = f ? b : a;
+                  g = q[H];
+                  if (!g) {
+                    ":" === c.charAt(0) && ":" === c.charAt(1) && (k = !0, c = c.substring(2));
+                    g = f ? p : u;
+                    var B = new mc(g);
+                    g = (new nc(B, e, g)).parse(c);
+                    g.constant ? g.$$watchDelegate = r : k ? g.$$watchDelegate = g.literal ? n : m : g.inputs && (g.$$watchDelegate = l);
+                    f && (g = h(g));
+                    q[H] = g
+                  }
+                  return s(g, d);
+                case "function":
+                  return s(c, d);
+                default:
+                  return s(w, d)
+              }
+            }
+
+            function h(a) {
+              function b(c, d, e, f) {
+                var g = K;
+                K = !0;
+                try {
+                  return a(c, d, e, f)
+                } finally {
+                  K = g
+                }
+              }
+              if (!a) return a;
+              b.$$watchDelegate = a.$$watchDelegate;
+              b.assign = h(a.assign);
+              b.constant = a.constant;
+              b.literal = a.literal;
+              for (var c = 0; a.inputs && c < a.inputs.length; ++c) a.inputs[c] = h(a.inputs[c]);
+              b.inputs = a.inputs;
+              return b
+            }
+
+            function k(a, b) {
+              return null == a || null == b ? a === b : "object" === typeof a && (a = lc(a), "object" === typeof a) ? !1 : a === b || a !== a && b !== b
+            }
+
+            function l(a, b, c, d, e) {
+              var f = d.inputs,
+                g;
+              if (1 === f.length) {
+                var h = k,
+                  f = f[0];
+                return a.$watch(function(a) {
+                  var b = f(a);
+                  k(b, h) || (g = d(a, void 0, void 0, [b]), h = b && lc(b));
+                  return g
+                }, b, c, e)
+              }
+              for (var l = [],
+                  m = [], n = 0, s = f.length; n < s; n++) l[n] = k, m[n] = null;
+              return a.$watch(function(a) {
+                for (var b = !1, c = 0, e = f.length; c < e; c++) {
+                  var h = f[c](a);
+                  if (b || (b = !k(h, l[c]))) m[c] = h, l[c] = h && lc(h)
+                }
+                b && (g = d(a, void 0, void 0, m));
+                return g
+              }, b, c, e)
+            }
+
+            function m(a, b, c, d) {
+              var e, f;
+              return e = a.$watch(function(a) {
+                return d(a)
+              }, function(a, c, d) {
+                f = a;
+                C(b) && b.apply(this, arguments);
+                x(a) && d.$$postDigest(function() {
+                  x(f) && e()
+                })
+              }, c)
+            }
+
+            function n(a, b, c, d) {
+              function e(a) {
+                var b = !0;
+                q(a, function(a) {
+                  x(a) || (b = !1)
+                });
+                return b
+              }
+              var f, g;
+              return f = a.$watch(fu

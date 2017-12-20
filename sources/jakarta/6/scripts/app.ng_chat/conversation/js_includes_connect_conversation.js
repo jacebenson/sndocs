@@ -1210,129 +1210,1732 @@ angular.module('sn.connect.conversation').service('conversations', function(
 });;
 /*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversation.js */
 angular.module('sn.connect.conversation').directive('snConversation', function(
-      getTemplateUrl, $rootScope, $timeout, messageService, activeConversation, profiles) {
-      "use strict";
-      return {
-        restrict: 'E',
-        templateUrl: getTemplateUrl("snConversation.xml"),
-        replace: true,
-        scope: {
-          conversation: "=",
-          shouldAnnounce: "=readmessages",
-          showSenderPresence: "@"
-        },
-        link: function(scope, element) {
-          scope.loading = false;
-          scope.$watch("messagesLoadedOnce", function() {
-            var isConversationActive = !activeConversation.pendingConversation;
-            if (isConversationActive)
-              $timeout(function() {
-                var el = element.find('.new-message');
-                el.focus()
-              }, 0, false);
-            $timeout(function() {
-              scope.loading = !scope.messagesLoadedOnce && isConversationActive;
-            }, 0, true);
-          });
-          scope.checkForUnloadedMessages = function() {
-            $timeout(function() {
-              var scrollHeight = element.find(".sn-feed-messages")[0].scrollHeight;
-              var containerHeight = element.find(".sn-feed-messages").height();
-              if (scrollHeight < containerHeight) {
-                scope.retrieveMessageHistory().then(function(retrievedMessages) {
-                  if (retrievedMessages.length === 30)
-                    scope.checkForUnloadedMessages();
-                  else
-                    $timeout(function() {
-                      scope.$broadcast('connect.auto_scroll.jump_to_bottom');
-                    }, 0, false);
-                });
-              }
+  getTemplateUrl, $rootScope, $timeout, messageService, activeConversation, profiles) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl("snConversation.xml"),
+    replace: true,
+    scope: {
+      conversation: "=",
+      shouldAnnounce: "=readmessages",
+      showSenderPresence: "@"
+    },
+    link: function(scope, element) {
+      scope.loading = false;
+      scope.$watch("messagesLoadedOnce", function() {
+        var isConversationActive = !activeConversation.pendingConversation;
+        if (isConversationActive)
+          $timeout(function() {
+            var el = element.find('.new-message');
+            el.focus()
+          }, 0, false);
+        $timeout(function() {
+          scope.loading = !scope.messagesLoadedOnce && isConversationActive;
+        }, 0, true);
+      });
+      scope.checkForUnloadedMessages = function() {
+        $timeout(function() {
+          var scrollHeight = element.find(".sn-feed-messages")[0].scrollHeight;
+          var containerHeight = element.find(".sn-feed-messages").height();
+          if (scrollHeight < containerHeight) {
+            scope.retrieveMessageHistory().then(function(retrievedMessages) {
+              if (retrievedMessages.length === 30)
+                scope.checkForUnloadedMessages();
+              else
+                $timeout(function() {
+                  scope.$broadcast('connect.auto_scroll.jump_to_bottom');
+                }, 0, false);
             });
-          };
-
-          function onClick(evt) {
-            $timeout(function() {
-              var profileID = angular.element(evt.target).attr('class').substring("at-mention at-mention-user-".length);
-              profiles.getAsync(profileID).then(function(profile) {
-                scope.showPopover = true;
-                scope.mentionPopoverProfile = profile;
-                scope.clickEvent = evt;
-              });
-            }, 0, false);
           }
-          element.on("click", ".at-mention", function(evt) {
-            if (scope.showPopover) {
-              var off = scope.$on("snMentionPopover.showPopoverIsFalse", function() {
-                onClick(evt);
-                off();
-              });
-            } else {
-              onClick(evt);
+        });
+      };
+
+      function onClick(evt) {
+        $timeout(function() {
+          var profileID = angular.element(evt.target).attr('class').substring("at-mention at-mention-user-".length);
+          profiles.getAsync(profileID).then(function(profile) {
+            scope.showPopover = true;
+            scope.mentionPopoverProfile = profile;
+            scope.clickEvent = evt;
+          });
+        }, 0, false);
+      }
+      element.on("click", ".at-mention", function(evt) {
+        if (scope.showPopover) {
+          var off = scope.$on("snMentionPopover.showPopoverIsFalse", function() {
+            onClick(evt);
+            off();
+          });
+        } else {
+          onClick(evt);
+        }
+      });
+      element.on("click", function(evt) {
+        scope.focusOnConversation();
+      });
+    },
+    controller: function($scope, $element, $q, snRecordPresence, queueEntries, hotKeyHandler, snHotKey,
+      snComposingPresence, userID, inFrameSet) {
+      $scope.messagesLoadedOnce = false;
+      $scope.showLoading = true;
+      $scope.rawMessages = [];
+      $scope.asideOpen = false;
+      $scope.$on("sn.aside.open", function() {
+        $scope.asideOpen = true;
+      });
+      $scope.$on("sn.aside.close", function() {
+        $scope.asideOpen = false;
+      });
+      $scope.isComposingHidden = function() {
+        return $scope.conversation.isHelpDesk && !$scope.conversation.queueEntry.isActive;
+      };
+      var closeHotKey = new snHotKey({
+        key: "ESC",
+        callback: function() {
+          $scope.$broadcast("snippets.hide", $scope.conversation);
+          hotKeyHandler.remove(closeHotKey);
+        }
+      });
+      $scope.escalateOk = function() {
+        queueEntries.escalate($scope.conversation);
+      };
+      $rootScope.$on('http-error.hide', function() {
+        messageService.retrieveMessages($scope.conversation);
+      });
+      $scope.isNoRecipientsMessageShowing = function() {
+        return hasNoMessage() && $scope.conversation.pendingRecipients.length === 0;
+      };
+      $scope.isOneRecipientsMessageShowing = function() {
+        return hasNoMessage() && $scope.conversation.pendingRecipients.length === 1;
+      };
+      $scope.isGroupMessageShowing = function() {
+        return hasNoMessage() && $scope.conversation.pendingRecipients.length > 1;
+      };
+
+      function hasNoMessage() {
+        return !$scope.conversation.firstMessage;
+      }
+
+      function isVisible() {
+        return ($element[0].offsetWidth !== 0) && ($element[0].offsetHeight !== 0);
+      }
+      $scope.$watch(isVisible, function(visible) {
+        if (!visible || $scope.conversation.isPending)
+          return;
+        if (inFrameSet && $scope.conversation.isFrameStateMinimize)
+          return;
+        $scope.conversation.resetUnreadCount();
+      });
+      $scope.$watch("conversation.sysID", function(newSysID) {
+        if (!newSysID)
+          return;
+        if ($scope.conversation.isPending)
+          return;
+        $scope.messagesLoadedOnce = false;
+        $scope.conversationAlreadyViewed = $scope.conversation.unreadCount > 0;
+        $scope.rawMessages = [];
+        $scope.previousProfileID = void(0);
+        if (!$scope.conversation)
+          return;
+        if ($scope.conversation.sysID) {
+          snComposingPresence.set($scope.conversation.sysID, {
+            viewing: [],
+            typing: []
+          });
+          snRecordPresence.initPresence("live_group_profile", $scope.conversation.sysID);
+        }
+        refreshMessages().then(function(loadedMessages) {
+          if (loadedMessages.length === 30)
+            $scope.checkForUnloadedMessages();
+        });
+      });
+      $scope.$root.$on("sn.sessions", function(name, data) {
+        if (!$scope.conversation || !$scope.conversation.members)
+          return;
+        var viewing = {};
+        var typing = {};
+        angular.forEach(data, function(value) {
+          if (value.user_id === userID)
+            return;
+          var conversationID = $scope.conversation.sysID;
+          if (value.sys_id === conversationID) {
+            if (value.status === "typing") {
+              typing[value.user_id] = true;
+              delete viewing[value.user_id];
+            } else if ((value.status === "viewing" || value.status === "entered") && !typing[value.user_id]) {
+              viewing[value.user_id] = true;
             }
+          }
+        });
+        var conversationViewing = [];
+        var conversationTyping = [];
+        if ($scope.conversation.amMember) {
+          angular.forEach($scope.conversation.members, function(member) {
+            if (viewing[member.document])
+              conversationViewing.push(member);
+            if (typing[member.document])
+              conversationTyping.push(member);
           });
-          element.on("click", function(evt) {
-            scope.focusOnConversation();
+          snComposingPresence.set($scope.conversation.sysID, {
+            viewing: conversationViewing,
+            typing: conversationTyping
           });
+        }
+      });
+      $scope.$on("conversation.refresh_messages", function(e, data) {
+        if ($scope.conversation.sysID !== data.sysID)
+          return;
+        refreshMessages();
+      });
+      $scope.$on("amb.connection.recovered", refreshMessages);
+
+      function refreshMessages() {
+        return messageService.retrieveMessages($scope.conversation)
+          .then(function(loadedMessages) {
+            $timeout(function() {
+              $scope.$broadcast('connect.auto_scroll.jump_to_bottom');
+            }, 500);
+            $scope.messagesLoadedOnce = true;
+            return loadedMessages;
+          })
+          .catch(function() {
+            $scope.messagesLoadedOnce = true;
+            return [];
+          });
+      }
+      $scope.focusOnConversation = function() {
+        if (activeConversation.pendingConversation)
+          $rootScope.$broadcast("connect.message.focus", this.conversation);
+        else
+          activeConversation.conversation = $scope.conversation;
+      };
+      $scope.retrieveMessageHistory = function() {
+        if ($scope.conversation.isPending ||
+          $scope.conversation.restricted ||
+          !$scope.conversation.messageBatcher.batches.length)
+          return $q.when([]);
+        var earliestReceivedTime = $scope.conversation.firstMessage.timestamp;
+        var promise = messageService.retrieveMessages($scope.conversation, earliestReceivedTime);
+        if (!promise)
+          return $q.when([]);
+        var deferred = $q.defer();
+        promise.then(function(retrievedMessages) {
+          $scope.messagesLoadedOnce = false;
+          $scope.rawMessages = [];
+          $scope.messagesLoadedOnce = true;
+          deferred.resolve(retrievedMessages);
+        });
+        return deferred.promise;
+      };
+      $scope.$on("ngRepeat.complete", function(e) {
+        if (angular.equals(e.targetScope, $scope))
+          return;
+        $scope.$broadcast("ngRepeat.complete");
+      });
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationFooter.js */
+angular.module('sn.connect.conversation').directive('snConversationFooter', function(getTemplateUrl) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl("snConversationFooter.xml"),
+    replace: true,
+    scope: {
+      conversation: "="
+    },
+    controller: function($scope, $rootScope, amb, uploadAttachmentService, queueEntries, inSupportClient, showActionsForClosedCases) {
+      $scope.amb = amb;
+      var snHttpError = false;
+      $scope.$on('http-error.show', function() {
+        snHttpError = true;
+      });
+      $scope.$on('http-error.hide', function() {
+        snHttpError = false;
+      });
+
+      function getNoticeType() {
+        if (isQueueEntry("isClosedByAgent"))
+          return "closed session";
+        if ($scope.conversation.restricted)
+          return "restricted";
+        if (amb.interrupted || snHttpError)
+          return "connection error";
+        if (inSupportClient && !isQueueEntry("isActive") && !isQueueEntry("isClosedByAgent"))
+          return "rejoin";
+        if (!inSupportClient && isQueueEntry("isWaiting"))
+          return "agent waiting";
+        if ($scope.conversation.isPendingNoRecipients)
+          return "no recipients";
+        if (uploadAttachmentService.filesInProgress.length > 0)
+          return "upload in progress";
+      }
+      $scope.isNoticeShowing = function() {
+        return !!getNoticeType();
+      };
+      $scope.isClosedSessionShowing = function() {
+        return getNoticeType() === "closed session";
+      };
+      $scope.isConnectionErrorShowing = function() {
+        return getNoticeType() === "connection error";
+      };
+      $scope.isRestrictedShowing = function() {
+        return getNoticeType() === "restricted";
+      };
+      $scope.isRejoinShowing = function() {
+        return getNoticeType() === "rejoin";
+      };
+      $scope.isAgentWaitingShowing = function() {
+        return getNoticeType() === "agent waiting";
+      };
+      $scope.isNewConversationNoRecipientsShowing = function() {
+        return getNoticeType() === "no recipients";
+      };
+      $scope.isUploadInProgressShowing = function() {
+        return getNoticeType() === "upload in progress";
+      };
+      $scope.isError = function() {
+        return $scope.isRestrictedShowing() || $scope.isConnectionErrorShowing();
+      };
+      $scope.isQueueNameShowing = function() {
+        return isQueueEntry("queue");
+      };
+      $scope.isQueueNumberShowing = function() {
+        return $scope.conversation.table == 'chat_queue_entry';
+      };
+      $scope.isDocumentNumberShowing = function() {
+        return $scope.conversation.hasRecord;
+      };
+
+      function isQueueEntry(field) {
+        return $scope.conversation.isHelpDesk && $scope.conversation.queueEntry[field];
+      }
+      $scope.selectSnippet = function(snippet) {
+        $scope.$broadcast("connect.conversation.insert_snippet", snippet);
+      };
+      $scope.rejoin = function() {
+        queueEntries.rejoin($scope.conversation.sysID);
+      };
+      $scope.isMenuVisible = function() {
+        return !inSupportClient &&
+          !$scope.conversation.isEmpty &&
+          $scope.conversation.chatActions &&
+          $scope.conversation.chatActions.getMenuActions().length > 0 &&
+          (!isQueueEntry("isClosedByAgent") || showActionsForClosedCases);
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationAddUserButton.js */
+angular.module('sn.connect.conversation').directive('snConversationAddUserButton', function(getTemplateUrl) {
+  "use strict";
+  return {
+    restrict: 'E',
+    scope: {
+      conversation: "="
+    },
+    templateUrl: getTemplateUrl("snConversationAddUserButton.xml"),
+    controller: function($scope, $rootScope, conversations, activeConversation) {
+      $scope.userSelected = function(user) {
+        conversations.addUser($scope.conversation.sysID, user)
+          .then(function(conversation) {
+            activeConversation.conversation = conversation;
+          })
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationContainer.js */
+angular.module('sn.connect.conversation').directive('snConversationContainer', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snConversationContainer.xml'),
+    replace: true,
+    scope: {},
+    controller: function($scope, $timeout, conversations, activeConversation, screenWidth) {
+      $scope.activeConversation = activeConversation;
+      var loading = true;
+      conversations.loaded.then(function() {
+        loading = false;
+      });
+      $scope.$on("connect.new_conversation.cancelled", function() {
+        activeConversation.pendingConversation = undefined;
+      });
+      $scope.$on("connect.new_conversation.complete", function() {
+        activeConversation.pendingConversation = undefined;
+      });
+      $scope.$on("connect.show_create_conversation_screen", function(unused, preloadedMember) {
+        activeConversation.pendingConversation = conversations.newConversation.$reset();
+        activeConversation.tab = 'chat';
+        if (preloadedMember)
+          $timeout(function() {
+            $scope.$emit("connect.member_profile.direct_message", preloadedMember);
+          });
+      });
+      $scope.showLoading = function() {
+        return loading;
+      };
+      $scope.showIntroduction = function() {
+        return !loading && activeConversation.isEmpty;
+      };
+      $scope.showConversation = function() {
+        return !loading && !activeConversation.isEmpty;
+      };
+      $scope.showSidePanel = function() {
+        return $scope.showConversation() && screenWidth.isAbove(800);
+      };
+      $scope.isCloseNewConversationShowing = function() {
+        return !conversations.newConversation.firstMessage;
+      };
+      $scope.closeNewConversation = function() {
+        $scope.$emit("connect.new_conversation.cancelled");
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationHeader.js */
+angular.module('sn.connect').directive('snConversationHeader', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snConversationHeader.xml'),
+    replace: true,
+    scope: {
+      conversation: '='
+    },
+    controller: function($scope, $element, $timeout, conversations, snAttachmentHandler, userID) {
+      $scope.conversationTemp = {};
+      $scope.middleAlignName = false;
+      $scope.userID = userID;
+      $scope.canEdit = function() {
+        return $scope.conversation && $scope.conversation.isGroup;
+      };
+      $scope.getPrimaryUser = function() {
+        return $scope.conversation.isGroup ?
+          $scope.conversation.lastMessage.profileData :
+          $scope.conversation.peer;
+      };
+      $scope.onlyShowName = function() {
+        if ($scope.conversation.isHelpDesk)
+          return false;
+        if ($scope.conversation.isGroup)
+          return !$scope.showDescription();
+        if (!$scope.conversation.peer)
+          return true;
+        var detail = $scope.conversation.peer.detail;
+        return !detail || !(detail.department || detail.city);
+      };
+      $scope.showDescription = function() {
+        return $scope.conversation.isGroup && !(!$scope.conversation.description || $scope.conversation.description === "") &&
+          !($scope.conversation.isHelpDesk && $scope.conversation.queueEntry.isTransferPending);
+      };
+      $scope.isEditable = function() {
+        return $scope.conversation.isGroup && !$scope.conversation.isHelpDesk && $scope.conversation.amMember;
+      };
+      $scope.saveGroupEdit = function() {
+        conversations.update($scope.conversation.sysID, $scope.conversationTemp);
+      };
+      $scope.openModal = function(evt) {
+        if (evt.keyCode === 9 || !$scope.isEditable())
+          return;
+        $scope.conversationTemp = {
+          name: $scope.conversation.name,
+          description: $scope.conversation.description,
+          access: $scope.conversation.access
+        };
+        angular.element("#chatGroupPopupModal").modal('show').find("#groupName").focus();
+      };
+      $scope.stopProp = function(event) {
+        event.stopPropagation();
+      };
+      $scope.uploadNewGroupImage = function() {
+        if ($scope.conversation.amMember)
+          $timeout(function() {
+            $element.find(".message-attach-file").click();
+          }, 0, false);
+      };
+      $scope.getImageBackground = function() {
+        return {
+          'background-image': "url('" + $scope.conversation.avatar + "')"
+        }
+      };
+      $scope.attachFiles = function(files) {
+        $scope.uploading = true;
+        snAttachmentHandler.create("live_group_profile", $scope.conversation.sysID).uploadAttachment(files.files[0], {
+          sysparm_fieldname: "photo"
+        }).then(function(response) {
+          conversations.refreshConversation($scope.conversation.sysID);
+          $scope.conversation.avatar = response.sys_id + ".iix";
+          $scope.uploading = false;
+        });
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationHeaderControls.js */
+angular.module('sn.connect').directive('snConversationHeaderControls', function(getTemplateUrl, i18n) {
+  'use strict';
+  var knowledgeBaseTitle = "";
+  var documentTitle = "";
+  i18n.getMessages(["Knowledge Base", "Document"], function(results) {
+    knowledgeBaseTitle = results["Knowledge Base"];
+    documentTitle = results["Document"];
+  });
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snConversationHeaderControls.xml'),
+    replace: true,
+    scope: {
+      conversation: '=',
+      collapsible: '@'
+    },
+    link: function(scope, element, attrs) {
+      attrs.$observe('collapsible', function(value) {
+        scope.collapsible = scope.$eval(value || 'true');
+      });
+    },
+    controller: function($scope, $element, $animate, snConversationAsideHistory, $timeout) {
+      $scope.expandDirection = "left";
+      $scope.activeAside = "";
+      $scope.buttons = $element.find('#conversationAsideButtons');
+      var activeAsideButton;
+      var helpDeskAsides = ["knowledge", "record", "pending_record"];
+      var pendingRecordKeys = {};
+      var defaultAsideScope = $scope.$new();
+      var asideViews = {
+        members: {
+          template: "<sn-aside-member-list></sn-aside-member-list>",
+          scope: defaultAsideScope
         },
-        controller: function($scope, $element, $q, snRecordPresence, queueEntries, hotKeyHandler, snHotKey,
-            snComposingPresence, userID, inFrameSet) {
-            $scope.messagesLoadedOnce = false;
-            $scope.showLoading = true;
-            $scope.rawMessages = [];
-            $scope.asideOpen = false;
-            $scope.$on("sn.aside.open", function() {
-              $scope.asideOpen = true;
-            });
-            $scope.$on("sn.aside.close", function() {
-              $scope.asideOpen = false;
-            });
-            $scope.isComposingHidden = function() {
-              return $scope.conversation.isHelpDesk && !$scope.conversation.queueEntry.isActive;
-            };
-            var closeHotKey = new snHotKey({
-              key: "ESC",
-              callback: function() {
-                $scope.$broadcast("snippets.hide", $scope.conversation);
-                hotKeyHandler.remove(closeHotKey);
-              }
-            });
-            $scope.escalateOk = function() {
-              queueEntries.escalate($scope.conversation);
-            };
-            $rootScope.$on('http-error.hide', function() {
-              messageService.retrieveMessages($scope.conversation);
-            });
-            $scope.isNoRecipientsMessageShowing = function() {
-              return hasNoMessage() && $scope.conversation.pendingRecipients.length === 0;
-            };
-            $scope.isOneRecipientsMessageShowing = function() {
-              return hasNoMessage() && $scope.conversation.pendingRecipients.length === 1;
-            };
-            $scope.isGroupMessageShowing = function() {
-              return hasNoMessage() && $scope.conversation.pendingRecipients.length > 1;
-            };
+        info: {
+          template: "<sn-aside-info></sn-aside-info>",
+          scope: defaultAsideScope
+        },
+        attachments: {
+          template: "<sn-aside-attachments></sn-aside-attachments>",
+          scope: defaultAsideScope
+        },
+        notifications: {
+          template: "<sn-aside-notifications></sn-aside-notifications>",
+          scope: defaultAsideScope
+        },
+        knowledge: {
+          template: function() {
+            return "<sn-aside-frame name='knowledge' url=\"/$knowledge.do\" title='" + knowledgeBaseTitle + "'></sn-aside-frame>";
+          },
+          width: "50%",
+          cacheKey: function() {
+            return $scope.conversation.sysID + ".knowledgeBase";
+          }
+        },
+        record: {
+          template: function() {
+            return "<sn-aside-frame name='record' url=\"/" + $scope.conversation.table + ".do?sys_id=" + $scope.conversation.document + "\" title=\"" + documentTitle + "\"></sn-aside-frame>";
+          },
+          width: "50%",
+          cacheKey: function() {
+            return $scope.conversation.sysID + ".record";
+          }
+        },
+        pending_record: {
+          template: "",
+          width: "50%",
+          cacheKey: function() {
+            return pendingRecordKeys[$scope.conversation.sysID] ? pendingRecordKeys[$scope.conversation.sysID] : $scope.conversation.sysID + ".pending_record";
+          }
+        }
+      };
+      $scope.isShowInfo = function() {
+        return !$scope.conversation.isHelpDesk && ($scope.conversation.document || $scope.conversation.resources.links.length > 0 || $scope.conversation.resources.records.length > 0);
+      };
+      $scope.isShowRecord = function() {
+        return $scope.conversation.isHelpDesk && $scope.conversation.document && $scope.conversation.table != 'chat_queue_entry'
+      };
 
-            function hasNoMessage() {
-              return !$scope.conversation.firstMessage;
-            }
+      function stringFunction(stringOrFunction) {
+        if (angular.isFunction(stringOrFunction))
+          return stringOrFunction();
+        return stringOrFunction;
+      }
+      $scope.$on("sn.aside.open", function(e, view) {
+        var cacheKey = stringFunction(view.cacheKey);
+        if (cacheKey && cacheKey.indexOf("pending_record") > -1) {
+          pendingRecordKeys[$scope.conversation.sysID] = cacheKey;
+        }
+      });
+      $scope.$watch("conversation.sysID", function() {
+        var historicalAside = snConversationAsideHistory.getHistory($scope.conversation.sysID);
+        if ($scope.conversation.restricted) {
+          $scope.$emit("sn.aside.close");
+          return;
+        }
+        var historicalAsideScopeValid = (historicalAside && historicalAside.scope && historicalAside.scope.$parent && !historicalAside.scope.$parent["$$destroyed"]);
+        if (historicalAside && historicalAsideScopeValid) {
+          $scope.$evalAsync(function() {
+            $scope.$emit("sn.aside.open", historicalAside);
+          });
+          return;
+        }
+        if (!$scope.activeAside)
+          return;
+        if (!$scope.showInfo && $scope.activeAside === "info") {
+          $scope.$emit("sn.aside.close");
+          return;
+        }
+        if (helpDeskAsides.indexOf($scope.activeAside) >= 0 && !$scope.conversation.isHelpDesk) {
+          $scope.$emit("sn.aside.close");
+          return;
+        }
+        if ($scope.activeAside === "record" && $scope.conversation.table === "chat_queue_entry") {
+          $scope.$emit("sn.aside.close");
+          return;
+        }
+        if ($scope.activeAside === "pending_record" && !$scope.conversation.pendingRecord) {
+          $scope.$emit("sn.aside.close");
+          return;
+        }
+        $scope.$emit("sn.aside.open", asideViews[$scope.activeAside], asideWidth($scope.activeAside));
+      });
 
-            function isVisible() {
-              return ($element[0].offsetWidth !== 0) && ($element[0].offsetHeight !== 0);
-            }
-            $scope.$watch(isVisible, function(visible) {
-              if (!visible || $scope.conversation.isPending)
+      function asideWidth(view) {
+        return asideViews[view].width || $scope.buttons.width();
+      }
+      $scope.$on("sn.aside.trigger_control", function(e, view) {
+        if (!asideViews.hasOwnProperty(view))
+          return;
+        if ($scope.activeAside === view) {
+          if ($scope.collapsible)
+            $scope.$emit("sn.aside.close");
+          return;
+        }
+        $scope.activeAside = view;
+        $timeout(function() {
+          $scope.$emit("sn.aside.open", asideViews[view], asideWidth(view));
+        }, 0, false);
+      });
+      $scope.openAside = function(view) {
+        $scope.$emit("sn.aside.trigger_control", view);
+      };
+      $scope.$on("sn.aside.controls.active", function(e, data) {
+        activeAsideButton = $element.find('[aside-view-name="' + data + '"]');
+        $scope.activeAside = data;
+      });
+      $scope.$on("sn.aside.close", function() {
+        if (activeAsideButton) {
+          activeAsideButton.focus();
+        }
+        $scope.activeAside = void(0);
+        activeAsideButton = void(0);
+      });
+
+      function resizeAside(unused, phase) {
+        if (phase === "close" && $scope.activeAside && asideViews[$scope.activeAside]) {
+          $scope.$emit("sn.aside.resize", asideWidth($scope.activeAside));
+        }
+      }
+      $animate.on('addClass', $scope.buttons, resizeAside);
+      $animate.on('removeClass', $scope.buttons, resizeAside);
+      $scope.close = function(evt) {
+        if (evt.keyCode === 9)
+          return;
+        $scope.$emit("sn.aside.close");
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationItem.js */
+angular.module('sn.connect.conversation').directive('snConversationItem', function(
+  getTemplateUrl, inSupportClient, conversations, activeConversation) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl(inSupportClient ? 'snConversationItem-SupportClient.xml' : 'snConversationItem.xml'),
+    replace: true,
+    scope: {
+      conversation: '='
+    },
+    controller: function($scope, $rootScope) {
+      $scope.isBadgeVisible = function() {
+        return ($scope.conversation.unreadCount > 0) && !$scope.isTransferPending();
+      };
+      $scope.getUserFromProfile = function(conversation) {
+        return conversation.isGroup ? conversation.lastMessage.profileData : conversation.peer;
+      };
+      $scope.remove = function($event) {
+        if ($event && $event.keyCode === 9)
+          return;
+        $event.stopPropagation();
+        closeConversation();
+      };
+
+      function closeConversation() {
+        if (conversations.close($scope.conversation.sysID)) {
+          $rootScope.$broadcast("sn.aside.clearCache", $scope.conversation.sysID);
+          activeConversation.clear($scope.conversation);
+        }
+      }
+      return {
+        closeConversation: closeConversation
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snSupportConversationItem.js */
+angular.module('sn.connect.conversation').directive('snSupportConversationItem', function(getTemplateUrl, inSupportClient) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl(inSupportClient ? 'snConversationItem-SupportClient.xml' : 'snSupportConversationItem.xml'),
+    replace: true,
+    require: 'snConversationItem',
+    scope: {
+      conversation: '='
+    },
+    controller: function($scope, $rootScope, activeConversation, queueEntries,
+      queueEntryNotifier, supportEnabled, inFrameSet, snConversationItemDirective) {
+      var parent = snConversationItemDirective[0].controller.apply(this, arguments);
+      $scope.supportEnabled = supportEnabled || false;
+      for (var i = 0; i < $scope.conversation.members.length; i++)
+        if ($scope.conversation.members[i].document === $scope.conversation.queueEntry.openedBy)
+          $scope.openedBy = $scope.conversation.members[i];
+      $scope.acceptTransfer = function($event) {
+        $event.stopPropagation();
+        $scope.conversation.queueEntry.clearTransferState();
+        queueEntries.accept($scope.conversation.sysID);
+        activeConversation.conversation = $scope.conversation;
+      };
+      $scope.rejectTransfer = function($event) {
+        $event.stopPropagation();
+        $scope.conversation.queueEntry.clearTransferState();
+        queueEntries.reject($scope.conversation.sysID);
+        if ($scope.conversation.queueEntry.transferShouldClose)
+          parent.closeConversation();
+      };
+      $scope.cancelTransfer = function($event) {
+        $event.stopPropagation();
+        $scope.conversation.queueEntry.clearTransferState();
+        queueEntries.cancel($scope.conversation.sysID);
+      };
+      $scope.isTransferPending = function() {
+        return !!$scope.conversation.isHelpDesk && $scope.conversation.queueEntry.isTransferPending;
+      };
+      $scope.isSendingTransfer = function() {
+        return $scope.isTransferPending() && $scope.conversation.queueEntry.isTransferringFromMe;
+      };
+      $scope.isReceivingTransfer = function() {
+        return $scope.isTransferPending() && $scope.conversation.queueEntry.isTransferringToMe;
+      };
+      $rootScope.$on("connect.queueEntry.updated", queueEntryUpdated);
+      queueEntryUpdated(undefined, $scope.conversation.queueEntry);
+
+      function queueEntryUpdated(event, queueEntry, old) {
+        if (queueEntry.conversationID !== $scope.conversation.sysID)
+          return;
+        if (!queueEntry)
+          return;
+        var initial = angular.isUndefined(old);
+        if (!queueEntry.isTransferStateChanged && !initial)
+          return;
+        if ((inFrameSet || activeConversation.isEmpty) &&
+          queueEntry.isTransferringToMe && queueEntry.isTransferPending)
+          activeConversation.conversation = $scope.conversation;
+        var isTransferNegative = queueEntry.isTransferCancelled || queueEntry.isTransferRejected;
+        if (queueEntry.isTransferringToMe &&
+          queueEntry.transferShouldClose &&
+          isTransferNegative)
+          parent.closeConversation();
+        queueEntryNotifier.notify($scope.conversation);
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snChatTab.js */
+angular.module('sn.connect.conversation').directive('snChatTab', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snChatTab.xml'),
+    replace: true,
+    scope: {},
+    controller: function($scope, $rootScope, $filter, conversations, activeConversation,
+      inFrameSet, supportEnabled, supportAddMembers) {
+      $scope.isSupportListEnabled = !supportEnabled && supportAddMembers;
+      if (!inFrameSet) {
+        var index = 0;
+        $scope.$watch(function() {
+          return activeConversation.sysID;
+        }, function(sysID) {
+          if (!sysID)
+            return;
+          index = conversations.find(activeConversation.conversation, filterConversations(true)).index;
+          if (index < 0)
+            index = 0;
+        });
+        $scope.$watchCollection(function() {
+          return filterConversations(true);
+        }, function(conversationList) {
+          if (activeConversation.isSupport)
+            return;
+          if (conversationList.length === 0)
+            return;
+          if (!activeConversation.isEmpty)
+            return;
+          activeConversation.conversation = getIndexConversation(conversationList);
+        });
+        $scope.$on('connect.conversation.select', function(unused, tab, conversationID) {
+          if (activeConversation.getTab(tab).isSupport)
+            return;
+          conversationID = conversationID || activeConversation.sysID;
+          var conversationList = filterConversations(!conversationID);
+          var conversation;
+          if (conversationID)
+            conversation = conversations.find(conversationID, conversationList).conversation;
+          activeConversation.conversation = conversation || getIndexConversation(conversationList);
+        });
+        var getIndexConversation = function(conversationList) {
+          if (index >= conversationList.length)
+            index = conversationList.length - 1;
+          if (index < 0)
+            index = 0;
+          return conversationList[index];
+        }
+      }
+      $scope.supportConversationsFilter = function(conversations) {
+        return supportEnabled ?
+          [] :
+          getConversations(conversations, true, true, $scope.searchTerm);
+      };
+      $scope.openConversationsFilter = function(conversations) {
+        return getConversations(conversations, true, false, $scope.searchTerm);
+      };
+      $scope.closedConversationsFilter = function(conversations) {
+        return getConversations(conversations, false, false, $scope.searchTerm);
+      };
+
+      function getConversations(conversations, visible, support, searchTerm) {
+        var searchFiltered = $filter('searchTerm')(conversations, searchTerm);
+        if (searchFiltered.length === 0)
+          return [];
+        return $filter('conversation')(searchFiltered, visible, support);
+      }
+
+      function filterConversations(visible) {
+        if (!visible)
+          return getConversations(conversations.all);
+        return $scope.supportConversationsFilter(conversations.all)
+          .concat($scope.openConversationsFilter(conversations.all));
+      }
+      $scope.triggerCreateConversation = function(evt) {
+        if (evt && evt.keyCode === 9)
+          return;
+        $rootScope.$broadcast("connect.show_create_conversation_screen");
+        $rootScope.$broadcast('connect.pane.close');
+      };
+      $scope.clearFilterText = function() {
+        $scope.searchTerm = "";
+      };
+      $scope.hasSearchText = function() {
+        return $scope.searchTerm && $scope.searchTerm.length > 0;
+      };
+      $scope.showOpenHeader = function() {
+        return ($scope.hasSearchText() || hasSupportConversations()) &&
+          hasOpenConversations();
+      };
+      $scope.showClosedHeader = function() {
+        return $scope.hasSearchText() &&
+          hasClosedConversations();
+      };
+      $scope.showMessageBlock = function() {
+        return ($scope.showNoChatConversations() ||
+          $scope.showNoSearchResults());
+      };
+      $scope.showNoChatConversations = function() {
+        return !$scope.hasSearchText() &&
+          filterConversations(true).length === 0;
+      };
+      $scope.showNoSearchResults = function() {
+        return $scope.hasSearchText() &&
+          !hasSupportConversations() &&
+          !hasOpenConversations() &&
+          !hasClosedConversations();
+      };
+
+      function hasSupportConversations() {
+        return $scope.supportConversationsFilter(conversations.all).length > 0;
+      }
+
+      function hasOpenConversations() {
+        return $scope.openConversationsFilter(conversations.all).length > 0;
+      }
+
+      function hasClosedConversations() {
+        return $scope.closedConversationsFilter(conversations.all).length > 0;
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snSupportTab.js */
+angular.module('sn.connect.conversation').directive('snSupportTab', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snSupportTab.xml'),
+    replace: true,
+    scope: {},
+    controller: function($scope, $filter, conversations, activeConversation, inFrameSet) {
+      if (!inFrameSet) {
+        $scope.$watchCollection(function() {
+          return filterConversations();
+        }, function(conversationList) {
+          if (!activeConversation.isSupport)
+            return;
+          if (conversationList.length === 0)
+            return;
+          if (activeConversation.isEmpty)
+            activeConversation.conversation = conversationList[0];
+        });
+      }
+      $scope.primarySupportConversationsFilter = function(conversations) {
+        return supportConversationsFilter(conversations, true);
+      };
+      $scope.secondarySupportConversationsFilter = function(conversations) {
+        return supportConversationsFilter(conversations, false);
+      };
+
+      function supportConversationsFilter(conversations, primary) {
+        return $filter('conversation')(conversations, true, true).filter(function(conversation) {
+          var queueEntry = conversation.queueEntry;
+          return primary === (queueEntry.isAssignedToMe || queueEntry.isTransferringToMe);
+        });
+      };
+
+      function filterConversations() {
+        return $scope.primarySupportConversationsFilter(conversations.all)
+          .concat($scope.secondarySupportConversationsFilter(conversations.all));
+      }
+      $scope.$on('connect.conversation.select', function(unused, tab, conversationID) {
+        if (!activeConversation.getTab(tab).isSupport)
+          return;
+        if (!activeConversation.isEmpty && activeConversation.sysID === conversationID)
+          return;
+        conversationID = conversationID || activeConversation.sysID;
+        var conversationList = filterConversations();
+        var conversation;
+        if (conversationID)
+          conversation = conversations.find(conversationID, conversationList).conversation;
+        activeConversation.conversation = conversation || conversationList[0];
+      });
+      $scope.showNoSupportSession = function() {
+        return filterConversations().length === 0;
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationList.js */
+angular.module('sn.connect.conversation').directive('snConversationList', function(getTemplateUrl, i18n) {
+  'use strict';
+  var unreadMessage = 'Unread Messages';
+  i18n.getMessages([unreadMessage], function(i18nNames) {
+    unreadMessage = i18nNames[unreadMessage];
+  });
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snConversationList.xml'),
+    scope: {
+      headerText: '@',
+      isHelpDesk: '=?',
+      filter: '&?',
+      isHeaderVisible: '&?'
+    },
+    controller: function($scope, $rootScope, conversations, activeConversation, inSupportClient) {
+      $scope.isHelpDesk = $scope.isHelpDesk || false;
+      $scope.conversations = [];
+      if (angular.isUndefined($scope.isHeaderVisible)) {
+        $scope.isHeaderVisible = function() {
+          return function() {
+            return $scope.conversations.length > 0;
+          };
+        }
+      } else {
+        var value = $scope.isHeaderVisible();
+        if (!angular.isFunction(value)) {
+          $scope.isHeaderVisible = function() {
+            return function() {
+              return value;
+            };
+          }
+        }
+      }
+      $scope.$watchCollection(function() {
+        if ($scope.filter)
+          return $scope.filter()(conversations.all);
+        return conversations.all;
+      }, function(conversations) {
+        $scope.conversations = conversations || [];
+      });
+      $scope.isActive = function(conversation) {
+        return activeConversation.isActive(conversation);
+      };
+      $scope.selectConversation = function(event, conversation) {
+        if (event && event.keyCode === 9)
+          return;
+        $rootScope.$broadcast('connect.open.floating', conversation);
+        $rootScope.$broadcast("connect.new_conversation.cancelled");
+        activeConversation.conversation = conversation;
+      };
+      $scope.getAriaText = function(conversation) {
+        var text = inSupportClient ?
+          conversation.description :
+          conversation.name;
+        text += conversation.unreadCount ?
+          ' ' + conversation.formattedUnreadCount + ' ' + unreadMessage :
+          '';
+        return text;
+      }
+      $scope.conversationDelta = function(conversation) {
+        return conversation.sysID + conversation.avatar + conversation.name;
+      }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationListContainer.js */
+angular.module('sn.connect.conversation').directive('snConversationListContainer', function(
+  getTemplateUrl, conversations, i18n) {
+  'use strict';
+  var supportTabAriaLabel = "Support Conversations - {0} Unread Messages";
+  i18n.getMessages([supportTabAriaLabel], function(results) {
+    supportTabAriaLabel = results[supportTabAriaLabel];
+  });
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snConversationListContainer.xml'),
+    replace: true,
+    scope: {},
+    link: function(scope, element) {
+      conversations.loaded.then(function() {
+        element.removeClass("loading");
+      })
+    },
+    controller: function($scope, $rootScope, $filter, snCustomEvent, conversationFactory, queues,
+      activeConversation, supportEnabled, inFrameSet, chatEnabled) {
+      $scope.inFrameSet = inFrameSet;
+      $scope.supportEnabled = supportEnabled;
+      $scope.chatEnabled = chatEnabled;
+      $scope.showTabs = function() {
+        return supportEnabled && chatEnabled;
+      };
+      $scope.getSupportTabAriaLabel = function() {
+        return i18n.format(supportTabAriaLabel, $scope.getSupportUnreadCount());
+      };
+      $scope.isUsersWaitingIndicatorShowing = function() {
+        return (queues.getAllWaitingCount() > 0) && !$scope.isSupport();
+      };
+      snCustomEvent.observe('chat:open_conversation', function(profile) {
+        var cachedPeerConversations = conversations.getCachedPeerConversations(profile.userID || profile.sys_id);
+        if (cachedPeerConversations[0]) {
+          activeConversation.tab = 'chat';
+          activeConversation.conversation = cachedPeerConversations[0];
+        } else {
+          $rootScope.$broadcast("connect.show_create_conversation_screen", profile);
+        }
+      });
+      $scope.isSupport = function() {
+        return activeConversation.isSupport;
+      };
+      $scope.openChat = openTab('chat');
+      $scope.openSupport = openTab('support');
+
+      function openTab(tab) {
+        return function() {
+          activeConversation.tab = tab;
+        }
+      }
+      $scope.getChatUnreadCount = getUnreadCount(false);
+      $scope.getSupportUnreadCount = getUnreadCount(true);
+
+      function getUnreadCount(isSupport) {
+        return function() {
+          var unreadCount = 0;
+          $filter('conversation')(conversations.all, true, isSupport)
+            .forEach(function(conversation) {
+              if (isSupport && conversation.queueEntry && conversation.queueEntry.isTransferringToMe)
                 return;
-              if (inFrameSet && $scope.conversation.isFrameStateMinimize)
-                return;
-              $scope.conversation.resetUnreadCount();
+              unreadCount += conversation.unreadCount;
             });
-            $scope.$watch("conversation.sysID", function(newSysID) {
-                  if (!newSysID)
-                    return;
-                  if ($scope.conversation.isPending)
-                    return;
-                  $scope.messagesLoadedOnce = false;
-                  $scope.conversationAlreadyViewed = $scope.conversation.unreadCount > 0;
-                  $scope.rawMessages = [];
-                  $scope.previousProfileID = vo
+          return conversationFactory.formatUnreadCount(unreadCount);
+        }
+      }
+      $scope.$watch(function() {
+        return $scope.getChatUnreadCount() + $scope.getSupportUnreadCount();
+      }, function(unreadCount) {
+        CustomEvent.fireTop('connect:message_notification.update', unreadCount);
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snConversationSearch.js */
+angular.module('sn.connect.conversation').directive('snConversationSearch', function(getTemplateUrl, $timeout) {
+  "use strict";
+  return {
+    restrict: 'E',
+    scope: {
+      title: "@",
+      table: "=",
+      name: "=",
+      icon: "@",
+      qualifier: "=?",
+      searchField: "=?",
+      onSelect: "&"
+    },
+    templateUrl: getTemplateUrl('snConversationSearch.xml'),
+    replace: true,
+    link: function(scope, element) {
+      scope.search = function(evt) {
+        $timeout(function() {
+          element.find(".select2-choice").triggerHandler("mousedown");
+          evt.preventDefault();
+        }, 0, false);
+        return false;
+      }
+    },
+    controller: function($scope) {
+      $scope.descriptor = {
+        reference: $scope.table,
+        attributes: '',
+        name: $scope.name,
+        searchField: $scope.searchField,
+        qualifier: $scope.qualifier
+      };
+      $scope.valueSelected = function() {
+        $scope.onSelect({
+          value: "live_profile." + $scope.field.value
+        })
+      };
+      $scope.field = {};
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snCreateNewConversationHeader.js */
+angular.module('sn.connect.conversation').directive('snCreateNewConversationHeader', function(getTemplateUrl, $timeout) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snCreateNewConversationHeader.xml'),
+    replace: true,
+    link: function(scope, elem) {
+      var input;
+      scope.focusOnInput = function() {
+        if (!input)
+          input = elem.find("input");
+        input.focus();
+      };
+      scope.scrollRecipientListToBottom = function() {
+        $timeout(function() {
+          var recipientListElem = document.getElementById("create-conversation-recipient-list");
+          recipientListElem.scrollTop = recipientListElem.scrollHeight;
+        }, 0, false);
+      };
+      var unWatch = scope.$on("live.search.control.ready", function(evt, control) {
+        if (control)
+          input = control;
+        $timeout(scope.focusOnInput, 0, false);
+        unWatch();
+      });
+    },
+    controller: function($scope, $rootScope, activeConversation, conversations, snCustomEvent) {
+      snCustomEvent.observe('connect:member_profile.direct_message', function(suggestion) {
+        $scope.selectedMember(null, suggestion);
+        if (suggestion)
+          $scope.$broadcast("connect.message.focus", $scope.newConversation);
+      });
+      $rootScope.$on("connect.member_profile.direct_message", function(evt, suggestion) {
+        $scope.selectedMember(null, suggestion);
+        if (suggestion)
+          $scope.$broadcast("connect.message.focus", $scope.newConversation);
+      });
+
+      function updatePendingConversation() {
+        var conversation = conversations.newConversation;
+        var pendingRecipients = conversation.pendingRecipients;
+        if (pendingRecipients.length === 1) {
+          var userSysID = pendingRecipients[0].sysID;
+          var cachedPeerConversation = conversations.getCachedPeerConversations(userSysID)[0];
+          if (cachedPeerConversation) {
+            conversation = angular.copy(cachedPeerConversation);
+            conversation.isPending = true;
+          }
+        }
+        activeConversation.pendingConversation = conversation;
+      }
+      $scope.pendingRecipients = function() {
+        return conversations.newConversation.pendingRecipients;
+      };
+      $scope.isAddUserShowing = function() {
+        return !conversations.newConversation.firstMessage;
+      };
+      $scope.ignoreList = function() {
+        return conversations.newConversation.pendingRecipients.map(function(recipient) {
+          return recipient.sysID;
+        }).join(',');
+      };
+      $scope.selectedMember = function(id, suggestion) {
+        var sys_id = suggestion.sys_id || suggestion.userID || suggestion.jid.split(".")[1];
+        var recipient = {
+          name: suggestion.name,
+          jid: suggestion.jid || (suggestion.table + "." + sys_id),
+          sysID: sys_id
+        };
+        var alreadyAdded = conversations.newConversation.pendingRecipients
+          .some(function(obj) {
+            return angular.equals(obj, recipient);
+          });
+        if (!alreadyAdded) {
+          conversations.newConversation.pendingRecipients.push(recipient);
+          updatePendingConversation();
+        }
+        $scope.scrollRecipientListToBottom();
+      };
+      $scope.removeRecipient = function(event, index) {
+        if (event && event.keyCode === 9)
+          return;
+        conversations.newConversation.pendingRecipients.splice(index, 1);
+        updatePendingConversation();
+        $scope.focusOnInput();
+      };
+      $scope.$on("connect.search_control_key", function(evt, key) {
+        $scope.$evalAsync(function() {
+          if (key === "backspace") {
+            conversations.newConversation.pendingRecipients.pop();
+            updatePendingConversation();
+          } else if (key === "enter")
+            $rootScope.$broadcast("connect.message.focus", activeConversation.pendingConversation);
+          else if (key === "escape")
+            $scope.$emit("connect.new_conversation.cancelled");
+        });
+      });
+      $scope.$on("connect.message_control_key", function(evt, key) {
+        if (key === "escape")
+          $scope.$emit("connect.new_conversation.cancelled");
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snFloatingConversation.js */
+angular.module('sn.connect.conversation').directive('snFloatingConversation', function(getTemplateUrl, $timeout, $animate, isRTL) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snFloatingConversation.xml'),
+    replace: true,
+    scope: {
+      position: '=',
+      conversation: '='
+    },
+    link: function(scope, element) {
+      scope.$watch('position', function() {
+        $timeout(function() {
+          var property = isRTL ? 'left' : 'right';
+          element.css(property, scope.position);
+          element.addClass('loaded');
+        }, 0, false);
+      });
+      scope.animateClose = function() {
+        return $animate.addClass(element, "state-closing");
+      };
+      scope.$watch('conversation.isFrameStateOpen', function(value, old) {
+        if (value === old)
+          return;
+        scope.$broadcast('connect.auto_scroll.scroll_to_bottom', scope.conversation);
+      });
+      element.on("click", function(evt) {
+        scope.focusOnConversation();
+      });
+    },
+    controller: function($scope, $rootScope, activeConversation, resourcePersister, profiles, queueEntries,
+      documentsService, userID, $timeout, snCustomEvent, audioNotifier, supportAddMembers,
+      connectDropTargetService) {
+      $scope.activeConversation = activeConversation;
+      $scope.userID = userID;
+      $scope.popoverOpen = function(evt) {
+        var el = angular.element(evt.target).closest(".sn-navhub-content").find(".sub-avatar");
+        $timeout(function() {
+          angular.element(el).trigger('click')
+        }, 0);
+      };
+      CustomEvent.observe('glide:nav_sync_list_with_form', function(conversation) {
+        $scope.$apply(function() {
+          setSpotlighted(conversation);
+        })
+      });
+      $scope.$on("connect.spotlight", function(evt, conversation) {
+        setSpotlighted(conversation);
+      });
+
+      function setSpotlighted(conversation) {
+        $scope.isSpotlighted =
+          conversation.table === $scope.conversation.table &&
+          conversation.sysID === $scope.conversation.document;
+      }
+      $scope.focusOnConversation = function(event) {
+        activeConversation.conversation =  $scope.conversation;
+        if (!event)
+          return;
+        if (!$scope.conversation.isPending)
+          return;
+        if (angular.element(event.target).parents(".sn-add-users").length !== 0)
+          return;
+        $rootScope.$broadcast("connect.message.focus", $scope.conversation);
+      };
+      $scope.isCurrentConversation = function() {
+        return activeConversation.isActive($scope.conversation);
+      };
+      $scope.isReadMessages = function() {
+        return $scope.isCurrentConversation() && $scope.conversation.isFrameStateOpen;
+      };
+      $scope.isTransferPending = function() {
+        var queueEntry = $scope.conversation.queueEntry;
+        return queueEntry && queueEntry.isTransferPending && queueEntry.isTransferringToMe;
+      };
+      $scope.isCloseButtonShowing = function() {
+        return !$scope.conversation.isPending || !$scope.conversation.firstMessage;
+      };
+      if ($scope.isTransferPending())
+        audioNotifier.notify($scope.conversation.sysID);
+      $scope.$on("connect.floatingConversationEscape", function(evt) {
+        $scope.removeConversation(evt);
+      });
+      $scope.removeConversation = function($event) {
+        if ($event && $event.keyCode === 9)
+          return;
+        snCustomEvent.fireTop('snAvatar.closePopover');
+        $rootScope.$broadcast('mentio.closeMenu');
+        $scope.stopPropagation($event);
+        $scope.animateClose().then(function() {
+          if ($scope.conversation.isPending) {
+            $rootScope.$broadcast("connect.new_conversation.cancelled");
+            return;
+          }
+          $scope.conversation.closeFrameState();
+          activeConversation.clear($scope.conversation);
+        })
+      };
+      $scope.getWindowTarget = function() {
+        return '_blank';
+      };
+      $scope.showDocument = function(table, sysID, $event) {
+        $scope.stopPropagation($event);
+        documentsService.show(table, sysID);
+      };
+      $scope.showDocumentIfExists = function($event) {
+        if ($scope.isDocumentConversation())
+          $scope.showDocument($scope.conversation.table, $scope.conversation.document, $event);
+      };
+      $scope.stopPropagation = function($event) {
+        if ($event)
+          $event.stopPropagation();
+      };
+      var toggleOpenLock;
+      $scope.toggleOpen = function($event) {
+        $scope.stopPropagation($event);
+        if (toggleOpenLock && $event.timeStamp === toggleOpenLock) {
+          toggleOpenLock = null;
+          return;
+        } else
+          toggleOpenLock = $event.timeStamp;
+        if ($scope.conversation.isFrameStateOpen) {
+          snCustomEvent.fireTop('snAvatar.closePopover');
+          $scope.conversation.minimizeFrameState();
+          if (activeConversation.isActive($scope.conversation))
+            activeConversation.clear();
+        } else {
+          $scope.conversation.openFrameState();
+          $timeout(function() {
+            activeConversation.conversation = $scope.conversation;
+          }, 0, false);
+        }
+      };
+      $scope.isPendingVisible = function() {
+        return $scope.isTransferPending() || $scope.conversation.isPending;
+      };
+      $scope.isAddUserButtonVisible = function() {
+        var conversation = $scope.conversation;
+        if (!conversation.isHelpDesk)
+          return conversation.isGroup;
+        return supportAddMembers &&
+          conversation.queueEntry.isActive;
+      };
+      $scope.activateDropTarget = function() {
+        connectDropTargetService.activateDropTarget($scope.conversation);
+      };
+      $scope.deactivateDropTarget = function() {
+        connectDropTargetService.deactivateDropTarget($scope.conversation);
+      };
+      $scope.onFileDrop = function(files) {
+        connectDropTargetService.onFileDrop(files, $scope.conversation);
+      };
+      $scope.handleDropEvent = function(data) {
+        connectDropTargetService.handleDropEvent(data, $scope.conversation);
+      };
+      $scope.getPrimary = function() {
+        return $scope.conversation.isGroup ?
+          $scope.conversation.lastMessage.profileData :
+          $scope.conversation.peer;
+      };
+      $scope.$watch('conversation', function(conversation) {
+        if (activeConversation.isActive(conversation) && !conversation.isFrameStateOpen)
+          activeConversation.clear();
+      });
+      $scope.$watch('conversation.queueEntry', function updateAssignedToProfile() {
+        if (!$scope.conversation.isHelpDesk)
+          return;
+        profiles.getAsync('sys_user.' + $scope.conversation.queueEntry.assignedTo).then(function(profile) {
+          $scope.assignedToProfile = profile;
+        });
+      });
+      $scope.acceptTransfer = function($event) {
+        $scope.stopPropagation($event);
+        queueEntries.accept($scope.conversation.sysID);
+      };
+      $scope.rejectTransfer = function($event) {
+        $scope.stopPropagation($event);
+        queueEntries.reject($scope.conversation.sysID);
+        $scope.removeConversation();
+      };
+      $scope.isDocumentConversation = function() {
+        return $scope.conversation.document !== '';
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snFloatingConversationCompressed.js */
+angular.module('sn.connect.conversation').directive('snFloatingConversationCompressed', function(getTemplateUrl, $timeout, isRTL) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl("snFloatingConversationCompressed.xml"),
+    replace: true,
+    scope: {
+      start: '=',
+      position: '='
+    },
+    link: function(scope, element) {
+      var positionProperty = isRTL ? 'left' : 'right';
+      if (element.hideFix) {
+        element.hideFix();
+      }
+      scope.$watch("start", setRightCoordinate);
+
+      function setRightCoordinate() {
+        $timeout(function() {
+          element.css(positionProperty, scope.position);
+        }, 0, false);
+      }
+      setRightCoordinate();
+    },
+    controller: function($scope, $rootScope, $filter, conversations, activeConversation) {
+      $scope.filterConversations = function() {
+        return $filter('frameSet')(conversations.all);
+      };
+      $scope.isVisible = function() {
+        return $scope.compressConversations.length > 0;
+      };
+      $scope.openConversation = function(conversation, $event) {
+        if ($event && $event.keyCode === 9)
+          return;
+        $rootScope.$broadcast('connect.open.floating', conversation);
+      };
+      $scope.closeConversation = function(conversation, $event) {
+        if ($event && $event.keyCode === 9)
+          return;
+        conversation.closeFrameState();
+        activeConversation.clear();
+      };
+      $scope.toggleOpen = function() {
+        $scope.open = !$scope.open;
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/directive.snFloatingConversationContainer.js */
+angular.module('sn.connect.conversation').directive('snFloatingConversationContainer', function(
+  getTemplateUrl, $rootScope, documentLinkMatcher, conversations, activeConversation) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snFloatingConversationContainer.xml'),
+    scope: {},
+    link: function(scope) {
+      var mainFrame = angular.element("#gsft_main");
+      if (mainFrame.length > 0) {
+        scope.$watch(function() {
+          return mainFrame[0].contentDocument.location.href;
+        }, checkForRecord);
+        mainFrame.on("load", function() {
+          scope.$digest();
+        });
+        mainFrame.on("click", function() {
+          scope.$apply(function() {
+            checkForRecord(mainFrame[0].contentDocument.location.href)
+          })
+        })
+      }
+      CustomEvent.observe("connect:open_group", function(data) {
+        conversations.followDocumentConversation(data).then(function(conversation) {
+          activeConversation.conversation = conversation;
+        })
+      });
+      CustomEvent.observe("connect:follow_document", conversations.followDocumentConversation);
+      CustomEvent.observe("connect:unfollow_document", conversations.unfollowDocumentConversation);
+
+      function checkForRecord(newValue) {
+        if (!documentLinkMatcher.isLink(newValue))
+          return;
+        $rootScope.$broadcast("connect.spotlight", documentLinkMatcher.getRecordData(newValue));
+      }
+    },
+    controller: function($scope, $element, $filter, $timeout, $window, snRecordPresence, conversationPersister, isRTL) {
+      angular.element('document').append($element);
+      var FRAME_SPACING = 350;
+      var FRAME_COMPRESSED = 60;
+      var FRAME_SEPARATOR = 10;
+      var ASIDE_WIDTH = 285;
+      $scope.activeConversation = activeConversation;
+      conversations.refreshAll().then(function() {
+        activeConversation.conversation = getFirstFocusConversation();
+      });
+      $scope.filterConversations = function() {
+        return $filter('frameSet')(conversations.all);
+      };
+      var isAsideOpen = false;
+      CustomEvent.observe("connect:conversation_list:state", function(state) {
+        isAsideOpen = state === "open";
+        resize();
+      });
+      angular.element($window).bind('resize', resize);
+      var conversationDisplayCount = calculateConversationDisplayCount();
+      var resizeTimeout;
+
+      function resize() {
+        if (resizeTimeout)
+          $timeout.cancel(resizeTimeout);
+        resizeTimeout = $timeout(function() {
+          conversationDisplayCount = calculateConversationDisplayCount();
+        }, 100);
+      }
+
+      function calculateConversationDisplayCount() {
+        var frameWidth = $window.innerWidth;
+        if (isAsideOpen)
+          frameWidth -= ASIDE_WIDTH;
+        var allWidth = $scope.filterConversations().length * FRAME_SPACING;
+        frameWidth -= (allWidth > frameWidth) ? FRAME_COMPRESSED : FRAME_SEPARATOR;
+        return Math.max(Math.floor(frameWidth / FRAME_SPACING), 1);
+      }
+      $scope.getConversationDisplayCount = function() {
+        return conversationDisplayCount - (activeConversation.pendingConversation ? 1 : 0);
+      };
+      $scope.getCompressPosition = function() {
+        return $scope.getContainerPosition(conversationDisplayCount);
+      };
+      $scope.getContainerPosition = function(index) {
+        return index * FRAME_SPACING + FRAME_SEPARATOR;
+      };
+      $scope.newConversation = function() {
+        return conversations.newConversation;
+      };
+      $scope.$watch(function() {
+        return activeConversation.sysID;
+      }, function(sysID) {
+        if (!sysID) {
+          activeConversation.conversation = getFirstFocusConversation();
+          sysID = activeConversation.sysID;
+        }
+        if (sysID)
+          snRecordPresence.initPresence("live_group_profile", sysID);
+      });
+
+      function getFirstFocusConversation() {
+        if (activeConversation.pendingConversation)
+          return activeConversation.pendingConversation;
+        var first = undefined;
+        $scope.filterConversations()
+          .some(function(conversation, index) {
+            if (!conversation.isFrameStateOpen)
+              return false;
+            if (index > conversationDisplayCount)
+              return false;
+            first = conversation;
+            return true;
+          });
+        return first;
+      }
+      $scope.$on("connect.show_create_conversation_screen", function(evt, preloadedMember) {
+        if (activeConversation.pendingConversation)
+          return;
+        activeConversation.pendingConversation = conversations.newConversation.$reset();
+        if (preloadedMember)
+          $timeout(function() {
+            $rootScope.$broadcast("connect.member_profile.direct_message", preloadedMember);
+            $timeout(function() {
+              $rootScope.$broadcast("connect.member_profile.direct_message", preloadedMember)
+            }, 0, false);
+          });
+      });
+      $scope.$on("connect.new_conversation.cancelled", function() {
+        activeConversation.pendingConversation = undefined;
+        if (activeConversation.isEmpty)
+          activeConversation.conversation = getFirstFocusConversation();
+      });
+      $scope.$on("connect.new_conversation.complete", function(event, conversation) {
+        activeConversation.pendingConversation = undefined;
+        moveToTop(conversation);
+      });
+      $scope.$on("connect.open.floating", function(event, conversation) {
+        moveToTop(conversation);
+      });
+
+      function moveToTop(conversation) {
+        if (conversation.isPending)
+          return;
+        if (!conversation)
+          return;
+        conversation.openFrameState();
+        var conversationList = $scope.filterConversations();
+        var position = conversations.find(conversation, conversationList).index;
+        if (position < 1) {
+          activeConversation.conversation = conversation;
+          $scope.$broadcast('connect.auto_scroll.jump_to_bottom');
+          return;
+        }
+        conversationList.splice(position, 1);
+        conversationList.unshift(conversation);
+        conversationPersister.changeFrameOrder(conversationList.map(function(conversation, index) {
+          conversation.frameOrder = index;
+          return conversation.sysID;
+        }));
+        activeConversation.conversation = conversation;
+        $scope.$broadcast('connect.auto_scroll.jump_to_bottom');
+      }
+      if (angular.element(document.body).data().layout) {
+        var $connectFloating = $element.find('.sn-connect-floating');
+        var positionProperty = isRTL ? 'left' : 'right';
+        $connectFloating.css(positionProperty, "5px");
+        $scope.$on("pane.collapsed", function(evt, position, collapsed) {
+          $connectFloating.css(positionProperty, collapsed ? "5px" : "290px");
+        });
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/filter.searchTerm.js */
+angular.module('sn.connect.conversation').filter('searchTerm', function() {
+  'use strict';
+  return function(input, searchTerm) {
+    if (!searchTerm || searchTerm.length === 0)
+      return input;
+    var directMessages = [],
+      groupMessages = [];
+    input.filter(function(item) {
+      if (item.isGroup)
+        groupMessages.push(item);
+      else
+        directMessages.push(item);
+    });
+    var tempA = [],
+      tempB = [];
+    directMessages.filter(function(item) {
+      if (item.name.indexOf(searchTerm) === 0) {
+        tempA.push(item);
+      } else {
+        tempB.push(item);
+      }
+    });
+    directMessages = tempA.concat(tempB);
+    tempA = [];
+    tempB = [];
+    groupMessages.filter(function(item) {
+      if (item.name.indexOf(searchTerm) === 0 || item.description.indexOf(searchTerm) === 0) {
+        tempA.push(item);
+      } else {
+        tempB.push(item);
+      }
+    });
+    groupMessages = tempA.concat(tempB);
+    var newInput = directMessages.concat(groupMessages);
+
+    function contains(s, t) {
+      var s2 = s.toUpperCase();
+      var t2 = t.toUpperCase();
+      return s2.indexOf(t2) > -1;
+    }
+    return newInput.filter(function(entry) {
+      return contains(entry.name, searchTerm) || contains(entry.description, searchTerm)
+    });
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/filter.conversation.js */
+angular.module('sn.connect.conversation').filter('conversation', function(
+  inSupportClient, supportEnabled, supportAddMembers, closedConversationLimit) {
+  'use strict';
+
+  function isConversationDisplayable(conversation, isHelpDesk) {
+    if (inSupportClient)
+      return conversation.isHelpDesk && conversation.queueEntry.isOpenedByMe;
+    if (isHelpDesk !== conversation.isHelpDesk)
+      return false;
+    if (!isHelpDesk)
+      return true;
+    return (supportEnabled || supportAddMembers) &&
+      !conversation.queueEntry.isOpenedByMe;
+  }
+
+  function isOpenSession(conversation, isOpenSession) {
+    if (!conversation.isHelpDesk)
+      return false;
+    return !isOpenSession ===
+      (conversation.queueEntry.isClosedByAgent || conversation.queueEntry.isAbandoned);
+  }
+
+  function isVisible(conversation, visible) {
+    return conversation.visible === visible;
+  }
+
+  function filter(input, filter, fn) {
+    return angular.isUndefined(filter) ?
+      input :
+      input.filter(function(conversation) {
+        return fn(conversation, filter);
+      });
+  }
+  return function(input, visible, helpDesk, openSession) {
+    if (angular.isObject(visible)) {
+      var object = visible;
+      visible = object.visible;
+      helpDesk = object.helpDesk;
+      openSession = object.openSession;
+    }
+    input = filter(input, visible, isVisible);
+    input = filter(input, helpDesk, isConversationDisplayable);
+    input = filter(input, openSession, isOpenSession);
+    input.sort(function(conv1, conv2) {
+      return conv2.sortIndex - conv1.sortIndex;
+    });
+    if (angular.isDefined(openSession) && !openSession && closedConversationLimit)
+      input = input.slice(0, closedConversationLimit);
+    return input;
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/conversation/filter.frameSet.js */
+angular.module('sn.connect.conversation').filter('frameSet', function() {
+  'use strict';
+  return function(input) {
+    return input.filter(function(conversation) {
+      return !conversation.isFrameStateClosed && conversation.visible;
+    }).sort(function(conv1, conv2) {
+      return conv1.frameOrder - conv2.frameOrder;
+    });
+  }
+});;;

@@ -1541,41 +1541,300 @@ angular.module('sn.concourse').directive('elevateRoleIndicator', ['snCustomEvent
 }]);;
 /*! RESOURCE: /scripts/concourse/directive.printerFriendly.js */
 angular.module("sn.concourse").directive('printerFriendly', function(getTemplateUrl) {
-      return {
-        restrict: 'E',
-        templateUrl: getTemplateUrl('concourse_print_friendly.xml'),
-        controller: function($scope) {
-            $scope.printList = function(maxRows) {
-                verifyEventHandlers();
-                var veryLargeNumber = "999999999";
-                var print = true;
-                var features = "resizable=yes,scrollbars=yes,status=yes,toolbar=no,menubar=yes,location=no";
-                if (navigator.appVersion.indexOf("Mac OS X") != -1 && navigator.appVersion.indexOf("Chrome") != -1)
-                  features = "";
-                var href = "";
-                if (top.gsft_main)
-                  var frame = top.gsft_main.gsft_list_form_modal;
-                if (!frame) {
-                  frame = top.gsft_main;
-                  if (!frame)
-                    frame = top;
-                }
-                if (frame.document.getElementById("printURL") != null) {
-                  href = frame.document.getElementById("printURL").value;
-                  href = printListURLDecode(href);
-                }
-                if (!href) {
-                  if (frame.document.getElementById("sysparm_total_rows") != null) {
-                    validateMaxRows(maxRows);
-                  }
-                  var formTest;
-                  var f = 0;
-                  var form;
-                  while ((formTest = frame.document.forms[f++])) {
-                    if (formTest.id == 'sys_personalize_ajax') {
-                      form = formTest;
-                      break;
-                    }
-                  }
-                  if (!form)
-                    form = frame.document.forms['sy
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('concourse_print_friendly.xml'),
+    controller: function($scope) {
+      $scope.printList = function(maxRows) {
+        verifyEventHandlers();
+        var veryLargeNumber = "999999999";
+        var print = true;
+        var features = "resizable=yes,scrollbars=yes,status=yes,toolbar=no,menubar=yes,location=no";
+        if (navigator.appVersion.indexOf("Mac OS X") != -1 && navigator.appVersion.indexOf("Chrome") != -1)
+          features = "";
+        var href = "";
+        if (top.gsft_main)
+          var frame = top.gsft_main.gsft_list_form_modal;
+        if (!frame) {
+          frame = top.gsft_main;
+          if (!frame)
+            frame = top;
+        }
+        if (frame.document.getElementById("printURL") != null) {
+          href = frame.document.getElementById("printURL").value;
+          href = printListURLDecode(href);
+        }
+        if (!href) {
+          if (frame.document.getElementById("sysparm_total_rows") != null) {
+            validateMaxRows(maxRows);
+          }
+          var formTest;
+          var f = 0;
+          var form;
+          while ((formTest = frame.document.forms[f++])) {
+            if (formTest.id == 'sys_personalize_ajax') {
+              form = formTest;
+              break;
+            }
+          }
+          if (!form)
+            form = frame.document.forms['sys_personalize'];
+          if (form && form.sysparm_referring_url) {
+            href = form.sysparm_referring_url.value;
+            if (href.indexOf("?sys_id=-1") != -1 && !href.startsWith('sys_report_template')) {
+              alert(getMessage("Please save the current form before printing."));
+              return false;
+            }
+            if (navigator.appVersion.indexOf("MSIE") != -1) {
+              var isFormPage = frame.document.getElementById("isFormPage");
+              if (isFormPage != null && isFormPage.value == "true")
+                href = href.replace(/javascript%3A/gi, "_javascript_%3A");
+            }
+            href = printListURLDecode(href);
+          } else
+            href = document.getElementById("gsft_main").contentWindow.location.href;
+        }
+        if (href.indexOf("?") < 0)
+          href += "?";
+        else
+          href += "&";
+        href = href.replace("partial_page=", "syshint_unimportant=");
+        href = href.replace("sysparm_media=", "syshint_unimportant=");
+        href += "sysparm_stack=no&sysparm_force_row_count=" + veryLargeNumber + "&sysparm_media=print";
+        if (print) {
+          if (href != null && href != "") {
+            win = window.open(href, "Printer_friendly_format", features);
+            win.focus();
+          } else {
+            alert("Nothing to print");
+          }
+        }
+      };
+
+      function verifyEventHandlers(maxRows) {
+        var mainWin = getMainWindow();
+        if (mainWin && mainWin.CustomEvent && mainWin.CustomEvent.fire && mainWin.CustomEvent.fire("print", maxRows) === false)
+          return false;
+      }
+
+      function validateMaxRows(maxRows) {
+        var mRows = parseInt(maxRows);
+        if (mRows < 1)
+          mRows = 5000;
+        var totalrows = frame.document.getElementById("sysparm_total_rows").value;
+        if (parseInt(totalrows) > parseInt(mRows))
+          print = confirm(getMessage("Printing large lists may affect system performance. Continue?"));
+      }
+
+      function printListURLDecode(href) {
+        href = href.replace(/@99@/g, "&");
+        href = href.replace(/@88@/g, "@99@");
+        href = href.replace(/@77@/g, "@88@");
+        href = href.replace(/@66@/g, "@77@");
+        return href;
+      }
+
+      function getMainWindow() {
+        var topWindow = getTopWindow();
+        return topWindow['gsft_main'];
+      }
+
+      function getTopWindow() {
+        var topWindow = window.self;
+        try {
+          while (topWindow.GJSV && topWindow != topWindow.parent && topWindow.parent.GJSV) {
+            topWindow = topWindow.parent;
+          }
+        } catch (e) {}
+        return topWindow;
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/concourse/directive.applicationPicker.js */
+angular.module('sn.concourse').directive('applicationPicker', [
+  'snCustomEvent',
+  'getTemplateUrl',
+  '$rootScope',
+  'userPreferences',
+  'applicationService',
+  function(snCustomEvent, getTemplateUrl, $rootScope, userPreferences, applicationService) {
+    "use strict"
+    return {
+      restrict: 'E',
+      replace: false,
+      templateUrl: getTemplateUrl('concourse_application_picker.xml'),
+      scope: {
+        current: '=',
+        inHeader: '=',
+        showInHeader: '='
+      },
+      controller: function($scope) {
+        $scope.closeModal = function() {
+          angular.element('#settings_modal').modal('hide');
+        };
+        $scope.app = applicationService.applicationData;
+        if ($scope.current) {
+          applicationService.initialize($scope.current, $scope.showInHeader);
+        }
+        $scope.refreshApplicationPicker = function() {
+          applicationService.getApplicationList();
+        };
+        $scope.updateCurrent = function() {
+          applicationService.updateCurrent();
+        };
+        snCustomEvent.observe('glide:ui_notification.application_change', function() {
+          applicationService.getApplicationList();
+        });
+        snCustomEvent.observe('sn:refresh_application_picker', function() {
+          applicationService.getApplicationList();
+        });
+        snCustomEvent.observe('sn:change_application', function(appId) {
+          applicationService.getApplicationList().then(function() {
+            applicationService.applicationData.currentId = appId;
+            $scope.updateCurrent();
+          });
+        });
+      },
+      link: function(scope, element) {
+        element.tooltip({
+          selector: '[data-toggle="tooltip"]',
+          title: function() {
+            var $this = angular.element(this);
+            return $this.attr('title') || $this.text();
+          }
+        });
+        element.on('mouseover', function() {
+          if (!applicationService.hasFetchedData()) {
+            applicationService.getApplicationList();
+          }
+        });
+        element.on('change', 'input[type=checkbox]', function() {
+          var showInHeader = angular.element(this).prop('checked');
+          applicationService.applicationData.showInHeader = showInHeader;
+          scope.showInHeader = showInHeader;
+          if (showInHeader) {
+            userPreferences.setPreference('glide.ui.application_picker.in_header', 'true');
+          } else {
+            userPreferences.setPreference('glide.ui.application_picker.in_header', '');
+          }
+        });
+        $rootScope.$on('concourse.application.refresh', function() {
+          var iframe = jQuery('iframe#gsft_main');
+          if (iframe.length) {
+            iframe[0].contentWindow.location.reload();
+          }
+        });
+      }
+    }
+  }
+]).factory('applicationService', ['$http', 'snCustomEvent', '$rootScope', function($http, snCustomEvent, $rootScope) {
+  var fetchedInitialData = false;
+  var initialized = false;
+  var applicationData = {
+    list: [],
+    current: {},
+    currentId: '',
+    showInHeader: false
+  };
+  var hasFetchedData = function() {
+    return fetchedInitialData;
+  };
+  var initialize = function(current, showInHeader) {
+    if (initialized)
+      return;
+    initialized = true;
+    applicationData.list = [current];
+    applicationData.current = current;
+    applicationData.currentId = current.sysId;
+    applicationData.showInHeader = showInHeader;
+  };
+  var getApplicationList = function() {
+    fetchedInitialData = true;
+    return $http.get('/api/now/ui/concoursepicker/application?cache=' + new Date().getTime()).then(function(response) {
+      if (response && response.data && response.data.result) {
+        applicationData.list = response.data.result.list;
+        if (response.data.result.current && response.data.result.current != applicationData.currentId) {
+          var apps = response.data.result.list;
+          var curr = response.data.result.current;
+          for (var i = 0; i < apps.length; i++) {
+            if (curr == apps[i].sysId) {
+              applicationData.current = apps[i]
+              applicationData.currentId = apps[i].sysId;
+              break;
+            }
+          }
+          triggerChangeEvent();
+        }
+      }
+    });
+  };
+  var updateCurrent = function() {
+    var apps = applicationData.list;
+    var curr = applicationData.currentId;
+    for (var i = 0; i < apps.length; i++) {
+      if (curr == apps[i].sysId) {
+        applicationData.current = apps[i];
+        break;
+      }
+    }
+    $http.put('/api/now/ui/concoursepicker/application', {
+      app_id: applicationData.currentId
+    }).then(function(response) {
+      if (response && response.data && response.data.result && response.data.result.app_id) {
+        triggerRefreshFrameEvent();
+        triggerChangeEvent();
+      }
+    });
+  };
+
+  function triggerChangeEvent() {
+    $rootScope.$broadcast('concourse.application.changed', applicationData.current);
+  }
+
+  function triggerRefreshFrameEvent() {
+    $rootScope.$broadcast('concourse.application.refresh', {});
+  }
+  $rootScope.$on('concourse.application.changed', function(evt, current) {
+    applicationData.current = current;
+    applicationData.currentId = current.sysId;
+  });
+  return {
+    hasFetchedData: hasFetchedData,
+    getApplicationList: getApplicationList,
+    updateCurrent: updateCurrent,
+    applicationData: applicationData,
+    initialize: initialize
+  }
+}]);;
+/*! RESOURCE: /scripts/concourse/directive.updateSetPicker.js */
+angular.module('sn.concourse').directive('updateSetPicker', [
+      'snCustomEvent',
+      'getTemplateUrl',
+      '$rootScope',
+      'userPreferences',
+      'updateSetService',
+      function(snCustomEvent, getTemplateUrl, $rootScope, userPreferences, updateSetService) {
+        "use strict"
+        return {
+          restrict: 'E',
+          replace: false,
+          templateUrl: getTemplateUrl('concourse_update_set_picker.xml'),
+          scope: {
+            current: '=',
+            inHeader: '=',
+            showInHeader: '='
+          },
+          controller: function($scope) {
+              $scope.closeModal = function() {
+                angular.element('#settings_modal').modal('hide');
+              };
+              if ($scope.current) {
+                updateSetService.initialize($scope.current, $scope.showInHeader);
+              }
+              $scope.updateSets = updateSetService.updateSetData;
+              $scope.getUpdateSetList = function() {
+                return updateSetService.getUpdateSetList();
+              };
+              $scope.refreshUpdateSetList = $scope.getUpdateSetList;
+              $scope.updateC

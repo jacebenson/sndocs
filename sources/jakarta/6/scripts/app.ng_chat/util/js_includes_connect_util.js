@@ -1007,251 +1007,27 @@ angular.module('sn.connect.util').directive('snEscape', function() {
 });;
 /*! RESOURCE: /scripts/app.ng_chat/util/directive.snFocusOnConversation.js */
 angular.module('sn.connect.util').directive('snFocusOnConversation', function($timeout, $parse, $window, activeConversation) {
-  'use strict';
-  return {
-    restrict: "A",
-    link: function(scope, element, attr) {
-      if (attr.disableAutofocus)
-        return;
-      scope.snFocusOnConversation = $parse(attr.snFocusOnConversation)(scope);
-      scope.$watch(function() {
-        return activeConversation.conversation;
-      }, function(conversation) {
-        if (window.getSelection().toString() !== "")
-          return;
-        if (!scope.snFocusOnConversation)
-          return;
-        if (!conversation)
-          return;
-        if (conversation.sysID !== scope.snFocusOnConversation.sysID)
-          return;
-        $timeout(function() {
-          focusOnMessageInput();
-        });
-      });
-
-      function focusOnMessageInput() {
-        if ($window.ontouchstart)
-          return;
-        $timeout(function() {
-          element.focus();
-        });
-      }
-      focusOnMessageInput();
-    }
-  }
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snLoadingIndicator.js */
-angular.module('sn.connect.util').directive('snLoadingIndicator', function(getTemplateUrl) {
-  "use strict";
-  return {
-    restrict: 'E',
-    scope: {
-      active: "="
-    },
-    transclude: true,
-    templateUrl: getTemplateUrl("snLoadingIndicator.xml"),
-    replace: true
-  }
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snOnload.js */
-angular.module('sn.connect.util').directive('snOnload', function() {
-  return {
-    scope: {
-      callBack: '&snOnload'
-    },
-    link: function(scope, element) {
-      element.on('load', function() {
-        scope.callBack();
-        scope.$apply();
-      });
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snOptions.js */
-angular.module('sn.connect.util').directive('snOptions', function(getTemplateUrl) {
-  "use strict";
-  return {
-    restrict: 'E',
-    templateUrl: getTemplateUrl("snOptions.xml"),
-    replace: true
-  };
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snPane.js */
-angular.module('sn.connect.util').directive('snPane', function($timeout, getTemplateUrl, paneManager) {
-  'use strict';
-  return {
-    restrict: 'E',
-    replace: true,
-    transclude: true,
-    templateUrl: getTemplateUrl('snPane.xml'),
-    scope: {
-      paneCollapsed: '=',
-      panePosition: '@',
-      paneResizeable: '@',
-      paneWidth: '=',
-      paneToggle: '@'
-    },
-    link: function(scope, element) {
-      var scrollPromise;
-      var mouseHeldDown = false;
-      var mouseClicked = true;
-      scope.toggleConversationList = function($event) {
-        if ($event && $event.keyCode === 9)
-          return;
-        paneManager.togglePane('connect:conversation_list', true);
-      };
-      scope.$watch('paneWidth', function() {
-        if (scope.paneWidth) {
-          element.width(scope.paneWidth);
-        }
-      });
-      scope.isMobile = function() {
-        return angular.element('html').width() <= 800;
-      };
-      scope.scrollMousedown = function(moveBy) {
-        scrollPromise = $timeout(function() {
-          mouseHeldDown = true;
-          mouseClicked = false;
-          updateScrollPosition(moveBy);
-        }, 300);
-      };
-      scope.scrollMouseup = function() {
-        $timeout.cancel(scrollPromise);
-        scrollPromise = void(0);
-        if (!mouseClicked) {
-          mouseHeldDown = false;
-        }
-      };
-      scope.scrollUpCick = function() {
-        if (mouseClicked) {
-          var scrollContainer = element.find('.pane-scroll-container');
-          updateScrollPosition(-scrollContainer.height());
-        }
-        mouseClicked = true;
-        mouseHeldDown = false;
-      };
-      scope.scrollDownCick = function() {
-        if (mouseClicked) {
-          var scrollContainer = element.find('.pane-scroll-container');
-          updateScrollPosition(scrollContainer.height());
-        }
-        mouseClicked = true;
-        mouseHeldDown = false;
-      };
-      scope.openConnect = function($event) {
-        $event.stopPropagation();
-        if ($event && $event.keyCode === 9)
-          return;
-        window.open("$c.do", "_blank");
-      };
-
-      function updateScrollPosition(moveBy) {
-        var scrollContainer = element.find('.pane-scroll-container');
-        scrollContainer.animate({
-          scrollTop: scrollContainer[0].scrollTop + moveBy
-        }, 300, 'linear', function() {
-          if (mouseHeldDown) {
-            updateScrollPosition(moveBy);
-          }
-        });
-      }
-
-      function updateScrollButtons() {
-        var scrollContainer = element.find('.pane-scroll-container');
-        if (scope.paneCollapsed && !scope.isMobile() && scrollContainer.get(0)) {
-          if (scrollContainer.outerHeight() < scrollContainer.get(0).scrollHeight) {} else {}
-        } else {}
-      }
-      scope.togglePane = function() {
-        scope.paneCollapsed = !scope.paneCollapsed;
-        scope.$root.$broadcast('pane.collapsed', scope.panePosition, scope.paneCollapsed);
-        updateScrollButtons();
-      }
-      angular.element(window).on('resize', function() {
-        updateScrollButtons();
-      });
-      $timeout(updateScrollButtons);
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snPaneManager.js */
-angular.module('sn.connect.util').directive('snPaneManager', function() {
-  'use strict';
-  return {
-    restrict: 'A',
-    link: function(scope, element, attrs) {
-      scope.resourcePaneClass = attrs.snPaneManager;
-      scope.resourcePaneClasses = {
-        'closed': 'pane-closed',
-        'large': 'pane-large large-resource-pane',
-        'compact': 'pane-compact compact-resource-pane'
-      };
-      scope.$on('conversation.resource.open', function($evt, data) {
-        scope.$broadcast('conversation.resource.show', data);
-        scope.resizePane(data.type);
-      });
-      scope.$on('conversation.resource.close', function() {
-        scope.resizePane('closed');
-      });
-      scope.resizePane = function(type) {
-        angular.forEach(scope.resourcePaneClasses, function(resourcePaneClass) {
-          element.removeClass(resourcePaneClass);
-        });
-        scope.resourcePaneClass = scope.resourcePaneClasses[type || 'closed'];
-        element.addClass(scope.resourcePaneClass);
-      };
-      scope.resizePane(attrs.snPaneManager);
-    }
-  }
-});
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snPod.js */
-angular.module('sn.connect.util').directive('snPod', function(getTemplateUrl) {
-  'use strict';
-  return {
-    restrict: 'E',
-    templateUrl: getTemplateUrl("snPod.xml"),
-    replace: true,
-    scope: {
-      user: '=',
-      label: '=label',
-      showLabel: '=showLabel',
-      removeTitle: '@removeTitle',
-      removeClick: '&removeClick'
-    },
-    controller: function($scope) {
-      $scope.onRemove = function($event) {
-        if ($scope.removeClick) {
-          $event.stopPropagation();
-          $scope.removeClick({
-            $event: $event
-          });
-        }
-      };
-    }
-  };
-});;
-/*! RESOURCE: /scripts/app.ng_chat/util/directive.snPopOver.js */
-angular.module('sn.connect.util').directive('snPopover', function($window, $rootScope) {
       'use strict';
-      if ($window.jQuery)
-        $window.jQuery('html').on('click', function(e) {
-          $rootScope.$broadcast("popover-html-click", e);
-        });
       return {
-        restrict: 'A',
-        scope: {
-          options: '=snPopover',
-          enabled: '=snPopoverEnabled'
-        },
-        link: function(scope, element) {
-            scope.popoverID = scope.$id;
+        restrict: "A",
+        link: function(scope, element, attr) {
+            if (attr.disableAutofocus)
+              return;
+            scope.snFocusOnConversation = $parse(attr.snFocusOnConversation)(scope);
+            scope.$watch(function() {
+              return activeConversation.conversation;
+            }, function(conversation) {
+              if (window.getSelection().toString() !== "")
+                return;
+              if (!scope.snFocusOnConversation)
+                return;
+              if (!conversation)
+                return;
+              if (conversation.sysID !== scope.snFocusOnConversation.sysID)
+                return;
+              $timeout(function() {
+                focusOnMessageInput();
+              });
+            });
 
-            function getContent() {
-              if (!$content) {
-                if (angular.isObject(scope.options) && scope.options.target) {
-                  $content = angular.element(scope.options.target).detach().show();
-                } else if (typeof scope.options == "string") {
-                  $content = angular.element(scope.options).detach().show();
-                } else {
-                  $content = element.siblings('.popover-body').eq(0).detach().show()
+            function focusOnMessageIn
