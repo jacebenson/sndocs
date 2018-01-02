@@ -1300,6 +1300,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6/scripts/",
         "date": "2017-11-30"
+      },
+      {
+        "number": "6a",
+        "name": "Jakarta Patch 6a",
+        "url": "#",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6a/scripts/",
+        "date": "2017-11-30"
       }
     ],
     "features": [
