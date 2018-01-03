@@ -916,13 +916,15 @@
       {
         "name": "Fuji Patch 12",
         "url": "https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12",
-        "date": "2016-02-11"
+        "date": "2016-02-11",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e19e3a4b4f21de40f347524e0210c7b5"
       },
       {
         "name": "Fuji Patch 13",
         "url": "https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13",
         "date": "2016-05-04",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/fuji/13/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/fuji/13/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=3909ed674f4f56047b0cb85e0210c7c6"
       }
     ],
     "features": [
@@ -955,48 +957,57 @@
       {
         "name": "Geneva Patch 3",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
-        "date": "2016-01-22"
+        "date": "2016-01-22",
+        "hi":"https://hi.service-now.com/kb_view.do?sys_kb_id=a89fb7326fd5da80fbf5409e9f3ee4c4"
       },
       {
         "name": "Geneva Patch 4",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html",
-        "date": "2016-02-16"
+        "date": "2016-02-16",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e2bde5034f29da40f347524e0210c781"
       },
       {
         "name": "Geneva Patch 5",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html",
-        "date": "2016-03-23"
+        "date": "2016-03-23",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=68652e9d0fb196802f42938172050ea4"
       },
       {
         "name": "Geneva Patch 6",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html",
-        "date": "2016-04-19"
+        "date": "2016-04-19",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=2b0c63144fba9e403ed8b85e0210c7ad"
       },
       {
         "name": "Geneva Patch 7",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html",
-        "date": "2016-05-21"
+        "date": "2016-05-21",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=f18db1f74f471e047b0cb85e0210c7e0"
       },
       {
         "name": "Geneva Patch 8",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html",
-        "date": "2016-08-16"
+        "date": "2016-08-16",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=069f713adbcdee08bd7ef47e0f9619f5"
       },
       {
         "name": "Geneva Patch 9",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html",
-        "date": "2016-09-28"
+        "date": "2016-09-28",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=964dc669dbc6ee00852c7a9e0f96191c"
       },
       {
         "name": "Geneva Patch 10",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html",
-        "date": "2016-11-24"
+        "date": "2016-11-24",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=1a0e26a7dbcb6a00852c7a9e0f961952"
       },
       {
         "name": "Geneva Patch 11",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
         "date": "2017-02-23",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/geneva/11/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/geneva/11/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=40edbe82db093e400e3dfb651f9619e3"
       }
     ],
     "features": [
@@ -1109,7 +1120,8 @@
         "name": "Helsinki Patch 12a",
         "url": "#",
         "date": "2017-08-24",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12a/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12a/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=60f52e17dbb407800e3dfb651f9619e1"
       }
     ],
     "features": [
