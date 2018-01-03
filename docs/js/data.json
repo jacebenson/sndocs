@@ -1040,7 +1040,8 @@
         "name": "Helsinki Patch 5",
         "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
         "date": "2016-09-21",
-        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597668"
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597668",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/5/scripts/"
       },
       {
         "name": "Helsinki Patch 6",
@@ -1064,7 +1065,8 @@
         "name": "Helsinki Patch 9",
         "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html",
         "date": "2017-02-14",
-        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621356"
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621356",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/9/scripts/"
       },
       {
         "number": "9a",
@@ -1130,7 +1132,7 @@
         "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
         "date": "2017-01-13",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598954",
-        "git": ""
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/1/scripts/"
       },
       {
         "name": "Istanbul Patch 2",
@@ -1142,7 +1144,8 @@
         "name": "Istanbul Patch 3",
         "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html",
         "date": "2017-02-28",
-        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621511"
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621511",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/3/scripts/"
       },
       {
         "number": "3a",
