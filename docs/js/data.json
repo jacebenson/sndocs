@@ -1182,7 +1182,15 @@
         "name": "Istanbul Patch 6a",
         "url": "#",
         "date": "Unknown",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=fc6b7e6cdb93b6c05a4af85e0f9619a7",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/6a/scripts/"
+      },
+      {
+        "number": "6b",
+        "name": "Istanbul Patch 6b",
+        "url": "#",
+        "date": "Unknown",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=c0e0d0e5db67b6005a4af85e0f961940"
       },
       {
         "number": "7",
@@ -1213,7 +1221,8 @@
         "name": "Istanbul Patch 9a",
         "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html",
         "date": "2017-08-31",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9a/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9a/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=4756441cdbfd4340bf55f7fcbf961929"
       },
       {
         "number": "10",
@@ -1278,6 +1287,7 @@
         "name": "Jakarta Patch 3b",
         "url": "#",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3b/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=27fa9e45dbb50f80bf55f7fcbf9619a2",
         "date": "2017-12-06"
       },
       {
@@ -1308,6 +1318,7 @@
         "number": "6a",
         "name": "Jakarta Patch 6a",
         "url": "#",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=6e50210edbd7c7444837f3231f96191d",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6a/scripts/",
         "date": "2018-01-02"
       }
