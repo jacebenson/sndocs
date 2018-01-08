@@ -1349,7 +1349,7 @@
         "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/7/scripts/",
-        "date": "2018-01-02"
+        "date": "2018-01-05"
       }
     ],
     "features": [
