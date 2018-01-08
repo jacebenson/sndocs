@@ -32,6 +32,9 @@
     <style>
 .file-text { font-size: 8px;
 margin-left: -1.5em;}
+td {
+    padding: 15px !important;
+}
 </style>
     <script>
         $(document).ready(function () {
@@ -55,7 +58,7 @@ margin-left: -1.5em;}
                             console.log('version.name: ' + version.name);
                             var html = '<thead>\n\t<tr class="thead">\n';
                             html += '\t\t<th class="" data-field="1">Version</th>\n';
-                            html += '\t\t<th colspan="15" class="" data-field="2">Patches</th>\n';
+                            html += '\t\t<th colspan="20" class="" data-field="2">Patches</th>\n';
                             html += '\t\t<th colspan="1" class="" data-field="3">Features</th>\n';
                             
                             /*
@@ -75,8 +78,8 @@ margin-left: -1.5em;}
                         html += '<a href="'+version.url+'">' 
                         html += version.name;
                         html += '</a> ('+version.date+')</td>';
-                        if(version.patches.length<15){
-                            while(version.patches.length<15){
+                        if(version.patches.length<20){
+                            while(version.patches.length<20){
                                 version.patches.push({});
                             }
                         }
