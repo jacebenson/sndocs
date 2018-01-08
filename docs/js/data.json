@@ -1249,7 +1249,16 @@
         "name": "Istanbul Patch 10a",
         "url": "#",
         "date": "2017-12-12",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=9e29b0aedbb6c340bd7ef47e0f961981",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10a/scripts/"
+      },
+      {
+        "number": "10b",
+        "name": "Istanbul Patch 10b",
+        "url": "#",
+        "date": "2018-01-08",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=bbff91cadbd7c7444837f3231f961930",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10b/scripts/"
       }
     ],
     "features": [
@@ -1332,6 +1341,14 @@
         "url": "#",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=6e50210edbd7c7444837f3231f96191d",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6a/scripts/",
+        "date": "2018-01-02"
+      },
+      {
+        "number": "7",
+        "name": "Jakarta Patch 7",
+        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/7/scripts/",
         "date": "2018-01-02"
       }
     ],
