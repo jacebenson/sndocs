@@ -6,13 +6,11 @@
 
 <body>
     <header>
-        <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-            crossorigin="anonymous"></script>
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-            crossorigin="anonymous"></link>
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-            crossorigin="anonymous">
+        
+        <script src="./js/jquery-3.2.1.min.js"></script>
+        <script src="./js/bootstrap.min.js"></script>
+        <link href="./css/bootstrap.min.css" rel="stylesheet"></link>
+        <link href="./css/fontawesome.css" rel="stylesheet"></link>
     </header>
     <div class="container-fluid">
         <table id="table" class="table table-responsive table-hover" data-toolbar="#toolbar" data-search="true" data-show-toggle="true"
@@ -37,20 +35,20 @@
                 url: 'js/data.json?id=' + new Date().getTime(),
                 dataType: 'json',
                 error: function (jqXHR, status, errorThrown) {
-                    console.log(status);
+                    //console.log(status);
                 },
                 success: function (data) {
                     try {
-                        console.log(data);
+                        //console.log(data);
                         window.colspan = 1;
                         window.dataJson = data;
                         var dataLength = data.length - 1;
                         for (var x = dataLength; x >= 0; x--) {
                             var version = data[x];
-                            console.log(x + ' : data.length - 1 ' + dataLength);
+                            //console.log(x + ' : data.length - 1 ' + dataLength);
                             if (x === data.length - 1) {
-                                console.log('in if');
-                                console.log('version.name: ' + version.name);
+                                //console.log('in if');
+                                //console.log('version.name: ' + version.name);
                                 var html = '<thead>\n\t<tr class="thead">\n';
                                 html += '\t\t<th class="" data-field="1">Version</th>\n';
                                 html += '\t\t<th colspan="20" class="" data-field="2">Patches</th>\n';
@@ -81,16 +79,16 @@
                             for (var patch in version.patches) {
                                 var patchNum = parseInt(patch, 10) + 1;
                                 if (version.patches[patch].number) {
-                                    console.log(version.patches[patch].number);
+                                    //console.log(version.patches[patch].number);
                                     patchNum = version.patches[patch].number;
                                 }
                                 var thisPatch = version.patches[patch];
                                 var hasHi = thisPatch.hi;
-                                console.log('hasHi: ' + hasHi);
+                                //console.log('hasHi: ' + hasHi);
                                 if (thisPatch.name) {
                                     html += '<td><div class="row">';
                                     //release notes
-                                    html += '<div class="col-6">';
+                                    html += '<div class="col-12">';
                                     if (thisPatch.url === '#') {
                                         html += '<span title="' + thisPatch.name + ' Notes' + '"><strong>' + patchNum + '</strong></span>';
                                     } else {
@@ -100,14 +98,14 @@
                                     //end release notes
                                     if (thisPatch.hi !== undefined) {
                                         //hi security notes
-                                        html += '<div class="col-6">';
+                                        html += '<div class="col-12">';
                                         html += '<a title="' + thisPatch.name + ' Security KB' + '" href="' + thisPatch.hi + '"><i class="fa fa-power-off"></i></a>';
                                         html += '</div>';
                                     }
                                     //end hi security notes
                                     if (thisPatch.git) {
                                         //saved off code
-                                        html += '<div class="col-6">';
+                                        html += '<div class="col-12">';
                                         html += '<a title="' + thisPatch.name + ' Code' + '" href="' + thisPatch.git + '"><i class="fa fa-code-fork"></i></a>';
                                         html += '</div>';
                                         //end saved off code
@@ -130,7 +128,7 @@
                         window.html = html
                         $(html).appendTo("#table");
                     } catch (error) {
-                        console.log(error);
+                        //console.log(error);
                     }
                 }
             });
