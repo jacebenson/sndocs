@@ -21,14 +21,18 @@ config.instances.map(function (instance) {
   }, function (error, response, body) {// eslint-disable-line 
     // console.log(url)
     // console.log(response.body)
+    if(error){
+      console.error(error);
+    } else {
     console.log(url);
-    var doc = new DOM().parseFromString(response.body)
+    var doc = new DOM().parseFromString(response.body);
     var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
     console.log('BUILDTAG: ' + buildTag);
     addToVersions({
       url: 'https://' + instance + '.service-now.com/',
       buildTag: buildTag
     })
+  }
   }
 )
 })
