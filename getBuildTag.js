@@ -1,3 +1,4 @@
+var fs = require('fs')
 var https = require('https')
 var request = require('request')
 var xpath = require('xpath')
