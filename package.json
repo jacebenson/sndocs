@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "get": "node getBuildTag.js",
     "standard": "./node_modules/.bin/standard --fix"
   },
   "repository": {
@@ -25,7 +26,8 @@
     "standard": "^10.0.3",
     "threads": "^0.10.1",
     "xmldom": "^0.1.27",
-    "xpath": "0.0.27"
+    "xpath": "0.0.27",
+    "yargs": "^10.1.1"
   },
   "standard": {
     "ignore": [
