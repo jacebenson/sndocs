@@ -9,7 +9,15 @@ var fs = require('fs')
 var https = require('https')
 var beautify = require('js-beautify').js_beautify
 var mkdirp = require('mkdirp')
-var versions = {}
+var versions = {
+  "eureka":{},
+  "fuji":{},
+  "geneva":{},
+  "helsinki":{},
+  "istanbul":{},
+  "jakarta":{},
+  "kingston":{}
+}
 var counter = 0
 config.instances = config.instances.sort()
 config.instances.map(function (instance) {
