@@ -10,13 +10,18 @@ var https = require('https')
 var beautify = require('js-beautify').js_beautify
 var mkdirp = require('mkdirp')
 var versions = {
+  "aspen":{},
+  "berlin":{},
+  "calgary":{},
+  "dublin":{},
   "eureka":{},
   "fuji":{},
   "geneva":{},
   "helsinki":{},
   "istanbul":{},
   "jakarta":{},
-  "kingston":{}
+  "kingston":{},
+  "london":{}
 }
 var counter = 0
 config.instances = config.instances.sort()
