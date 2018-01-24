@@ -9,20 +9,7 @@ var fs = require('fs')
 var https = require('https')
 var beautify = require('js-beautify').js_beautify
 var mkdirp = require('mkdirp')
-var versions = {
-  "aspen":{},
-  "berlin":{},
-  "calgary":{},
-  "dublin":{},
-  "eureka":{},
-  "fuji":{},
-  "geneva":{},
-  "helsinki":{},
-  "istanbul":{},
-  "jakarta":{},
-  "kingston":{},
-  "london":{}
-}
+var versions = require('./versions')
 var counter = 0
 config.instances = config.instances.sort()
 config.instances.map(function (instance) {
@@ -37,17 +24,16 @@ config.instances.map(function (instance) {
     if(error){
       console.error(error);
     } else {
-    console.log(url);
-    var doc = new DOM().parseFromString(response.body);
-    var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
-    console.log('BUILDTAG: ' + buildTag);
-    addToVersions({
-      url: 'https://' + instance + '.service-now.com/',
-      buildTag: buildTag
-    })
-  }
-  }
-)
+      console.log(url);
+      var doc = new DOM().parseFromString(response.body);
+      var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
+      console.log('BUILDTAG: ' + buildTag);
+      addToVersions({
+        url: 'https://' + instance + '.service-now.com/',
+        buildTag: buildTag
+      })
+    }
+  })
 })
 
 function addToVersions (obj) {
@@ -97,6 +83,12 @@ function addToVersions (obj) {
 
 function createSources () {
   console.log(JSON.stringify(versions, '', '  '))
+  fs.writeFile('./versions.json', JSON.stringify(versions, '', '  '),function(err){
+    if(err){
+      return console.log(err)
+    }
+    
+  })
   // check for directories...
   // ./sources/family/patch
   // ./docs/family/patch
