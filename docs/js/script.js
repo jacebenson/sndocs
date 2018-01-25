@@ -3,6 +3,6 @@ var toggleFeatures = function(){
         //jQuery(this).toggleClass("d-none");
         jQuery(this).toggleClass("invisible");
     });
-    jQuery('#feature-control').toggleClass('fa-minus-square');
-    jQuery('#feature-control').toggleClass('fa-plus-square');
+    jQuery('#feature-control').toggleClass('fa-angle-up');
+    jQuery('#feature-control').toggleClass('fa-angle-down');
 }

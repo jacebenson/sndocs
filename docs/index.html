@@ -54,10 +54,12 @@
                                 html += '\t\t<th class="" data-field="1">Version</th>\n';
                                 html += '\t\t<th colspan="20" class="" data-field="2">Patches</th>\n';
                                 html += '\t\t<th colspan="1" class="" data-field="3">';
-                                html += 'Features';
+                                html += '<div class="float-right text-nowrap">'
                                 html += '<a title="Toggle Features" href="#" onclick="toggleFeatures()">';
-                                html += '<i id="feature-control" class="fa fa-minus-square"></i>';
+                                html += 'Features ';
+                                html += '<i id="feature-control" class="fa fa-angle-up"></i>';
                                 html += '</a>';
+                                html += '</div>';
                                 html += '</th>\n';
 
                                 /*
