@@ -14,20 +14,25 @@ var counter = 0
 config.instances = config.instances.sort()
 config.instances.map(function (instance) {
   var url = 'https://' + instance + '.service-now.com'
-  request({
+  var requestOptions = {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
-    body: config.payload
-  }, function (error, response, body) {// eslint-disable-line 
+    body: config.payload,
+    timeout: 10000
+  };
+  request(requestOptions, function (error, response, body) {// eslint-disable-line 
     // console.log(url)
     // console.log(response.body)
     if(error){
-      console.error(error);
+      if(error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT'){
+        console.log("Could not connect in " + requestOptions.timeout/1000 + " seconds to " + url)
+      } else {
+        console.log(requestOptions.url);
+        console.error(error);
+      }
     } else {
-      console.log(url);
       var doc = new DOM().parseFromString(response.body);
       var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
-      console.log('BUILDTAG: ' + buildTag);
       addToVersions({
         url: 'https://' + instance + '.service-now.com/',
         buildTag: buildTag
@@ -38,7 +43,7 @@ config.instances.map(function (instance) {
 
 function addToVersions (obj) {
   try {
-    // console.log('trying ' + obj.url + ' -- ' + obj.buildTag)
+    console.log(obj.buildTag + ': ' + obj.url)
     var url = obj.url
     counter++
     var family = obj.buildTag.split('glide-')[1].split('-')[0]
@@ -58,7 +63,7 @@ function addToVersions (obj) {
         // family exists...
         // console.log("family exists: " + family);
         if (versions[family] && versions[family][patch]) {
-          console.log('Found ' + family + ' patch ' + patch + ' @ ' + url)
+          //console.log('Found ' + family + ' patch ' + patch + ' @ ' + url)
           versions[family][patch] = url
         } else {
           versions[family][patch] = url
@@ -74,6 +79,7 @@ function addToVersions (obj) {
       }
     }
     if (counter === config.instances.length) {
+      console.log('starting to create files');
       createSources()
     }
   } catch (err) {
@@ -82,7 +88,7 @@ function addToVersions (obj) {
 }
 
 function createSources () {
-  console.log(JSON.stringify(versions, '', '  '))
+  //console.log(JSON.stringify(versions, '', '  '))
   fs.writeFile('./versions.json', JSON.stringify(versions, '', '  '),function(err){
     if(err){
       return console.log(err)

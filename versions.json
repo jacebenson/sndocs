@@ -15,37 +15,37 @@
   "helsinki": {
     "9": "https://csscorp.service-now.com/",
     "11": "https://cognizant.service-now.com/",
-    "12": "https://vfc.service-now.com/",
+    "12": "https://tnt.service-now.com/",
     "12a": "https://usc.service-now.com/",
     "11b": "https://saintfrancis.service-now.com/"
   },
   "istanbul": {
     "1": "https://pnmac.service-now.com/",
     "3": "https://lennar.service-now.com/",
-    "4": "https://mellanox.service-now.com/",
-    "6": "https://tanium.service-now.com/",
+    "4": "https://davita.service-now.com/",
+    "6": "https://huludev.service-now.com/",
     "7": "https://vodafone.service-now.com/",
     "8": "https://sephora.service-now.com/",
     "9": "https://walmart.service-now.com/",
-    "10": "https://velux.service-now.com/",
+    "10": "https://duke.service-now.com/",
     "9a": "https://vidanthealth.service-now.com/",
-    "10b": "https://hosting.service-now.com/",
-    "10a": "https://thehartford.service-now.com/"
+    "10b": "https://empjnerius.service-now.com/",
+    "10a": "https://kwiktripdev.service-now.com/"
   },
   "jakarta": {
     "1": "https://qualcomm.service-now.com/",
-    "2": "https://neustar.service-now.com/",
-    "3": "https://virteva.service-now.com/",
-    "4": "https://slcc.service-now.com/",
-    "5": "https://wgu.service-now.com/",
-    "6": "https://veritas.service-now.com/",
-    "7": "https://wayfair.service-now.com/",
-    "3a": "https://oakhilladvisors.service-now.com/",
+    "2": "https://medtronic.service-now.com/",
+    "3": "https://trustvesta.service-now.com/",
+    "4": "https://progleasing.service-now.com/",
+    "5": "https://rmit.service-now.com/",
+    "6": "https://pcm.service-now.com/",
+    "7": "https://virtevadev.service-now.com/",
+    "3a": "https://contegix.service-now.com/",
     "6a": "https://nfldev.service-now.com/"
   },
   "kingston": {
-    "0": "https://logicalissmc.service-now.com/",
-    "1": "https://redhatdev.service-now.com/"
+    "0": "https://hi.service-now.com/",
+    "1": "https://nielsenpov.service-now.com/"
   },
   "london": {}
 }
