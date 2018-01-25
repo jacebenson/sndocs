@@ -11,6 +11,7 @@
         <script src="./js/bootstrap.min.js"></script>
         <link href="./css/bootstrap.min.css" rel="stylesheet"></link>
         <link href="./css/fontawesome.css" rel="stylesheet"></link>
+        <script src="./js/script.js"></script>
     </header>
     <div class="container-fluid">
         <table id="table" class="table table-responsive table-hover" data-toolbar="#toolbar" data-search="true" data-show-toggle="true"
@@ -52,7 +53,12 @@
                                 var html = '<thead>\n\t<tr class="thead">\n';
                                 html += '\t\t<th class="" data-field="1">Version</th>\n';
                                 html += '\t\t<th colspan="20" class="" data-field="2">Patches</th>\n';
-                                html += '\t\t<th colspan="1" class="" data-field="3">Features</th>\n';
+                                html += '\t\t<th colspan="1" class="" data-field="3">';
+                                html += 'Features';
+                                html += '<a title="Toggle Features" href="#" onclick="toggleFeatures()">';
+                                html += '<i id="feature-control" class="fa fa-minus-square"></i>';
+                                html += '</a>';
+                                html += '</th>\n';
 
                                 /*
                                 var allFeatures = [];
@@ -117,9 +123,11 @@
                                 }
                             }
                             html += '<td>';
+                            html += '<div class="feature">'
                             for (var feature in version.features) {
                                 html += '<a href="https://docs.servicenow.com/search?q=' + version.features[feature] + '">' + version.features[feature] + '</a>' + '<br/>'
                             }
+                            html += '</div>';
                             html += '</td>';
                             html += '</tr>\n';
                         }
