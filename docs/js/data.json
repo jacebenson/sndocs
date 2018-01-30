@@ -855,6 +855,20 @@
     ]
   },
   {
+  "name": "TrackHi",
+  "url": "#",
+  "date": "2015-06-23",
+  "patches": [
+    {
+      "number":"0",
+      "name": "TrackHi Patch 0",
+      "url": "#",
+      "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/trackhi/0/scripts/",
+      "date": "2015-06-23"
+    }
+  ]
+  },
+  {
     "name": "Fuji",
     "url": "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",
     "date": "2015-01-23",
@@ -1410,19 +1424,5 @@
       "Guided Tours Auto Launch",
       "Guided Tours Domain Seperation"
     ]
-  },
-  {
-  "name": "TrackHi",
-  "url": "#",
-  "date": "2018-01-29",
-  "patches": [
-    {
-      "number":"0",
-      "name": "TrackHi Patch 0",
-      "url": "#",
-      "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/trackhi/0/scripts/",
-      "date": "2018-01-29"
-    }
-  ]
   }
 ]
