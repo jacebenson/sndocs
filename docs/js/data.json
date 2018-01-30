@@ -1410,5 +1410,19 @@
       "Guided Tours Auto Launch",
       "Guided Tours Domain Seperation"
     ]
+  },
+  {
+  "name": "TrackHi",
+  "url": "#",
+  "date": "2018-01-29",
+  "patches": [
+    {
+      "number":"0",
+      "name": "TrackHi Patch 0",
+      "url": "#",
+      "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/trackhi/0/scripts/",
+      "date": "2018-01-29"
+    }
+  ]
   }
 ]
