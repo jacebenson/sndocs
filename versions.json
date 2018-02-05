@@ -19,7 +19,7 @@
     "9": "https://csscorp.service-now.com/",
     "11": "https://cognizant.service-now.com/",
     "12": "https://vfc.service-now.com/",
-    "12a": "https://usc.service-now.com/",
+    "12a": "https://mercy.service-now.com/",
     "11b": "https://saintfrancis.service-now.com/"
   },
   "istanbul": {
@@ -29,21 +29,22 @@
     "5": "https://devoteam.service-now.com/",
     "6": "https://tanium.service-now.com/",
     "7": "https://vodafone.service-now.com/",
-    "8": "https://sephora.service-now.com/",
-    "9": "https://walmart.service-now.com/",
+    "8": "https://macysdev.service-now.com/",
+    "9": "https://utah.service-now.com/",
     "10": "https://velux.service-now.com/",
-    "9a": "https://tricentis.service-now.com/",
+    "9a": "https://princeton.service-now.com/",
     "10b": "https://fujitsu.service-now.com/",
-    "10a": "https://thehartford.service-now.com/"
+    "10a": "https://walmart.service-now.com/",
+    "10c": "https://empjnerius.service-now.com/"
   },
   "jakarta": {
     "1": "https://qualcomm.service-now.com/",
     "2": "https://neustar.service-now.com/",
     "3": "https://virteva.service-now.com/",
     "4": "https://uchicago.service-now.com/",
-    "5": "https://pwc.service-now.com/",
-    "6": "https://ucmerced.service-now.com/",
-    "7": "https://wayfair.service-now.com/",
+    "5": "https://wgu.service-now.com/",
+    "6": "https://veritas.service-now.com/",
+    "7": "https://virtevadev.service-now.com/",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://tmx.service-now.com/",
     "3b": "https://ge.service-now.com/"

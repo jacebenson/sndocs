@@ -1274,6 +1274,13 @@
         "date": "2018-01-08",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=bbff91cadbd7c7444837f3231f961930",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10b/scripts/"
+      },{
+        "number": "10c",
+        "name": "Istanbul Patch 10c",
+        "url": "#",
+        "date": "2018-02-05",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662330",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10c/scripts/"
       }
     ],
     "features": [
