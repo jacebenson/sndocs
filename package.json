@@ -1,11 +1,11 @@
 {
   "name": "sndocs",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Download scripts and make html pages for the,.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "startBeta": "node indexThread.js",
+    "start": "node app.js",
+    "download": "node index.js",
     "standard": "./node_modules/.bin/standard --fix"
   },
   "repository": {
@@ -20,6 +20,7 @@
   "homepage": "https://gitlab.com/jacebenson/SNDocs#readme",
   "dependencies": {
     "async": "^2.5.0",
+    "browser-sync": "^2.23.6",
     "js-beautify": "^1.7.4",
     "mkdirp": "^0.5.1",
     "request": "^2.83.0",
@@ -33,5 +34,6 @@
     "ignore": [
       "/sources/"
     ]
-  }
+  },
+  "devDependencies": {}
 }
