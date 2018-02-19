@@ -357,18 +357,359 @@ function addOnSubmitEvent(form, func, funcname) {
     form.onsubmit = func;
   else {
     form.onsubmit = function() {
-        var formFuncCalled = false;
-        try {
-          if (oldonsubmit() == false)
-            return false;
-          CustomEvent.fire('glide_optics_inspect_put_cs_context', funcname, 'submit');
-          formFuncCalled = true;
-          var returnvalue = func();
-          formFuncCalled = false;
-          CustomEvent.fire('glide_optics_inspect_pop_cs_context', funcname, 'submit');
-          if (returnvalue == false)
-            return false;
-          return true;
-        } catch (ex) {
-          if (formFuncCalled)
-            CustomEvent.fire('glide_optics_inspect_pop_cs_context', fun
+      var formFuncCalled = false;
+      try {
+        if (oldonsubmit() == false)
+          return false;
+        CustomEvent.fire('glide_optics_inspect_put_cs_context', funcname, 'submit');
+        formFuncCalled = true;
+        var returnvalue = func();
+        formFuncCalled = false;
+        CustomEvent.fire('glide_optics_inspect_pop_cs_context', funcname, 'submit');
+        if (returnvalue == false)
+          return false;
+        return true;
+      } catch (ex) {
+        if (formFuncCalled)
+          CustomEvent.fire('glide_optics_inspect_pop_cs_context', funcname, 'load');
+        formFuncError("onSubmit", func, ex);
+        return false;
+      }
+    }
+  }
+  form = null;
+}
+
+function formFuncError(type, func, ex) {
+  var funcStr = func.toString();
+  funcStr = funcStr.replace(/onSubmit[a-fA-F0-9]{32}\(/, "onSubmit(");
+  var msg;
+  if (g_user.hasRole("client_script_admin"))
+    msg = type + " script error: " + ex.toString() + ":<br/>" + funcStr.replace(/\n/g, "<br/>").replace(/\s/g, "&nbsp;");
+  else
+    msg = "Submit canceled due to a script error - please contact your System Administrator";
+  g_form.addErrorMessage(msg);
+  CustomEvent.fire('glideform:script_error', type + " script error: " + ex.toString() + "\n" + funcStr);
+}
+
+function hide(element) {
+  var e = typeof element === "string" ? gel(element) : element;
+  if (!e)
+    return;
+  e.style.display = 'none';
+  _frameChanged();
+}
+
+function show(element) {
+  var e = typeof element === "string" ? gel(element) : element;
+  if (!e)
+    return;
+  if (e.tagName == "TR")
+    e.style.display = 'table-row';
+  else
+    e.style.display = 'block';
+  _frameChanged();
+}
+
+function hideObject(o, visibilityOnly) {
+  if (!o)
+    return;
+  o.style.visibility = "hidden";
+  if (!visibilityOnly)
+    o.style.display = "none";
+  _frameChanged();
+}
+
+function showObject(o, visibilityOnly) {
+  if (!o)
+    return;
+  o.style.visibility = "visible";
+  if (!visibilityOnly)
+    o.style.display = "block";
+  _frameChanged();
+}
+
+function showObjectInline(o) {
+  if (!o)
+    return;
+  o.style.visibility = "visible";
+  o.style.display = "inline";
+  _frameChanged();
+}
+
+function showObjectInlineBlock(o) {
+  if (!o)
+    return;
+  o.style.visibility = "visible";
+  o.style.display = "inline-block";
+  _frameChanged();
+}
+
+function focusFirstElement(form) {
+  try {
+    var e = findFirstEditableElement(form);
+    if (e) {
+      Field.activate(e);
+      triggerEvent(e, 'focus', true);
+    }
+  } catch (ex) {}
+}
+
+function findFirstEditableElement(form) {
+  var tags = ['input', 'select', 'textarea'];
+  var elements = form.getElementsByTagName('*');
+  for (var i = 0, n = elements.length; i < n; i++) {
+    var element = elements[i];
+    if (element.type == 'hidden')
+      continue;
+    var tagName = element.tagName.toLowerCase();
+    if (!tags.include(tagName))
+      continue;
+    element = $(element);
+    var formGroup = element.up('.form-group');
+    if (!element.disabled &&
+      !element.readOnly &&
+      element.style.visibility != 'hidden' &&
+      element.style.display != 'none' &&
+      element.offsetParent != null &&
+      formGroup &&
+      formGroup.style.display != 'none')
+      return element;
+  }
+  return null;
+}
+
+function triggerEvent(element, eventType, canBubble) {
+  canBubble = (typeof(canBubble) == undefined) ? true : canBubble;
+  if (element && element.disabled && eventType == "change" && element.onchange) {
+    element.onchange.call(element);
+    return;
+  }
+  if (element.fireEvent) {
+    element.fireEvent('on' + eventType);
+  } else {
+    var evt = document.createEvent('HTMLEvents');
+    evt.initEvent(eventType, canBubble, true);
+    element.dispatchEvent(evt);
+  }
+}
+var g_form_dirty_message;
+
+function onWindowClose() {
+  if (typeof g_form == 'undefined')
+    return;
+  if (!g_form.submitted && g_form.modified) {
+    g_submitted = false;
+    setTimeout(function() {
+      CustomEvent.fireTop('glide:nav_form_dirty_cancel_stay', window);
+    }, 750);
+    return g_form_dirty_message;
+  }
+  g_form.submitted = false;
+}
+
+function jslog(msg, src, dateTime) {
+  try {
+    if (!src) {
+      var path = window.self.location.pathname;
+      src = path.substring(path.lastIndexOf('/') + 1);
+    }
+    if (window.self.opener && window != window.self.opener) {
+      if (window.self.opener.jslog) {
+        window.self.opener.jslog(msg, src, dateTime);
+      }
+    } else if (parent && parent.jslog && jslog != parent.jslog) {
+      parent.jslog(msg, src, dateTime);
+    } else if (parent.parent && parent.parent.jslog && jslog != parent.parent.jslog) {
+      parent.parent.jslog(msg, src, dateTime);
+    } else {
+      if (window.console && window.console.log)
+        console.log(msg);
+    }
+  } catch (e) {}
+}
+
+function getXMLIsland(name) {
+  var xml = gel(name);
+  if (xml == null)
+    return null;
+  xml = "<xml>" + xml.innerHTML + "</xml>";
+  xml = loadXML(xml);
+  return xml;
+}
+
+function lock(me, ref, edit_id, nonedit_id, current_value_id, update_id) {
+  if (me)
+    me.style.display = "none";
+  var unlock = gel(ref + '_unlock');
+  unlock.style.display = "";
+  var edit_span = gel(edit_id);
+  edit_span.style.display = "none";
+  var nonedit_span = gel(nonedit_id);
+  nonedit_span.style.display = "inline-block";
+  var current_value = gel(current_value_id);
+  var the_value = "";
+  if (current_value.options) {
+    for (var i = 0; i < current_value.options.length; i++) {
+      if (i > 0)
+        the_value += g_glide_list_separator;
+      the_value += current_value.options[i].text;
+    }
+  } else
+    the_value = current_value.value;
+  var update_element = gel(update_id);
+  if (update_element.href)
+    update_element.href = the_value;
+  update_element.innerHTML = htmlEscape(the_value);
+}
+
+function unlock(me, ref, edit_id, nonedit_id) {
+  if (me)
+    me.style.display = "none";
+  var unlock = gel(ref + '_lock');
+  if (unlock)
+    showObjectInlineBlock(unlock);
+  var edit_span = gel(edit_id);
+  edit_span.style.display = "";
+  var nonedit_span = gel(nonedit_id);
+  nonedit_span.style.display = "none";
+  var list_foc = gel("sys_display." + ref);
+  if (list_foc) {
+    try {
+      list_foc.focus();
+    } catch (e) {}
+  }
+}
+
+function setMandatoryExplained(enforce) {
+  var showexp = gel('mandatory_explained');
+  if (!showexp)
+    return;
+  if (enforce || foundAMandatoryField())
+    showexp.style.display = "inline";
+  else
+    showexp.style.display = "none";
+}
+
+function foundAMandatoryField() {
+  var spanTags = document.getElementsByTagName('span');
+  if (!spanTags)
+    return false;
+  for (var c = 0, n = spanTags.length; c != n; ++c) {
+    var spanTag = spanTags[c];
+    var id = spanTag.id;
+    if (!id)
+      continue;
+    if (id.indexOf('status.') == 0) {
+      var mandatory = spanTag.getAttribute("mandatory") + "";
+      if (mandatory == 'true')
+        return true;
+    }
+  }
+  return false;
+}
+var _frameChangedTimer = null;
+
+function _frameChanged() {
+  if (_frameChangedTimer)
+    clearTimeout(_frameChangedTimer);
+  _frameChangedTimer = setTimeout(function() {
+    _frameChangedTimer = null;
+    CustomEvent.fire('frame.resized');
+    CustomEvent.fire('refresh.event');
+  }, 300);
+}
+
+function getFormContentParent() {
+  var glideOverlay = $(document.body).select("div.glide_overlay");
+  var exposeMask = $('glide_expose_mask');
+  if (glideOverlay.length > 0 && exposeMask && exposeMask.visible())
+    return glideOverlay[0];
+  if (typeof g_section_contents == 'undefined' || !g_section_contents)
+    g_section_contents = $(document.body).select(".section_header_content_no_scroll");
+  if (g_section_contents.length > 0)
+    return g_section_contents[0];
+  return document.body;
+}
+
+function addClassName(element, name) {
+  if (!element)
+    return;
+  $(element).addClassName(name);
+}
+
+function removeClassName(element, name) {
+  if (!element)
+    return;
+  $(element).removeClassName(name);
+}
+
+function hasClassName(element, name) {
+  if (!element)
+    return;
+  if (!element.hasClassName)
+    return;
+  return $(element).hasClassName(name);
+}
+
+function getIFrameDocument(iframe) {
+  return iframe.contentWindow ? iframe.contentWindow.document : (iframe.contentDocument || null);
+}
+
+function writeTitle(element, title) {
+  element.title = title;
+  if (element.alt)
+    element.alt = title;
+  if (element.getAttribute('disabled') == 'disabled')
+    element.style.pointerEvents = 'auto';
+}
+
+function contextMenuHide(e) {
+  if (typeof contextHide === 'undefined')
+    return;
+  if (!isMSIE && e) {
+    if (isTouchDevice && !isTouchRightClick(e)) {
+      if (e.type == 'touchend' && $(e.target).up('.context_menu'))
+        return;
+      contextHide();
+    } else if (isLeftClick(e)) {
+      contextHide();
+    }
+  } else
+    contextHide();
+}
+
+function trim(s) {
+  return s.replace(/^\s+|\s+$/g, '');
+}
+
+function htmlEscape(s) {
+  return s.replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g,
+    "&quot;").replace(/</g, "&#60;").replace(/>/g, "&#62;");
+}
+
+function htmlEscapeQuote(s) {
+  return s.replace(/'/g, "&#39;");
+}
+
+function htmlEscapeDoubleQuote(s) {
+  return s.replace(/"/g, "&quot;");
+}
+
+function loadXML(r) {
+  var xml = r.responseXML;
+  if (typeof xml != 'undefined')
+    return xml;
+  var dom = null;
+  try {
+    dom = new DOMParser().parseFromString(r, 'text/xml');
+  } catch (e) {}
+  return dom;
+}
+if (!window.GwtDateTimePicker) {
+  window.GwtDateTimePicker = function(name, format, showTime) {
+    ScriptLoader.getScripts('scripts/classes/GwtDateTimePicker.js', function() {
+      new GwtDateTimePicker(name, format, showTime);
+    });
+  }
+};

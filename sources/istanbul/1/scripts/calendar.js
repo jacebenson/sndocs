@@ -371,4 +371,114 @@ function getDateFromFormat(val, format) {
           day = 7 - (dayOfWeek - day);
         else
           day -= dayOfWeek;
-        if (day
+        if (day > 0) {
+          temp.setDate(temp.getDate() + day);
+          year = temp.getFullYear();
+          month = temp.getMonth() + 1;
+          date = temp.getDate();
+        }
+        i_val++;
+      }
+    } else if (token == "z")
+      i_val += 3;
+    else {
+      if (val.substring(i_val, i_val + token.length) != token) {
+        return 0;
+      } else {
+        i_val += token.length;
+      }
+    }
+  }
+  if (i_val != val.length) {
+    return 0;
+  }
+  if (month == 2) {
+    if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
+      if (date > 29) {
+        return 0;
+      }
+    } else {
+      if (date > 28) {
+        return 0;
+      }
+    }
+  }
+  if ((month == 4) || (month == 6) || (month == 9) || (month == 11)) {
+    if (date > 30) {
+      return 0;
+    }
+  }
+  if (hh < 12 && ampm == "PM") {
+    hh = hh - 0 + 12;
+  } else if (hh > 11 && ampm == "AM") {
+    hh -= 12;
+  }
+  var newdate = new Date(year, month - 1, date, hh, mm, ss);
+  return newdate.getTime();
+}
+
+function parseDate(val) {
+  var preferEuro = (arguments.length == 2) ? arguments[1] : false;
+  generalFormats = new Array('y-M-d', 'MMM d, y', 'MMM d,y', 'y-MMM-d', 'd-MMM-y', 'MMM d');
+  monthFirst = new Array('M/d/y', 'M-d-y', 'M.d.y', 'MMM-d', 'M/d', 'M-d');
+  dateFirst = new Array('d/M/y', 'd-M-y', 'd.M.y', 'd-MMM', 'd/M', 'd-M');
+  yearFirst = new Array('yyyyw.F', 'yyw.F');
+  var checkList = new Array('generalFormats', preferEuro ? 'dateFirst' : 'monthFirst', preferEuro ? 'monthFirst' : 'dateFirst', 'yearFirst');
+  var d = null;
+  for (var i = 0; i < checkList.length; i++) {
+    var l = window[checkList[i]];
+    for (var j = 0; j < l.length; j++) {
+      d = getDateFromFormat(val, l[j]);
+      if (d != 0) {
+        return new Date(d);
+      }
+    }
+  }
+  return null;
+}
+
+function getDurationString(ms) {
+  var sec = Math.floor(ms / 1000),
+    s = '',
+    days = Math.floor(sec / 86400);
+  if (days >= 1) {
+    s += days + ' day' + (days > 1 ? 's' : '');
+    sec -= days * 86400;
+  }
+  var hours = Math.floor(sec / 3600);
+  if (hours >= 1) {
+    s += (days > 0 ? ' ' : '') + hours + ' hour' + (hours > 1 ? 's' : '');
+    sec -= hours * 3600;
+  }
+  var min = Math.floor(sec / 60);
+  if (days == 0) {
+    if (min >= 1) {
+      s += (hours > 0 ? ' ' : '') + min + ' minute' + (min > 1 ? 's' : '');
+      if (hours < 1) {
+        sec -= min * 60;
+        if (sec > 0 && min <= 10)
+          s += ' ' + sec + ' second' + (sec > 1 ? 's' : '');
+      }
+    } else if (hours == 0 && sec > 0)
+      s += sec + ' second' + (sec > 1 ? 's' : '');
+  }
+  return s;
+}
+
+function getUserDateTime() {
+  var browserDate = new Date();
+  var browserOffset = browserDate.getTimezoneOffset() * 60000;
+  var utcTime = browserDate.getTime() + browserOffset;
+  var userDateTime = utcTime + g_tz_offset;
+  return new Date(userDateTime);
+}
+
+function convertUtcTimeToUserTimeMs(utcTimeMs) {
+  var d = new Date();
+  return parseInt(utcTimeMs) + (d.getTimezoneOffset() * 60000) + g_tz_offset;
+}
+
+function convertUserTimeToUtcTimeMs(userTimeMs) {
+  var d = new Date();
+  return parseInt(userTimeMs) - (d.getTimezoneOffset() * 60000) - g_tz_offset;
+};

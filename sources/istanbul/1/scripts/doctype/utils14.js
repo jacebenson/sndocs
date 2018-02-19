@@ -423,4 +423,235 @@ function copySelectOptionToIndex(select, opt, index) {
 
 function selectMenuItem(id, selectName) {
   var selectMenu = document.getElementById(selectName);
-  if (!s
+  if (!selectMenu)
+    return -1;
+  var options = selectMenu.options;
+  var selectItem = selectMenu.selectedIndex;
+  if (id) {
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      if (option.value == id) {
+        selectItem = i;
+        break;
+      }
+    }
+  }
+  if (selectItem > 0) {
+    selectMenu.selectedIndex = selectItem;
+    if (selectMenu["onchange"]) {
+      selectMenu.onchange();
+    }
+  }
+  return selectItem;
+}
+
+function menuIsEmpty(selectName) {
+  var selectMenu = document.getElementById(selectName);
+  if (!selectMenu || selectMenu.selectedIndex <= 0)
+    return true;
+  return false;
+}
+
+function getBounds(obj, addScroll) {
+  var x = grabOffsetLeft(obj);
+  var y = grabOffsetTop(obj);
+  if (addScroll) {
+    x += getScrollX();
+    y += getScrollY();
+  }
+  this.absoluteRect = {
+    top: y,
+    left: x,
+    bottom: y + obj.offsetHeight,
+    right: x + obj.offsetWidth,
+    height: obj.offsetHeight,
+    width: obj.offsetWidth,
+    middleX: x + (obj.offsetWidth / 2),
+    middleY: y + (obj.offsetHeight / 2),
+    cbottom: y + obj.clientHeight,
+    cright: x + obj.clientWidth
+  };
+  return this.absoluteRect;
+}
+
+function guid(l) {
+  var l = l || 32,
+    strResult = '';
+  while (strResult.length < l)
+    strResult += (((1 + Math.random() + new Date().getTime()) * 0x10000) | 0).toString(16).substring(1);
+  return strResult.substr(0, l);
+}
+
+function stopSelection(e) {
+  e.onselectstart = function() {
+    return false;
+  };
+  e.style.MozUserSelect = "none";
+}
+
+function restoreSelection(e) {
+  e.onselectstart = null;
+  e.style.MozUserSelect = "";
+}
+
+function getAttributeValue(element, name) {
+  if (!element.attributes)
+    return null;
+  var v = element.attributes.getNamedItem(name);
+  if (v == null)
+    return null;
+  return v.nodeValue;
+}
+
+function createImage(src, title, object, onClick) {
+  var img = cel('input');
+  img.type = 'image';
+  img.src = src;
+  img.title = title;
+  img.alt = title;
+  if (arguments.length == 4)
+    img.onclick = onClick.bindAsEventListener(object);
+  return img;
+}
+
+function createIcon(cls, title, object, onClick) {
+  var icn = cel('a');
+  icn.addClassName(cls);
+  icn.setAttribute('title', title);
+  if (arguments.length == 4)
+    icn.onclick = onClick.bindAsEventListener(object);
+  return icn;
+}
+
+function getXMLString(node) {
+  var xml = "???";
+  if (node.xml) {
+    xml = node.xml;
+  } else if (window.XMLSerializer) {
+    xml = (new XMLSerializer()).serializeToString(node);
+  }
+  return xml;
+}
+
+function isLeftClick(e) {
+  return e.button == 0;
+}
+
+function formatMessage() {
+  if (arguments.length == 1)
+    return arguments[0];
+  var str = arguments[0];
+  var args = arguments;
+  if (arguments.length == 2 && typeof arguments[1] == 'object' && arguments[1] instanceof Array) {
+    args = [''].concat(arguments[1]);
+  }
+  var i = 0;
+  while (++i < args.length) {
+    str = str.replace(new RegExp('\\{' + (i - 1) + '\\}', 'g'), args[i]);
+  }
+  return str;
+}
+
+function getFormattedDateAndTime(date) {
+  return getFormattedDate(date) + " " + getFormattedTime(date);
+}
+
+function getFormattedDate(date) {
+  var d = (date ? date : new Date());
+  var curr_mon = d.getMonth() + 1;
+  var curr_day = d.getDate();
+  var curr_year = d.getYear() - 100;
+  return doubleDigitFormat(curr_mon) + "/" + doubleDigitFormat(curr_day) + "/" + doubleDigitFormat(curr_year)
+}
+
+function getFormattedTime(date) {
+  var d = (date ? date : new Date());
+  var curr_hour = d.getHours();
+  var curr_min = d.getMinutes();
+  var curr_sec = d.getSeconds();
+  var curr_msec = d.getMilliseconds();
+  return doubleDigitFormat(curr_hour) + ":" + doubleDigitFormat(curr_min) + ":" + doubleDigitFormat(curr_sec) + " (" + tripleDigitFormat(curr_msec) + ")"
+}
+
+function showGoToLine(textAreaID) {
+  var e = gel("go_to_" + textAreaID)
+  if (e) {
+    showObjectInline(e);
+    gel("go_to_input_" + textAreaID).focus();
+  }
+}
+
+function gotoLineKeyPress(evt, textAreaObject, input) {
+  if (evt.keyCode == 13) {
+    Event.stop(evt);
+    gotoLinePopup(textAreaObject, input.value);
+    input.value = "";
+    hideObject(input.parentNode);
+  }
+}
+
+function gotoLinePopup(textAreaObject, lineText) {
+  if (lineText) {
+    lineText = trim(lineText);
+    if (lineText) {
+      var line = parseInt(lineText, 10);
+      g_form._setCaretPositionLineColumn(textAreaObject, line, 1);
+    }
+  }
+}
+
+function getBrowserWindowHeight() {
+  return window.innerHeight;
+}
+
+function getBrowserWindowWidth() {
+  return window.innerWidth;
+}
+var WindowSize = function() {
+  return {
+    width: getBrowserWindowWidth(),
+    height: getBrowserWindowHeight()
+  }
+}
+
+function getScrollBarWidthPx() {
+  var inner = cel("p");
+  inner.style.width = "100%";
+  inner.style.height = "200px";
+  var outer = cel("div");
+  outer.style.position = "absolute";
+  outer.style.top = "0px";
+  outer.style.left = "0px";
+  outer.style.visibility = "hidden";
+  outer.style.width = "200px";
+  outer.style.height = "150px";
+  outer.style.overflow = "hidden";
+  outer.appendChild(inner);
+  document.body.appendChild(outer);
+  var w1 = inner.offsetWidth;
+  outer.style.overflow = "scroll";
+  var w2 = inner.offsetWidth;
+  if (w1 == w2) w2 = outer.clientWidth;
+  document.body.removeChild(outer);
+  return (w1 - w2);
+}
+
+function showOpticsDebugger() {
+  var mainWindow = getMainWindow();
+  if (mainWindow)
+    mainWindow.CustomEvent.fire('glide_optics_inspect_window_open');
+}
+
+function opticsLog(tablename, fieldname, message, oldvalue, newvalue) {
+  var info = {};
+  info.table = tablename;
+  info.field = fieldname;
+  info.message = message;
+  info.message_type = "static";
+  if (oldvalue && newvalue) {
+    info.oldvalue = oldvalue;
+    info.newvalue = newvalue;
+    info.message_type = "change";
+  }
+  CustomEvent.fire('glide_optics_inspect_log_message', info);
+};

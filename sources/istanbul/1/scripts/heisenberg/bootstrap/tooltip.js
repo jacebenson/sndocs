@@ -245,7 +245,131 @@
     return this.getTitle()
   }
   Tooltip.prototype.getPosition = function($element) {
-      $element = $element || this.$element
-      var el = $element[0]
-      var isBody = el.tagName == 'BODY'
-      return $.extend({}, (typeof el.g
+    $element = $element || this.$element
+    var el = $element[0]
+    var isBody = el.tagName == 'BODY'
+    return $.extend({}, (typeof el.getBoundingClientRect == 'function') ? el.getBoundingClientRect() : null, {
+      scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.scrollTop(),
+      width: isBody ? document.documentElement.scrollWidth : $element.outerWidth(),
+      height: isBody ? $(window).height() : $element.outerHeight()
+    }, isBody ? {
+      top: 0,
+      left: 0
+    } : $element.offset())
+  }
+  Tooltip.prototype.getCalculatedOffset = function(placement, pos, actualWidth, actualHeight) {
+    return placement == 'bottom' ? {
+        top: pos.top + pos.height,
+        left: pos.left + pos.width / 2 - actualWidth / 2
+      } :
+      placement == 'top' ? {
+        top: pos.top - actualHeight,
+        left: pos.left + pos.width / 2 - actualWidth / 2
+      } :
+      placement == 'left' ? {
+        top: pos.top + pos.height / 2 - actualHeight / 2,
+        left: pos.left - actualWidth
+      } : {
+        top: pos.top + pos.height / 2 - actualHeight / 2,
+        left: pos.left + pos.width
+      }
+  }
+  Tooltip.prototype.getViewportAdjustedDelta = function(placement, pos, actualWidth, actualHeight) {
+    var delta = {
+      top: 0,
+      left: 0
+    }
+    if (!this.$viewport) return delta
+    var viewportPadding = this.options.viewport && this.options.viewport.padding || 0
+    var viewportDimensions = this.getPosition(this.$viewport)
+    if (/right|left/.test(placement)) {
+      var topEdgeOffset = pos.top - viewportPadding - viewportDimensions.scroll
+      var bottomEdgeOffset = pos.top + viewportPadding - viewportDimensions.scroll + actualHeight
+      if (topEdgeOffset < viewportDimensions.top) {
+        delta.top = viewportDimensions.top - topEdgeOffset
+      } else if (bottomEdgeOffset > viewportDimensions.top + viewportDimensions.height) {
+        delta.top = viewportDimensions.top + viewportDimensions.height - bottomEdgeOffset
+      }
+    } else {
+      var leftEdgeOffset = pos.left - viewportPadding
+      var rightEdgeOffset = pos.left + viewportPadding + actualWidth
+      if (leftEdgeOffset < viewportDimensions.left) {
+        delta.left = viewportDimensions.left - leftEdgeOffset
+      } else if (rightEdgeOffset > viewportDimensions.width) {
+        delta.left = viewportDimensions.left + viewportDimensions.width - rightEdgeOffset
+      }
+    }
+    return delta
+  }
+  Tooltip.prototype.getTitle = function() {
+    var title
+    var $e = this.$element
+    var o = this.options
+    title = $e.attr('data-original-title') ||
+      (typeof o.title == 'function' ? o.title.call($e[0]) : o.title)
+    return title
+  }
+  Tooltip.prototype.getUID = function(prefix) {
+    do prefix += ~~(Math.random() * 1000000)
+    while (document.getElementById(prefix))
+    return prefix
+  }
+  Tooltip.prototype.tip = function() {
+    return (this.$tip = this.$tip || $(this.options.template))
+  }
+  Tooltip.prototype.arrow = function() {
+    return (this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow'))
+  }
+  Tooltip.prototype.validate = function() {
+    if (!this.$element[0].parentNode) {
+      this.hide()
+      this.$element = null
+      this.options = null
+    }
+  }
+  Tooltip.prototype.enable = function() {
+    this.enabled = true
+  }
+  Tooltip.prototype.disable = function() {
+    this.enabled = false
+  }
+  Tooltip.prototype.toggleEnabled = function() {
+    this.enabled = !this.enabled
+  }
+  Tooltip.prototype.toggle = function(e) {
+    var self = this
+    if (e) {
+      self = $(e.currentTarget).data('bs.' + this.type)
+      if (!self) {
+        self = new this.constructor(e.currentTarget, this.getDelegateOptions())
+        $(e.currentTarget).data('bs.' + this.type, self)
+      }
+    }
+    self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
+  }
+  Tooltip.prototype.destroy = function() {
+    var that = this
+    clearTimeout(this.timeout)
+    this.hide(function() {
+      that.$element.off('.' + that.type).removeData('bs.' + that.type)
+    })
+  }
+
+  function Plugin(option) {
+    return this.each(function() {
+      var $this = $(this)
+      var data = $this.data('bs.tooltip')
+      var options = typeof option == 'object' && option
+      if (!data && option == 'destroy') return
+      if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+  var old = $.fn.tooltip
+  $.fn.tooltip = Plugin
+  $.fn.tooltip.Constructor = Tooltip
+  $.fn.tooltip.noConflict = function() {
+    $.fn.tooltip = old
+    return this
+  }
+}(jQuery);;

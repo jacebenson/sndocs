@@ -224,4 +224,261 @@ function personalizeList(listId, tableName) {
     addInput(form, 'HIDDEN', 'sysparm_collection_relationship', '');
   addInput(form, 'HIDDEN', 'sysparm_list', tableName);
   addInput(form, 'HIDDEN', 'sysparm_form', 'list');
-  if (parentF
+  if (parentForm && parentForm['sysparm_collection'])
+    addInput(form, 'HIDDEN', 'sysparm_collection', parentForm['sysparm_collection'].value);
+  else
+    addInput(form, 'HIDDEN', 'sysparm_collection', '');
+  if (typeof GlideTransactionScope !== 'undefined') {
+    GlideTransactionScope.appendTransactionScope(function(name, value) {
+      addInput(form, 'HIDDEN', name, value);
+    });
+  }
+  form.submit();
+}
+
+function personalizeField(identifier, formName) {
+  var form = document.forms['sys_personalize'];
+  var fields = 'name.element.language';
+  if (formName && formName.indexOf('sys_dictionary') == 0)
+    fields = 'name.element';
+  addQueryFilter(form, fields, identifier, '', formName);
+  form.action = formName;
+  form.submit();
+}
+
+function personalizeFields(identifier, formName) {
+  var form = document.forms['sys_personalize'];
+  addQueryFilter(form, 'name', identifier);
+  form.action = formName;
+  form.submit();
+}
+
+function personalizeSecurity(identifier, field_name) {
+  var a = field_name.split('.');
+  var g_dialog = new GlideDialogWindow('security_mechanic');
+  g_dialog.setPreference('table_name', a[0]);
+  g_dialog.setPreference('field_name', a[1]);
+  g_dialog.setSize(600, '');
+  g_dialog.setTitle('Security Mechanic');
+  g_dialog.render();
+}
+
+function showDictionary(identifier, field_id) {
+  var a = field_id.split('.');
+  var g_dialog = new GlideDialogWindow('dictionary_viewer');
+  g_dialog.setPreference('table_name', a[0]);
+  g_dialog.setPreference('field_name', a[1]);
+  g_dialog.setTitle('Dictionary Info: ' + field_id);
+  g_dialog.render();
+}
+
+function listSecurity(identifier, field_name) {
+  var form = document.forms['sys_personalize'];
+  addQueryFilter(form, 'CALCULATED:SecurityQueryCalculator', field_name);
+  form.action = "sys_security_acl_list.do";
+  form.submit();
+}
+
+function listCollection(coll_table, coll_field, of_table, view_name) {
+  var form = document.forms['sys_personalize'];
+  addQueryFilter(form, 'CALCULATED:CollectionQueryCalculator', of_table + ',' + coll_field + ',' + view_name);
+  addInput(form, 'HIDDEN', 'sysparm_domain_restore', 'false');
+  form.action = coll_table + "_list.do";
+  form.submit();
+}
+
+function exportToPDF(table, sys_id, isLandscape, sysparm_view) {
+  var relatedListFilters = "";
+  if (window.g_tabs2List && g_tabs2List.tabIDs) {
+    var relatedLists = g_tabs2List.tabIDs;
+    var relatedListCount = relatedLists.length;
+    if (relatedListCount > 0) {
+      for (var i = 0; i < relatedListCount; i++) {
+        var relatedListName = relatedLists[i].substring(0, relatedLists[i].lastIndexOf("_list"));
+        var filter = getFilter(relatedListName);
+        if (filter && filter.length > 0) {
+          if (i == relatedListCount - 1)
+            relatedListFilters += relatedListName + "=" + encodeURIComponent(encodeURIComponent(filter));
+          else
+            relatedListFilters += relatedListName + "=" + encodeURIComponent(encodeURIComponent(filter)) + "^";
+        }
+      }
+    }
+  }
+  var url = table + ".do?sys_id=" + sys_id + "&PDF" + "&sysparm_view=" + sysparm_view + "&related_list_filter=" + relatedListFilters;
+  if (isLandscape)
+    url += "&landscape=true";
+  window.location = url;
+}
+
+function showList(tableName, fields, ids) {
+  if (!ids)
+    ids = gActiveContext.getTableName();
+  self.location = tableName + "_list.do?sysparm_query=" + addQueryFilter('', fields, ids, tableName);
+}
+
+function showItem(tableName, fields, ids, view) {
+  if (!ids)
+    ids = gActiveContext.getTableName();
+  var url = tableName + ".do?sysparm_query=" + addQueryFilter('', fields, ids, tableName);
+  if (typeof(view) != "undefined") {
+    url += "&sysparm_view=" + view;
+  }
+  self.location = url;
+}
+
+function addQueryFilter(form, names, values, table, formName) {
+  var tableName = table;
+  if ((names == '' || names == null) || (values == '' || values == null))
+    return;
+  if (names.indexOf("CALCULATED") == 0) {
+    var ec = "";
+    if (names.indexOf("CollectionQueryCalculator") > 0)
+      ec = collectionQueryCalculator(values);
+    else
+      ec = securityQueryCalculator(values);
+    addInput(form, "HIDDEN", "sysparm_query", ec);
+    addInput(form, "HIDDEN", "sysparm_query_encoced", ec);
+    return;
+  }
+  var vNames = names.split(".");
+  var vValues = values.split(".");
+  if (names.indexOf("name.element") == 0) {
+    if (vValues.length > 2) {
+      var tableElement = TableElement.get(values);
+      vValues[0] = tableElement.getTableName();
+      vValues[1] = tableElement.getName();
+    } else {
+      var tableR = new Table(vValues[0]);
+      var element = tableR.getElement(vValues[1]);
+      var label = '';
+      if (formName && formName.indexOf("sys_documentation") == 0)
+        label = getTableLabel(tableR.getName(), element.getName());
+      if (label == '' && element != null)
+        vValues[0] = element.getTableName();
+    }
+  }
+  if (names.indexOf("name.element.language") == 0) {
+    vValues[2] = g_lang;
+  }
+  var query = new Array();
+  for (var i = 0; i < vNames.length; i++) {
+    if ("sys_choice" == tableName && "name" == vNames[i]) {
+      query.push("nameINjavascript:getTableExtensions('" + vValues[i] + "')");
+    } else if ("sys_ui_style" == tableName && "name" == vNames[i]) {
+      query.push(buildQueryClause(values.split(".")[0], "name"));
+    } else
+      query.push(vNames[i] + "=" + vValues[i]);
+  }
+  if (tableName)
+    return query.join('^');
+  addInput(form, "HIDDEN", "sysparm_query", query.join('^'));
+  addInput(form, "HIDDEN", "sysparm_query_encoded", query.join('^'));
+  setStack(form);
+}
+
+function getTableLabel(tabel, element) {
+  var ajax = new GlideAjax('ContextActionsAjax');
+  ajax.addParam("sysparm_name", "getLabel");
+  ajax.addParam("sysparm_type", tabel);
+  ajax.addParam("sysparm_value", element);
+  ajax.getXMLWait();
+  return ajax.getAnswer();
+}
+
+function collectionQueryCalculator(args) {
+  var sa = args.split(",");
+  var tableName = sa[0];
+  var collField = sa[1];
+  return buildQueryClause(tableName, collField);
+}
+
+function buildQueryClause(tableName, collField) {
+  var tableDef = Table.get(tableName);
+  var tables = tableDef.getTables();
+  var result = new Array();
+  result.push(collField);
+  result.push("=");
+  result.push(tableName);
+  result.push("^OR");
+  result.push(collField);
+  result.push("IN");
+  result.push(tables.join());
+  return result.join("");
+}
+
+function securityQueryCalculator(values) {
+  var sa = values.split(".");
+  var fieldName = null;
+  var element = null;
+  var tableName = sa[0];
+  if (sa.length > 1)
+    fieldName = sa[1];
+  var allTables = new Array();
+  var table = new Table(tableName);
+  if (fieldName == null)
+    allTables = table.getTables();
+  else {
+    allTables.push(tableName);
+    element = table.getElement(fieldName);
+    if (element != null && element.getTableName() != tableName)
+      allTables.push(element.getTableName());
+    allTables.push("*");
+  }
+  var rc = getRules(allTables, fieldName);
+  return rc;
+}
+
+function getRules(allTables, fieldName) {
+  var rules = null;
+  if (fieldName == null) {
+    rules = "name=*^ORnameSTARTSWITH*.";
+    for (var i = 0; i < allTables.length; i++)
+      rules += "^ORname=" + allTables[i] + "^ORnameSTARTSWITH" + allTables[i] + ".";
+    return rules;
+  }
+  var rc = new Array();
+  for (var x = 0; x < allTables.length; x++) {
+    var tableName = allTables[x];
+    rc.push(tableName);
+    rc.push(tableName + ".*");
+    if (fieldName != null)
+      rc.push(tableName + "." + fieldName);
+  }
+  rules = "nameIN" + rc.join();
+  return rules;
+}
+
+function setWatchField(id) {
+  var ajax = new GlideAjax('ContextActionsAjax');
+  ajax.addParam("sysparm_name", "setWatchField");
+  ajax.addParam("sysparm_id", id);
+  ajax.getXML(function() {
+    CustomEvent.fire('glide_optics_inspect_watchfield', id)
+  });
+}
+
+function showWatchField(id) {
+  var ajax = new GlideAjax('ContextActionsAjax');
+  ajax.addParam("sysparm_name", "setWatchField");
+  ajax.addParam("sysparm_id", id);
+  ajax.getXML(function() {
+    CustomEvent.fire('glide_optics_inspect_show_watchfield', id)
+  });
+}
+
+function clearWatchField(id) {
+  var ajax = new GlideAjax('ContextActionsAjax');
+  ajax.addParam("sysparm_name", "clearWatchField");
+  ajax.getXML();
+  ajax.getXML(function() {
+    CustomEvent.fire('glide_optics_inspect_clear_watchfield', id)
+  });
+}
+
+function setStack(form) {
+  var url = new GlideURL(window.location.href);
+  var stack = url.getParam('sysparm_nameofstack');
+  if (stack)
+    addInput(form, 'HIDDEN', 'sysparm_nameofstack', stack);
+};

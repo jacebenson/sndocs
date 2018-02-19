@@ -5488,35 +5488,91 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
 /*! RESOURCE: Redirect Users */
 (function() {
   try {
-    var currentURL = window.location.href;
-    var isIndex = endsWith(currentURL, '.service-now.com/') || endsWith(currentURL, '.service-now.com') || endsWith(currentURL, '.service-now.com/home.do') || endsWith(currentURL, 'nav_to.do?uri=%2Fhisp');
-    if (isIndex) {
-      addLoadEvent(routeUser);
+    if (window.HI_SKIP_REDIRECTION)
+      return;
+    var nav = jQuery(".navpage-header");
+    nav.css("background", "white");
+    var currentURL = window.location.href,
+      pathName = window.location.pathname,
+      userDomainDetails = getDomainDetails(),
+      isCommunityDomain = userDomainDetails.isCommunityDomain,
+      isPureCommunityUser = userDomainDetails.isPureCommunityUser,
+      hasCommunityEditRole = userDomainDetails.hasCommunityEditRole,
+      isAdminImpersonating = userDomainDetails.isAdminImpersonating,
+      isPureCommunityUserWithNoEditRole = isPureCommunityUser && !hasCommunityEditRole,
+      isPureCommunityUserWithEditRole = isPureCommunityUser && hasCommunityEditRole;
+    if (isCommunityDomain) {
+      if (isAdminImpersonating)
+        return;
+      else if (!isValidCommunityURL() && !isLoginPage()) {
+        if ((isPureCommunityUserWithNoEditRole || (window.NOW.user && window.NOW.user.userID == 'guest')) && pathName != "/auth_redirect.do") {
+          window.parent.location.replace('/community');
+        } else if (isPureCommunityUserWithEditRole) {
+          if (pathName == '/hisp') {
+            window.parent.location.replace('/community');
+          }
+        }
+      }
+    } else if (!isValidHIURL()) {
+      if (window.NOW.user.userID == 'guest') {
+        routeToHISP();
+      } else {
+        loadEvent(routeUser);
+      }
+    } else {
+      var isIndex = endsWith(currentURL, '.service-now.com/') || endsWith(currentURL, '.service-now.com') || endsWith(currentURL, 'home.do') || endsWith(currentURL, 'nav_to.do?uri=%2Fhisp');
+      if (isIndex) {
+        loadEvent(routeUser);
+      }
     }
+    window.HI_SKIP_REDIRECTION = true;
   } catch (error) {
     routeToHISP();
   }
 
-  function isMemberOfCJOrg() {
-    var ga = new GlideAjax('CommunityUserUtil');
-    ga.addParam('sysparm_name', 'isMemberOfCJOrg');
-    ga.getXMLWait();
-    if (ga.getAnswer() === 'true')
-      return true;
-    else
-      return false;
+  function isValidHIURL() {
+    return !isCommunityDomain && pathName.replace(/\//g, '') != 'community';
+  }
+
+  function isValidCommunityURL() {
+    return isCommunityDomain && pathName.replace(/\//g, '') == 'community';
+  }
+
+  function isLoginPage() {
+    return isCommunityDomain && pathName == '/login.do';
+  }
+
+  function getDomainDetails() {
+    var domainDetails = {};
+    jQuery.ajax({
+      method: "GET",
+      dataType: "json",
+      url: "/api/snc/community_user_redirection/getCommunityWebDomainInfo",
+      async: false,
+    }).done(function(response) {
+      domainDetails = response.result;
+    });
+    return domainDetails;
   }
 
   function routeUser() {
-    var preferenceRequest = new GlideAjax('HISPUtilAjax');
-    preferenceRequest.addParam('sysparm_name', 'getSPPreference');
-    preferenceRequest.getXML(function(response) {
-      var isLegacy = JSON.parse(response.responseXML.documentElement.getAttribute('answer')).result;
-      console.log('#### LEGACY? ' + isLegacy);
-      if (isLegacy == 'false') {
-        routeToHISP();
-      } else {}
+    if (window.NOW.user.userID == 'guest')
+      return;
+    var isLegacy = true;
+    jQuery.ajax({
+      method: "GET",
+      dataType: "json",
+      url: "/api/snc/community_user_redirection/getLegacyPreference",
+      async: false,
+    }).done(function(response) {
+      isLegacy = response.result.isLegacy;
     });
+    if (isLegacy == 'false') {
+      var sessionPreference = localStorage.getItem('hiLegacy');
+      if (sessionPreference && sessionPreference == 'false') {
+        routeToHISP();
+      }
+    }
   }
 
   function routeToHISP() {
@@ -5525,6 +5581,24 @@ var AddMembersFromGroup = Class.create(GlideDialogWindow, {
 
   function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
+  }
+
+  function loadEvent(func) {
+    if (typeof addLoadEvent !== 'undefined') {
+      addLoadEvent(func);
+    } else {
+      var oldonload = window.onload;
+      if (typeof window.onload != 'function') {
+        window.onload = func;
+      } else {
+        window.onload = function() {
+          if (oldonload) {
+            oldonload();
+          }
+          func();
+        };
+      }
+    }
   }
 })();
 /*! RESOURCE: hi_int_wizard_survey_response */
