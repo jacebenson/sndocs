@@ -25,35 +25,35 @@
   "istanbul": {
     "1": "https://pnmac.service-now.com/",
     "3": "https://ihg.service-now.com/",
-    "4": "https://davitadev.service-now.com/",
+    "4": "https://davita.service-now.com/",
     "5": "https://devoteam.service-now.com/",
     "6": "https://hulu.service-now.com/",
     "7": "https://vodafone.service-now.com/",
     "8": "https://macys.service-now.com/",
     "9": "https://tiffany.service-now.com/",
     "10": "https://tacoma.service-now.com/",
-    "9a": "https://tricentis.service-now.com/",
-    "10b": "https://uky.service-now.com/",
-    "10a": "https://walmart.service-now.com/",
-    "10c": "https://velux.service-now.com/"
+    "9a": "https://lbl.service-now.com/",
+    "10b": "https://concurrency.service-now.com/",
+    "10a": "https://disney.service-now.com/",
+    "10c": "https://duke.service-now.com/"
   },
   "jakarta": {
     "1": "https://qualcomm.service-now.com/",
     "2": "https://medtronic.service-now.com/",
-    "3": "https://studygroup.service-now.com/",
-    "4": "https://uchicago.service-now.com/",
-    "5": "https://tieto.service-now.com/",
-    "6": "https://veritas.service-now.com/",
-    "7": "https://usi.service-now.com/",
+    "3": "https://medtronicdev.service-now.com/",
+    "4": "https://sasktel.service-now.com/",
+    "5": "https://yale.service-now.com/",
+    "6": "https://nationwidechildrens.service-now.com/",
+    "7": "https://cablecomnetworking.service-now.com/",
     "8": "https://bushbros.service-now.com/",
     "3a": "https://oakhilladvisors.service-now.com/",
-    "6a": "https://vidanthealth.service-now.com/",
+    "6a": "https://maersk.service-now.com/",
     "3b": "https://ge.service-now.com/"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
-    "1": "https://symfoni.service-now.com/",
-    "2": "https://princeton.service-now.com/"
+    "1": "https://accenturetest1.service-now.com/",
+    "2": "https://devoteam.service-now.com/"
   },
   "london": {}
 }
