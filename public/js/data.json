@@ -1281,6 +1281,13 @@
         "date": "2018-02-05",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662330",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10c/scripts/"
+      },{
+        "number": "11",
+        "name": "Istanbul Patch 11",
+        "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html",
+        "date": "2018-02-16",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598935",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11/scripts/"
       }
     ],
     "features": [
