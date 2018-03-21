@@ -18,8 +18,8 @@
   "helsinki": {
     "9": "https://csscorp.service-now.com/",
     "11": "https://cognizant.service-now.com/",
-    "12": "https://tnt.service-now.com/",
-    "12a": "https://unitypoint.service-now.com/",
+    "12": "https://vfc.service-now.com/",
+    "12a": "https://mercy.service-now.com/",
     "11b": "https://saintfrancis.service-now.com/"
   },
   "istanbul": {
@@ -31,30 +31,31 @@
     "7": "https://vodafone.service-now.com/",
     "8": "https://macys.service-now.com/",
     "9": "https://tiffany.service-now.com/",
-    "9a": "https://tricentis.service-now.com/",
     "10": "https://tacoma.service-now.com/",
-    "10a": "https://walmart.service-now.com/",
-    "10b": "https://stanforddev.service-now.com/",
-    "10c": "https://velux.service-now.com/",
-    "11": "https://uky.service-now.com/"
+    "11": "https://uky.service-now.com/",
+    "9a": "https://nasa.service-now.com/",
+    "10a": "https://kwiktripdev.service-now.com/",
+    "10b": "https://cloudpires.service-now.com/",
+    "10c": "https://grupoboticario.service-now.com/"
   },
   "jakarta": {
     "1": "https://qualcomm.service-now.com/",
     "2": "https://medtronic.service-now.com/",
-    "3": "https://studygroup.service-now.com/",
+    "3": "https://medtronictest.service-now.com/",
     "4": "https://uchicago.service-now.com/",
     "5": "https://rmit.service-now.com/",
-    "6": "https://verisk.service-now.com/",
-    "7": "https://visa.service-now.com/",
-    "8": "https://mn.service-now.com/",
+    "6": "https://soprasteria.service-now.com/",
+    "7": "https://mwhc.service-now.com/",
+    "8": "https://usi.service-now.com/",
     "3a": "https://oakhilladvisors.service-now.com/",
-    "6a": "https://vidanthealth.service-now.com/",
+    "6a": "https://foundationmedicine.service-now.com/",
     "3b": "https://ge.service-now.com/"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
-    "1": "https://accenturetest1.service-now.com/",
-    "2": "https://princeton.service-now.com/"
+    "1": "https://exegy.service-now.com/",
+    "2": "https://amtrustgroup.service-now.com/",
+    "3": "https://redhatdev.service-now.com/"
   },
   "london": {}
 }

@@ -1433,6 +1433,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/2/scripts/",
         "date": "2018-02-01"
+      },{
+        "number": "3",
+        "name": "Kingston Patch 3",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3/scripts/",
+        "date": "2018-03-08"
       }
     ],
     "features": [
