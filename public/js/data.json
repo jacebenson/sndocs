@@ -1387,6 +1387,14 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8/scripts/",
         "date": "2018-02-26"
+      },
+      {
+        "number": "8a",
+        "name": "Jakarta Patch 8a",
+        "url": "#",
+        "hi": "#",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8a/scripts/",
+        "date": "2018-02-26"
       }
     ],
     "features": [
@@ -1439,6 +1447,13 @@
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3/scripts/",
+        "date": "2018-03-08"
+      },{
+        "number": "3a",
+        "name": "Kingston Patch 3a",
+        "url": "#",
+        "hi": "#",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3a/scripts/",
         "date": "2018-03-08"
       }
     ],
