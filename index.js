@@ -13,7 +13,12 @@ var versions = require('./versions')
 var counter = 0
 config.instances = config.instances.sort()
 config.instances.map(function (instance) {
-  var url = 'https://' + instance + '.service-now.com'
+  var url = '';
+  if(instance.indexOf('.')>=0){
+    url = instance;
+  } else {
+    url = 'https://' + instance + '.service-now.com'
+  }
   var requestOptions = {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
