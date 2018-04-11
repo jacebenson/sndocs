@@ -51,6 +51,12 @@ config.instances.map(function (instance) {
   })
 })
 
+/**
+ * This function adds to the ./versions.json
+ * @param {JS} obj - Obj used to give all requirements to fx
+ * obj.buildTag - glide-helsinki-03-16-2016__patch12a-08-25-2017
+ * obj.url - https://example.service-now.com
+ */
 function addToVersions (obj) {
   try {
     console.log(obj.buildTag + ': ' + obj.url)
