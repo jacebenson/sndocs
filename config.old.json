@@ -1,11 +1,6 @@
 {
     "instances": [
-      "aarons",
-      "ac3",
-      "academymortgage",
-      "accenturetest1",
-      "acxiom",
-      "aeritae"
+      "community.servicenow.com"
     ],
     "endpoints": [
       "/scripts/js_includes_last.jsx",

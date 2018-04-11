@@ -15,7 +15,7 @@ config.instances = config.instances.sort()
 config.instances.map(function (instance) {
   var url = '';
   if(instance.indexOf('.')>=0){
-    url = instance;
+    url = 'https://' + instance;
   } else {
     url = 'https://' + instance + '.service-now.com'
   }
@@ -38,8 +38,13 @@ config.instances.map(function (instance) {
     } else {
       var doc = new DOM().parseFromString(response.body);
       var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
+      if(instance.indexOf('.')>=0){
+        url = 'https://' + instance;
+      } else {
+        url = 'https://' + instance + '.service-now.com'
+      }
       addToVersions({
-        url: 'https://' + instance + '.service-now.com/',
+        url: url,
         buildTag: buildTag
       })
     }
