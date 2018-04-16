@@ -24,6 +24,7 @@
     "js-beautify": "^1.7.4",
     "mkdirp": "^0.5.1",
     "request": "^2.83.0",
+    "rss": "^1.2.2",
     "standard": "^10.0.3",
     "threads": "^0.10.1",
     "xmldom": "^0.1.27",
