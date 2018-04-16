@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 16 Apr 2018 19:40:11 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 16 Apr 2018 21:50:00 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 16 Apr 2018 19:40:11 GMT</pubDate>
+        <pubDate>Mon, 16 Apr 2018 21:50:00 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -25,424 +25,686 @@
         <itunes:category text="Technology">
         </itunes:category>
         <item>
-            <title><![CDATA[Glidesoft 2004]]></title>
-            <link>https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm</guid>
-            <pubDate>Sat, 04 Dec 2004 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html</guid>
+            <pubDate>Thu, 16 Nov 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[January 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Fri, 27 Jan 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 0]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html</guid>
+            <pubDate>Thu, 16 Nov 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[February 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Sun, 12 Feb 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html</guid>
+            <pubDate>Thu, 11 Jan 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[March 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Sat, 18 Mar 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html</guid>
+            <pubDate>Thu, 01 Feb 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[April 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Sat, 15 Apr 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 3]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html</guid>
+            <pubDate>Thu, 08 Mar 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[May 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Sun, 21 May 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 3a]]></title>
+            <guid isPermaLink="false">Kingston Patch 3a</guid>
+            <pubDate>Thu, 08 Mar 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[July 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Tue, 04 Jul 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Kingston Patch 4]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html</guid>
+            <pubDate>Fri, 13 Apr 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[August 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Mon, 28 Aug 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html</guid>
+            <pubDate>Thu, 15 Jun 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[November 2006]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Fri, 17 Nov 2006 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html</guid>
+            <pubDate>Mon, 31 Jul 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[March 2007]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Fri, 02 Mar 2007 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html</guid>
+            <pubDate>Fri, 18 Aug 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2007 aka July 2007]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Thu, 05 Jul 2007 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 3]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html</guid>
+            <pubDate>Wed, 13 Sep 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2007 Enhancement Patch]]></title>
-            <link>https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</guid>
-            <pubDate>Sun, 29 Jul 2007 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 3a]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html</guid>
+            <pubDate>Mon, 13 Nov 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2007]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Fri, 23 Nov 2007 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 3b]]></title>
+            <guid isPermaLink="false">Jakarta Patch 3b</guid>
+            <pubDate>Wed, 06 Dec 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2007 Enhancement Patch]]></title>
-            <link>https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</guid>
-            <pubDate>Fri, 30 Nov 2007 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 4]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html</guid>
+            <pubDate>Fri, 06 Oct 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
-            <pubDate>Fri, 22 Aug 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 5]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html</guid>
+            <pubDate>Thu, 02 Nov 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1</guid>
-            <pubDate>Wed, 17 Sep 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 6]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html</guid>
+            <pubDate>Thu, 30 Nov 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</guid>
-            <pubDate>Fri, 31 Oct 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 6a]]></title>
+            <guid isPermaLink="false">Jakarta Patch 6a</guid>
+            <pubDate>Tue, 02 Jan 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</guid>
-            <pubDate>Fri, 05 Dec 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 7]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html</guid>
+            <pubDate>Fri, 05 Jan 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009]]></title>
-            <link>https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes</guid>
-            <pubDate>Fri, 09 Jan 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 8]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-8.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-8.html</guid>
+            <pubDate>Mon, 26 Feb 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</guid>
-            <pubDate>Fri, 13 Feb 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Jakarta Patch 8a]]></title>
+            <guid isPermaLink="false">Jakarta Patch 8a</guid>
+            <pubDate>Mon, 26 Feb 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</guid>
-            <pubDate>Fri, 13 Mar 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html</guid>
+            <pubDate>Mon, 28 Nov 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</guid>
-            <pubDate>Fri, 10 Apr 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html</guid>
+            <pubDate>Fri, 13 Jan 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009 Stable 4]]></title>
-            <link>https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</guid>
-            <pubDate>Fri, 01 May 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html</guid>
+            <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009]]></title>
-            <link>https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</guid>
-            <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 3]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html</guid>
+            <pubDate>Tue, 28 Feb 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009 Stable 1]]></title>
-            <link>https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1</guid>
-            <pubDate>Fri, 26 Jun 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 3a]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3a.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3a.html</guid>
+            <pubDate>Wed, 22 Mar 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</guid>
-            <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 4]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html</guid>
+            <pubDate>Mon, 27 Mar 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</guid>
-            <pubDate>Fri, 28 Aug 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 5]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html</guid>
+            <pubDate>Thu, 20 Apr 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009]]></title>
-            <link>https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes</guid>
-            <pubDate>Fri, 25 Sep 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 6]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html</guid>
+            <pubDate>Mon, 05 Jun 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Update]]></title>
-            <link>https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</guid>
+            <title><![CDATA[Istanbul Patch 6a]]></title>
+            <guid isPermaLink="false">Istanbul Patch 6a</guid>
             <pubDate>Invalid Date</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</guid>
-            <pubDate>Fri, 23 Oct 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 6b]]></title>
+            <guid isPermaLink="false">Istanbul Patch 6b</guid>
+            <pubDate>Invalid Date</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</guid>
-            <pubDate>Fri, 20 Nov 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 7]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html</guid>
+            <pubDate>Thu, 06 Jul 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</guid>
-            <pubDate>Fri, 18 Dec 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 8]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html</guid>
+            <pubDate>Fri, 28 Jul 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010]]></title>
-            <link>https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes</guid>
-            <pubDate>Fri, 22 Jan 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 9]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html</guid>
+            <pubDate>Thu, 31 Aug 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</guid>
-            <pubDate>Fri, 19 Feb 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 9a]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html</guid>
+            <pubDate>Thu, 31 Aug 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</guid>
-            <pubDate>Fri, 19 Mar 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 10]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html</guid>
+            <pubDate>Wed, 25 Oct 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</guid>
-            <pubDate>Fri, 16 Apr 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 10a]]></title>
+            <guid isPermaLink="false">Istanbul Patch 10a</guid>
+            <pubDate>Tue, 12 Dec 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010]]></title>
-            <link>https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes</guid>
-            <pubDate>Sun, 04 Jul 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 10b]]></title>
+            <guid isPermaLink="false">Istanbul Patch 10b</guid>
+            <pubDate>Mon, 08 Jan 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</guid>
-            <pubDate>Fri, 09 Jul 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 10c]]></title>
+            <guid isPermaLink="false">Istanbul Patch 10c</guid>
+            <pubDate>Mon, 05 Feb 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</guid>
-            <pubDate>Fri, 06 Aug 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 11]]></title>
+            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html</guid>
+            <pubDate>Fri, 16 Feb 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</guid>
-            <pubDate>Fri, 03 Sep 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Istanbul Patch 11a]]></title>
+            <guid isPermaLink="false">Istanbul Patch 11a</guid>
+            <pubDate>Fri, 13 Apr 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010]]></title>
-            <link>https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes</guid>
-            <pubDate>Fri, 01 Oct 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html</guid>
+            <pubDate>Thu, 28 Apr 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Update]]></title>
-            <link>https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update</guid>
-            <pubDate>Fri, 08 Oct 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html</guid>
+            <pubDate>Fri, 10 Jun 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</guid>
-            <pubDate>Fri, 29 Oct 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html</guid>
+            <pubDate>Thu, 07 Jul 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Stable 1 Update]]></title>
-            <link>https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</guid>
-            <pubDate>Fri, 12 Nov 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 3]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html</guid>
+            <pubDate>Fri, 05 Aug 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</guid>
-            <pubDate>Fri, 03 Dec 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 4]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html</guid>
+            <pubDate>Wed, 31 Aug 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Stable 2 Update]]></title>
-            <link>https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</guid>
-            <pubDate>Wed, 08 Dec 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 5]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html</guid>
+            <pubDate>Wed, 21 Sep 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</guid>
-            <pubDate>Fri, 07 Jan 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 6]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html</guid>
+            <pubDate>Thu, 20 Oct 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2011]]></title>
-            <link>https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes</guid>
-            <pubDate>Fri, 04 Feb 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 7]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html</guid>
+            <pubDate>Thu, 17 Nov 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2011 Update]]></title>
-            <link>https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update</guid>
-            <pubDate>Thu, 10 Mar 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 8]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html</guid>
+            <pubDate>Thu, 15 Dec 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 2011 Preview 1]]></title>
-            <link>https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</guid>
-            <pubDate>Fri, 04 Mar 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 9]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html</guid>
+            <pubDate>Tue, 14 Feb 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 2011 Preview 2]]></title>
-            <link>https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</guid>
-            <pubDate>Fri, 08 Apr 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 9a]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9a.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9a.html</guid>
+            <pubDate>Wed, 22 Mar 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 2011 Preview 3]]></title>
-            <link>https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</guid>
-            <pubDate>Fri, 06 May 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 10]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html</guid>
+            <pubDate>Thu, 04 May 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 2011]]></title>
-            <link>https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes</guid>
-            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 11]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</guid>
+            <pubDate>Fri, 09 Jun 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 11 Update]]></title>
-            <link>https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update</guid>
-            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 11b]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</guid>
+            <pubDate>Fri, 09 Jun 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 11 Patch 2]]></title>
-            <link>https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2</guid>
-            <pubDate>Fri, 21 Oct 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 12]]></title>
+            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html</guid>
+            <pubDate>Thu, 24 Aug 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 11 Patch 3]]></title>
-            <link>https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3</guid>
-            <pubDate>Tue, 22 Nov 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Helsinki Patch 12a]]></title>
+            <guid isPermaLink="false">Helsinki Patch 12a</guid>
+            <pubDate>Thu, 24 Aug 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 11 Patch 4]]></title>
-            <link>https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4</guid>
-            <pubDate>Wed, 07 Mar 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html</guid>
+            <pubDate>Tue, 03 Nov 2015 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 11 Patch 5]]></title>
-            <link>https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5</guid>
-            <pubDate>Sat, 07 Jul 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html</guid>
+            <pubDate>Wed, 25 Nov 2015 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen aka October 2011]]></title>
-            <link>https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes</guid>
-            <pubDate>Thu, 01 Dec 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</guid>
+            <pubDate>Fri, 22 Jan 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 1]]></title>
-            <link>https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1</guid>
-            <pubDate>Wed, 21 Dec 2011 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 3]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</guid>
+            <pubDate>Fri, 22 Jan 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 2]]></title>
-            <link>https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2</guid>
-            <pubDate>Mon, 16 Jan 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 4]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html</guid>
+            <pubDate>Tue, 16 Feb 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 3]]></title>
-            <link>https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3</guid>
-            <pubDate>Wed, 25 Apr 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 5]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html</guid>
+            <pubDate>Wed, 23 Mar 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 4]]></title>
-            <link>https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4</guid>
-            <pubDate>Fri, 18 May 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 6]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html</guid>
+            <pubDate>Tue, 19 Apr 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 5]]></title>
-            <link>https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5</guid>
-            <pubDate>Thu, 14 Jun 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 7]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html</guid>
+            <pubDate>Sat, 21 May 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 6]]></title>
-            <link>https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6</guid>
-            <pubDate>Fri, 06 Jul 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 8]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html</guid>
+            <pubDate>Tue, 16 Aug 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 7]]></title>
-            <link>https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7</guid>
-            <pubDate>Mon, 06 Aug 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 9]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html</guid>
+            <pubDate>Wed, 28 Sep 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 8]]></title>
-            <link>https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8</guid>
-            <pubDate>Tue, 11 Sep 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 10]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html</guid>
+            <pubDate>Thu, 24 Nov 2016 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 9]]></title>
-            <link>https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9</guid>
-            <pubDate>Mon, 15 Oct 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Geneva Patch 11]]></title>
+            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html</link>
+            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html</guid>
+            <pubDate>Thu, 23 Feb 2017 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 10]]></title>
-            <link>https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10</guid>
-            <pubDate>Thu, 15 Nov 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fuji]]></title>
+            <link>https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes</guid>
+            <pubDate>Fri, 23 Jan 2015 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen Patch 11]]></title>
-            <link>https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11</guid>
-            <pubDate>Thu, 20 Dec 2012 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fuji Patch 1]]></title>
+            <link>https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1</guid>
+            <pubDate>Sat, 21 Feb 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 2]]></title>
+            <link>https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2</guid>
+            <pubDate>Mon, 16 Mar 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 3]]></title>
+            <link>https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3</guid>
+            <pubDate>Tue, 14 Apr 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 4]]></title>
+            <link>https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4</guid>
+            <pubDate>Thu, 14 May 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 5]]></title>
+            <link>https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5</guid>
+            <pubDate>Tue, 09 Jun 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 6]]></title>
+            <link>https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6</guid>
+            <pubDate>Mon, 13 Jul 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 7]]></title>
+            <link>https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7</guid>
+            <pubDate>Mon, 03 Aug 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 8]]></title>
+            <link>https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8</guid>
+            <pubDate>Thu, 03 Sep 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 9]]></title>
+            <link>https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9</guid>
+            <pubDate>Fri, 25 Sep 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 10]]></title>
+            <link>https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10</guid>
+            <pubDate>Thu, 29 Oct 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 11]]></title>
+            <link>https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11</guid>
+            <pubDate>Mon, 30 Nov 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 12]]></title>
+            <link>https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12</guid>
+            <pubDate>Thu, 11 Feb 2016 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fuji Patch 13]]></title>
+            <link>https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13</guid>
+            <pubDate>Wed, 04 May 2016 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[TrackHi]]></title>
+            <guid isPermaLink="false">TrackHi</guid>
+            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[TrackHi Patch 0]]></title>
+            <guid isPermaLink="false">TrackHi Patch 0</guid>
+            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka]]></title>
+            <link>https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes</guid>
+            <pubDate>Tue, 06 May 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 0]]></title>
+            <guid isPermaLink="false">Eureka Patch 0</guid>
+            <pubDate>Tue, 06 May 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 1]]></title>
+            <link>https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1</guid>
+            <pubDate>Tue, 03 Jun 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 2]]></title>
+            <link>https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2</guid>
+            <pubDate>Wed, 25 Jun 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 3]]></title>
+            <link>https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3</guid>
+            <pubDate>Mon, 21 Jul 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 4]]></title>
+            <link>https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4</guid>
+            <pubDate>Tue, 19 Aug 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 5]]></title>
+            <link>https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5</guid>
+            <pubDate>Tue, 09 Sep 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 6]]></title>
+            <link>https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6</guid>
+            <pubDate>Sun, 19 Oct 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 7]]></title>
+            <link>https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7</guid>
+            <pubDate>Fri, 07 Nov 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 8]]></title>
+            <link>https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8</guid>
+            <pubDate>Thu, 08 Jan 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 9]]></title>
+            <link>https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9</guid>
+            <pubDate>Wed, 04 Feb 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 10]]></title>
+            <link>https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10</guid>
+            <pubDate>Thu, 02 Apr 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 11]]></title>
+            <link>https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11</guid>
+            <pubDate>Tue, 19 May 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 12]]></title>
+            <link>https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12</guid>
+            <pubDate>Tue, 25 Aug 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Eureka Patch 13]]></title>
+            <link>https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13</guid>
+            <pubDate>Tue, 17 Nov 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin]]></title>
+            <link>https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes</guid>
+            <pubDate>Tue, 22 Oct 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 1]]></title>
+            <link>https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1</guid>
+            <pubDate>Fri, 04 Apr 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 2]]></title>
+            <link>https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2</guid>
+            <pubDate>Tue, 13 May 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 3]]></title>
+            <link>https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3</guid>
+            <pubDate>Thu, 12 Jun 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 4]]></title>
+            <link>https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4</guid>
+            <pubDate>Mon, 07 Jul 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 5]]></title>
+            <link>https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5</guid>
+            <pubDate>Tue, 29 Jul 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 6]]></title>
+            <link>https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6</guid>
+            <pubDate>Tue, 23 Sep 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 7]]></title>
+            <link>https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7</guid>
+            <pubDate>Tue, 18 Nov 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Dublin Patch 8]]></title>
+            <link>https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8</guid>
+            <pubDate>Tue, 24 Feb 2015 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary]]></title>
+            <link>https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes</guid>
+            <pubDate>Thu, 28 Feb 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 1]]></title>
+            <link>https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1</guid>
+            <pubDate>Mon, 22 Jul 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 2]]></title>
+            <link>https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2</guid>
+            <pubDate>Thu, 08 Aug 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 3]]></title>
+            <link>https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3</guid>
+            <pubDate>Tue, 12 Nov 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 4]]></title>
+            <link>https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4</guid>
+            <pubDate>Tue, 17 Dec 2013 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 5]]></title>
+            <link>https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5</guid>
+            <pubDate>Tue, 18 Mar 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 6]]></title>
+            <link>https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6</guid>
+            <pubDate>Tue, 27 May 2014 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Calgary Patch 7]]></title>
+            <link>https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7</guid>
+            <pubDate>Tue, 05 Aug 2014 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Berlin]]></title>
@@ -540,700 +802,424 @@
             <pubDate>Tue, 17 Dec 2013 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary]]></title>
-            <link>https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes</guid>
-            <pubDate>Thu, 28 Feb 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen aka October 2011]]></title>
+            <link>https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes</guid>
+            <pubDate>Thu, 01 Dec 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 1]]></title>
-            <link>https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1</guid>
-            <pubDate>Mon, 22 Jul 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 1]]></title>
+            <link>https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1</guid>
+            <pubDate>Wed, 21 Dec 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 2]]></title>
-            <link>https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170120073524/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_2</guid>
-            <pubDate>Thu, 08 Aug 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 2]]></title>
+            <link>https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212113/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_2</guid>
+            <pubDate>Mon, 16 Jan 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 3]]></title>
-            <link>https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191724/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_3</guid>
-            <pubDate>Tue, 12 Nov 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 3]]></title>
+            <link>https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513220716/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_3</guid>
+            <pubDate>Wed, 25 Apr 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 4]]></title>
-            <link>https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513192526/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_4</guid>
-            <pubDate>Tue, 17 Dec 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 4]]></title>
+            <link>https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513201636/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_4</guid>
+            <pubDate>Fri, 18 May 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 5]]></title>
-            <link>https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_5</guid>
-            <pubDate>Tue, 18 Mar 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 5]]></title>
+            <link>https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513200516/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_5</guid>
+            <pubDate>Thu, 14 Jun 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 6]]></title>
-            <link>https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191522/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_6</guid>
-            <pubDate>Tue, 27 May 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 6]]></title>
+            <link>https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513194706/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_6</guid>
+            <pubDate>Fri, 06 Jul 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Calgary Patch 7]]></title>
-            <link>https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203459/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_7</guid>
-            <pubDate>Tue, 05 Aug 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 7]]></title>
+            <link>https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513213513/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_7</guid>
+            <pubDate>Mon, 06 Aug 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin]]></title>
-            <link>https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes</guid>
-            <pubDate>Tue, 22 Oct 2013 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 8]]></title>
+            <link>https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191259/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_8</guid>
+            <pubDate>Tue, 11 Sep 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 1]]></title>
-            <link>https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1</guid>
-            <pubDate>Fri, 04 Apr 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 9]]></title>
+            <link>https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513200319/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_9</guid>
+            <pubDate>Mon, 15 Oct 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 2]]></title>
-            <link>https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212425/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_2</guid>
-            <pubDate>Tue, 13 May 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 10]]></title>
+            <link>https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20160128170912/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_10</guid>
+            <pubDate>Thu, 15 Nov 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 3]]></title>
-            <link>https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203503/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_3</guid>
-            <pubDate>Thu, 12 Jun 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Aspen Patch 11]]></title>
+            <link>https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513190809/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_11</guid>
+            <pubDate>Thu, 20 Dec 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 4]]></title>
-            <link>https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513203826/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_4</guid>
-            <pubDate>Mon, 07 Jul 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 2011]]></title>
+            <link>https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes</guid>
+            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 5]]></title>
-            <link>https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212143/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_5</guid>
-            <pubDate>Tue, 29 Jul 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 11 Update]]></title>
+            <link>https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update</guid>
+            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 6]]></title>
-            <link>https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170520093339/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_6</guid>
-            <pubDate>Tue, 23 Sep 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 11 Patch 2]]></title>
+            <link>https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513194000/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_2</guid>
+            <pubDate>Fri, 21 Oct 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 7]]></title>
-            <link>https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160812163901/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_7</guid>
-            <pubDate>Tue, 18 Nov 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 11 Patch 3]]></title>
+            <link>https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20171126164631/http://wiki.servicenow.com/index.php?title=Release:June11_Patch_3</guid>
+            <pubDate>Tue, 22 Nov 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Dublin Patch 8]]></title>
-            <link>https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20161118225559/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_8</guid>
-            <pubDate>Tue, 24 Feb 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 11 Patch 4]]></title>
+            <link>https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513213501/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_4</guid>
+            <pubDate>Wed, 07 Mar 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka]]></title>
-            <link>https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes</guid>
-            <pubDate>Tue, 06 May 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 11 Patch 5]]></title>
+            <link>https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212827/http://wiki.servicenow.com:80/index.php?title=Release:June11_Patch_5</guid>
+            <pubDate>Sat, 07 Jul 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 0]]></title>
-            <link>https://sndocs.jacebenson.com/#Eureka%20Patch%200</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Eureka%20Patch%200</guid>
-            <pubDate>Tue, 06 May 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 2011 Preview 3]]></title>
+            <link>https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</guid>
+            <pubDate>Fri, 06 May 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 1]]></title>
-            <link>https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160129073712/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_1</guid>
-            <pubDate>Tue, 03 Jun 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 2011 Preview 2]]></title>
+            <link>https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</guid>
+            <pubDate>Fri, 08 Apr 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 2]]></title>
-            <link>https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513220803/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_2</guid>
-            <pubDate>Wed, 25 Jun 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[June 2011 Preview 1]]></title>
+            <link>https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</guid>
+            <pubDate>Fri, 04 Mar 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 3]]></title>
-            <link>https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513192856/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_3</guid>
-            <pubDate>Mon, 21 Jul 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2011]]></title>
+            <link>https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes</guid>
+            <pubDate>Fri, 04 Feb 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 4]]></title>
-            <link>https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513191320/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_4</guid>
-            <pubDate>Tue, 19 Aug 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2011 Update]]></title>
+            <link>https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update</guid>
+            <pubDate>Thu, 10 Mar 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 5]]></title>
-            <link>https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212626/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_5</guid>
-            <pubDate>Tue, 09 Sep 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</guid>
+            <pubDate>Fri, 07 Jan 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 6]]></title>
-            <link>https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513193020/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_6</guid>
-            <pubDate>Sun, 19 Oct 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</guid>
+            <pubDate>Fri, 03 Dec 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 7]]></title>
-            <link>https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160918152258/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_7</guid>
-            <pubDate>Fri, 07 Nov 2014 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 2 Update]]></title>
+            <link>https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</guid>
+            <pubDate>Wed, 08 Dec 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 8]]></title>
-            <link>https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20150625021523/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_8</guid>
-            <pubDate>Thu, 08 Jan 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</guid>
+            <pubDate>Fri, 29 Oct 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 9]]></title>
-            <link>https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20150625033157/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_9</guid>
-            <pubDate>Wed, 04 Feb 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 1 Update]]></title>
+            <link>https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</guid>
+            <pubDate>Fri, 12 Nov 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 10]]></title>
-            <link>https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151009000644/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_10</guid>
-            <pubDate>Thu, 02 Apr 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010]]></title>
+            <link>https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes</guid>
+            <pubDate>Fri, 01 Oct 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 11]]></title>
-            <link>https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160424225634/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_11</guid>
-            <pubDate>Tue, 19 May 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Update]]></title>
+            <link>https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update</guid>
+            <pubDate>Fri, 08 Oct 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 12]]></title>
-            <link>https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160305043254/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_12</guid>
-            <pubDate>Tue, 25 Aug 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</guid>
+            <pubDate>Fri, 03 Sep 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Eureka Patch 13]]></title>
-            <link>https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160328163443/http://wiki.servicenow.com:80/index.php?title=Release:Eureka_Patch_13</guid>
-            <pubDate>Tue, 17 Nov 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</guid>
+            <pubDate>Fri, 06 Aug 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[TrackHi]]></title>
-            <link>#</link>
-            <guid isPermaLink="true">#</guid>
-            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</guid>
+            <pubDate>Fri, 09 Jul 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[TrackHi Patch 0]]></title>
-            <link>https://sndocs.jacebenson.com/#TrackHi%20Patch%200</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#TrackHi%20Patch%200</guid>
-            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010]]></title>
+            <link>https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes</guid>
+            <pubDate>Sun, 04 Jul 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji]]></title>
-            <link>https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes</guid>
-            <pubDate>Fri, 23 Jan 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</guid>
+            <pubDate>Fri, 16 Apr 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 1]]></title>
-            <link>https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1</guid>
-            <pubDate>Sat, 21 Feb 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</guid>
+            <pubDate>Fri, 19 Mar 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 2]]></title>
-            <link>https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151021045618/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_2</guid>
-            <pubDate>Mon, 16 Mar 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</guid>
+            <pubDate>Fri, 19 Feb 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 3]]></title>
-            <link>https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160502161341/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_3</guid>
-            <pubDate>Tue, 14 Apr 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010]]></title>
+            <link>https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes</guid>
+            <pubDate>Fri, 22 Jan 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 4]]></title>
-            <link>https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151020095547/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_4</guid>
-            <pubDate>Thu, 14 May 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</guid>
+            <pubDate>Fri, 18 Dec 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 5]]></title>
-            <link>https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20170119073019/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_5</guid>
-            <pubDate>Tue, 09 Jun 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</guid>
+            <pubDate>Fri, 20 Nov 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 6]]></title>
-            <link>https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151018175849/http://wiki.servicenow.com/index.php?title=Release:Fuji_Patch_6</guid>
-            <pubDate>Mon, 13 Jul 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2009 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</guid>
+            <pubDate>Fri, 23 Oct 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 7]]></title>
-            <link>https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151024000829/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_7</guid>
-            <pubDate>Mon, 03 Aug 2015 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2009]]></title>
+            <link>https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes</guid>
+            <pubDate>Fri, 25 Sep 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fuji Patch 8]]></title>
-            <link>https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20151226072656/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_8</guid>
-            <pubDate>Thu, 03 Sep 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fuji Patch 9]]></title>
-            <link>https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160115193840/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_9</guid>
-            <pubDate>Fri, 25 Sep 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fuji Patch 10]]></title>
-            <link>https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20160718085623/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_10</guid>
-            <pubDate>Thu, 29 Oct 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fuji Patch 11]]></title>
-            <link>https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20161118225616/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_11</guid>
-            <pubDate>Mon, 30 Nov 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fuji Patch 12]]></title>
-            <link>https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20161118225620/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_12</guid>
-            <pubDate>Thu, 11 Feb 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fuji Patch 13]]></title>
-            <link>https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13</link>
-            <guid isPermaLink="true">https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13</guid>
-            <pubDate>Wed, 04 May 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html</guid>
-            <pubDate>Tue, 03 Nov 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 1]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html</guid>
-            <pubDate>Wed, 25 Nov 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 2]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</guid>
-            <pubDate>Fri, 22 Jan 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 3]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html</guid>
-            <pubDate>Fri, 22 Jan 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 4]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html</guid>
-            <pubDate>Tue, 16 Feb 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 5]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-5.html</guid>
-            <pubDate>Wed, 23 Mar 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 6]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-6.html</guid>
-            <pubDate>Tue, 19 Apr 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 7]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-7.html</guid>
-            <pubDate>Sat, 21 May 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 8]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-8.html</guid>
-            <pubDate>Tue, 16 Aug 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 9]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-9.html</guid>
-            <pubDate>Wed, 28 Sep 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 10]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-10.html</guid>
-            <pubDate>Thu, 24 Nov 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Geneva Patch 11]]></title>
-            <link>https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html</guid>
-            <pubDate>Thu, 23 Feb 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html</guid>
-            <pubDate>Thu, 28 Apr 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 1]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html</guid>
-            <pubDate>Fri, 10 Jun 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 2]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-2.html</guid>
-            <pubDate>Thu, 07 Jul 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 3]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-3.html</guid>
-            <pubDate>Fri, 05 Aug 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 4]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-4.html</guid>
-            <pubDate>Wed, 31 Aug 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 5]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html</guid>
-            <pubDate>Wed, 21 Sep 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 6]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-6.html</guid>
-            <pubDate>Thu, 20 Oct 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 7]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-7.html</guid>
-            <pubDate>Thu, 17 Nov 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 8]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-8.html</guid>
-            <pubDate>Thu, 15 Dec 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 9]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html</guid>
-            <pubDate>Tue, 14 Feb 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 9a]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9a.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9a.html</guid>
-            <pubDate>Wed, 22 Mar 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 10]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-10.html</guid>
-            <pubDate>Thu, 04 May 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 11]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</guid>
-            <pubDate>Fri, 09 Jun 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 11b]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html</guid>
-            <pubDate>Fri, 09 Jun 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 12]]></title>
-            <link>https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html</guid>
-            <pubDate>Thu, 24 Aug 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Helsinki Patch 12a]]></title>
-            <link>https://sndocs.jacebenson.com/#Helsinki%20Patch%2012a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Helsinki%20Patch%2012a</guid>
-            <pubDate>Thu, 24 Aug 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html</guid>
-            <pubDate>Mon, 28 Nov 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 1]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html</guid>
-            <pubDate>Fri, 13 Jan 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 2]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-2.html</guid>
-            <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 3]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html</guid>
-            <pubDate>Tue, 28 Feb 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 3a]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3a.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3a.html</guid>
-            <pubDate>Wed, 22 Mar 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 4]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html</guid>
-            <pubDate>Mon, 27 Mar 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 5]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html</guid>
-            <pubDate>Thu, 20 Apr 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 6]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html</guid>
-            <pubDate>Mon, 05 Jun 2017 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Istanbul Patch 6a]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%206a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%206a</guid>
+            <title><![CDATA[Fall 2009 Update]]></title>
+            <link>https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</guid>
             <pubDate>Invalid Date</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 6b]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%206b</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%206b</guid>
-            <pubDate>Invalid Date</pubDate>
+            <title><![CDATA[Spring 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</guid>
+            <pubDate>Fri, 28 Aug 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 7]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html</guid>
-            <pubDate>Thu, 06 Jul 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</guid>
+            <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 8]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html</guid>
-            <pubDate>Fri, 28 Jul 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2009 Stable 1]]></title>
+            <link>https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1</guid>
+            <pubDate>Fri, 26 Jun 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 9]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html</guid>
-            <pubDate>Thu, 31 Aug 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2009]]></title>
+            <link>https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</guid>
+            <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 9a]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html</guid>
-            <pubDate>Thu, 31 Aug 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 4]]></title>
+            <link>https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</guid>
+            <pubDate>Fri, 01 May 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 10]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html</guid>
-            <pubDate>Wed, 25 Oct 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</guid>
+            <pubDate>Fri, 10 Apr 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 10a]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%2010a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%2010a</guid>
-            <pubDate>Tue, 12 Dec 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</guid>
+            <pubDate>Fri, 13 Mar 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 10b]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%2010b</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%2010b</guid>
-            <pubDate>Mon, 08 Jan 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</guid>
+            <pubDate>Fri, 13 Feb 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 10c]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%2010c</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%2010c</guid>
-            <pubDate>Mon, 05 Feb 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009]]></title>
+            <link>https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes</guid>
+            <pubDate>Fri, 09 Jan 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 11]]></title>
-            <link>https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html</guid>
-            <pubDate>Fri, 16 Feb 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2008 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</guid>
+            <pubDate>Fri, 05 Dec 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Istanbul Patch 11a]]></title>
-            <link>https://sndocs.jacebenson.com/#Istanbul%20Patch%2011a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Istanbul%20Patch%2011a</guid>
-            <pubDate>Fri, 13 Apr 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2008 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</guid>
+            <pubDate>Fri, 31 Oct 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html</guid>
-            <pubDate>Thu, 15 Jun 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2008 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1</guid>
+            <pubDate>Wed, 17 Sep 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 1]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html</guid>
-            <pubDate>Mon, 31 Jul 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2008]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Fri, 22 Aug 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 2]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html</guid>
-            <pubDate>Fri, 18 Aug 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2007]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Fri, 23 Nov 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 3]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html</guid>
-            <pubDate>Wed, 13 Sep 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2007 Enhancement Patch]]></title>
+            <link>https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</guid>
+            <pubDate>Fri, 30 Nov 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 3a]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html</guid>
-            <pubDate>Mon, 13 Nov 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2007 aka July 2007]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Thu, 05 Jul 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 3b]]></title>
-            <link>https://sndocs.jacebenson.com/#Jakarta%20Patch%203b</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Jakarta%20Patch%203b</guid>
-            <pubDate>Wed, 06 Dec 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2007 Enhancement Patch]]></title>
+            <link>https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch</guid>
+            <pubDate>Sun, 29 Jul 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 4]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html</guid>
-            <pubDate>Fri, 06 Oct 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[March 2007]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Fri, 02 Mar 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 5]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html</guid>
-            <pubDate>Thu, 02 Nov 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[November 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Fri, 17 Nov 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 6]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html</guid>
-            <pubDate>Thu, 30 Nov 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[August 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Mon, 28 Aug 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 6a]]></title>
-            <link>https://sndocs.jacebenson.com/#Jakarta%20Patch%206a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Jakarta%20Patch%206a</guid>
-            <pubDate>Tue, 02 Jan 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[July 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Tue, 04 Jul 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 7]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html</guid>
-            <pubDate>Fri, 05 Jan 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[May 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Sun, 21 May 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 8]]></title>
-            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-8.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-8.html</guid>
-            <pubDate>Mon, 26 Feb 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[April 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Sat, 15 Apr 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Jakarta Patch 8a]]></title>
-            <link>https://sndocs.jacebenson.com/#Jakarta%20Patch%208a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Jakarta%20Patch%208a</guid>
-            <pubDate>Mon, 26 Feb 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[March 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Sat, 18 Mar 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Kingston]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html</guid>
-            <pubDate>Thu, 16 Nov 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[February 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Sun, 12 Feb 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Kingston Patch 0]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html</guid>
-            <pubDate>Thu, 16 Nov 2017 00:00:00 GMT</pubDate>
+            <title><![CDATA[January 2006]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</guid>
+            <pubDate>Fri, 27 Jan 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Kingston Patch 1]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html</guid>
-            <pubDate>Thu, 11 Jan 2018 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Kingston Patch 2]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html</guid>
-            <pubDate>Thu, 01 Feb 2018 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Kingston Patch 3]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html</guid>
-            <pubDate>Thu, 08 Mar 2018 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Kingston Patch 3a]]></title>
-            <link>https://sndocs.jacebenson.com/#Kingston%20Patch%203a</link>
-            <guid isPermaLink="true">https://sndocs.jacebenson.com/#Kingston%20Patch%203a</guid>
-            <pubDate>Thu, 08 Mar 2018 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Kingston Patch 4]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html</link>
-            <guid isPermaLink="true">https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html</guid>
-            <pubDate>Fri, 13 Apr 2018 00:00:00 GMT</pubDate>
+            <title><![CDATA[Glidesoft 2004]]></title>
+            <link>https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm</link>
+            <guid isPermaLink="true">https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm</guid>
+            <pubDate>Sat, 04 Dec 2004 00:00:00 GMT</pubDate>
         </item>
     </channel>
 </rss>

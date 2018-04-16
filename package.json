@@ -26,6 +26,7 @@
     "request": "^2.83.0",
     "rss": "^1.2.2",
     "standard": "^10.0.3",
+    "table-builder": "^2.1.1",
     "threads": "^0.10.1",
     "xmldom": "^0.1.27",
     "xpath": "0.0.27",
