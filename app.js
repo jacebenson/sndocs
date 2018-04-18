@@ -1,6 +1,6 @@
 var fs =  require('fs');
-var data = require('./data.json');
-var families = data.reverse();
+var feedData = require('./data.json');
+var families = feedData.reverse();
 
 /**
  * Generate the RSS feed
@@ -41,7 +41,7 @@ var feed = new RSS({
   ]
 });
 //console.log(versions);
-families.map(function(family){
+feedData.map(function(family){
   var familyStr = family.name + '';
   //console.log(family.name);
   feed.item({
@@ -115,7 +115,7 @@ var tableHTML =   (new Table({'class': 'table table-responsive table-hover'}))
     returnHTML += '</div>';
     returnHTML += '</td>';
   });
-  console.log(row.name + ': ' + patches.length);
+  //console.log(row.name + ': ' + patches.length);
   for(var col = patches.length;col<headerColSpan;col++){
     returnHTML += '<td></td>';
   }
