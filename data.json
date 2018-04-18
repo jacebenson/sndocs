@@ -908,19 +908,33 @@
     ]
   },
   {
-  "name": "TrackHi",
-  "url": "",
-  "date": "2015-06-23",
-  "patches": [
+    "name": "TrackHi",
+    "url": "",
+    "date": "2015-06-23",
+    "patches": [
+      {
+        "number":"0",
+        "name": "TrackHi Patch 0",
+        "url": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/trackhi/0/scripts/",
+        "date": "2015-06-23"
+      }
+    ]
+    },
     {
-      "number":"0",
-      "name": "TrackHi Patch 0",
+      "name": "TrackSurf",
       "url": "",
-      "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/trackhi/0/scripts/",
-      "date": "2015-06-23"
-    }
-  ]
-  },
+      "date": "2015-06-24",
+      "patches": [
+        {
+          "number":"0",
+          "name": "TrackSurf Patch 0",
+          "url": "",
+          "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/tracksurf/0/scripts/",
+          "date": "2015-06-24"
+        }
+      ]
+      },
   {
     "name": "Fuji",
     "url": "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",

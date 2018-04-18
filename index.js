@@ -23,10 +23,10 @@ config.instances.map(function (instance) {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload,
-    timeout: 30000
+    timeout: 10000
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 
-    // console.log(url)
+    console.log('Requesting: ' + url);
     // console.log(response.body)
     if(error){
       if(error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT'){
@@ -35,7 +35,7 @@ config.instances.map(function (instance) {
         console.log(requestOptions.url);
         console.error(error);
       }
-    } else {
+    } else { // no error
       var doc = new DOM().parseFromString(response.body);
       var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc)
       if(instance.indexOf('.')>=0){
@@ -43,6 +43,8 @@ config.instances.map(function (instance) {
       } else {
         url = 'https://' + instance + '.service-now.com'
       }
+      console.log('BuildTag:   ' + buildTag);
+      console.log('---------------------------------------------------');
       addToVersions({
         url: url,
         buildTag: buildTag
@@ -59,7 +61,7 @@ config.instances.map(function (instance) {
  */
 function addToVersions (obj) {
   try {
-    console.log(obj.buildTag + ': ' + obj.url)
+    //console.log(obj.buildTag + ': ' + obj.url)
     var url = obj.url
     counter++
     var family = obj.buildTag.split('glide-')[1].split('-')[0]
