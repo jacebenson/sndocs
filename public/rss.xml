@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 18 Apr 2018 01:38:14 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 18 Apr 2018 01:45:29 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Wed, 18 Apr 2018 01:38:14 GMT</pubDate>
+        <pubDate>Wed, 18 Apr 2018 01:45:29 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -794,6 +794,7 @@
             <title><![CDATA[Berlin Patch 14]]></title>
             <link>https://web.archive.org/web/20171126170228/http://wiki.servicenow.com/index.php?title=Release:Berlin_Patch_14</link>
             <guid isPermaLink="true">https://web.archive.org/web/20171126170228/http://wiki.servicenow.com/index.php?title=Release:Berlin_Patch_14</guid>
+            <pubDate>Tue, 26 Nov 2013 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Berlin Patch 15]]></title>
@@ -1057,7 +1058,7 @@
             <title><![CDATA[Fall 2009 Update]]></title>
             <link>https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</link>
             <guid isPermaLink="true">https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update</guid>
-            <pubDate>Invalid Date</pubDate>
+            <pubDate>Sat, 26 Sep 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Spring 2009 Stable 3]]></title>
