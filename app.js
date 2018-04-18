@@ -160,7 +160,13 @@ indexHTML += '        <script src="./js/script.js"></script>';
 indexHTML += '    </header>';
 indexHTML += '    <div class="container-fluid">';
 indexHTML += '        <div class="row">'
-indexHTML += '            <div class="col-sm-11">Unofficial SN Release List</div>'
+indexHTML += '            <div class="col-sm-7">Unofficial SN Release List</div>'
+indexHTML += '            <div class="col-sm-2">';
+indexHTML += '                <a href="https://gitlab.com/jacebenson/sndocs/commits/master">';
+indexHTML += '                    <img alt="pipeline status" src="https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg" />';
+indexHTML += '                </a>';
+indexHTML += '            </div>';
+indexHTML += '            <div class="col-sm-2">Last Updated:'+new Date().toISOString()+'</div>'
 indexHTML += '            <div class="col-sm-1"><a href="/rss.xml">RSS <i class="fa fa-rss-square" aria-hidden="true"></i></a></div>'
 indexHTML += '        </div>'
 indexHTML += tableHTML;
