@@ -44,7 +44,7 @@ config.instances.map(function (instance) {
         url = 'https://' + instance + '.service-now.com'
       }
       console.log('BuildTag:   ' + buildTag);
-      console.log('---------------------------------------------------');
+      console.log('-------------------------' + (counter + 1) +'/'+ config.instances.length + '--------------------------');
       addToVersions({
         url: url,
         buildTag: buildTag
@@ -97,7 +97,6 @@ function addToVersions (obj) {
       }
     }
     if (counter === config.instances.length) {
-      console.log('starting to create files');
       createSources()
     }
   } catch (err) {
@@ -107,6 +106,7 @@ function addToVersions (obj) {
 
 function createSources () {
   //console.log(JSON.stringify(versions, '', '  '))
+  console.log('starting to create files');
   fs.writeFile('./versions.json', JSON.stringify(versions, '', '  '),function(err){
     if(err){
       return console.log(err)
