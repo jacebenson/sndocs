@@ -1505,9 +1505,17 @@
         "number": "8a",
         "name": "Jakarta Patch 8a",
         "url": "",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682388",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8a/scripts/",
         "date": "2018-02-26"
+      },
+      {
+        "number": "8b",
+        "name": "Jakarta Patch 8b",
+        "url": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684026",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8b/scripts/",
+        "date": "2018-04-05"
       }
     ],
     "features": [

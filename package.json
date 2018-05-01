@@ -4,9 +4,8 @@
   "description": "Download scripts and make html pages for the,.",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
     "download": "node index.js",
-    "standard": "./node_modules/.bin/standard --fix"
+    "build": "node index.js && node app.js"
   },
   "repository": {
     "type": "git",
@@ -20,22 +19,15 @@
   "homepage": "https://gitlab.com/jacebenson/SNDocs#readme",
   "dependencies": {
     "async": "^2.5.0",
-    "browser-sync": "^2.23.6",
     "js-beautify": "^1.7.4",
     "mkdirp": "^0.5.1",
     "request": "^2.83.0",
     "rss": "^1.2.2",
-    "standard": "^10.0.3",
     "table-builder": "^2.1.1",
     "threads": "^0.10.1",
     "xmldom": "^0.1.27",
     "xpath": "0.0.27",
     "yargs": "^10.1.1"
-  },
-  "standard": {
-    "ignore": [
-      "/sources/"
-    ]
   },
   "devDependencies": {}
 }

@@ -185,20 +185,3 @@ fs.writeFile('./public/index.html', indexHTML, function (err){
   if(err) return console.log(err);
   console.log('created ./index.html');
 });
-
-//for testing
-/**
- * Require Browsersync
- */
-
- var browserSync = require('browser-sync')
-
-/**
- * Run Browsersync with server config
- */
-
- browserSync({
-  server: 'public',
-  files: ['public/*.html', 'public/*.xml', 'public/css/*.css', 'public/js/*.json']
-})
-

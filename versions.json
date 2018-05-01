@@ -10,7 +10,7 @@
     "13": "https://visa.service-now.com/"
   },
   "trackhi": {
-    "0": "https://hi.service-now.com"
+    "0": "https://hisandbox.service-now.com"
   },
   "geneva": {
     "11": "https://sanofi.service-now.com/"
@@ -20,7 +20,7 @@
     "9": "https://csscorp.service-now.com",
     "11": "https://cognizant.service-now.com",
     "12": "https://tnt.service-now.com",
-    "12a": "https://vector.service-now.com",
+    "12a": "https://aspediens.service-now.com",
     "11b": "https://saintfrancis.service-now.com"
   },
   "istanbul": {
@@ -29,16 +29,16 @@
     "4": "https://davita.service-now.com",
     "5": "https://devoteam.service-now.com/",
     "6": "https://wdpr.service-now.com",
-    "7": "https://vodafone.service-now.com",
+    "7": "https://dell.service-now.com",
     "8": "https://macys.service-now.com/",
     "9": "https://tiffany.service-now.com/",
-    "10": "https://tacoma.service-now.com",
-    "11": "https://velux.service-now.com",
+    "10": "https://coretech.service-now.com",
+    "11": "https://grupoboticario.service-now.com",
     "9a": "https://nasa.service-now.com",
-    "10a": "https://thewhitecompany.service-now.com",
-    "10b": "https://ngahr.service-now.com",
-    "10c": "https://pentanasolutions.service-now.com",
-    "11a": "https://ucf.service-now.com"
+    "10a": "https://walmart.service-now.com",
+    "10b": "https://asus.service-now.com",
+    "10c": "https://intuit.service-now.com",
+    "11a": "https://qlddet.service-now.com"
   },
   "jakarta": {
     "1": "https://upgrade.service-now.com",
@@ -46,20 +46,21 @@
     "3": "https://medtronictest.service-now.com",
     "4": "https://uchicago.service-now.com",
     "5": "https://unimelb.service-now.com",
-    "6": "https://tcs.service-now.com",
-    "7": "https://irco.service-now.com",
-    "8": "https://une.service-now.com",
+    "6": "https://support.service-now.com",
+    "7": "https://nisa.service-now.com",
+    "8": "https://ictprocurement.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
-    "6a": "https://investcorp.service-now.com",
+    "6a": "https://maersk.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://specsavers.service-now.com"
+    "8a": "https://mwhc.service-now.com",
+    "8b": "https://southwesttest.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
     "1": "https://mas.service-now.com",
-    "2": "https://uoatest.service-now.com",
-    "3": "https://aoldev.service-now.com",
-    "4": "https://mobile.service-now.com",
+    "2": "https://uoadev.service-now.com",
+    "3": "https://paphosgroup.service-now.com",
+    "4": "https://redhat.service-now.com",
     "3a": "https://nielsenpov.service-now.com"
   },
   "london": {},
