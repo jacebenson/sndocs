@@ -45,6 +45,7 @@ feedData.map(function(family){
   var familyStr = family.name + '';
   //console.log(family.name);
   feed.item({
+    guid: family.name,
     title: family.name,
     url: family.url,
     date: family.date
@@ -55,6 +56,7 @@ feedData.map(function(family){
       patch.url = 'https://sndocs.jacebenson.com/#' + encodeURIComponent(patch.name);
     }
     feed.item({
+      guid: patch.name,
       title: patch.name,
       url: patch.url,
       date: patch.date
