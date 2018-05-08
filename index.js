@@ -1,7 +1,7 @@
 // SNDocs
 // ======
 // SNDocs is the unofficial documentation for Servicenow
-var config = require('./config') /* Load the config.instances, and config.endpoints */
+var config = require('./config.json') /* Load the config.instances, and config.endpoints */
 var request = require('request')
 var xpath = require('xpath')
 var DOM = require('xmldom').DOMParser
@@ -61,10 +61,14 @@ config.instances.map(function (instance) {
  */
 function addToVersions (obj) {
   try {
-    //console.log(obj.buildTag + ': ' + obj.url)
+    console.log(obj.buildTag + ': ' + obj.url)
     var url = obj.url
     counter++
-    var family = obj.buildTag.split('glide-')[1].split('-')[0]
+    if(obj.buildTag){
+      var family = obj.buildTag.split('glide-')[1].split('-')[0]
+    } else {
+      var family = 'Unknown';
+    }
     var patch = 0
     if (obj.buildTag.indexOf('patch') >= 0) {
       patch = obj.buildTag.split('patch')[1].split('-')[0]
