@@ -1583,6 +1583,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0683279",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/4/scripts/",
         "date": "2018-04-13"
+      },{
+        "number": "5",
+        "name": "Kingston Patch 5",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-5.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685497",
+        "git": "#",
+        "date": "2018-05-03"
       }
     ],
     "features": [
