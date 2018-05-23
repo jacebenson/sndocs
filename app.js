@@ -1,7 +1,7 @@
 var fs =  require('fs');
 var feedData = require('./data.json');
 var families = feedData.reverse();
-
+//console.log(families)
 /**
  * Generate the RSS feed
  */
@@ -76,6 +76,7 @@ var headerColSpan = 20;
 var Table = require('table-builder');
 var headers = {
   "name": "Family",
+  "url": "Docs",
   "patches": "Patches",
   "features": "Features"
 };
@@ -123,6 +124,24 @@ var tableHTML =   (new Table({'class': 'table table-responsive table-hover'}))
   }
   return returnHTML;
 })
+.setPrism('family', function(cellData,row){
+  var returnHTML = '';
+  if(cellData){
+    returnHTML += cellData;
+  }
+  return returnHTML
+})
+.setPrism('url', function(cellData,row){
+  var returnHTML = '';
+  if(cellData){
+    //returnHTML += cellData;
+    returnHTML += '    <a title="Family Patch Notes" href="'+cellData+'">';
+    returnHTML += '      <i class="fa fa-power-off"></i>';
+    returnHTML += '    </a>';
+
+  }
+  return returnHTML
+})
 .setPrism('features', function(cellData, row){
   var returnHTML = '';
   if(cellData){
@@ -130,6 +149,8 @@ var tableHTML =   (new Table({'class': 'table table-responsive table-hover'}))
     returnHTML += '<div><a href="https://docs.servicenow.com/search?q=' + feature + '">'+feature+'</a></div>'
   })
   return returnHTML;
+  } else {
+    return "Unknown";
   }
 })
 .setData(families)

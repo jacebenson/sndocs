@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 23 May 2018 12:25:03 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 23 May 2018 12:45:15 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Wed, 23 May 2018 12:25:03 GMT</pubDate>
+        <pubDate>Wed, 23 May 2018 12:45:15 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
