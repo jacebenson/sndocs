@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 23 May 2018 12:45:15 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 24 May 2018 05:42:30 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Wed, 23 May 2018 12:45:15 GMT</pubDate>
+        <pubDate>Thu, 24 May 2018 05:42:30 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -24,16 +24,6 @@
         <itunes:image href="https://sndocs.jacebenson.com/favicon.png"/>
         <itunes:category text="Technology">
         </itunes:category>
-        <item>
-            <title><![CDATA[TrackHiNext]]></title>
-            <guid isPermaLink="false">TrackHiNext</guid>
-            <pubDate>Sun, 29 Apr 2018 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[TrackHiNext Patch 0]]></title>
-            <guid isPermaLink="false">TrackHiNext Patch 0</guid>
-            <pubDate>Sun, 29 Apr 2018 00:00:00 GMT</pubDate>
-        </item>
         <item>
             <title><![CDATA[Kingston]]></title>
             <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/kingston-release-notes.html</link>
@@ -68,6 +58,11 @@
             <title><![CDATA[Kingston Patch 3a]]></title>
             <guid isPermaLink="false">Kingston Patch 3a</guid>
             <pubDate>Thu, 08 Mar 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kingston Patch 3b]]></title>
+            <guid isPermaLink="false">Kingston Patch 3b</guid>
+            <pubDate>Thu, 05 Apr 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston Patch 4]]></title>
@@ -160,6 +155,12 @@
             <title><![CDATA[Jakarta Patch 8b]]></title>
             <guid isPermaLink="false">Jakarta Patch 8b</guid>
             <pubDate>Thu, 05 Apr 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Jakarta Patch 9]]></title>
+            <link>https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-9.html</link>
+            <guid isPermaLink="false">Jakarta Patch 9</guid>
+            <pubDate>Thu, 17 May 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Istanbul]]></title>
@@ -274,6 +275,11 @@
             <title><![CDATA[Istanbul Patch 11a]]></title>
             <guid isPermaLink="false">Istanbul Patch 11a</guid>
             <pubDate>Fri, 13 Apr 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Istanbul Patch 11b]]></title>
+            <guid isPermaLink="false">Istanbul Patch 11b</guid>
+            <pubDate>Mon, 09 Apr 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Helsinki]]></title>
@@ -525,26 +531,6 @@
             <link>https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13</link>
             <guid isPermaLink="false">Fuji Patch 13</guid>
             <pubDate>Wed, 04 May 2016 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[TrackSurf]]></title>
-            <guid isPermaLink="false">TrackSurf</guid>
-            <pubDate>Wed, 24 Jun 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[TrackSurf Patch 0]]></title>
-            <guid isPermaLink="false">TrackSurf Patch 0</guid>
-            <pubDate>Wed, 24 Jun 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[TrackHi]]></title>
-            <guid isPermaLink="false">TrackHi</guid>
-            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[TrackHi Patch 0]]></title>
-            <guid isPermaLink="false">TrackHi Patch 0</guid>
-            <pubDate>Tue, 23 Jun 2015 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Eureka]]></title>

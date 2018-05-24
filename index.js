@@ -23,7 +23,7 @@ config.instances.map(function (instance) {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload,
-    timeout: 10000
+    timeout: 30000
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 
     console.log('Requesting: ' + url);
