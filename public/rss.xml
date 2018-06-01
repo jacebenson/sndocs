@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 29 May 2018 12:17:23 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 01 Jun 2018 14:01:20 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Tue, 29 May 2018 12:17:23 GMT</pubDate>
+        <pubDate>Fri, 01 Jun 2018 14:01:20 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -75,6 +75,12 @@
             <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-5.html</link>
             <guid isPermaLink="false">Kingston Patch 5</guid>
             <pubDate>Thu, 03 May 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kingston Patch 6]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-6.html</link>
+            <guid isPermaLink="false">Kingston Patch 6</guid>
+            <pubDate>Wed, 30 May 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Jakarta]]></title>

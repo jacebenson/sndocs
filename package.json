@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "download": "node index.js",
-    "build": "node index.js && node app.js"
+    "build": "node index.js > output.txt && node app.js"
   },
   "repository": {
     "type": "git",
