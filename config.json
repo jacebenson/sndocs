@@ -661,7 +661,7 @@
     "davitadev",
     "deloitte",
     "desjardins",
-    "demonightlyeureka",
+    "dev32369",
     "disney",
     "disneydev",
     "dobson",
@@ -957,5 +957,11 @@
     "/sn.dragdrop.jsdbx",
     "/scripts/lib/newtag-it.jsx"
   ],
-  "payload": "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ins='http://www/InstanceInfo'>\n<soapenv:Header/>\n\t<soapenv:Body>\n\t\t<ins:execute/>\n\t</soapenv:Body>\n</soapenv:Envelope>"
+  "payload": "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ins='http://www/InstanceInfo'>\n<soapenv:Header/>\n\t<soapenv:Body>\n\t\t<ins:execute/>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+  "users":[
+    {
+      "name": "admin",
+      "pass": "admin"
+    }
+  ]
 }
