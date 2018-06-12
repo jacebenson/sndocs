@@ -49,19 +49,19 @@
     "5": "https://unimelb.service-now.com",
     "6": "https://yale.service-now.com",
     "7": "https://wipros.service-now.com",
-    "8": "https://westcongrouptest.service-now.com",
+    "8": "https://westcongroup.service-now.com",
     "9": "https://ustglobal.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://voeazul.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://uwstest.service-now.com",
-    "8b": "https://thomsonreuters.service-now.com"
+    "8a": "https://uws.service-now.com",
+    "8b": "https://wbprod01.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
     "1": "https://zumtobelprod.service-now.com",
     "2": "https://uoadev.service-now.com",
-    "3": "https://zebra.service-now.com",
+    "3": "https://verifone.service-now.com",
     "4": "https://uts.service-now.com",
     "5": "https://zetupprod.service-now.com",
     "6": "https://vsoftconsulting.service-now.com",
@@ -80,5 +80,8 @@
   },
   "trackdeogold": {
     "0": "https://styleguide.service-now.com"
+  },
+  "Unknown": {
+    "0": "https://reedelsevier.service-now.com"
   }
 }
