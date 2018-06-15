@@ -20,7 +20,7 @@
     "9": "https://csscorp.service-now.com",
     "11": "https://nyk.service-now.com",
     "12": "https://sears.service-now.com",
-    "12a": "https://vector.service-now.com",
+    "12a": "https://wittel.service-now.com",
     "11b": "https://saintfrancis.service-now.com"
   },
   "istanbul": {
@@ -37,9 +37,9 @@
     "9a": "https://dignityhealth.service-now.com",
     "10a": "https://sephora.service-now.com",
     "10b": "https://umnprd.service-now.com",
-    "10c": "https://tricentis.service-now.com",
+    "10c": "https://welltokinc.service-now.com",
     "11a": "https://williamhill.service-now.com",
-    "11b": "https://wpcoprod.service-now.com"
+    "11b": "https://tateandlyle.service-now.com"
   },
   "jakarta": {
     "1": "https://upgrade.service-now.com",
@@ -48,19 +48,19 @@
     "4": "https://uchicago.service-now.com",
     "5": "https://unimelb.service-now.com",
     "6": "https://yale.service-now.com",
-    "7": "https://wipros.service-now.com",
-    "8": "https://zillow.service-now.com",
-    "9": "https://ustglobal.service-now.com",
+    "7": "https://utah.service-now.com",
+    "8": "https://westcongroup.service-now.com",
+    "9": "https://wipros.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://vgsupport.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://wsi.service-now.com",
+    "8a": "https://uws.service-now.com",
     "8b": "https://voeazul.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
     "1": "https://zumtobelprod.service-now.com",
-    "2": "https://uoadev.service-now.com",
+    "2": "https://uoatest.service-now.com",
     "3": "https://zebra.service-now.com",
     "4": "https://uts.service-now.com",
     "5": "https://zetupprod.service-now.com",
