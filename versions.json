@@ -20,7 +20,7 @@
     "9": "https://csscorp.service-now.com",
     "11": "https://nyk.service-now.com",
     "12": "https://sears.service-now.com",
-    "12a": "https://vector.service-now.com",
+    "12a": "https://wittel.service-now.com",
     "11b": "https://saintfrancis.service-now.com"
   },
   "istanbul": {
@@ -49,7 +49,7 @@
     "5": "https://unimelb.service-now.com",
     "6": "https://yale.service-now.com",
     "7": "https://utah.service-now.com",
-    "8": "https://une.service-now.com",
+    "8": "https://ssmportal.service-now.com",
     "9": "https://wipros.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://vgsupport.service-now.com",
@@ -80,8 +80,5 @@
   },
   "trackdeogold": {
     "0": "https://styleguide.service-now.com"
-  },
-  "Unknown": {
-    "0": "https://macysdev.service-now.com"
   }
 }
