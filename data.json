@@ -1591,6 +1591,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0687472",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/6/scripts/",
         "date": "2018-05-30"
+      },{
+        "number": "7",
+        "name": "Kingston Patch 7",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-7.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690216",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/7/scripts/",
+        "date": "2018-06-21"
       }
     ],
     "features": [
