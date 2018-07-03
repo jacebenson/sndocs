@@ -1503,6 +1503,14 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685869",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9/scripts/",
         "date": "2018-05-17"
+      },
+      {
+        "number": "9a",
+        "name": "Jakarta Patch 9a",
+        "url": "",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9a/scripts/",
+        "date": "2018-05-17"
       }
     ],
     "features": [
