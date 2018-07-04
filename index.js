@@ -67,7 +67,7 @@ function addToVersions (obj) {
     if(obj.buildTag){
       var family = obj.buildTag.split('glide-')[1].split('-')[0]
     } else {
-      var family = 'Unknown';
+      //var family = 'Unknown';//do nothing!
     }
     var patch = 0
     if (obj.buildTag.indexOf('patch') >= 0) {

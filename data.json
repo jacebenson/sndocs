@@ -1,18 +1,18 @@
 [
- {
-   "name": "Glidesoft 2004",
-   "url": "https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm",
-   "date": "2004-12-04",
-   "patches": [],
-   "features": [
-     "Incident",
-     "Problem",
-     "Change",
-     "Knowledge",
-     "Legacy Surveys",
-     "ECMA3 aka es3"
-   ]
- },
+  {
+    "name": "Glidesoft 2004",
+    "url": "https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm",
+    "date": "2004-12-04",
+    "patches": [],
+    "features": [
+      "Incident",
+      "Problem",
+      "Change",
+      "Knowledge",
+      "Legacy Surveys",
+      "ECMA3 aka es3"
+    ]
+  },
   {
     "name": "January 2006",
     "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
@@ -43,8 +43,7 @@
     "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
     "date": "2006-04-15",
     "patches": [],
-    "features": [
-    ]
+    "features": []
   },
   {
     "name": "May 2006",
@@ -76,7 +75,7 @@
       "Computer Telephony Integration",
       "Client Scripts"
     ]
-  },  
+  },
   {
     "name": "November 2006",
     "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
@@ -1028,7 +1027,7 @@
         "name": "Geneva Patch 3",
         "url": "https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-3.html",
         "date": "2016-01-22",
-        "hi":"https://hi.service-now.com/kb_view.do?sys_kb_id=a89fb7326fd5da80fbf5409e9f3ee4c4"
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=a89fb7326fd5da80fbf5409e9f3ee4c4"
       },
       {
         "number": "4",
@@ -1349,28 +1348,32 @@
         "date": "2018-01-08",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=bbff91cadbd7c7444837f3231f961930",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10b/scripts/"
-      },{
+      },
+      {
         "number": "10c",
         "name": "Istanbul Patch 10c",
         "url": "",
         "date": "2018-02-05",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662330",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10c/scripts/"
-      },{
+      },
+      {
         "number": "11",
         "name": "Istanbul Patch 11",
         "url": "https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html",
         "date": "2018-02-16",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598935",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11/scripts/"
-      },{
+      },
+      {
         "number": "11a",
         "name": "Istanbul Patch 11a",
         "url": "",
         "date": "2018-04-13",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682452",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11a/scripts/"
-      },{
+      },
+      {
         "number": "11b",
         "name": "Istanbul Patch 11b",
         "url": "",
@@ -1421,7 +1424,7 @@
         "name": "Jakarta Patch 3a",
         "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
-        "hi":"https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
         "date": "2017-11-13"
       },
       {
@@ -1535,56 +1538,64 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/0/scripts/",
         "date": "2017-11-16"
-      },{
+      },
+      {
         "number": "1",
         "name": "Kingston Patch 1",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662222",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/1/scripts/",
         "date": "2018-01-11"
-      },{
+      },
+      {
         "number": "2",
         "name": "Kingston Patch 2",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/2/scripts/",
         "date": "2018-02-01"
-      },{
+      },
+      {
         "number": "3",
         "name": "Kingston Patch 3",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3/scripts/",
         "date": "2018-03-08"
-      },{
+      },
+      {
         "number": "3a",
         "name": "Kingston Patch 3a",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682450",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3a/scripts/",
         "date": "2018-03-08"
-      },{
+      },
+      {
         "number": "3b",
         "name": "Kingston Patch 3b",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684018",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3b/scripts/",
         "date": "2018-04-05"
-      },{
+      },
+      {
         "number": "4",
         "name": "Kingston Patch 4",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0683279",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/4/scripts/",
         "date": "2018-04-13"
-      },{
+      },
+      {
         "number": "5",
         "name": "Kingston Patch 5",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-5.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685497",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/5/scripts/",
         "date": "2018-05-03"
-      },{
+      },
+      {
         "number": "6",
         "name": "Kingston Patch 6",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-6.html",
