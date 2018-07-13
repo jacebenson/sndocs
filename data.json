@@ -903,7 +903,8 @@
     "features": [
       "Facilities Service Automation",
       "Visual Task Boards",
-      "Demand Management"
+      "Demand Management",
+      "Inbound Rest Web service"
     ]
   },
   {
@@ -1002,7 +1003,10 @@
       "Finance Service Management",
       "Team Development",
       "Studio",
-      "UI15"
+      "UI15",
+      "Inbound OAuth Support",
+      "Outbound Mutual Authentication",
+      "Outbound web services v2"
     ]
   },
   {
