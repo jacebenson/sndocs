@@ -49,7 +49,7 @@
     "5": "https://volvocars.service-now.com",
     "6": "https://yale.service-now.com",
     "7": "https://utah.service-now.com",
-    "8": "https://une.service-now.com",
+    "8": "https://graham.service-now.com",
     "9": "https://wipros.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://vgsupport.service-now.com",
@@ -65,12 +65,14 @@
     "3": "https://vector.service-now.com",
     "4": "https://uts.service-now.com",
     "5": "https://zetupprod.service-now.com",
-    "6": "https://unimelb.service-now.com",
+    "6": "https://williams.service-now.com",
     "7": "https://xpologistics.service-now.com",
     "3a": "https://vodafone.service-now.com",
-    "3b": "https://ven01601.service-now.com"
+    "3b": "https://utas1.service-now.com"
   },
-  "london": {},
+  "london": {
+    "0": "https://hi.service-now.com"
+  },
   "trackhinext": {
     "0": "https://hi.service-now.com"
   },
@@ -84,6 +86,6 @@
     "0": "https://styleguide.service-now.com"
   },
   "undefined": {
-    "0": "https://upgrade.service-now.com"
+    "0": "https://dev32369.service-now.com"
   }
 }
