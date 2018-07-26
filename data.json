@@ -1518,6 +1518,14 @@
         "hi": "",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9a/scripts/",
         "date": "2018-07-03"
+      },
+      {
+        "number": "9b",
+        "name": "Jakarta Patch 9b",
+        "url": "",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9b/scripts/",
+        "date": "2018-07-26"
       }
     ],
     "features": [
