@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 26 Jul 2018 05:57:27 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 26 Jul 2018 05:59:23 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Thu, 26 Jul 2018 05:57:27 GMT</pubDate>
+        <pubDate>Thu, 26 Jul 2018 05:59:23 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -178,6 +178,11 @@
             <title><![CDATA[Jakarta Patch 9a]]></title>
             <guid isPermaLink="false">Jakarta Patch 9a</guid>
             <pubDate>Tue, 03 Jul 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Jakarta Patch 9b]]></title>
+            <guid isPermaLink="false">Jakarta Patch 9b</guid>
+            <pubDate>Thu, 26 Jul 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Istanbul]]></title>
