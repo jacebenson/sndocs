@@ -1649,5 +1649,23 @@
       "Guided Tours Auto Launch",
       "Guided Tours Domain Seperation"
     ]
-  }
+  },
+  {
+    "name": "London",
+    "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
+    "date": "2018-07-27",
+    "patches": [
+      {
+        "number": "0",
+        "name": "Kingston Patch 0",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
+        "date": "2018-07-27"
+      }
+    ],
+      "features": [
+        "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/summary/rn-summary-new-features.html"
+      ]
+    }
 ]
