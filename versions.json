@@ -39,17 +39,17 @@
     "10b": "https://businessnatixis.service-now.com",
     "10c": "https://welltokinc.service-now.com",
     "11a": "https://williamhill.service-now.com",
-    "11b": "https://vub.service-now.com"
+    "11b": "https://vss.service-now.com"
   },
   "jakarta": {
     "1": "https://upgrade.service-now.com",
     "2": "https://medtronic.service-now.com",
     "3": "https://medtronicprod.service-now.com",
     "4": "https://uchicago.service-now.com",
-    "5": "https://volvocars.service-now.com",
+    "5": "https://rmit.service-now.com",
     "6": "https://yale.service-now.com",
     "7": "https://utah.service-now.com",
-    "8": "https://westcongroup.service-now.com",
+    "8": "https://une.service-now.com",
     "9": "https://wipros.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://vgsupport.service-now.com",
@@ -57,7 +57,7 @@
     "8a": "https://uwstest.service-now.com",
     "8b": "https://voeazul.service-now.com",
     "9a": "https://umichprod.service-now.com",
-    "9b": "https://osuitsmtest.service-now.com"
+    "9b": "https://wilburellis.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -65,11 +65,11 @@
     "2": "https://uoaprod.service-now.com",
     "3": "https://vector.service-now.com",
     "4": "https://uts.service-now.com",
-    "5": "https://ubc.service-now.com",
+    "5": "https://utsinsearchprod.service-now.com",
     "6": "https://uoatest.service-now.com",
     "7": "https://xpologistics.service-now.com",
-    "3a": "https://vodafone.service-now.com",
-    "3b": "https://utas1.service-now.com"
+    "3a": "https://nielsenpov.service-now.com",
+    "3b": "https://ven01601.service-now.com"
   },
   "london": {
     "0": "https://hi.service-now.com"
@@ -87,6 +87,6 @@
     "0": "https://styleguide.service-now.com"
   },
   "undefined": {
-    "0": "https://dev32369.service-now.com"
+    "0": "https://smc.service-now.com"
   }
 }
