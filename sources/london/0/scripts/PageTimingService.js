@@ -12,10 +12,13 @@
       }
       var transactionID = data.transaction_id;
       delete data.transaction_id;
-      if (!error)
-        error = function(xhr, textStatus, errorThrown) {
-          throw errorThrown;
+      if (!error) {
+        error = function(request, textStatus, errorThrown) {
+          if (request.statusText !== 'abort') {
+            console.error(errorThrown);
+          }
         };
+      }
       var headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

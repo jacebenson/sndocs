@@ -329,7 +329,7 @@ angular.module('sn.embedded_help').service('embeddedHelpService', ['$rootScope',
       else
         return normalizeUrl(url1).indexOf(normalizeUrl(url2));
     }
-    var IGNORE_PARAMS_ON_COMPARE = ['sysparm_list', 'sysparm_list_mode', 'sysparm_nameofstack', 'sysparm_clear_stack', 'sysparm_userpref_module', 'sysparm_offset'];
+    var IGNORE_PARAMS_ON_COMPARE = ['sysparm_list', 'sysparm_list_mode', 'sysparm_nameofstack', 'sysparm_clear_stack', 'sysparm_userpref_module', 'sysparm_offset', 'sysparm_first_row', 'sysparm_view', 'sysparm_query'];
 
     function normalizeUrl(url) {
       var i = url.indexOf('?');

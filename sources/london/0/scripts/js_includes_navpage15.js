@@ -1019,6 +1019,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,
@@ -4135,7 +4138,108 @@ angular.module('sn.common.bindWatch').factory('BindWatch', function() {
       }.bind(null, key));
     });
   }
-});;;;
+});;;
+/*! RESOURCE: scripts/app.snList/optional/service.listv3PaneExtension.js */
+angular.module('sn.concourse_pane_extension').run(function(concoursePaneExtensionRegistry, getTemplateUrl, glideUrlBuilder, $ocLazyLoad, $compile, $log, snCustomEvent) {
+  var listv3FilesLoaded = false;
+  var listv3OuterScope = null;
+  concoursePaneExtensionRegistry.register('list', function(elementRoot, url, params) {
+    params.startTime = new Date();
+    if (listv3FilesLoaded) {
+      loadList(elementRoot, url, params);
+      return;
+    }
+    $ocLazyLoad.load([
+      'scripts/js_includes_list_v3.js',
+      'styles/css_includes_list_v3.css',
+      getTemplateUrl('sn_list_template_preload.xml&sysparm_nothing=.html')
+    ]).then(function() {
+      loadList(elementRoot, url, params);
+      listv3FilesLoaded = true;
+    }, function(err) {
+      $log.error('Error while lazy loading list', err);
+    });
+  });
+
+  function loadList(elementRoot, url, params) {
+    var listConfig = parseListConfig(url);
+    if (elementRoot.find('sn-list').length > 0) {
+      var dirty = false;
+      angular.forEach(listConfig, function(item, name) {
+        if (angular.equals(listv3OuterScope[name], item))
+          return;
+        dirty = true;
+        listv3OuterScope[name] = item;
+      });
+      if (dirty)
+        snCustomEvent.fire('list_v3.list_reload', listv3OuterScope);
+    } else {
+      var snList = document.createElement('sn-list');
+      listv3OuterScope = angular.element(elementRoot).scope().$new();
+      angular.forEach(listConfig, function(item, name) {
+        listv3OuterScope[name] = item;
+        snList.setAttribute(name, name);
+      });
+      var element = $compile(snList)(listv3OuterScope);
+      elementRoot.append(element);
+    }
+  }
+
+  function parseListConfig(url) {
+    var urlBuilder = glideUrlBuilder.newGlideUrl(parseTheBeginningOutOf(url));
+    var table = urlBuilder.contextPath.replace('_list.do', '');
+    var params = urlBuilder.getParams();
+    var query = params.sysparm_query || '';
+    return {
+      table: table,
+      query: query,
+      concourse: true,
+      parameters: angular.extend({
+        sysparm_limit: '20',
+        sysparm_field_styles: 'true',
+        sysparm_exclude_reference_link: 'true',
+        sysparm_display_value: 'all',
+        sysparm_read_replica_category: 'list'
+      }, params),
+      properties: {
+        listId: table,
+        table: table,
+        listControl: {
+          omitFilter: 'false',
+          omitEmpty: 'false',
+          omitLinks: 'false'
+        },
+        related: {},
+        isRefList: 'false',
+        maxRows: '20',
+        isModernCellStyles: 'true',
+        isEmbedded: 'false',
+        isRelated: 'false',
+        isRegularList: true,
+        live: 'true',
+        showFixedHeaders: 'true',
+        showVTB: 'true',
+        target: 'gsft_main'
+      },
+      include: {
+        header: "true",
+        activityStream: "true",
+        modeSelector: "true",
+        uiActions: "true",
+        footer: "true",
+        isReferenceList: "false",
+        listEdit: "true",
+        titleContextMenu: "true"
+      }
+    }
+  }
+
+  function parseTheBeginningOutOf(url) {
+    if (!url.startsWith('http://') && !url.startsWith('https://'))
+      return url;
+    return url.match(/\/\/[^\/]+\/(.+)/)[1];
+  }
+});;;
 /*! RESOURCE: /scripts/concourse_view_stack/js_includes_concourse_view_stack.js */
 /*! RESOURCE: /scripts/concourse_view_stack/_module.js */
 angular.module('sn.concourse_view_stack', []);;
@@ -4733,26 +4837,21 @@ angular.module('sn.concourse').directive('domainReferencePicker', function($http
 /*! RESOURCE: /scripts/concourse/dateTimeFormat.js */
 (function() {
   CustomEvent.observe('cc_dateformat_set', function(preferences) {
-    preferences = parsePreferences(preferences);
-    if (preferences.timeAgo == false && preferences.dateBoth == false)
+    try {
+      preferences = JSON.parse(preferences);
+    } catch (ex) {
+      preferences = {};
+    }
+    if (preferences.timeAgo === false && preferences.dateBoth === false)
       CustomEvent.fireAll('timeago_set', false);
-    if (preferences.timeAgo == true && preferences.dateBoth == false)
+    if (preferences.timeAgo === true && preferences.dateBoth === false)
       CustomEvent.fireAll('timeago_set', true);
-    if (preferences.dateBoth == true)
+    if (preferences.dateBoth === true)
       CustomEvent.fireAll('date_both', true);
   });
   CustomEvent.observe('cc_dateformat_compact_set', function(bool) {
     CustomEvent.fireAll('shortdates_set', bool);
   });
-
-  function parsePreferences(p) {
-    var o = {};
-    p = p.replace(/\s+/g, '');
-    p = p.substring(1, p.length - 1).split(',');
-    for (var i = 0; i < p.length; i++)
-      o[p[i].split(':')[0]] = JSON.parse(p[i].split(':')[1]);
-    return o;
-  }
 })();;
 /*! RESOURCE: /scripts/sn/common/notification/js_includes_notification.js */
 /*! RESOURCE: /scripts/sn/common/notification/_module.js */
@@ -5498,6 +5597,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     },
     get events() {
       return events;
+    },
+    set events(value) {
+      events = value;
     },
     on: on,
     un: un,

@@ -5481,14 +5481,39 @@ angular.module('sn.connect').controller('chatFloating', function(
 /*! RESOURCE: /scripts/app.ng_chat/message/_module.js */
 angular.module("sn.connect.message", ["ng.common", "sn.connect.util", "sn.connect.profile"]);;
 /*! RESOURCE: /scripts/app.ng_chat/message/directive.snAriaChatMessage.js */
-angular.module('sn.connect.message').directive('snAriaChatMessage', function(getTemplateUrl) {
+angular.module('sn.connect.message').directive('snAriaChatMessage', function(getTemplateUrl, $templateCache, $interpolate, $sanitize) {
   'use strict';
+  var ariaTemplate = $templateCache.get(getTemplateUrl('snAriaChatMessage.xml'));
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: getTemplateUrl('snAriaChatMessage.xml'),
+    template: "<div></div>",
     scope: {
       message: '='
+    },
+    link: function(scope, element) {
+      var node = $interpolate(ariaTemplate)(scope);
+      element.html($sanitize(node));
+    },
+    controller: function($scope) {
+      $scope.displayedText = function() {
+        if (!$scope.message.isMessageShowing) {
+          return "";
+        }
+        return $scope.message.displayText;
+      };
+      $scope.attachmentMessage = function() {
+        if (!$scope.message.attachments || !$scope.message.attachments.length) {
+          return "";
+        }
+        var output = "";
+        for (var i = 0, len = $scope.message.attachments.length; i < len; i++) {
+          var attachment = $scope.message.attachments[i];
+          output += i > 0 ? ' . ' : '';
+          output += attachment.fileName + ', ' + attachment.byteDisplay;
+        }
+        return output;
+      }
     }
   }
 });;
@@ -5895,7 +5920,7 @@ angular.module('sn.connect.message').directive('snMessageBatch', function(getTem
     scope: {
       batch: '=',
       isGroupConversation: '=',
-      disableAvatarPopovers: '<?'
+      disableAvatarPopovers: '=?'
     },
     controller: function($scope, showAgentAvatar, inSupportClient) {
       $scope.isSystemMessage = function() {
@@ -13567,7 +13592,7 @@ angular.module('sn.connect.queue').service('queueNotifier', function($window, sn
 });;
 /*! RESOURCE: /scripts/app.ng_chat/queue/service.queueEntries.js */
 angular.module('sn.connect.queue').service('queueEntries', function(
-  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n) {
+  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n, supportEnabled) {
   'use strict';
   var QUEUE_AMB = '/connect/support/queues';
   var GROUP_AMB = '/connect/support/group/';
@@ -13610,11 +13635,13 @@ angular.module('sn.connect.queue').service('queueEntries', function(
           });
         }
       });
-      amb.connect();
     }
   }
 
   function addRawQueueEntry(rawQueueEntry) {
+    if (inSupportClient || supportEnabled) {
+      ambSubscribe();
+    }
     var oldQueueEntry = queueEntries[rawQueueEntry.sys_id];
     if (oldQueueEntry && oldQueueEntry.equals(rawQueueEntry))
       return oldQueueEntry;
@@ -13680,7 +13707,7 @@ angular.module('sn.connect.queue').service('queueEntries', function(
       return addRawQueueEntry(response.data.result);
     });
   }
-  ambSubscribe();
+  amb.connect();
   return {
     addRaw: addRawQueueEntry,
     get: function(id) {
@@ -14476,6 +14503,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     },
     get events() {
       return events;
+    },
+    set events(value) {
+      events = value;
     },
     on: on,
     un: un,

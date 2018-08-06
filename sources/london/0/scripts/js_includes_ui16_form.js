@@ -13971,7 +13971,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
           }
         },
         initSelection: function(elem, callback) {
-          if (scope.field.displayValue)
+          if (scope.field && scope.field.displayValue)
             callback({
               sys_id: scope.field.value,
               name: scope.field.displayValue
@@ -14002,6 +14002,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
               sysparm_target_field: scope.ed.dependent_field || scope.ed.name,
               table: scope.ed.reference,
               qualifier: scope.ed.qualifier,
+              sysparm_for_impersonation: !!scope.ed.for_impersonation,
               data_adapter: scope.ed.data_adapter,
               attributes: scope.ed.attributes,
               dependent_field: scope.ed.dependent_field,
@@ -14367,7 +14368,8 @@ angular.module('sn.common.controls').directive('snRecordPicker', function($timeo
             var params = {
               sysparm_offset: (scope.pageSize * (page - 1)),
               sysparm_limit: scope.pageSize,
-              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery)
+              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery),
+              sysparm_display_value: true
             };
             return params;
           },
@@ -21034,7 +21036,7 @@ angular.module("sn.common.stream").controller("Stream", function($rootScope, $sc
   });
 });;
 /*! RESOURCE: /scripts/sn/common/stream/controller.snStream.js */
-angular.module("sn.common.stream").controller("snStream", function($rootScope, $scope, $attrs, $http, nowStream, snRecordPresence, snCustomEvent, userPreferences, $window, $q, $timeout, $sanitize, $sce, snMention, i18n, getTemplateUrl) {
+angular.module("sn.common.stream").controller("snStream", function($rootScope, $scope, $attrs, $http, nowStream, snRecordPresence, snCustomEvent, userPreferences, $window, $q, $timeout, $sce, snMention, i18n, getTemplateUrl) {
   "use strict";
   if (angular.isDefined($attrs.isInline)) {
     bindInlineStreamAttributes();
@@ -21211,10 +21213,16 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
     var regexLinks = /@L\[([^|]+?)\|([^\]]*)]/gi;
     return text.replace(regexLinks, "<a href='$1' target='_blank'>$2</a>");
   };
+  $scope.trustAsHtml = function(text) {
+    return $sce.trustAsHtml(text);
+  };
   $scope.parseSpecial = function(text) {
-    var parsedText = $scope.parseLinks($sanitize(text));
+    var parsedText = $scope.parseLinks(text);
     parsedText = $scope.parseMentions(parsedText);
-    return $sce.trustAsHtml(parsedText);
+    return $scope.trustAsHtml(parsedText);
+  };
+  $scope.isHTMLField = function(change) {
+    return change.field_type === 'html' || change.field_type === 'translated_html';
   };
   $scope.getFullEntryValue = function(entry, event) {
     event.stopPropagation();
@@ -21226,7 +21234,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
         sysparm_sys_id: journal.sys_id
       }
     }).then(function(response) {
-      journal.new_value = response.data.result.replace(/\n/g, '<br/>');
+      journal.sanitized_new_value = journal.new_value = response.data.result.replace(/\n/g, '<br/>');
       journal.is_truncated = false;
       journal.loading = false;
       journal.showMore = true;
@@ -21354,7 +21362,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
     var entries = [];
     if ($scope.multipleInputs) {
       angular.forEach($scope.fields, function(item) {
-        if (!item.isSelected || !item.value)
+        if (!item.isActive || !item.value)
           return;
         entries.push({
           field: item.name,
@@ -21386,7 +21394,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
   function clearInputs() {
     $scope.inputTypeValue = "";
     angular.forEach($scope.fields, function(item) {
-      if (!item.isSelected)
+      if (!item.isActive)
         return;
       if (item.value)
         item.filled = true;
@@ -21644,13 +21652,13 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
 
   function setShowAllFields() {
     $scope.checkbox.showAllFields = $scope.showAllFields = $scope.allFields && !$scope.allFields.some(function(item) {
-      return !item.isSelected;
+      return !item.isActive;
     });
     $scope.hideAllFields = !$scope.allFields || !$scope.allFields.some(function(item) {
-      return item.isSelected;
+      return item.isActive;
     });
     $scope.isFiltered = !$scope.showAllFields || $scope.allFields.some(function(item) {
-      return !item.isSelected;
+      return !item.isActive;
     });
   }
   $scope.setPrimary = function(entry) {
@@ -21674,13 +21682,13 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
   $scope.updateFieldVisibilityAll = function() {
     $scope.showAllFields = !$scope.showAllFields;
     angular.forEach($scope.allFields, function(item) {
-      item.isSelected = $scope.showAllFields;
+      item.isActive = $scope.showAllFields;
     });
     $scope.updateFieldVisibility();
   };
   $scope.updateFieldVisibility = function() {
     var activeFields = $scope.allFields.map(function(item) {
-      return item.name + ',' + item.isSelected;
+      return item.name + ',' + item.isActive;
     });
     setShowAllFields();
     emitFilterChange();
@@ -21839,9 +21847,12 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
 
   function newLinesToBR(entries) {
     angular.forEach(entries, function(item) {
-      if (!item.new_value)
-        return;
-      item.new_value = item.new_value.replace(/\n/g, '<br/>');
+      if (item.new_value) {
+        item.new_value = item.new_value.replace(/\n/g, '<br/>');
+      }
+      if (item.sanitized_new_value) {
+        item.sanitized_new_value = item.sanitized_new_value.replace(/\n/g, '<br/>');
+      }
     });
   }
 
@@ -22396,7 +22407,7 @@ angular.injector(['ng']).invoke(function($log) {
     }
 
     function _getTemplateContentFromMarkup($markup) {
-      return $markup.find(".popover-content").html();
+      return $markup.find(".popover-content").html() || new GwtMessage().getMessage('No Preview Available');
     }
 
     function _getPopoverTitle($markup) {
@@ -22631,6 +22642,7 @@ angular.injector(['ng']).invoke(function($log) {
     var fieldName = safeInputID.slice(firstDotIndex + 1);
     var table = safeInputID.slice(0, firstDotIndex);
     var displayInput = gel("sys_display." + safeInputID);
+    var newWindow = $(evt.target).attr('data-new-window') === "true";
     if (displayInput) {
       var targetForm = displayInput.getAttribute('data-table');
     }
@@ -22651,6 +22663,7 @@ angular.injector(['ng']).invoke(function($log) {
       contentURL.addParam("sysparm_refkey", refKey);
     }
     contentURL.addParam("sysparm_glide_popup", "true");
+    contentURL.addParam("sysparm_new_window", newWindow);
     showPopup(evt, contentURL.getURL(), options);
   }
 
@@ -22701,6 +22714,7 @@ angular.injector(['ng']).invoke(function($log) {
     evt.preventDefault();
     var options = _createOptionsObject(true, width);
     var contentURL = new GlideURL("popup.do");
+    var newWindow = $(evt.target).attr('data-new-window') === "true";
     contentURL.addParam("sysparm_sys_id", sys_id);
     contentURL.addParam("sysparm_table_name", table);
     contentURL.addParam("sysparm_field_name", "sys_id");
@@ -22710,6 +22724,7 @@ angular.injector(['ng']).invoke(function($log) {
       contentURL.addParam("sysparm_view", view);
     }
     contentURL.addParam("sysparm_glide_popup", "true");
+    contentURL.addParam("sysparm_new_window", newWindow);
     showPopup(evt, contentURL.getURL(), options);
   }
 
@@ -22725,7 +22740,9 @@ angular.injector(['ng']).invoke(function($log) {
     if (sysIdElem) {
       sys_id = sysIdElem.value;
     }
+    var options = _createOptionsObject(true);
     var contentURL = new GlideURL("popup.do");
+    var newWindow = $(evt.target).attr('data-new-window') === "true";
     contentURL.addParam("sysparm_sys_id", sys_id);
     contentURL.addParam("sysparm_table_name", table);
     contentURL.addParam("sysparm_field_name", "sys_id");
@@ -22736,7 +22753,8 @@ angular.injector(['ng']).invoke(function($log) {
       contentURL.addParam("sysparm_show_open_button", "false");
     else
       contentURL.addParam("sysparm_show_open_button", "true");
-    showPopup(evt, contentURL.getURL());
+    contentURL.addParam("sysparm_new_window", newWindow);
+    showPopup(evt, contentURL.getURL(), options);
   }
 
   function popIssueDiv(evt, issues) {

@@ -8724,6 +8724,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,
@@ -16727,13 +16730,21 @@ function setLightWeightLink(name) {
   if (!v)
     return;
   var link = $(name + "LINK");
-  if (!link)
+  var replace = $(name + "LINKreplace")
+  if (!link && !replace)
     return;
   var vis = "hidden";
   if (v.value != '')
     vis = "";
-  link.style.visibility = vis;
-  link.style.display = vis == 'hidden' ? 'none' : '';
+  setLightWeightLinkDisplay(link, vis);
+  setLightWeightLinkDisplay(replace, vis);
+}
+
+function setLightWeightLinkDisplay(el, vis) {
+  if (!el)
+    return;
+  el.style.visibility = vis;
+  el.style.display = vis == 'hidden' ? 'none' : '';
 }
 
 function toggleDebug(id) {
@@ -17172,8 +17183,6 @@ function setSelectValue(select, elementName) {
 
 function refFlipImage(element, elementName, useText) {
   var viewField = gel("view." + elementName);
-  if (!viewField)
-    return;
   var viewRField = gel("viewr." + elementName);
   var viewHideField = gel("view." + elementName + ".no");
   var refid = gel(elementName);
@@ -17357,11 +17366,17 @@ function onChangeLabelProcessByEl(elementNode, statusLabel, value) {
     clearAriaLabel = true;
   }
   var tooltipButton = $j(statusLabel).siblings('.icon-help');
-  if (tooltipButton.length && newTitle.length && mandatory == "true") {
-    tooltipButton.attr('style', 'padding-left: 3px;');
-    tooltipButton.attr('title', newTitle + '. ' + tooltipButton.attr('label-title'));
+  if (tooltipButton.length) {
+    var baseTooltipMessage = tooltipButton.attr('label-title');
+    var fullTooltipLabel = (newTitle && baseTooltipMessage) ?
+      newTitle + '. ' + baseTooltipMessage :
+      (newTitle || baseTooltipMessage);
+    if (fullTooltipLabel)
+      tooltipButton.attr('data-dynamic-title', fullTooltipLabel).show();
+    else
+      tooltipButton.hide();
   } else
-    statusLabel.setAttribute("title", newTitle);
+    statusLabel.setAttribute("data-dynamic-title", newTitle);
   if (document.documentElement.getAttribute('data-doctype') == 'true') {
     if (mandatory == 'true') {
       statusLabel.className = "required-marker label_description";
@@ -17475,6 +17490,8 @@ function multiKeyDown(me) {
   if (eOriginalSet)
     return;
   var oValue = escape(me.value);
+  if (typeof(g_form) != "undefined")
+    var oValue = escape(g_form.getValue(me.name));
   eval(eOriginal + '="' + oValue + '";');
 }
 
@@ -17781,10 +17798,12 @@ function addEllipsesToAttachments() {
   if (!list)
     return;
   var more = document.getElementById('more_attachments');
-  if (list.scrollHeight > list.clientHeight * 2)
-    setElementStyle(more, 'display:block');
-  else
-    setElementStyle(more, 'display:none');
+  if (more) {
+    if (list.scrollHeight > list.clientHeight * 2)
+      setElementStyle(more, 'display:block');
+    else
+      setElementStyle(more, 'display:none');
+  }
 }
 
 function setElementStyle(elm, rules) {
@@ -27007,8 +27026,6 @@ var AJAXReferenceCompleter = Class.create(AJAXCompleter, {
   },
   showViewImage: function() {
     var element = gel("view." + this.keyElement.id);
-    if (element == null)
-      return;
     var elementR = gel("viewr." + this.keyElement.id);
     var noElement = gel("view." + this.keyElement.id + ".no");
     var sys_id = this.getKeyValue();
@@ -27796,8 +27813,8 @@ var AJAXEmailClientCompleter = Class.create(AJAXTableCompleter, {
           (values[0]['label'] == this.getDisplayValue()) &&
           (values[1]['label'] != this.getDisplayValue()))) {
         this.log("setting value without focus to " + values[0]['label'] + "->" + values[0]['name']);
-        var name = htmlEscape(o['name']);
-        var label = htmlEscape(o['label']);
+        var name = htmlEscape(values[0]['name']);
+        var label = htmlEscape(values[0]['label']);
         this.referenceSelect(name, label);
         var s = gel(this.inputSpan);
         if (this.renderItemTemplate) {
@@ -28975,23 +28992,21 @@ var FieldListElement = Class.create({
     if (index > 0) {
       moveSelectedOptions(selectedIds, scols, acols, '--None--', ['home'], '--None--');
     }
-    var text = "";
+    var text = [];
     var validValue = new Array;
     for (var i = 0; i < value.length; i++) {
       var v = value[i];
-      if (i > 0)
-        text += ", ";
       var aIndex = this._getOptionIndex(acols, v);
       if (aIndex > -1) {
         selectedIds = new Array();
         selectedIds[0] = aIndex;
-        text += acols.options[aIndex].text;
+        text.push(acols.options[aIndex].text);
         validValue[i] = v;
         moveSelectedOptions(selectedIds, acols, scols, '--None--', [], '--None--');
       } else {
         if (displayValue && displayValue[i]) {
           addChoiceFromValueAndDisplay(scols, v, displayValue[i]);
-          text += displayValue[i];
+          text.push(displayValue[i]);
           validValue[i] = v;
         }
       }
@@ -29000,7 +29015,7 @@ var FieldListElement = Class.create({
       this.lastValue = validValue.join(',');
     var nonedit = gel(this.name + "_nonedit");
     if (nonedit) {
-      nonedit.innerHTML = text;
+      nonedit.innerHTML = text.join(', ');
     }
     onChange(this.name);
   },
@@ -29793,7 +29808,7 @@ AttachmentUploader.uploadBlob = function(blob, filename, url, data) {
           return onError(new Error("Attachment failed. " +
             "Invalid table name and/or sys_id when attempting to create attachment."));
         }
-        if (200 <= xhr.status && xhr.status < 300) {
+        if (xhr.status < 200 || xhr.status >= 300) {
           return onError(new Error('server responded with: ' + xhr.status));
         }
         onSuccess({
@@ -30516,10 +30531,13 @@ var GwtDate = Class.create({
       }
       var transactionID = data.transaction_id;
       delete data.transaction_id;
-      if (!error)
-        error = function(xhr, textStatus, errorThrown) {
-          throw errorThrown;
+      if (!error) {
+        error = function(request, textStatus, errorThrown) {
+          if (request.statusText !== 'abort') {
+            console.error(errorThrown);
+          }
         };
+      }
       var headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -35529,6 +35547,179 @@ var WFStageSet = (function() {
     warnNoWorkflow: warnNoWorkflow
   }
 }());;
+/*! RESOURCE: scripts/Uploader.js */
+var Uploader = Class.create({
+  initialize: function(containerName, tableName, sys_id) {
+    this.containerName = containerName;
+    this.height = 20;
+    this._createInput();
+    this.sys_id = sys_id;
+    this.tableName = tableName;
+    this.fieldName;
+    this.callback;
+    Event.observe(window, 'unload', this._reset.bind(this));
+    this.startLoading;
+    this.tempSpot;
+    this.mouseDown = false;
+  },
+  setCallback: function(fDefinition) {
+    this.callback = fDefinition;
+  },
+  setStartLoading: function(fDefinition) {
+    this.startLoading = fDefinition;
+  },
+  setFieldName: function(fieldName) {
+    this.fieldName = fieldName;
+  },
+  setTitle: function(title) {
+    this.input.title = title;
+  },
+  setHeight: function(height) {
+    if (this.height == height)
+      return;
+    this.height = height;
+    this.input.parentNode.removeChild(this.input);
+    delete(this.input);
+    this._createInput();
+  },
+  _createInput: function() {
+    var parent = this.containerName;
+    if (this.tempSpot)
+      parent = this.tempSpot;
+    parent = $(parent);
+    this.input = new Element("input");
+    var input = this.input;
+    input.setAttribute("type", "file");
+    input.className = "upload_input_file";
+    input.name = this.containerName + "_input_file";
+    input.setStyle({
+      display: 'inline',
+      height: this.height + "px",
+      width: this.height + "px",
+      fontSize: this.height + "px",
+      opacity: "0 !important",
+      filter: "alpha(opacity=0) !important",
+      cursor: "pointer !important",
+      zIndex: (isMSIE7) ? "100" : "100 !important"
+    });
+    Event.observe(input, 'change', this._onFileChange.bind(this, input));
+    parent.appendChild(input);
+  },
+  _onFileChange: function(input) {
+    if (this.startLoading)
+      this.startLoading.call();
+    var iframe = this._createIFrame();
+    var form = this._createForm();
+    form.appendChild(this.input);
+    Event.observe(iframe, 'load', this._uploaded.bind(this));
+    form.submit();
+  },
+  _uploaded: function() {
+    var f = this.iframe;
+    var doc = null;
+    if (isMSIE)
+      doc = f.contentWindow.document.XMLDocument ? f.contentWindow.document.XMLDocument : f.contentWindow.document;
+    else
+      doc = f.contentDocument;
+    var root = doc.documentElement;
+    if (this.callback) {
+      var uri = root.getAttribute('attachment_uri');
+      var name = root.getAttribute('file_name');
+      var sys_id = root.getAttribute('sys_id');
+      this.callback.call(this, uri, name, sys_id);
+    }
+    this.form.parentNode.removeChild(this.form);
+    delete this.form;
+    this.form = null;
+    var iframe = this.iframe;
+    this.iframe = null;
+    setTimeout(function() {
+      iframe.parentNode.removeChild(iframe);
+      delete iframe;
+    }, 1000);
+    this._createInput();
+  },
+  _createIFrame: function() {
+    var name = this.containerName + "_iframe";
+    var s = "<iframe src='javascript: false' name='" + name + "'/>";
+    this.iframe = toElement(s);
+    this.iframe.style.display = 'none';
+    this.iframe.style.position = 'absolute';
+    this.iframe.style.left = '-999px';
+    document.body.appendChild(this.iframe);
+    return this.iframe;
+  },
+  _createForm: function() {
+    this.containerName + "_form";
+    var s = "<form method='post' enctype='multipart/form-data' name='" + this.containerName + "' ></form>";
+    var form = toElement(s)
+    this._addInput(form, "sysparm_table", this.tableName);
+    this._addInput(form, "sysparm_xml", "true");
+    if (this.fieldName)
+      this._addInput(form, "sysparm_fieldname", this.fieldName);
+    this._addInput(form, "sysparm_sys_id", this.sys_id);
+    if (typeof g_ck != 'undefined')
+      this._addInput(form, "sysparm_ck", g_ck);
+    form.setAttribute("action", "sys_attachment.do");
+    form.setAttribute("target", this.containerName + "_iframe");
+    form.style.display = 'none';
+    form.style.position = 'absolute';
+    form.style.left = '-999px';
+    this.form = form;
+    document.body.appendChild(this.form);
+    return form;
+  },
+  _addInput: function(form, name, value) {
+    var input = cel("input");
+    input.value = value;
+    input.name = name;
+    form.appendChild(input);
+  },
+  _reset: function() {
+    this.input = null;
+  },
+  moveInputTo: function(elementName) {
+    this.tempSpot = elementName;
+    if (elementName == null)
+      elementName = this.containerName;
+    var input = this.input;
+    var p = input.parentNode;
+    var parent = gel(elementName);
+    if (p == parent)
+      return;
+    input.parentNode.removeChild(input);
+    parent.appendChild(input);
+  },
+  toString: function() {
+    return 'Uploader';
+  }
+});
+
+function toElement(innerHTML) {
+  var div = cel('div');
+  div.innerHTML = innerHTML;
+  var element = div.firstChild;
+  div.removeChild(element);
+  return element;
+};
+/*! RESOURCE: scripts/ImageUploader.js */
+var ImageUploader = Class.create(Uploader, {
+  initialize: function($super, containerName, tableName, sys_id) {
+    $super(containerName, tableName, sys_id);
+  },
+  _onFileChange: function($super, input) {
+    if (!this._isFileNameValid(input.value))
+      return;
+    $super(input);
+  },
+  _isFileNameValid: function(filename) {
+    if (endsWithImageExtension(filename))
+      return true;
+    var message = getMessage('Name is not a recognized image file format');
+    alert(message);
+    return false;
+  }
+});;
 /*! RESOURCE: scripts/labels.js */
 var refreshRateProperty = "60";
 var refreshLabelRate = (refreshRateProperty != null && refreshRateProperty > 0 ? refreshRateProperty : 60);
@@ -36459,230 +36650,6 @@ CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
     g_optics_inspect_handler.processServerMessages();
   }
 });;
-/*! RESOURCE: scripts/classes/GlideMenu.js */
-var GlideMenu = Class.create();
-GlideMenu.prototype = {
-  initialize: function(idSuffix, type) {
-    this.suffix = idSuffix;
-    this.type = type;
-    this.clear();
-  },
-  destroy: function() {
-    this.clear();
-  },
-  clear: function() {
-    this.menuItems = [];
-    this.variables = {};
-    this.onShowScripts = [];
-  },
-  isEmpty: function() {
-    var e = gel('context.' + this.type + "." + this.suffix);
-    if (e) {
-      var script = e.innerHTML;
-      if (window.execScript)
-        window.execScript(script);
-      else
-        eval.call(window, script);
-      Element.remove(e);
-    }
-    for (var i = 0; i < this.menuItems.length; i++) {
-      if (this.menuItems[i].parentId == '')
-        return false;
-    }
-    return true;
-  },
-  load: function() {},
-  add: function(sysId, id, parentId, label, type, action, order, img, trackSelected) {
-    var item = {};
-    item.sysId = sysId;
-    item.id = id;
-    item.parentId = parentId;
-    item.label = label;
-    item.type = type;
-    item.action = action || "";
-    item.order = order;
-    item.image = img;
-    item.trackSelected = (trackSelected == "true");
-    this._add(item);
-  },
-  addItem: function(id, parentId, label, type, action, order, img, trackSelected, onShowScript) {
-    var item = {};
-    item.id = id;
-    item.parentId = parentId;
-    item.label = label;
-    item.type = type;
-    item.action = action;
-    item.order = order;
-    item.image = img;
-    item.trackSelected = (trackSelected == "true");
-    item.onShowScript = onShowScript;
-    this._add(item);
-  },
-  _add: function(item) {
-    if (!item.order)
-      item.order = 0;
-    this.menuItems.push(item);
-  },
-  increaseItemsOrder: function(increase) {
-    for (var i = 0; i < this.menuItems.length; i++)
-      this.menuItems[i].order += increase;
-  },
-  addAction: function(label, action, order) {
-    this.addItem("", "", label, "action", action, order);
-  },
-  showContextMenu: function(evt, id, variables) {
-    this.variables = variables;
-    id += this.suffix;
-    if (!getMenuByName(id))
-      this._createMenu(id);
-    var cm = getMenuByName(id);
-    if (cm.context.isEmpty())
-      return;
-    this._loadVariables(variables);
-    for (var i = 0; i < this.onShowScripts.length; i++) {
-      var onShow = this.onShowScripts[i];
-      g_menu = getMenuByName(onShow.menuId);
-      if (!g_menu)
-        continue;
-      g_menu = g_menu.context;
-      if (!g_menu)
-        continue;
-      g_item = g_menu.getItem(onShow.itemId);
-      if (!g_item)
-        continue;
-      this._runOnShowScript(onShow.script, onShow.itemId);
-    }
-    this._clearVariables(variables);
-    g_menu = null;
-    g_item = null;
-    return contextShow(evt, id, 0, 0, 0, 0);
-  },
-  _createMenu: function(id) {
-    var cm = new GwtContextMenu(id);
-    cm.clear();
-    this._sort();
-    this._buildMenu("", cm);
-  },
-  _sort: function() {
-    this.menuItems = this.menuItems.sort(function(a, b) {
-      var aOrder = parseInt("0" + a.order, 10);
-      var bOrder = parseInt("0" + b.order, 10);
-      if ((aOrder) < (bOrder)) {
-        return -1;
-      }
-      if ((aOrder) > (bOrder)) {
-        return 1;
-      }
-      return 0;
-    });
-  },
-  _buildMenu: function(parentId, cm) {
-    var lastType;
-    var itemsAfterLine = 0;
-    for (var i = 0; i < this.menuItems.length; i++) {
-      var item = this.menuItems[i];
-      if (parentId != item.parentId)
-        continue;
-      if (lastType == "line" && item.type == "line")
-        continue;
-      if (lastType == "line" && itemsAfterLine > 0) {
-        this._addLine(cm);
-        itemsAfterLine = 0;
-      }
-      lastType = item.type;
-      if (lastType == "line")
-        continue;
-      if (this._addMenuItem(cm, item))
-        itemsAfterLine++;
-    }
-  },
-  _addLine: function(cm) {
-    cm.addLine();
-  },
-  _addMenuItem: function(cm, item) {
-    var added = true;
-    var mi;
-    if (item.type == "action") {
-      if (!this._getAction(item))
-        mi = cm.addLabel(item.label);
-      else
-        mi = cm.addFunc(item.label, this._runMenuAction.bind(this, item), item.id);
-    } else if (item.type == "label") {
-      mi = cm.addLabel(item.label);
-    } else if (item.type == "menu") {
-      var sm = new GwtContextMenu(item.id + '_' + this.suffix);
-      if (item.trackSelected)
-        sm.setTrackSelected(true);
-      this._buildMenu(item.id, sm);
-      if (sm.isEmpty())
-        added = false;
-      else
-        mi = cm.addMenu(item.label, sm, item.id);
-    }
-    if (mi && item.image)
-      cm.setImage(mi, item.image);
-    if (added && this._getOnShowScript(item)) {
-      var o = {};
-      o.menuId = cm.id;
-      o.itemId = item.id;
-      o.script = this._getOnShowScript(item);
-      this.onShowScripts.push(o);
-    }
-    return added;
-  },
-  _getAction: function(item) {
-    var action = '';
-    if (item.action)
-      action = item.action;
-    if (item.sysId)
-      action += '\n' + GlideMenu.scripts[item.sysId];
-    return action;
-  },
-  _getOnShowScript: function(item) {
-    if (item.sysId)
-      return GlideMenu.onScripts[item.sysId];
-    return item.onShowScript;
-  },
-  _runMenuAction: function(item) {
-    this._loadVariables(this.variables);
-    try {
-      eval(this._getAction(item));
-    } catch (ex) {
-      jslog("Error running context menu '" + item.label + "': " + ex);
-    }
-    this._clearVariables(this.variables);
-  },
-  _runOnShowScript: function(script, itemId) {
-    try {
-      eval(script);
-    } catch (ex) {
-      jslog("Error running onShow script for item '" + itemId + "': " + ex);
-    }
-  },
-  _loadVariables: function(variables) {
-    for (var n in variables) {
-      var s = n + '=variables["' + n + '"]';
-      eval(s);
-    }
-  },
-  _clearVariables: function(variables) {
-    for (var n in variables) {
-      var s = n + '=null;';
-      eval(s);
-    }
-  },
-  type: 'GlideMenu'
-};
-GlideMenu.scripts = {};
-GlideMenu.onScripts = {};
-GlideMenu.addScripts = function(o) {
-  if (o == null)
-    return;
-  for (var s in o.scripts)
-    GlideMenu.scripts[s] = o.scripts[s];
-  for (var s in o.onScripts)
-    GlideMenu.onScripts[s] = o.onScripts[s];
-};
 /*! RESOURCE: scripts/TestClient.js */
 function popTestClient(test_definition, test_subject) {
   var test_execution;
@@ -36921,6 +36888,230 @@ TestClient.prototype = {
   },
   type: 'TestClient'
 };;
+/*! RESOURCE: scripts/classes/GlideMenu.js */
+var GlideMenu = Class.create();
+GlideMenu.prototype = {
+  initialize: function(idSuffix, type) {
+    this.suffix = idSuffix;
+    this.type = type;
+    this.clear();
+  },
+  destroy: function() {
+    this.clear();
+  },
+  clear: function() {
+    this.menuItems = [];
+    this.variables = {};
+    this.onShowScripts = [];
+  },
+  isEmpty: function() {
+    var e = gel('context.' + this.type + "." + this.suffix);
+    if (e) {
+      var script = e.innerHTML;
+      if (window.execScript)
+        window.execScript(script);
+      else
+        eval.call(window, script);
+      Element.remove(e);
+    }
+    for (var i = 0; i < this.menuItems.length; i++) {
+      if (this.menuItems[i].parentId == '')
+        return false;
+    }
+    return true;
+  },
+  load: function() {},
+  add: function(sysId, id, parentId, label, type, action, order, img, trackSelected) {
+    var item = {};
+    item.sysId = sysId;
+    item.id = id;
+    item.parentId = parentId;
+    item.label = label;
+    item.type = type;
+    item.action = action || "";
+    item.order = order;
+    item.image = img;
+    item.trackSelected = (trackSelected == "true");
+    this._add(item);
+  },
+  addItem: function(id, parentId, label, type, action, order, img, trackSelected, onShowScript) {
+    var item = {};
+    item.id = id;
+    item.parentId = parentId;
+    item.label = label;
+    item.type = type;
+    item.action = action;
+    item.order = order;
+    item.image = img;
+    item.trackSelected = (trackSelected == "true");
+    item.onShowScript = onShowScript;
+    this._add(item);
+  },
+  _add: function(item) {
+    if (!item.order)
+      item.order = 0;
+    this.menuItems.push(item);
+  },
+  increaseItemsOrder: function(increase) {
+    for (var i = 0; i < this.menuItems.length; i++)
+      this.menuItems[i].order += increase;
+  },
+  addAction: function(label, action, order) {
+    this.addItem("", "", label, "action", action, order);
+  },
+  showContextMenu: function(evt, id, variables) {
+    this.variables = variables;
+    id += this.suffix;
+    if (!getMenuByName(id))
+      this._createMenu(id);
+    var cm = getMenuByName(id);
+    if (cm.context.isEmpty())
+      return;
+    this._loadVariables(variables);
+    for (var i = 0; i < this.onShowScripts.length; i++) {
+      var onShow = this.onShowScripts[i];
+      g_menu = getMenuByName(onShow.menuId);
+      if (!g_menu)
+        continue;
+      g_menu = g_menu.context;
+      if (!g_menu)
+        continue;
+      g_item = g_menu.getItem(onShow.itemId);
+      if (!g_item)
+        continue;
+      this._runOnShowScript(onShow.script, onShow.itemId);
+    }
+    this._clearVariables(variables);
+    g_menu = null;
+    g_item = null;
+    return contextShow(evt, id, 0, 0, 0, 0);
+  },
+  _createMenu: function(id) {
+    var cm = new GwtContextMenu(id);
+    cm.clear();
+    this._sort();
+    this._buildMenu("", cm);
+  },
+  _sort: function() {
+    this.menuItems = this.menuItems.sort(function(a, b) {
+      var aOrder = parseInt("0" + a.order, 10);
+      var bOrder = parseInt("0" + b.order, 10);
+      if ((aOrder) < (bOrder)) {
+        return -1;
+      }
+      if ((aOrder) > (bOrder)) {
+        return 1;
+      }
+      return 0;
+    });
+  },
+  _buildMenu: function(parentId, cm) {
+    var lastType;
+    var itemsAfterLine = 0;
+    for (var i = 0; i < this.menuItems.length; i++) {
+      var item = this.menuItems[i];
+      if (parentId != item.parentId)
+        continue;
+      if (lastType == "line" && item.type == "line")
+        continue;
+      if (lastType == "line" && itemsAfterLine > 0) {
+        this._addLine(cm);
+        itemsAfterLine = 0;
+      }
+      lastType = item.type;
+      if (lastType == "line")
+        continue;
+      if (this._addMenuItem(cm, item))
+        itemsAfterLine++;
+    }
+  },
+  _addLine: function(cm) {
+    cm.addLine();
+  },
+  _addMenuItem: function(cm, item) {
+    var added = true;
+    var mi;
+    if (item.type == "action") {
+      if (!this._getAction(item))
+        mi = cm.addLabel(item.label);
+      else
+        mi = cm.addFunc(item.label, this._runMenuAction.bind(this, item), item.id);
+    } else if (item.type == "label") {
+      mi = cm.addLabel(item.label);
+    } else if (item.type == "menu") {
+      var sm = new GwtContextMenu(item.id + '_' + this.suffix);
+      if (item.trackSelected)
+        sm.setTrackSelected(true);
+      this._buildMenu(item.id, sm);
+      if (sm.isEmpty())
+        added = false;
+      else
+        mi = cm.addMenu(item.label, sm, item.id);
+    }
+    if (mi && item.image)
+      cm.setImage(mi, item.image);
+    if (added && this._getOnShowScript(item)) {
+      var o = {};
+      o.menuId = cm.id;
+      o.itemId = item.id;
+      o.script = this._getOnShowScript(item);
+      this.onShowScripts.push(o);
+    }
+    return added;
+  },
+  _getAction: function(item) {
+    var action = '';
+    if (item.action)
+      action = item.action;
+    if (item.sysId)
+      action += '\n' + GlideMenu.scripts[item.sysId];
+    return action;
+  },
+  _getOnShowScript: function(item) {
+    if (item.sysId)
+      return GlideMenu.onScripts[item.sysId];
+    return item.onShowScript;
+  },
+  _runMenuAction: function(item) {
+    this._loadVariables(this.variables);
+    try {
+      eval(this._getAction(item));
+    } catch (ex) {
+      jslog("Error running context menu '" + item.label + "': " + ex);
+    }
+    this._clearVariables(this.variables);
+  },
+  _runOnShowScript: function(script, itemId) {
+    try {
+      eval(script);
+    } catch (ex) {
+      jslog("Error running onShow script for item '" + itemId + "': " + ex);
+    }
+  },
+  _loadVariables: function(variables) {
+    for (var n in variables) {
+      var s = n + '=variables["' + n + '"]';
+      eval(s);
+    }
+  },
+  _clearVariables: function(variables) {
+    for (var n in variables) {
+      var s = n + '=null;';
+      eval(s);
+    }
+  },
+  type: 'GlideMenu'
+};
+GlideMenu.scripts = {};
+GlideMenu.onScripts = {};
+GlideMenu.addScripts = function(o) {
+  if (o == null)
+    return;
+  for (var s in o.scripts)
+    GlideMenu.scripts[s] = o.scripts[s];
+  for (var s in o.onScripts)
+    GlideMenu.onScripts[s] = o.onScripts[s];
+};
 /*! RESOURCE: scripts/spell.js */
 var TAG_DIV = "div";
 var TAG_SPAN = "span";
@@ -37477,6 +37668,68 @@ var AJAXTextSearchCompleter = Class.create(AJAXTableCompleter, {
     return width;
   }
 });;
+/*! RESOURCE: scripts/CloudApiSCClient.js */
+var CloudApiSCClient = {
+  _fieldsInfo: {},
+  validateCatItemParameterVariables: function(ajaxProcessor, variableSysId, oldValue, newValue, isLoading, g_form) {
+    if (isLoading || oldValue == newValue)
+      return;
+    var parameters = {};
+    parameters.variableSysId = variableSysId;
+    parameters.parameterValue = newValue.trim();
+    this.callAjax(ajaxProcessor, "validateVariableValue", parameters, function(answer) {
+      var result = JSON.parse(answer);
+      result.variableSysId = "IO:" + variableSysId;
+      CloudApiSCClient._fieldsInfo[result["name"]] = result;
+      CloudApiSCClient.showAllFieldMessages(g_form);
+    });
+  },
+  callAjax: function(ajaxName, methodName, parameters, callback) {
+    var glideAjax = new GlideAjax(ajaxName);
+    glideAjax.addParam("sysparm_name", methodName);
+    if (parameters) {
+      for (var name in parameters) {
+        glideAjax.addParam(name, parameters[name]);
+      }
+    }
+    if (callback) {
+      glideAjax.getXMLAnswer(callback);
+    } else {
+      glideAjax.getXMLWait();
+      return glideAjax.getAnswer();
+    }
+  },
+  beforeSubmitCloudRsrcTemplate: function(g_form) {
+    if (this.isFormValid())
+      return true;
+    var msg = "Please correct errors to submit order";
+    g_form.addErrorMessage(msg);
+    this.showAllFieldMessages(g_form);
+    return false;
+  },
+  isFormValid: function() {
+    if (!this._fieldsInfo)
+      return true;
+    for (var name in this._fieldsInfo) {
+      if (!this._fieldsInfo[name].isValid)
+        return false;
+    }
+    return true;
+  },
+  showAllFieldMessages: function(g_form) {
+    g_form.hideAllFieldMsgs("error");
+    g_form.hideAllFieldMsgs("error");
+    g_form.clearMessages();
+    for (var name in this._fieldsInfo) {
+      var fieldInfo = this._fieldsInfo[name];
+      if (fieldInfo.message.length > 0) {
+        for (var i = 0; i < fieldInfo.message.length; i++) {
+          g_form.showFieldMsg(fieldInfo.variableSysId, fieldInfo.message[i], fieldInfo.msgtype);
+        }
+      }
+    }
+  }
+};;
 /*! RESOURCE: /scripts/jquery-ui-1.9.2.custom.js */
 (function($, undefined) {
   var uuid = 0,

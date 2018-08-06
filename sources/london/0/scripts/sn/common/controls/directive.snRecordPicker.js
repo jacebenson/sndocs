@@ -111,7 +111,8 @@ angular.module('sn.common.controls').directive('snRecordPicker', function($timeo
             var params = {
               sysparm_offset: (scope.pageSize * (page - 1)),
               sysparm_limit: scope.pageSize,
-              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery)
+              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery),
+              sysparm_display_value: true
             };
             return params;
           },

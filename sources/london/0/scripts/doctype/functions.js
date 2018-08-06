@@ -857,13 +857,21 @@ function setLightWeightLink(name) {
   if (!v)
     return;
   var link = $(name + "LINK");
-  if (!link)
+  var replace = $(name + "LINKreplace")
+  if (!link && !replace)
     return;
   var vis = "hidden";
   if (v.value != '')
     vis = "";
-  link.style.visibility = vis;
-  link.style.display = vis == 'hidden' ? 'none' : '';
+  setLightWeightLinkDisplay(link, vis);
+  setLightWeightLinkDisplay(replace, vis);
+}
+
+function setLightWeightLinkDisplay(el, vis) {
+  if (!el)
+    return;
+  el.style.visibility = vis;
+  el.style.display = vis == 'hidden' ? 'none' : '';
 }
 
 function toggleDebug(id) {

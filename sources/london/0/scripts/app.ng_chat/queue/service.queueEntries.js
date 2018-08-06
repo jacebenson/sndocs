@@ -1,6 +1,6 @@
 /*! RESOURCE: /scripts/app.ng_chat/queue/service.queueEntries.js */
 angular.module('sn.connect.queue').service('queueEntries', function(
-  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n) {
+  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n, supportEnabled) {
   'use strict';
   var QUEUE_AMB = '/connect/support/queues';
   var GROUP_AMB = '/connect/support/group/';
@@ -43,11 +43,13 @@ angular.module('sn.connect.queue').service('queueEntries', function(
           });
         }
       });
-      amb.connect();
     }
   }
 
   function addRawQueueEntry(rawQueueEntry) {
+    if (inSupportClient || supportEnabled) {
+      ambSubscribe();
+    }
     var oldQueueEntry = queueEntries[rawQueueEntry.sys_id];
     if (oldQueueEntry && oldQueueEntry.equals(rawQueueEntry))
       return oldQueueEntry;
@@ -113,7 +115,7 @@ angular.module('sn.connect.queue').service('queueEntries', function(
       return addRawQueueEntry(response.data.result);
     });
   }
-  ambSubscribe();
+  amb.connect();
   return {
     addRaw: addRawQueueEntry,
     get: function(id) {

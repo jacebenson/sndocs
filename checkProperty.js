@@ -8,7 +8,7 @@ var request = require('request');
 // var mkdirp = require('mkdirp');
 var xpath = require('xpath');
 var DOM = require('xmldom').DOMParser;
-var property = 'glide.appcreator.company.code';
+var property = 'glide.email.test.user';
 config.instances = config.instances.sort();
 // config.instances.length = 5;
 config.instances.map(function (instance) {

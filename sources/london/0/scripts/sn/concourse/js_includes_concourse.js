@@ -3387,6 +3387,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,
@@ -26257,7 +26260,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
           }
         },
         initSelection: function(elem, callback) {
-          if (scope.field.displayValue)
+          if (scope.field && scope.field.displayValue)
             callback({
               sys_id: scope.field.value,
               name: scope.field.displayValue
@@ -26288,6 +26291,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
               sysparm_target_field: scope.ed.dependent_field || scope.ed.name,
               table: scope.ed.reference,
               qualifier: scope.ed.qualifier,
+              sysparm_for_impersonation: !!scope.ed.for_impersonation,
               data_adapter: scope.ed.data_adapter,
               attributes: scope.ed.attributes,
               dependent_field: scope.ed.dependent_field,
@@ -26653,7 +26657,8 @@ angular.module('sn.common.controls').directive('snRecordPicker', function($timeo
             var params = {
               sysparm_offset: (scope.pageSize * (page - 1)),
               sysparm_limit: scope.pageSize,
-              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery)
+              sysparm_query: buildQuery(filterText, scope.searchFields, scope.defaultQuery),
+              sysparm_display_value: true
             };
             return params;
           },
@@ -28173,6 +28178,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     },
     get events() {
       return events;
+    },
+    set events(value) {
+      events = value;
     },
     on: on,
     un: un,
@@ -34236,7 +34244,7 @@ angular.module("sn.common.stream").controller("Stream", function($rootScope, $sc
   });
 });;
 /*! RESOURCE: /scripts/sn/common/stream/controller.snStream.js */
-angular.module("sn.common.stream").controller("snStream", function($rootScope, $scope, $attrs, $http, nowStream, snRecordPresence, snCustomEvent, userPreferences, $window, $q, $timeout, $sanitize, $sce, snMention, i18n, getTemplateUrl) {
+angular.module("sn.common.stream").controller("snStream", function($rootScope, $scope, $attrs, $http, nowStream, snRecordPresence, snCustomEvent, userPreferences, $window, $q, $timeout, $sce, snMention, i18n, getTemplateUrl) {
   "use strict";
   if (angular.isDefined($attrs.isInline)) {
     bindInlineStreamAttributes();
@@ -34413,10 +34421,16 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
     var regexLinks = /@L\[([^|]+?)\|([^\]]*)]/gi;
     return text.replace(regexLinks, "<a href='$1' target='_blank'>$2</a>");
   };
+  $scope.trustAsHtml = function(text) {
+    return $sce.trustAsHtml(text);
+  };
   $scope.parseSpecial = function(text) {
-    var parsedText = $scope.parseLinks($sanitize(text));
+    var parsedText = $scope.parseLinks(text);
     parsedText = $scope.parseMentions(parsedText);
-    return $sce.trustAsHtml(parsedText);
+    return $scope.trustAsHtml(parsedText);
+  };
+  $scope.isHTMLField = function(change) {
+    return change.field_type === 'html' || change.field_type === 'translated_html';
   };
   $scope.getFullEntryValue = function(entry, event) {
     event.stopPropagation();
@@ -34428,7 +34442,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
         sysparm_sys_id: journal.sys_id
       }
     }).then(function(response) {
-      journal.new_value = response.data.result.replace(/\n/g, '<br/>');
+      journal.sanitized_new_value = journal.new_value = response.data.result.replace(/\n/g, '<br/>');
       journal.is_truncated = false;
       journal.loading = false;
       journal.showMore = true;
@@ -34556,7 +34570,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
     var entries = [];
     if ($scope.multipleInputs) {
       angular.forEach($scope.fields, function(item) {
-        if (!item.isSelected || !item.value)
+        if (!item.isActive || !item.value)
           return;
         entries.push({
           field: item.name,
@@ -34588,7 +34602,7 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
   function clearInputs() {
     $scope.inputTypeValue = "";
     angular.forEach($scope.fields, function(item) {
-      if (!item.isSelected)
+      if (!item.isActive)
         return;
       if (item.value)
         item.filled = true;
@@ -34846,13 +34860,13 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
 
   function setShowAllFields() {
     $scope.checkbox.showAllFields = $scope.showAllFields = $scope.allFields && !$scope.allFields.some(function(item) {
-      return !item.isSelected;
+      return !item.isActive;
     });
     $scope.hideAllFields = !$scope.allFields || !$scope.allFields.some(function(item) {
-      return item.isSelected;
+      return item.isActive;
     });
     $scope.isFiltered = !$scope.showAllFields || $scope.allFields.some(function(item) {
-      return !item.isSelected;
+      return !item.isActive;
     });
   }
   $scope.setPrimary = function(entry) {
@@ -34876,13 +34890,13 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
   $scope.updateFieldVisibilityAll = function() {
     $scope.showAllFields = !$scope.showAllFields;
     angular.forEach($scope.allFields, function(item) {
-      item.isSelected = $scope.showAllFields;
+      item.isActive = $scope.showAllFields;
     });
     $scope.updateFieldVisibility();
   };
   $scope.updateFieldVisibility = function() {
     var activeFields = $scope.allFields.map(function(item) {
-      return item.name + ',' + item.isSelected;
+      return item.name + ',' + item.isActive;
     });
     setShowAllFields();
     emitFilterChange();
@@ -35041,9 +35055,12 @@ angular.module("sn.common.stream").controller("snStream", function($rootScope, $
 
   function newLinesToBR(entries) {
     angular.forEach(entries, function(item) {
-      if (!item.new_value)
-        return;
-      item.new_value = item.new_value.replace(/\n/g, '<br/>');
+      if (item.new_value) {
+        item.new_value = item.new_value.replace(/\n/g, '<br/>');
+      }
+      if (item.sanitized_new_value) {
+        item.sanitized_new_value = item.sanitized_new_value.replace(/\n/g, '<br/>');
+      }
     });
   }
 
@@ -43134,6 +43151,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,
@@ -46250,7 +46270,108 @@ angular.module('sn.common.bindWatch').factory('BindWatch', function() {
       }.bind(null, key));
     });
   }
-});;;;
+});;;
+/*! RESOURCE: scripts/app.snList/optional/service.listv3PaneExtension.js */
+angular.module('sn.concourse_pane_extension').run(function(concoursePaneExtensionRegistry, getTemplateUrl, glideUrlBuilder, $ocLazyLoad, $compile, $log, snCustomEvent) {
+  var listv3FilesLoaded = false;
+  var listv3OuterScope = null;
+  concoursePaneExtensionRegistry.register('list', function(elementRoot, url, params) {
+    params.startTime = new Date();
+    if (listv3FilesLoaded) {
+      loadList(elementRoot, url, params);
+      return;
+    }
+    $ocLazyLoad.load([
+      'scripts/js_includes_list_v3.js',
+      'styles/css_includes_list_v3.css',
+      getTemplateUrl('sn_list_template_preload.xml&sysparm_nothing=.html')
+    ]).then(function() {
+      loadList(elementRoot, url, params);
+      listv3FilesLoaded = true;
+    }, function(err) {
+      $log.error('Error while lazy loading list', err);
+    });
+  });
+
+  function loadList(elementRoot, url, params) {
+    var listConfig = parseListConfig(url);
+    if (elementRoot.find('sn-list').length > 0) {
+      var dirty = false;
+      angular.forEach(listConfig, function(item, name) {
+        if (angular.equals(listv3OuterScope[name], item))
+          return;
+        dirty = true;
+        listv3OuterScope[name] = item;
+      });
+      if (dirty)
+        snCustomEvent.fire('list_v3.list_reload', listv3OuterScope);
+    } else {
+      var snList = document.createElement('sn-list');
+      listv3OuterScope = angular.element(elementRoot).scope().$new();
+      angular.forEach(listConfig, function(item, name) {
+        listv3OuterScope[name] = item;
+        snList.setAttribute(name, name);
+      });
+      var element = $compile(snList)(listv3OuterScope);
+      elementRoot.append(element);
+    }
+  }
+
+  function parseListConfig(url) {
+    var urlBuilder = glideUrlBuilder.newGlideUrl(parseTheBeginningOutOf(url));
+    var table = urlBuilder.contextPath.replace('_list.do', '');
+    var params = urlBuilder.getParams();
+    var query = params.sysparm_query || '';
+    return {
+      table: table,
+      query: query,
+      concourse: true,
+      parameters: angular.extend({
+        sysparm_limit: '20',
+        sysparm_field_styles: 'true',
+        sysparm_exclude_reference_link: 'true',
+        sysparm_display_value: 'all',
+        sysparm_read_replica_category: 'list'
+      }, params),
+      properties: {
+        listId: table,
+        table: table,
+        listControl: {
+          omitFilter: 'false',
+          omitEmpty: 'false',
+          omitLinks: 'false'
+        },
+        related: {},
+        isRefList: 'false',
+        maxRows: '20',
+        isModernCellStyles: 'true',
+        isEmbedded: 'false',
+        isRelated: 'false',
+        isRegularList: true,
+        live: 'true',
+        showFixedHeaders: 'true',
+        showVTB: 'true',
+        target: 'gsft_main'
+      },
+      include: {
+        header: "true",
+        activityStream: "true",
+        modeSelector: "true",
+        uiActions: "true",
+        footer: "true",
+        isReferenceList: "false",
+        listEdit: "true",
+        titleContextMenu: "true"
+      }
+    }
+  }
+
+  function parseTheBeginningOutOf(url) {
+    if (!url.startsWith('http://') && !url.startsWith('https://'))
+      return url;
+    return url.match(/\/\/[^\/]+\/(.+)/)[1];
+  }
+});;;
 /*! RESOURCE: /scripts/concourse_view_stack/js_includes_concourse_view_stack.js */
 /*! RESOURCE: /scripts/concourse_view_stack/_module.js */
 angular.module('sn.concourse_view_stack', []);;
@@ -46848,26 +46969,21 @@ angular.module('sn.concourse').directive('domainReferencePicker', function($http
 /*! RESOURCE: /scripts/concourse/dateTimeFormat.js */
 (function() {
   CustomEvent.observe('cc_dateformat_set', function(preferences) {
-    preferences = parsePreferences(preferences);
-    if (preferences.timeAgo == false && preferences.dateBoth == false)
+    try {
+      preferences = JSON.parse(preferences);
+    } catch (ex) {
+      preferences = {};
+    }
+    if (preferences.timeAgo === false && preferences.dateBoth === false)
       CustomEvent.fireAll('timeago_set', false);
-    if (preferences.timeAgo == true && preferences.dateBoth == false)
+    if (preferences.timeAgo === true && preferences.dateBoth === false)
       CustomEvent.fireAll('timeago_set', true);
-    if (preferences.dateBoth == true)
+    if (preferences.dateBoth === true)
       CustomEvent.fireAll('date_both', true);
   });
   CustomEvent.observe('cc_dateformat_compact_set', function(bool) {
     CustomEvent.fireAll('shortdates_set', bool);
   });
-
-  function parsePreferences(p) {
-    var o = {};
-    p = p.replace(/\s+/g, '');
-    p = p.substring(1, p.length - 1).split(',');
-    for (var i = 0; i < p.length; i++)
-      o[p[i].split(':')[0]] = JSON.parse(p[i].split(':')[1]);
-    return o;
-  }
 })();;
 /*! RESOURCE: /scripts/sn/common/notification/js_includes_notification.js */
 /*! RESOURCE: /scripts/sn/common/notification/_module.js */
@@ -47613,6 +47729,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     },
     get events() {
       return events;
+    },
+    set events(value) {
+      events = value;
     },
     on: on,
     un: un,
@@ -53239,12 +53358,14 @@ angular.module('Magellan').directive('concourseApplicationTree', function(
           applicationLink.className += ' state-overwrite';
         }
         applicationLink.setAttribute('data-target', '#collapseId' + application.id);
-        applicationLink.setAttribute('ng-attr-aria-controls', 'collapseId' + (application.open ? application.id : undefined));
         if (application.open) {
           applicationLink.setAttribute('aria-controls', 'collapseId' + application.id);
         }
         applicationLink.setAttribute('aria-expanded', application.open);
         applicationLink.setAttribute('data-id', application.id);
+        if (application.hint) {
+          applicationLink.setAttribute('title', application.hint);
+        }
         var titleElement = document.createElement('span');
         applicationLink.appendChild(titleElement);
         setText(titleElement, application.title);
@@ -53299,6 +53420,9 @@ angular.module('Magellan').directive('concourseApplicationTree', function(
               toggleFoldLink.className += ' nav-open-state';
             } else {
               toggleFoldLink.className += ' collapsed';
+            }
+            if (module.hint) {
+              toggleFoldLink.setAttribute('title', module.hint);
             }
             var sideSpan = SIDE_SPAN_WIDGET.cloneNode(false);
             toggleFoldLink.appendChild(sideSpan);
@@ -62057,14 +62181,39 @@ angular.module('sn.connect').controller('chatFloating', function(
 /*! RESOURCE: /scripts/app.ng_chat/message/_module.js */
 angular.module("sn.connect.message", ["ng.common", "sn.connect.util", "sn.connect.profile"]);;
 /*! RESOURCE: /scripts/app.ng_chat/message/directive.snAriaChatMessage.js */
-angular.module('sn.connect.message').directive('snAriaChatMessage', function(getTemplateUrl) {
+angular.module('sn.connect.message').directive('snAriaChatMessage', function(getTemplateUrl, $templateCache, $interpolate, $sanitize) {
   'use strict';
+  var ariaTemplate = $templateCache.get(getTemplateUrl('snAriaChatMessage.xml'));
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: getTemplateUrl('snAriaChatMessage.xml'),
+    template: "<div></div>",
     scope: {
       message: '='
+    },
+    link: function(scope, element) {
+      var node = $interpolate(ariaTemplate)(scope);
+      element.html($sanitize(node));
+    },
+    controller: function($scope) {
+      $scope.displayedText = function() {
+        if (!$scope.message.isMessageShowing) {
+          return "";
+        }
+        return $scope.message.displayText;
+      };
+      $scope.attachmentMessage = function() {
+        if (!$scope.message.attachments || !$scope.message.attachments.length) {
+          return "";
+        }
+        var output = "";
+        for (var i = 0, len = $scope.message.attachments.length; i < len; i++) {
+          var attachment = $scope.message.attachments[i];
+          output += i > 0 ? ' . ' : '';
+          output += attachment.fileName + ', ' + attachment.byteDisplay;
+        }
+        return output;
+      }
     }
   }
 });;
@@ -62471,7 +62620,7 @@ angular.module('sn.connect.message').directive('snMessageBatch', function(getTem
     scope: {
       batch: '=',
       isGroupConversation: '=',
-      disableAvatarPopovers: '<?'
+      disableAvatarPopovers: '=?'
     },
     controller: function($scope, showAgentAvatar, inSupportClient) {
       $scope.isSystemMessage = function() {
@@ -70143,7 +70292,7 @@ angular.module('sn.connect.queue').service('queueNotifier', function($window, sn
 });;
 /*! RESOURCE: /scripts/app.ng_chat/queue/service.queueEntries.js */
 angular.module('sn.connect.queue').service('queueEntries', function(
-  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n) {
+  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n, supportEnabled) {
   'use strict';
   var QUEUE_AMB = '/connect/support/queues';
   var GROUP_AMB = '/connect/support/group/';
@@ -70186,11 +70335,13 @@ angular.module('sn.connect.queue').service('queueEntries', function(
           });
         }
       });
-      amb.connect();
     }
   }
 
   function addRawQueueEntry(rawQueueEntry) {
+    if (inSupportClient || supportEnabled) {
+      ambSubscribe();
+    }
     var oldQueueEntry = queueEntries[rawQueueEntry.sys_id];
     if (oldQueueEntry && oldQueueEntry.equals(rawQueueEntry))
       return oldQueueEntry;
@@ -70256,7 +70407,7 @@ angular.module('sn.connect.queue').service('queueEntries', function(
       return addRawQueueEntry(response.data.result);
     });
   }
-  ambSubscribe();
+  amb.connect();
   return {
     addRaw: addRawQueueEntry,
     get: function(id) {
@@ -71053,6 +71204,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,
@@ -71423,7 +71577,7 @@ angular.module('sn.embedded_help').service('embeddedHelpService', ['$rootScope',
       else
         return normalizeUrl(url1).indexOf(normalizeUrl(url2));
     }
-    var IGNORE_PARAMS_ON_COMPARE = ['sysparm_list', 'sysparm_list_mode', 'sysparm_nameofstack', 'sysparm_clear_stack', 'sysparm_userpref_module', 'sysparm_offset'];
+    var IGNORE_PARAMS_ON_COMPARE = ['sysparm_list', 'sysparm_list_mode', 'sysparm_nameofstack', 'sysparm_clear_stack', 'sysparm_userpref_module', 'sysparm_offset', 'sysparm_first_row', 'sysparm_view', 'sysparm_query'];
 
     function normalizeUrl(url) {
       var i = url.indexOf('?');
@@ -73570,6 +73724,7 @@ var GlideWebAnalytics = (function() {
           abandoned: "abandoned",
           inTransit: "in_transit",
           welcomeModalDismissed: "welcome_modal_dismissed",
+          welcomeModalEndedTour: "welcome_modal_ended_tour",
           allTerminalEvents: ["completed", "failed", "dismissed", "abandoned"]
         },
         embeddedHelp: {
@@ -73706,6 +73861,11 @@ var GlideWebAnalytics = (function() {
               _this.currentAutoLaunchTour = null
             }), this.service.on(events.tourService.welcomeModalDismissed, function() {
               null != _this.currentAutoLaunchTour && _this.dismissAutoLaunchTour()
+            }), this.service.on(events.tourService.welcomeModalEndedTour, function() {
+              if (null != _this.currentAutoLaunchTour && 0 === _this.service.currentTour.steps.length) {
+                var data = {};
+                data.tour = _this.currentAutoLaunchTour, _this.overrideAutoLaunchTour(data)
+              }
             });
             var listeners = this.service._coreListeners;
             listeners.broadcastEnd.push(function() {
@@ -73741,8 +73901,12 @@ var GlideWebAnalytics = (function() {
             this.currentContext = page, url = (this.currentPortal = portal) ? [url, page, "&portal=", portal].join("") : [url, page].join(""), this.dataService.get(url, function(e, response) {
               if (e) logger.error(e), logger.error("Error getting tour auto-launch info");
               else {
-                var tour = response.result,
-                  autoLaunchTourId = tour.tourId,
+                var tour = response.result;
+                if ("service_portal" === tour.type && tour.options) {
+                  var opt = JSON.parse(tour.options);
+                  if (opt.isMapped && document.location.href.indexOf(opt.actualContext) < 0) return
+                }
+                var autoLaunchTourId = tour.tourId,
                   routeViaPlayButtonFromGTD = tourService.store.getItem("AUTOSTART");
                 null != autoLaunchTourId && null == routeViaPlayButtonFromGTD && (_this2.currentAutoLaunchTour = autoLaunchTourId, _this2.service.sharedMetadata.isAutoLaunched = !0, portal ? tourService.startTour(autoLaunchTourId, 0) : void 0 !== top.EmbeddedHelpEvents ? (tourService.store.setItem("AUTOSTART", autoLaunchTourId), tourService.store.setItem("TOURNAME", tour.name), CustomEvent.fire(top.EmbeddedHelpEvents.LOAD_EMBEDDED_HELP)) : tourService.startTour(autoLaunchTourId, 0))
               }
@@ -73881,7 +74045,7 @@ var GlideWebAnalytics = (function() {
                   type: "showWelcomeModal",
                   onBeginTour: function() {
                     tourHasSteps ? service.attemptToLaunch(tour, step, isFirstAttempt) : setTimeout(function() {
-                      service.endTour(), onEnd()
+                      service.trigger(events.welcomeModalEndedTour), service.endTour(), onEnd()
                     }, 1)
                   },
                   onClose: function() {
@@ -73932,33 +74096,37 @@ var GlideWebAnalytics = (function() {
         default: obj
       }
     }
-    top.NOW = top.NOW || {}, top.NOW.guidedToursService = top.NOW.guidedToursService || function() {
-      top.EmbeddedHelpEvents = top.EmbeddedHelpEvents || _constants2.default.events.embeddedHelp;
-      var store = sessionStorage,
-        dataService = new _dataService2.default(new _ajaxTransport2.default),
-        logger = (0, _logger.getInstance)(),
-        tourService = new _tour2.default(store, _storeManager2.default.store, logger, dataService, function(msg) {
-          top.NOW && top.NOW.gtdConfig && top.NOW.gtdConfig.servicePortalTours ? setTimeout(function() {
-            _storeManager2.default.store.dispatch({
-              type: "showErrorNotification",
-              text: msg
-            })
-          }, 1e3) : _thirdPartyUtils2.default.displayMessage("error", msg)
+    try {
+      top.NOW = top.NOW || {}, top.NOW.guidedToursService = top.NOW.guidedToursService || function() {
+        top.EmbeddedHelpEvents = top.EmbeddedHelpEvents || _constants2.default.events.embeddedHelp;
+        var store = sessionStorage,
+          dataService = new _dataService2.default(new _ajaxTransport2.default),
+          logger = (0, _logger.getInstance)(),
+          tourService = new _tour2.default(store, _storeManager2.default.store, logger, dataService, function(msg) {
+            top.NOW && top.NOW.gtdConfig && top.NOW.gtdConfig.servicePortalTours ? setTimeout(function() {
+              _storeManager2.default.store.dispatch({
+                type: "showErrorNotification",
+                text: msg
+              })
+            }, 1e3) : _thirdPartyUtils2.default.displayMessage("error", msg)
+          });
+        if (top.NOW.guidedToursService = tourService, (0, _globalEventListeners2.default)(tourService), (0, _analyticsFactory.getInstance)().listenTo(tourService, _constants2.default.eventStream), new _accessibility2.default(tourService).decorate(), new _autolaunch2.default(tourService).decorate(), new _draftMode2.default(tourService).decorate(), new _welcomeAndConclusionModal2.default(tourService).decorate(), top.NOW && top.NOW.gtdConfig) {
+          if ((0, _bootstrapApp2.default)(_storeManager2.default.store, tourService), top.NOW.gtdConfig.servicePortalTours) {
+            var args = {
+                location: location,
+                config: top.NOW.gtdConfig
+              },
+              params = (0, _object.parseStringToObject)(args.location.search.substring(1));
+            params.gtd_preview_tour_id ? (tourService.mode = params.mode ? params.mode : "normal", tourService.startTour(params.gtd_preview_tour_id, 0)) : CustomEvent.fireTop(_constants2.default.events.external.pageLoaded, args)
+          }
+        } else CustomEvent.observe(_constants2.default.events.page.loaded, function() {
+          (0, _bootstrapApp2.default)(_storeManager2.default.store, tourService)
         });
-      if (top.NOW.guidedToursService = tourService, (0, _globalEventListeners2.default)(tourService), (0, _analyticsFactory.getInstance)().listenTo(tourService, _constants2.default.eventStream), new _accessibility2.default(tourService).decorate(), new _autolaunch2.default(tourService).decorate(), new _draftMode2.default(tourService).decorate(), new _welcomeAndConclusionModal2.default(tourService).decorate(), top.NOW && top.NOW.gtdConfig) {
-        if ((0, _bootstrapApp2.default)(_storeManager2.default.store, tourService), top.NOW.gtdConfig.servicePortalTours) {
-          var args = {
-              location: location,
-              config: top.NOW.gtdConfig
-            },
-            params = (0, _object.parseStringToObject)(args.location.search.substring(1));
-          params.gtd_preview_tour_id ? (tourService.mode = params.mode ? params.mode : "normal", tourService.startTour(params.gtd_preview_tour_id, 0)) : CustomEvent.fireTop(_constants2.default.events.external.pageLoaded, args)
-        }
-      } else CustomEvent.observe(_constants2.default.events.page.loaded, function() {
-        (0, _bootstrapApp2.default)(_storeManager2.default.store, tourService)
-      });
-      return tourService
-    }()
+        return tourService
+      }()
+    } catch (e) {
+      console && console.log("Cannot access top. Guided Tours will not be available!")
+    }
   }, {
     1: 1,
     15: 15,
@@ -74801,11 +74969,15 @@ var GlideWebAnalytics = (function() {
       };
 
     function isStepUrlMatchingForCurrentWindow(stepUrl) {
-      for (var splt = stepUrl.split("?"), currentStepUrl = splt[0], params = splt[1].split("&"), i = 0; i < params.length; i++)
-        if (params[i].startsWith("id=")) {
-          currentStepUrl = [currentStepUrl, params[i]].join("?");
-          break
-        }
+      var splt = stepUrl.split("?"),
+        currentStepUrl = splt[0],
+        params = splt[1].split("&");
+      if (0 <= window.location.href.indexOf("id="))
+        for (var i = 0; i < params.length; i++)
+          if (params[i].startsWith("id=")) {
+            currentStepUrl = [currentStepUrl, params[i]].join("?");
+            break
+          }
       return -1 < window.location.href.indexOf(currentStepUrl)
     }
     var TourService = function() {
@@ -75010,7 +75182,7 @@ var GlideWebAnalytics = (function() {
             _this4.store.setItem("guided_tour:tour.state", state)
           }, function(err, state) {
             err || _this4.store.setItem("guided_tour:tour.state", state)
-          })
+          }), tour.steps[step].target = tour.steps[step].actionTarget
         }
       }, {
         key: "registerListenersForWrapper",
@@ -75215,7 +75387,9 @@ var GlideWebAnalytics = (function() {
       formElementTemplateFunctions = {
         field: function(element, typeV3) {
           return void 0 === element.fieldAction || "" == element.fieldAction ? function(element) {
-            switch (-1 < element.fieldType.indexOf("text") || -1 < element.fieldType.indexOf("glide_date") ? "____ComputedFieldTextOrDate" : -1 < element.fieldType.indexOf("html") ? "____ComputedHTML" : element.fieldType) {
+            var computedFieldType = -1 < element.fieldType.indexOf("text") || -1 < element.fieldType.indexOf("glide_date") ? "____ComputedFieldTextOrDate" : -1 < element.fieldType.indexOf("html") ? "____ComputedHTML" : element.fieldType;
+            "" == computedFieldType && -1 < element.field.indexOf("activity-stream") && (computedFieldType = "activity_stream");
+            switch (computedFieldType) {
               case "string":
               case "integer":
               case "decimal":
@@ -75236,6 +75410,8 @@ var GlideWebAnalytics = (function() {
                 return "label[id='label.ni." + element.table + "." + element.field + "']";
               case "journal_input":
                 return "textarea[id*='activity-stream'],textarea[id$='" + element.table + "." + element.field + "']:visible";
+              case "activity_stream":
+                return "textarea[id='" + element.field + "']";
               case "____ComputedHTML":
                 return ".mce-tinymce";
               case "template_value":
@@ -75578,8 +75754,19 @@ var GlideWebAnalytics = (function() {
       },
       _constants = require(15);
 
+    function canAccessIFrame(iframe) {
+      var html = null;
+      try {
+        html = (iframe.contentDocument || iframe.contentWindow.document).body.innerHTML
+      } catch (err) {}
+      return null !== html
+    }
+
     function findInlineFrameElements(page) {
-      for (var inlineFrames = page.document.getElementsByTagName("iframe"), frameArray = [], i = 0; i < inlineFrames.length; i++) void 0 !== page.jQuery && frameArray.push(inlineFrames[i]);
+      var inlineFrames = page.document.getElementsByTagName("iframe"),
+        frameArray = [];
+      if (void 0 !== page.jQuery)
+        for (var isSP = top.NOW && top.NOW.gtdConfig && top.NOW.gtdConfig.servicePortalTours, i = 0; i < inlineFrames.length; i++) isSP && canAccessIFrame(inlineFrames[i]) ? frameArray.push(inlineFrames[i]) : isSP || frameArray.push(inlineFrames[i]);
       return frameArray
     }
 
@@ -76117,57 +76304,54 @@ var GlideWebAnalytics = (function() {
     84: 84
   }],
   71: [function(require, module, exports) {
-    var global, factory;
-    global = this, factory = function() {
-      "use strict";
-      var REACT_STATICS = {
-          childContextTypes: !0,
-          contextTypes: !0,
-          defaultProps: !0,
-          displayName: !0,
-          getDefaultProps: !0,
-          getDerivedStateFromProps: !0,
-          mixins: !0,
-          propTypes: !0,
-          type: !0
-        },
-        KNOWN_STATICS = {
-          name: !0,
-          length: !0,
-          prototype: !0,
-          caller: !0,
-          callee: !0,
-          arguments: !0,
-          arity: !0
-        },
-        defineProperty = Object.defineProperty,
-        getOwnPropertyNames = Object.getOwnPropertyNames,
-        getOwnPropertySymbols = Object.getOwnPropertySymbols,
-        getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor,
-        getPrototypeOf = Object.getPrototypeOf,
-        objectPrototype = getPrototypeOf && getPrototypeOf(Object);
-      return function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
-        if ("string" != typeof sourceComponent) {
-          if (objectPrototype) {
-            var inheritedComponent = getPrototypeOf(sourceComponent);
-            inheritedComponent && inheritedComponent !== objectPrototype && hoistNonReactStatics(targetComponent, inheritedComponent, blacklist)
+    "use strict";
+    var REACT_STATICS = {
+        childContextTypes: !0,
+        contextTypes: !0,
+        defaultProps: !0,
+        displayName: !0,
+        getDefaultProps: !0,
+        getDerivedStateFromProps: !0,
+        mixins: !0,
+        propTypes: !0,
+        type: !0
+      },
+      KNOWN_STATICS = {
+        name: !0,
+        length: !0,
+        prototype: !0,
+        caller: !0,
+        callee: !0,
+        arguments: !0,
+        arity: !0
+      },
+      defineProperty = Object.defineProperty,
+      getOwnPropertyNames = Object.getOwnPropertyNames,
+      getOwnPropertySymbols = Object.getOwnPropertySymbols,
+      getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor,
+      getPrototypeOf = Object.getPrototypeOf,
+      objectPrototype = getPrototypeOf && getPrototypeOf(Object);
+    module.exports = function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
+      if ("string" != typeof sourceComponent) {
+        if (objectPrototype) {
+          var inheritedComponent = getPrototypeOf(sourceComponent);
+          inheritedComponent && inheritedComponent !== objectPrototype && hoistNonReactStatics(targetComponent, inheritedComponent, blacklist)
+        }
+        var keys = getOwnPropertyNames(sourceComponent);
+        getOwnPropertySymbols && (keys = keys.concat(getOwnPropertySymbols(sourceComponent)));
+        for (var i = 0; i < keys.length; ++i) {
+          var key = keys[i];
+          if (!(REACT_STATICS[key] || KNOWN_STATICS[key] || blacklist && blacklist[key])) {
+            var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
+            try {
+              defineProperty(targetComponent, key, descriptor)
+            } catch (e) {}
           }
-          var keys = getOwnPropertyNames(sourceComponent);
-          getOwnPropertySymbols && (keys = keys.concat(getOwnPropertySymbols(sourceComponent)));
-          for (var i = 0; i < keys.length; ++i) {
-            var key = keys[i];
-            if (!(REACT_STATICS[key] || KNOWN_STATICS[key] || blacklist && blacklist[key])) {
-              var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
-              try {
-                defineProperty(targetComponent, key, descriptor)
-              } catch (e) {}
-            }
-          }
-          return targetComponent
         }
         return targetComponent
       }
-    }, "object" == typeof exports && void 0 !== module ? module.exports = factory() : "function" == typeof define && define.amd ? define(factory) : global.hoistNonReactStatics = factory()
+      return targetComponent
+    }
   }, {}],
   72: [function(require, module, exports) {
     (function(process) {
@@ -76200,11 +76384,9 @@ var GlideWebAnalytics = (function() {
     var Symbol = require(73),
       getRawTag = require(77),
       objectToString = require(78),
-      nullTag = "[object Null]",
-      undefinedTag = "[object Undefined]",
       symToStringTag = Symbol ? Symbol.toStringTag : void 0;
     module.exports = function(value) {
-      return null == value ? void 0 === value ? undefinedTag : nullTag : symToStringTag && symToStringTag in Object(value) ? getRawTag(value) : objectToString(value)
+      return null == value ? void 0 === value ? "[object Undefined]" : "[object Null]" : symToStringTag && symToStringTag in Object(value) ? getRawTag(value) : objectToString(value)
     }
   }, {
     73: 73,
@@ -76271,14 +76453,13 @@ var GlideWebAnalytics = (function() {
     var baseGetTag = require(74),
       getPrototype = require(76),
       isObjectLike = require(81),
-      objectTag = "[object Object]",
       funcProto = Function.prototype,
       objectProto = Object.prototype,
       funcToString = funcProto.toString,
       hasOwnProperty = objectProto.hasOwnProperty,
       objectCtorString = funcToString.call(Object);
     module.exports = function(value) {
-      if (!isObjectLike(value) || baseGetTag(value) != objectTag) return !1;
+      if (!isObjectLike(value) || "[object Object]" != baseGetTag(value)) return !1;
       var proto = getPrototype(value);
       if (null === proto) return !0;
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
@@ -76422,19 +76603,20 @@ var GlideWebAnalytics = (function() {
       module.exports = function(typeSpecs, values, location, componentName, getStack) {}
     }).call(this, require(84))
   }, {
-    66: 66,
-    70: 70,
     84: 84,
     89: 89
   }],
   86: [function(require, module, exports) {
     "use strict";
-    var emptyFunction = require(60),
-      invariant = require(66),
-      ReactPropTypesSecret = require(89);
+    var ReactPropTypesSecret = require(89);
+
+    function emptyFunction() {}
     module.exports = function() {
       function shim(props, propName, componentName, location, propFullName, secret) {
-        secret !== ReactPropTypesSecret && invariant(!1, "Calling PropTypes validators directly is not supported by the `prop-types` package. Use PropTypes.checkPropTypes() to call them. Read more at http://fb.me/use-check-prop-types")
+        if (secret !== ReactPropTypesSecret) {
+          var err = new Error("Calling PropTypes validators directly is not supported by the `prop-types` package. Use PropTypes.checkPropTypes() to call them. Read more at http://fb.me/use-check-prop-types");
+          throw err.name = "Invariant Violation", err
+        }
       }
 
       function getShim() {
@@ -76462,19 +76644,19 @@ var GlideWebAnalytics = (function() {
       return ReactPropTypes.checkPropTypes = emptyFunction, ReactPropTypes.PropTypes = ReactPropTypes
     }
   }, {
-    60: 60,
-    66: 66,
     89: 89
   }],
   87: [function(require, module, exports) {
     (function(process) {
       "use strict";
-      var emptyFunction = require(60),
-        invariant = require(66),
-        warning = require(70),
-        assign = require(83),
+      var assign = require(83),
         ReactPropTypesSecret = require(89),
-        checkPropTypes = require(85);
+        checkPropTypes = require(85),
+        printWarning = function() {};
+
+      function emptyFunctionThatReturnsNull() {
+        return null
+      }
       module.exports = function(isValidElement, throwOnDirectAccess) {
         var ITERATOR_SYMBOL = "function" == typeof Symbol && Symbol.iterator,
           FAUX_ITERATOR_SYMBOL = "@@iterator";
@@ -76487,7 +76669,7 @@ var GlideWebAnalytics = (function() {
             object: createPrimitiveTypeChecker("object"),
             string: createPrimitiveTypeChecker("string"),
             symbol: createPrimitiveTypeChecker("symbol"),
-            any: createChainableTypeChecker(emptyFunction.thatReturnsNull),
+            any: createChainableTypeChecker(emptyFunctionThatReturnsNull),
             arrayOf: function(typeChecker) {
               return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
                 if ("function" != typeof typeChecker) return new PropTypeError("Property `" + propFullName + "` of component `" + componentName + "` has invalid PropType notation inside arrayOf.");
@@ -76542,7 +76724,7 @@ var GlideWebAnalytics = (function() {
               })
             },
             oneOf: function(expectedValues) {
-              if (!Array.isArray(expectedValues)) return emptyFunction.thatReturnsNull;
+              if (!Array.isArray(expectedValues)) return emptyFunctionThatReturnsNull;
               return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
                 for (var propValue = props[propName], i = 0; i < expectedValues.length; i++)
                   if (is(propValue, expectedValues[i])) return null;
@@ -76551,10 +76733,10 @@ var GlideWebAnalytics = (function() {
               })
             },
             oneOfType: function(arrayOfTypeCheckers) {
-              if (!Array.isArray(arrayOfTypeCheckers)) return emptyFunction.thatReturnsNull;
+              if (!Array.isArray(arrayOfTypeCheckers)) return emptyFunctionThatReturnsNull;
               for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
                 var checker = arrayOfTypeCheckers[i];
-                if ("function" != typeof checker) return warning(!1, "Invalid argument supplied to oneOfType. Expected an array of check functions, but received %s at index %s.", getPostfixForTypeWarning(checker), i), emptyFunction.thatReturnsNull
+                if ("function" != typeof checker) return printWarning("Invalid argument supplied to oneOfType. Expected an array of check functions, but received " + getPostfixForTypeWarning(checker) + " at index " + i + "."), emptyFunctionThatReturnsNull
               }
               return createChainableTypeChecker(function(props, propName, componentName, location, propFullName) {
                 for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
@@ -76606,7 +76788,10 @@ var GlideWebAnalytics = (function() {
 
         function createChainableTypeChecker(validate) {
           function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-            (componentName = componentName || ANONYMOUS, propFullName = propFullName || propName, secret !== ReactPropTypesSecret) && (throwOnDirectAccess && invariant(!1, "Calling PropTypes validators directly is not supported by the `prop-types` package. Use `PropTypes.checkPropTypes()` to call them. Read more at http://fb.me/use-check-prop-types"));
+            if ((componentName = componentName || ANONYMOUS, propFullName = propFullName || propName, secret !== ReactPropTypesSecret) && throwOnDirectAccess) {
+              var err = new Error("Calling PropTypes validators directly is not supported by the `prop-types` package. Use `PropTypes.checkPropTypes()` to call them. Read more at http://fb.me/use-check-prop-types");
+              throw err.name = "Invariant Violation", err
+            }
             return null == props[propName] ? isRequired ? null === props[propName] ? new PropTypeError("The " + location + " `" + propFullName + "` is marked as required in `" + componentName + "`, but its value is `null`.") : new PropTypeError("The " + location + " `" + propFullName + "` is marked as required in `" + componentName + "`, but its value is `undefined`.") : null : validate(props, propName, componentName, location, propFullName)
           }
           var chainedCheckType = checkType.bind(null, !1);
@@ -76686,9 +76871,6 @@ var GlideWebAnalytics = (function() {
       }
     }).call(this, require(84))
   }, {
-    60: 60,
-    66: 66,
-    70: 70,
     83: 83,
     84: 84,
     85: 85,
@@ -81423,10 +81605,9 @@ var GlideWebAnalytics = (function() {
   104: [function(require, module, exports) {
     "use strict";
     exports.__esModule = !0;
-    var CLEARED = null,
-      nullListeners = {
-        notify: function() {}
-      };
+    var nullListeners = {
+      notify: function() {}
+    };
     var Subscription = function() {
       function Subscription(store, parentSub, onStateChange) {
         ! function(instance, Constructor) {
@@ -81443,7 +81624,7 @@ var GlideWebAnalytics = (function() {
         var current, next;
         this.unsubscribe || (this.unsubscribe = this.parentSub ? this.parentSub.addNestedSub(this.onStateChange) : this.store.subscribe(this.onStateChange), this.listeners = (current = [], next = [], {
           clear: function() {
-            current = next = CLEARED
+            current = next = null
           },
           notify: function() {
             for (var listeners = current = next, i = 0; i < listeners.length; i++) listeners[i]()
@@ -81455,7 +81636,7 @@ var GlideWebAnalytics = (function() {
             var isSubscribed = !0;
             return next === current && (next = current.slice()), next.push(listener),
               function() {
-                isSubscribed && current !== CLEARED && (isSubscribed = !1, next === current && (next = current.slice()), next.splice(next.indexOf(listener), 1))
+                isSubscribed && null !== current && (isSubscribed = !1, next === current && (next = current.slice()), next.splice(next.indexOf(listener), 1))
               }
           }
         }))

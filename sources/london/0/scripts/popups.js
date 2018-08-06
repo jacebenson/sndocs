@@ -394,6 +394,16 @@ function htmlView(ref, id) {
     "width=" + w + ",height=" + h + ",toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollbars=1");
 }
 
+function openInNewWindow(table, navigate) {
+  var field = $j(".glide-popup-target");
+  var fieldName = field.attr('data-ref');
+  var view = field.attr('data-view') || field.attr('data-popup-view') || '';
+  var nav = (navigate) ? Boolean(navigate) : false;
+  var refKey = field.attr('data-ref-key') || null;
+  tearOffReference(table, fieldName, view, nav, refKey);
+  window.nowapi.g_popup_manager.destroypopDiv();
+}
+
 function tearOffReference(table, fieldName, view, navigate, refKey) {
   var widget = gel(fieldName);
   if (widget == null) {

@@ -73,7 +73,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
           }
         },
         initSelection: function(elem, callback) {
-          if (scope.field.displayValue)
+          if (scope.field && scope.field.displayValue)
             callback({
               sys_id: scope.field.value,
               name: scope.field.displayValue
@@ -104,6 +104,7 @@ angular.module('sn.common.controls').directive('snReferencePicker', function($ti
               sysparm_target_field: scope.ed.dependent_field || scope.ed.name,
               table: scope.ed.reference,
               qualifier: scope.ed.qualifier,
+              sysparm_for_impersonation: !!scope.ed.for_impersonation,
               data_adapter: scope.ed.data_adapter,
               attributes: scope.ed.attributes,
               dependent_field: scope.ed.dependent_field,

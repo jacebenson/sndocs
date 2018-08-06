@@ -5164,12 +5164,14 @@ angular.module('Magellan').directive('concourseApplicationTree', function(
           applicationLink.className += ' state-overwrite';
         }
         applicationLink.setAttribute('data-target', '#collapseId' + application.id);
-        applicationLink.setAttribute('ng-attr-aria-controls', 'collapseId' + (application.open ? application.id : undefined));
         if (application.open) {
           applicationLink.setAttribute('aria-controls', 'collapseId' + application.id);
         }
         applicationLink.setAttribute('aria-expanded', application.open);
         applicationLink.setAttribute('data-id', application.id);
+        if (application.hint) {
+          applicationLink.setAttribute('title', application.hint);
+        }
         var titleElement = document.createElement('span');
         applicationLink.appendChild(titleElement);
         setText(titleElement, application.title);
@@ -5224,6 +5226,9 @@ angular.module('Magellan').directive('concourseApplicationTree', function(
               toggleFoldLink.className += ' nav-open-state';
             } else {
               toggleFoldLink.className += ' collapsed';
+            }
+            if (module.hint) {
+              toggleFoldLink.setAttribute('title', module.hint);
             }
             var sideSpan = SIDE_SPAN_WIDGET.cloneNode(false);
             toggleFoldLink.appendChild(sideSpan);

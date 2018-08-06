@@ -26,8 +26,6 @@ function setSelectValue(select, elementName) {
 
 function refFlipImage(element, elementName, useText) {
   var viewField = gel("view." + elementName);
-  if (!viewField)
-    return;
   var viewRField = gel("viewr." + elementName);
   var viewHideField = gel("view." + elementName + ".no");
   var refid = gel(elementName);

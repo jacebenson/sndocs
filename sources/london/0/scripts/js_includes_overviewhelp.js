@@ -223,6 +223,9 @@ var CustomEventManager = (function(existingCustomEvent) {
     get events() {
       return events;
     },
+    set events(value) {
+      events = value;
+    },
     on: on,
     un: un,
     unAll: unAll,

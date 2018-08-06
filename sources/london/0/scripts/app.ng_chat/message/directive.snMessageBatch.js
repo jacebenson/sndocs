@@ -8,7 +8,7 @@ angular.module('sn.connect.message').directive('snMessageBatch', function(getTem
     scope: {
       batch: '=',
       isGroupConversation: '=',
-      disableAvatarPopovers: '<?'
+      disableAvatarPopovers: '=?'
     },
     controller: function($scope, showAgentAvatar, inSupportClient) {
       $scope.isSystemMessage = function() {

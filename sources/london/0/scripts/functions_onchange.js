@@ -157,11 +157,17 @@ function onChangeLabelProcessByEl(elementNode, statusLabel, value) {
     clearAriaLabel = true;
   }
   var tooltipButton = $j(statusLabel).siblings('.icon-help');
-  if (tooltipButton.length && newTitle.length && mandatory == "true") {
-    tooltipButton.attr('style', 'padding-left: 3px;');
-    tooltipButton.attr('title', newTitle + '. ' + tooltipButton.attr('label-title'));
+  if (tooltipButton.length) {
+    var baseTooltipMessage = tooltipButton.attr('label-title');
+    var fullTooltipLabel = (newTitle && baseTooltipMessage) ?
+      newTitle + '. ' + baseTooltipMessage :
+      (newTitle || baseTooltipMessage);
+    if (fullTooltipLabel)
+      tooltipButton.attr('data-dynamic-title', fullTooltipLabel).show();
+    else
+      tooltipButton.hide();
   } else
-    statusLabel.setAttribute("title", newTitle);
+    statusLabel.setAttribute("data-dynamic-title", newTitle);
   if (document.documentElement.getAttribute('data-doctype') == 'true') {
     if (mandatory == 'true') {
       statusLabel.className = "required-marker label_description";
@@ -275,6 +281,8 @@ function multiKeyDown(me) {
   if (eOriginalSet)
     return;
   var oValue = escape(me.value);
+  if (typeof(g_form) != "undefined")
+    var oValue = escape(g_form.getValue(me.name));
   eval(eOriginal + '="' + oValue + '";');
 }
 

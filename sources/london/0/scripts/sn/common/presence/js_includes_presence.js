@@ -2718,632 +2718,168 @@ angular.module('sn.common.presence', ['ng.amb', 'sn.common.glide']).config(funct
 });;
 /*! RESOURCE: /scripts/sn/common/presence/factory.snPresence.js */
 angular.module("sn.common.presence").factory('snPresence', function($rootScope, $window, $log, amb, $timeout, $http, snRecordPresence, snTabActivity, urlTools, PRESENCE_DISABLED) {
-  "use strict";
-  var REST = {
-    PRESENCE: "/api/now/ui/presence"
-  };
-  var RETRY_INTERVAL = ($window.NOW.presence_interval || 15) * 1000;
-  var MAX_RETRY_DELAY = RETRY_INTERVAL * 10;
-  var initialized = false;
-  var primary = false;
-  var presenceArray = [];
-  var serverTimeMillis;
-  var skew = 0;
-  var st = 0;
+      "use strict";
+      var REST = {
+        PRESENCE: "/api/now/ui/presence"
+      };
+      var RETRY_INTERVAL = ($window.NOW.presence_interval || 15) * 1000;
+      var MAX_RETRY_DELAY = RETRY_INTERVAL * 10;
+      var initialized = false;
+      var primary = false;
+      var presenceArray = [];
+      var serverTimeMillis;
+      var skew = 0;
+      var st = 0;
 
-  function init() {
-    var location = urlTools.parseQueryString($window.location.search);
-    var table = location['table'] || location['sysparm_table'];
-    var sys_id = location['sys_id'] || location['sysparm_sys_id'];
-    return initPresence(table, sys_id);
-  }
-
-  function initPresence(t, id) {
-    if (PRESENCE_DISABLED)
-      return;
-    if (!initialized) {
-      initialized = true;
-      initRootScopes();
-      if (!primary) {
-        CustomEvent.observe('sn.presence', onPresenceEvent);
-        CustomEvent.fireTop('sn.presence.ping');
-      } else {
-        presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
-        if (presenceArray)
-          $timeout(schedulePresence, 100);
-        else
-          updatePresence();
+      function init() {
+        var location = urlTools.parseQueryString($window.location.search);
+        var table = location['table'] || location['sysparm_table'];
+        var sys_id = location['sys_id'] || location['sysparm_sys_id'];
+        return initPresence(table, sys_id);
       }
-    }
-    return snRecordPresence.initPresence(t, id);
-  }
 
-  function onPresenceEvent(parms) {
-    presenceArray = parms;
-    $timeout(broadcastPresence);
-  }
-
-  function initRootScopes() {
-    if ($window.NOW.presence_scopes) {
-      var ps = $window.NOW.presence_scopes;
-      if (ps.indexOf($rootScope) == -1)
-        ps.push($rootScope);
-    } else {
-      $window.NOW.presence_scopes = [$rootScope];
-      primary = CustomEvent.isTopWindow();
-    }
-  }
-
-  function setPresence(data, st) {
-    var rt = new Date().getTime() - st;
-    if (rt > 500)
-      console.log("snPresence response time " + rt + "ms");
-    if (data.result && data.result.presenceArray) {
-      presenceArray = data.result.presenceArray;
-      setLocalPresence(presenceArray);
-      serverTimeMillis = data.result.serverTimeMillis;
-      skew = new Date().getTime() - serverTimeMillis;
-      var t = Math.floor(skew / 1000);
-      if (t < -15)
-        console.log(">>>>> server ahead " + Math.abs(t) + " seconds");
-      else if (t > 15)
-        console.log(">>>>> browser time ahead " + t + " seconds");
-    }
-    schedulePresence();
-  }
-
-  function updatePresence(numAttempts) {
-    presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
-    if (presenceArray) {
-      determineStatus(presenceArray);
-      $timeout(schedulePresence);
-      return;
-    }
-    if (!amb.isLoggedIn() || !snTabActivity.isPrimary) {
-      $timeout(schedulePresence);
-      return;
-    }
-    var p = {
-      user_agent: navigator.userAgent,
-      ua_time: new Date().toISOString(),
-      href: window.location.href,
-      pathname: window.location.pathname,
-      search: window.location.search,
-      path: window.location.pathname + window.location.search
-    };
-    st = new Date().getTime();
-    $http.post(REST.PRESENCE + '?sysparm_auto_request=true&cd=' + st, p).success(function(data) {
-      setPresence(data, st);
-    }).error(function(response, status) {
-      console.log("snPresence " + status);
-      schedulePresence(numAttempts);
-    })
-  }
-
-  function schedulePresence(numAttempts) {
-    numAttempts = isFinite(numAttempts) ? numAttempts + 1 : 0;
-    var interval = getDecayingRetryInterval(numAttempts);
-    $timeout(function() {
-      updatePresence(numAttempts)
-    }, interval);
-    determineStatus(presenceArray);
-    broadcastPresence();
-  }
-
-  function broadcastPresence() {
-    if (angular.isDefined($window.applyPresenceArray)) {
-      $window.applyPresenceArray(presenceArray);
-    }
-    $rootScope.$emit("sn.presence", presenceArray);
-    if (!primary)
-      return;
-    CustomEvent.fireAll('sn.presence', presenceArray);
-  }
-
-  function determineStatus(presenceArray) {
-    if (!presenceArray || !presenceArray.forEach)
-      return;
-    var t = new Date().getTime();
-    t -= skew;
-    presenceArray.forEach(function(p) {
-      var x = 0 + p.last_on;
-      var y = t - x;
-      p.status = "online";
-      if (y > (5 * RETRY_INTERVAL))
-        p.status = "offline";
-      else if (y > (3 * RETRY_INTERVAL))
-        p.status = "probably offline";
-      else if (y > (2.5 * RETRY_INTERVAL))
-        p.status = "maybe offline";
-    })
-  }
-
-  function setLocalPresence(value) {
-    var p = {
-      saved: new $window.Date().getTime(),
-      presenceArray: value
-    };
-    $window.localStorage.setItem('snPresence', angular.toJson(p));
-  }
-
-  function getLocalPresence(p) {
-    if (!p)
-      return null;
-    try {
-      p = angular.fromJson(p);
-    } catch (e) {
-      p = {};
-    }
-    if (!p.presenceArray)
-      return null;
-    var now = new Date().getTime();
-    if (now - p.saved >= RETRY_INTERVAL)
-      return null;
-    return p.presenceArray;
-  }
-
-  function getDecayingRetryInterval(numAttempts) {
-    return Math.min(RETRY_INTERVAL * Math.pow(2, numAttempts), MAX_RETRY_DELAY);
-  }
-  return {
-    init: init,
-    initPresence: initPresence,
-    _getLocalPresence: getLocalPresence,
-    _setLocalPresence: setLocalPresence,
-    _determineStatus: determineStatus
-  }
-});;
-/*! RESOURCE: /scripts/sn/common/presence/factory.snRecordPresence.js */
-angular.module("sn.common.presence").factory('snRecordPresence', function($rootScope, $location, amb, $timeout, $window, PRESENCE_DISABLED, snTabActivity) {
-  "use strict";
-  var statChannel;
-  var interval = ($window.NOW.record_presence_interval || 20) * 1000;
-  var sessions = {};
-  var primary = false;
-  var table;
-  var sys_id;
-
-  function initPresence(t, id) {
-    if (PRESENCE_DISABLED)
-      return;
-    if (!t || !id)
-      return;
-    if (t == table && id == sys_id)
-      return;
-    initRootScopes();
-    if (!primary)
-      return;
-    termPresence();
-    table = t;
-    sys_id = id;
-    var recordPresence = "/sn/rp/" + table + "/" + sys_id;
-    $rootScope.me = NOW.session_id;
-    statChannel = amb.getChannel(recordPresence);
-    statChannel.subscribe(onStatus);
-    amb.connected.then(function() {
-      setStatus("entered");
-      $rootScope.status = "viewing";
-    });
-    return statChannel;
-  }
-
-  function initRootScopes() {
-    if ($window.NOW.record_presence_scopes) {
-      var ps = $window.NOW.record_presence_scopes;
-      if (ps.indexOf($rootScope) == -1) {
-        ps.push($rootScope);
-        CustomEvent.observe('sn.sessions', onPresenceEvent);
-      }
-    } else {
-      $window.NOW.record_presence_scopes = [$rootScope];
-      primary = true;
-    }
-  }
-
-  function onPresenceEvent(sessionsToSend) {
-    $rootScope.$emit("sn.sessions", sessionsToSend);
-    $rootScope.$emit("sp.sessions", sessionsToSend);
-  }
-
-  function termPresence() {
-    if (!statChannel)
-      return;
-    statChannel.unsubscribe();
-    statChannel = table = sys_id = null;
-  }
-
-  function setStatus(status) {
-    if (status == $rootScope.status)
-      return;
-    $rootScope.status = status;
-    if (Object.keys(sessions).length == 0)
-      return;
-    if (getStatusPrecedence(status) > 1)
-      return;
-    publish($rootScope.status);
-  }
-
-  function publish(status) {
-    if (!statChannel)
-      return;
-    if (amb.getState() !== "opened")
-      return;
-    statChannel.publish({
-      presences: [{
-        status: status,
-        session_id: NOW.session_id,
-        user_name: NOW.user_name,
-        user_id: NOW.user_id,
-        user_display_name: NOW.user_display_name,
-        user_initials: NOW.user_initials,
-        user_avatar: NOW.user_avatar,
-        ua: navigator.userAgent,
-        table: table,
-        sys_id: sys_id,
-        time: new Date().toString().substring(0, 24)
-      }]
-    });
-  }
-
-  function onStatus(message) {
-    message.data.presences.forEach(function(d) {
-      if (!d.session_id || d.session_id == NOW.session_id)
-        return;
-      var s = sessions[d.session_id];
-      if (s)
-        angular.extend(s, d);
-      else
-        s = sessions[d.session_id] = d;
-      s.lastUpdated = new Date();
-      if (s.status == 'exited')
-        delete sessions[d.session_id];
-    });
-    broadcastSessions();
-  }
-
-  function broadcastSessions() {
-    var sessionsToSend = getUniqueSessions();
-    $rootScope.$emit("sn.sessions", sessionsToSend);
-    $rootScope.$emit("sp.sessions", sessionsToSend);
-    if (primary)
-      $timeout(function() {
-        CustomEvent.fire('sn.sessions', sessionsToSend);
-      })
-  }
-
-  function getUniqueSessions() {
-    var uniqueSessionsByUser = {};
-    var sessionKeys = Object.keys(sessions);
-    sessionKeys.forEach(function(key) {
-      var session = sessions[key];
-      if (session.user_id == NOW.user_id)
-        return;
-      if (session.user_id in uniqueSessionsByUser) {
-        var otherSession = uniqueSessionsByUser[session.user_id];
-        var thisPrecedence = getStatusPrecedence(session.status);
-        var otherPrecedence = getStatusPrecedence(otherSession.status);
-        uniqueSessionsByUser[session.user_id] = thisPrecedence < otherPrecedence ? session : otherSession;
-        return
-      }
-      uniqueSessionsByUser[session.user_id] = session;
-    });
-    var uniqueSessions = {};
-    angular.forEach(uniqueSessionsByUser, function(item) {
-      uniqueSessions[item.session_id] = item;
-    });
-    return uniqueSessions;
-  }
-
-  function getStatusPrecedence(status) {
-    switch (status) {
-      case 'typing':
-        return 0;
-      case 'viewing':
-        return 1;
-      case 'entered':
-        return 2;
-      case 'exited':
-      case 'probably left':
-        return 4;
-      case 'offline':
-        return 5;
-      default:
-        return 3;
-    }
-  }
-  $rootScope.$on("record.typing", function(evt, data) {
-    setStatus(data.status);
-  });
-  var idleTable, idleSysID;
-  snTabActivity.onIdle({
-    onIdle: function RecordPresenceTabIdle() {
-      idleTable = table;
-      idleSysID = sys_id;
-      sessions = {};
-      termPresence();
-      broadcastSessions();
-    },
-    onReturn: function RecordPresenceTabActive() {
-      initPresence(idleTable, idleSysID, true);
-      idleTable = idleSysID = void(0);
-    },
-    delay: interval * 4
-  });
-  return {
-    initPresence: initPresence,
-    termPresence: termPresence
-  }
-});;
-/*! RESOURCE: /scripts/sn/common/presence/directive.snPresence.js */
-angular.module('sn.common.presence').directive('snPresence', function(snPresence, $rootScope, $timeout, i18n) {
-  'use strict';
-  $timeout(snPresence.init, 100);
-  var presenceStatus = {};
-  i18n.getMessages(['maybe offline', 'probably offline', 'offline', 'online', 'entered', 'viewing'], function(results) {
-    presenceStatus.maybe_offline = results['maybe offline'];
-    presenceStatus.probably_offline = results['probably offline'];
-    presenceStatus.offline = results['offline'];
-    presenceStatus.online = results['online'];
-    presenceStatus.entered = results['entered'];
-    presenceStatus.viewing = results['viewing'];
-  });
-  var presences = {};
-  $rootScope.$on('sn.presence', function(event, presenceArray) {
-    if (!presenceArray) {
-      angular.forEach(presences, function(p) {
-        p.status = "offline";
-      });
-      return;
-    }
-    presenceArray.forEach(function(presence) {
-      presences[presence.user] = presence;
-    });
-  });
-  return {
-    restrict: 'EA',
-    replace: false,
-    scope: {
-      userId: '@?',
-      snPresence: '=?',
-      user: '=?',
-      profile: '=?',
-      displayName: '=?'
-    },
-    link: function(scope, element) {
-      if (scope.profile) {
-        scope.user = scope.profile.userID;
-        scope.profile.tabIndex = -1;
-        if (scope.profile.isAccessible)
-          scope.profile.tabIndex = 0;
-      }
-      if (!element.hasClass('presence'))
-        element.addClass('presence');
-
-      function updatePresence() {
-        var id = scope.snPresence || scope.user;
-        if (!angular.isDefined(id) && angular.isDefined(scope.userId)) {
-          id = scope.userId;
-        }
-        if (presences[id]) {
-          var status = presences[id].status;
-          if (status === 'maybe offline' || status === 'probably offline') {
-            element.removeClass('presence-online presence-offline presence-away');
-            element.addClass('presence-away');
-          } else if (status == "offline" && !element.hasClass('presence-offline')) {
-            element.removeClass('presence-online presence-away');
-            element.addClass('presence-offline');
-          } else if ((status == "online" || status == "entered" || status == "viewing") && !element.hasClass('presence-online')) {
-            element.removeClass('presence-offline presence-away');
-            element.addClass('presence-online');
+      function initPresence(t, id) {
+        if (PRESENCE_DISABLED)
+          return;
+        if (!initialized) {
+          initialized = true;
+          initRootScopes();
+          if (!primary) {
+            CustomEvent.observe('sn.presence', onPresenceEvent);
+            CustomEvent.fireTop('sn.presence.ping');
+          } else {
+            presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
+            if (presenceArray)
+              $timeout(schedulePresence, 100);
+            else
+              updatePresence();
           }
-          status = status.replace(/ /g, "_");
-          if (scope.profile)
-            angular.element('div[user-avatar-id="' + id + '"]').attr("aria-label", scope.profile.userName + ' ' + presenceStatus[status]);
-          else
-            angular.element('div[user-avatar-id="' + id + '"]').attr("aria-label", scope.displayName + ' ' + presenceStatus[status]);
+        }
+        return snRecordPresence.initPresence(t, id);
+      }
+
+      function onPresenceEvent(parms) {
+        presenceArray = parms;
+        $timeout(broadcastPresence);
+      }
+
+      function initRootScopes() {
+        if ($window.NOW.presence_scopes) {
+          var ps = $window.NOW.presence_scopes;
+          if (ps.indexOf($rootScope) == -1)
+            ps.push($rootScope);
         } else {
-          if (!element.hasClass('presence-offline'))
-            element.addClass('presence-offline');
+          $window.NOW.presence_scopes = [$rootScope];
+          primary = CustomEvent.isTopWindow();
         }
       }
-      var unbind = $rootScope.$on('sn.presence', updatePresence);
-      scope.$on('$destroy', unbind);
-      updatePresence();
-    }
-  };
-});;
-/*! RESOURCE: /scripts/sn/common/presence/directive.snComposing.js */
-angular.module('sn.common.presence').directive('snComposing', function(getTemplateUrl, snComposingPresence) {
-  "use strict";
-  return {
-    restrict: 'E',
-    templateUrl: getTemplateUrl("snComposing.xml"),
-    replace: true,
-    scope: {
-      conversation: "="
-    },
-    controller: function($scope, $element) {
-      var child = $element.children();
-      if (child && child.tooltip)
-        child.tooltip({
-          'template': '<div class="tooltip" style="white-space: pre-wrap" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
-          'placement': 'top',
-          'container': 'body'
-        });
-      $scope.snComposingPresence = snComposingPresence;
-    }
-  }
-});;
-/*! RESOURCE: /scripts/sn/common/presence/service.snComposingPresence.js */
-angular.module('sn.common.presence').service('snComposingPresence', function(i18n) {
-  "use strict";
-  var viewing = {};
-  var typing = {};
-  var allStrings = {};
-  var shortStrings = {};
-  var typing1 = "{0} is typing",
-    typing2 = "{0} and {1} are typing",
-    typingMore = "{0}, {1}, and {2} more are typing",
-    viewing1 = "{0} is viewing",
-    viewing2 = "{0} and {1} are viewing",
-    viewingMore = "{0}, {1}, and {2} more are viewing";
-  i18n.getMessages(
-    [
-      typing1,
-      typing2,
-      typingMore,
-      viewing1,
-      viewing2,
-      viewingMore
-    ],
-    function(results) {
-      typing1 = results[typing1];
-      typing2 = results[typing2];
-      typingMore = results[typingMore];
-      viewing1 = results[viewing1];
-      viewing2 = results[viewing2];
-      viewingMore = results[viewingMore];
-    });
 
-  function set(conversationID, newPresenceValues) {
-    if (newPresenceValues.viewing)
-      viewing[conversationID] = newPresenceValues.viewing;
-    if (newPresenceValues.typing)
-      typing[conversationID] = newPresenceValues.typing;
-    generateAllString(conversationID, {
-      viewing: viewing[conversationID],
-      typing: typing[conversationID]
-    });
-    generateShortString(conversationID, {
-      viewing: viewing[conversationID],
-      typing: typing[conversationID]
-    });
-    return {
-      viewing: viewing[conversationID],
-      typing: typing[conversationID]
-    }
-  }
-
-  function get(conversationID) {
-    return {
-      viewing: viewing[conversationID] || [],
-      typing: typing[conversationID] || []
-    }
-  }
-
-  function generateAllString(conversationID, members) {
-    var result = "";
-    var typingLength = members.typing.length;
-    var viewingLength = members.viewing.length;
-    if (typingLength < 4 && viewingLength < 4)
-      return "";
-    switch (typingLength) {
-      case 0:
-        break;
-      case 1:
-        result += i18n.format(typing1, members.typing[0].name);
-        break;
-      case 2:
-        result += i18n.format(typing2, members.typing[0].name, members.typing[1].name);
-        break;
-      default:
-        var allButLastTyper = "";
-        for (var i = 0; i < typingLength; i++) {
-          if (i < typingLength - 2)
-            allButLastTyper += members.typing[i].name + ", ";
-          else if (i === typingLength - 2)
-            allButLastTyper += members.typing[i].name + ",";
-          else
-            result += i18n.format(typing2, allButLastTyper, members.typing[i].name);
+      function setPresence(data, st) {
+        var rt = new Date().getTime() - st;
+        if (rt > 500)
+          console.log("snPresence response time " + rt + "ms");
+        if (data.result && data.result.presenceArray) {
+          presenceArray = data.result.presenceArray;
+          setLocalPresence(presenceArray);
+          serverTimeMillis = data.result.serverTimeMillis;
+          skew = new Date().getTime() - serverTimeMillis;
+          var t = Math.floor(skew / 1000);
+          if (t < -15)
+            console.log(">>>>> server ahead " + Math.abs(t) + " seconds");
+          else if (t > 15)
+            console.log(">>>>> browser time ahead " + t + " seconds");
         }
-    }
-    if (viewingLength > 0 && typingLength > 0)
-      result += "\n\n";
-    switch (viewingLength) {
-      case 0:
-        break;
-      case 1:
-        result += i18n.format(viewing1, members.viewing[0].name);
-        break;
-      case 2:
-        result += i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
-        break;
-      default:
-        var allButLastViewer = "";
-        for (var i = 0; i < viewingLength; i++) {
-          if (i < viewingLength - 2)
-            allButLastViewer += members.viewing[i].name + ", ";
-          else if (i === viewingLength - 2)
-            allButLastViewer += members.viewing[i].name + ",";
-          else
-            result += i18n.format(viewing2, allButLastViewer, members.viewing[i].name);
+        schedulePresence();
+      }
+
+      function updatePresence(numAttempts) {
+        presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
+        if (presenceArray) {
+          determineStatus(presenceArray);
+          $timeout(schedulePresence);
+          return;
         }
-    }
-    allStrings[conversationID] = result;
-  }
+        if (!amb.isLoggedIn() || !snTabActivity.isPrimary) {
+          $timeout(schedulePresence);
+          return;
+        }
+        var p = {
+          user_agent: navigator.userAgent,
+          ua_time: new Date().toISOString(),
+          href: window.location.href,
+          pathname: window.location.pathname,
+          search: window.location.search,
+          path: window.location.pathname + window.location.search
+        };
+        st = new Date().getTime();
+        $http.post(REST.PRESENCE + '?sysparm_auto_request=true&cd=' + st, p).success(function(data) {
+          setPresence(data, st);
+        }).error(function(response, status) {
+          console.log("snPresence " + status);
+          schedulePresence(numAttempts);
+        })
+      }
 
-  function generateShortString(conversationID, members) {
-    var typingLength = members.typing.length;
-    var viewingLength = members.viewing.length;
-    var typingString = "",
-      viewingString = "";
-    var inBetween = " ";
-    switch (typingLength) {
-      case 0:
-        break;
-      case 1:
-        typingString = i18n.format(typing1, members.typing[0].name);
-        break;
-      case 2:
-        typingString = i18n.format(typing2, members.typing[0].name, members.typing[1].name);
-        break;
-      case 3:
-        typingString = i18n.format(typing2, members.typing[0].name + ", " + members.typing[1].name + ",", members.typing[2].name);
-        break;
-      default:
-        typingString = i18n.format(typingMore, members.typing[0].name, members.typing[1].name, (typingLength - 2));
-    }
-    if (viewingLength > 0 && typingLength > 0)
-      inBetween = ". ";
-    switch (viewingLength) {
-      case 0:
-        break;
-      case 1:
-        viewingString = i18n.format(viewing1, members.viewing[0].name);
-        break;
-      case 2:
-        viewingString = i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
-        break;
-      case 3:
-        viewingString = i18n.format(viewing2, members.viewing[0].name + ", " + members.viewing[1].name + ",", members.viewing[2].name);
-        break;
-      default:
-        viewingString = i18n.format(viewingMore, members.viewing[0].name, members.viewing[1].name, (viewingLength - 2));
-    }
-    shortStrings[conversationID] = typingString + inBetween + viewingString;
-  }
+      function schedulePresence(numAttempts) {
+        numAttempts = isFinite(numAttempts) ? numAttempts + 1 : 0;
+        var interval = getDecayingRetryInterval(numAttempts);
+        $timeout(function() {
+          updatePresence(numAttempts)
+        }, interval);
+        determineStatus(presenceArray);
+        broadcastPresence();
+      }
 
-  function getAllString(conversationID) {
-    if ((viewing[conversationID] && viewing[conversationID].length > 3) ||
-      (typing[conversationID] && typing[conversationID].length > 3))
-      return allStrings[conversationID];
-    return "";
-  }
+      function broadcastPresence() {
+        if (angular.isDefined($window.applyPresenceArray)) {
+          $window.applyPresenceArray(presenceArray);
+        }
+        $rootScope.$emit("sn.presence", presenceArray);
+        if (!primary)
+          return;
+        CustomEvent.fireAll('sn.presence', presenceArray);
+      }
 
-  function getShortString(conversationID) {
-    return shortStrings[conversationID];
-  }
+      function determineStatus(presenceArray) {
+        if (!presenceArray || !presenceArray.forEach)
+          return;
+        var t = new Date().getTime();
+        t -= skew;
+        presenceArray.forEach(function(p) {
+          var x = 0 + p.last_on;
+          var y = t - x;
+          p.status = "online";
+          if (y > (5 * RETRY_INTERVAL))
+            p.status = "offline";
+          else if (y > (3 * RETRY_INTERVAL))
+            p.status = "probably offline";
+          else if (y > (2.5 * RETRY_INTERVAL))
+            p.status = "maybe offline";
+        })
+      }
 
-  function remove(conversationID) {
-    delete viewing[conversationID];
-  }
-  return {
-    set: set,
-    get: get,
-    generateAllString: generateAllString,
-    getAllString: getAllString,
-    generateShortString: generateShortString,
-    getShortString: getShortString,
-    remove: remove
-  }
-});;;
+      function setLocalPresence(value) {
+        var p = {
+          saved: new $window.Date().getTime(),
+          presenceArray: value
+        };
+        $window.localStorage.setItem('snPresence', angular.toJson(p));
+      }
+
+      function getLocalPresence(p) {
+        if (!p)
+          return null;
+        try {
+          p = angular.fromJson(p);
+        } catch (e) {
+          p = {};
+        }
+        if (!p.presenceArray)
+          return null;
+        var now = new Date().getTime();
+        if (now - p.saved >= RETRY_INTERVAL)
+          return null;
+        return p.presenceArray;
+      }
+
+      function getDecayingRetryInterval(n

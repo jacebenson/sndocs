@@ -637,12 +637,12 @@ function fieldProcessNow(typedChar, elementName, type, noMax, useInvisible, uFie
 
 function updateRelatedGivenNameAndValue(elementName, elementValue) {
   var viewField = gel("view." + elementName);
-  if (viewField == null)
-    return;
-  if (isDoctype())
-    viewField.style.display = '';
-  else
-    viewField.style.display = "inline";
+  if (viewField != null) {
+    if (isDoctype())
+      viewField.style.display = '';
+    else
+      viewField.style.display = "inline";
+  }
   var viewRField = gel("viewr." + elementName);
   var viewHideField = gel("view." + elementName + ".no");
   if (viewRField != null) {

@@ -139,10 +139,12 @@ function addEllipsesToAttachments() {
   if (!list)
     return;
   var more = document.getElementById('more_attachments');
-  if (list.scrollHeight > list.clientHeight * 2)
-    setElementStyle(more, 'display:block');
-  else
-    setElementStyle(more, 'display:none');
+  if (more) {
+    if (list.scrollHeight > list.clientHeight * 2)
+      setElementStyle(more, 'display:block');
+    else
+      setElementStyle(more, 'display:none');
+  }
 }
 
 function setElementStyle(elm, rules) {
