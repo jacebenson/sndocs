@@ -1657,11 +1657,18 @@
     "patches": [
       {
         "number": "0",
-        "name": "Kingston Patch 0",
-        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
+        "name": "London Patch 0",
+        "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
         "hi": "",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
         "date": "2018-07-27"
+      },{
+        "number": "1",
+        "name": "London Patch 1",
+        "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
+        "git": "",
+        "date": "2018-09-05"
       }
     ],
       "features": [
