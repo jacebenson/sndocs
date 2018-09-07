@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 06 Sep 2018 13:40:20 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 07 Sep 2018 08:03:07 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Thu, 06 Sep 2018 13:40:20 GMT</pubDate>
+        <pubDate>Fri, 07 Sep 2018 08:03:07 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -31,10 +31,16 @@
             <pubDate>Fri, 27 Jul 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Kingston Patch 0]]></title>
-            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html</link>
-            <guid isPermaLink="false">Kingston Patch 0</guid>
+            <title><![CDATA[London Patch 0]]></title>
+            <link>https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="false">London Patch 0</guid>
             <pubDate>Fri, 27 Jul 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 1]]></title>
+            <link>https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html</link>
+            <guid isPermaLink="false">London Patch 1</guid>
+            <pubDate>Wed, 05 Sep 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
