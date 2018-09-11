@@ -1526,6 +1526,14 @@
         "hi": "",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9b/scripts/",
         "date": "2018-07-26"
+      },
+      {
+        "number": "9c",
+        "name": "Jakarta Patch 9c",
+        "url": "",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9c/scripts/",
+        "date": "2018-09-11"
       }
     ],
     "features": [
@@ -1629,6 +1637,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690216",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/7/scripts/",
         "date": "2018-06-21"
+      },{
+        "number": "8",
+        "name": "Kingston Patch 8",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-8.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692610",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/8/scripts/",
+        "date": "2018-06-21"
       }
     ],
     "features": [
@@ -1659,7 +1674,7 @@
         "number": "0",
         "name": "London Patch 0",
         "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
         "date": "2018-07-27"
       },{
@@ -1667,7 +1682,7 @@
         "name": "London Patch 1",
         "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
-        "git": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/1/scripts/",
         "date": "2018-09-05"
       }
     ],

@@ -4,8 +4,8 @@
   "description": "Download scripts and make html pages for the,.",
   "main": "index.js",
   "scripts": {
-    "download": "node index.js",
-    "build": "node index.js > output.txt && node app.js"
+    "download": "node index.js > output.txt",
+    "build": "node app.js"
   },
   "repository": {
     "type": "git",
