@@ -1687,7 +1687,23 @@
       }
     ],
       "features": [
-        "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/summary/rn-summary-new-features.html"
+        "Chat Bots: Virtual Agents",
+        "Enhanced Flow Designer",
+        "Enhanced Integration Hub",
+        "Multi-row variable sets",
+        "Change schedule landing page",
+        "Guided Tour for Service Portal",
+        "Walk up experience",
+        "Knowledge enhancements",
+        "Upgrade resolve conflicts form",
+        "Document management in HR",
+        "New UI for Security Incident Response",
+        "Vendor Tiering",
+        "Continual Improvement Management",
+        "ITBM updates",
+        "Instance Security Dashboard (PA)",
+        "Assessments and Surveys updates",
+        "List v3 not recommended"
       ]
     }
 ]
