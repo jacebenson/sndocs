@@ -1515,7 +1515,7 @@
         "number": "9a",
         "name": "Jakarta Patch 9a",
         "url": "",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690897",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9a/scripts/",
         "date": "2018-07-03"
       },
@@ -1523,7 +1523,7 @@
         "number": "9b",
         "name": "Jakarta Patch 9b",
         "url": "",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692125",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9b/scripts/",
         "date": "2018-07-26"
       },
@@ -1531,7 +1531,7 @@
         "number": "9c",
         "name": "Jakarta Patch 9c",
         "url": "",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0694713",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9c/scripts/",
         "date": "2018-09-11"
       }
