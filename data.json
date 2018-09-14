@@ -1538,8 +1538,8 @@
       {
         "number": "10",
         "name": "Jakarta Patch 10",
-        "url": "",
-        "hi": "",
+        "url": "https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-10.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692612",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/10/scripts/",
         "date": "2018-09-13"
       }
