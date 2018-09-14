@@ -1203,7 +1203,8 @@
         "name": "Helsinki Patch 12",
         "url": "https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html",
         "date": "2017-08-24",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12/scripts/"
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12/scripts/",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0634662"
       },
       {
         "number": "12a",
