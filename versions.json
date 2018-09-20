@@ -34,7 +34,7 @@
     "9a": "https://dignityhealth.service-now.com",
     "10a": "https://sephora.service-now.com",
     "10b": "https://businessnatixis.service-now.com",
-    "10c": "https://welltokinc.service-now.com",
+    "10c": "https://viawest.service-now.com",
     "11a": "https://walmart.service-now.com",
     "11b": "https://vub.service-now.com"
   },
@@ -48,15 +48,15 @@
     "7": "https://ubisoft.service-now.com",
     "8": "https://springpathinc.service-now.com",
     "9": "https://wipros.service-now.com",
-    "10": "https://tbc.service-now.com",
+    "10": "https://willistowerswatson.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://vgsupport.service-now.com",
     "3b": "https://ge.service-now.com",
     "8a": "https://visa.service-now.com",
-    "8b": "https://wbprod01.service-now.com",
+    "8b": "https://sbdkproduction.service-now.com",
     "9a": "https://umuc.service-now.com",
     "9b": "https://wilburellis.service-now.com",
-    "9c": "https://uws.service-now.com"
+    "9c": "https://uwstest.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -65,7 +65,7 @@
     "3": "https://vector.service-now.com",
     "4": "https://walmartglobal.service-now.com",
     "5": "https://utsinsearchprod.service-now.com",
-    "6": "https://ven01601.service-now.com",
+    "6": "https://tmna.service-now.com",
     "7": "https://utas1.service-now.com",
     "8": "https://williamhill.service-now.com",
     "3a": "https://vodafone.service-now.com",
@@ -73,6 +73,6 @@
   },
   "london": {
     "0": "https://uoft.service-now.com",
-    "1": "https://ulti.service-now.com"
+    "1": "https://varian.service-now.com"
   }
 }
