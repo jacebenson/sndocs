@@ -53,15 +53,10 @@
     "6a": "https://vgsupport.service-now.com",
     "3b": "https://ge.service-now.com",
     "8a": "https://visa.service-now.com",
-<<<<<<< HEAD
-    "8b": "https://sbdkproduction.service-now.com",
-    "9a": "https://umuc.service-now.com",
-=======
     "8b": "https://synapsis.service-now.com",
-    "9a": "https://ssmportal.service-now.com",
->>>>>>> d0d130719912c95c74da1e77dcbb6cec9fe1b242
+    "9a": "https://umuc.service-now.com",
     "9b": "https://wilburellis.service-now.com",
-    "9c": "https://uwstest.service-now.com"
+    "9c": "https://orange.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -70,11 +65,7 @@
     "3": "https://vector.service-now.com",
     "4": "https://walmartglobal.service-now.com",
     "5": "https://utsinsearchprod.service-now.com",
-<<<<<<< HEAD
-    "6": "https://tmna.service-now.com",
-=======
-    "6": "https://uts.service-now.com",
->>>>>>> d0d130719912c95c74da1e77dcbb6cec9fe1b242
+    "6": "https://unimelb.service-now.com",
     "7": "https://utas1.service-now.com",
     "8": "https://williamhill.service-now.com",
     "3a": "https://vodafone.service-now.com",
