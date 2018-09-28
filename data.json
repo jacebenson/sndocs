@@ -1385,6 +1385,14 @@
         "date": "2018-04-09",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684024",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11b/scripts/"
+      },
+      {
+        "number": "11c",
+        "name": "Istanbul Patch 11c",
+        "url": "",
+        "date": "2018-09-28",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11c/scripts/"
       }
     ],
     "features": [
@@ -1653,6 +1661,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692610",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/8/scripts/",
         "date": "2018-06-21"
+      },{
+        "number": "9",
+        "name": "Kingston Patch 9",
+        "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html",
+        "hi": "",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/9/scripts/",
+        "date": "2018-09-28"
       }
     ],
     "features": [

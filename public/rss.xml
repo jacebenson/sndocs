@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 24 Sep 2018 12:28:11 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 28 Sep 2018 20:21:19 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 24 Sep 2018 12:28:11 GMT</pubDate>
+        <pubDate>Fri, 28 Sep 2018 20:21:19 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -111,6 +111,12 @@
             <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-8.html</link>
             <guid isPermaLink="false">Kingston Patch 8</guid>
             <pubDate>Thu, 21 Jun 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kingston Patch 9]]></title>
+            <link>https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html</link>
+            <guid isPermaLink="false">Kingston Patch 9</guid>
+            <pubDate>Fri, 28 Sep 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Jakarta]]></title>
@@ -337,6 +343,11 @@
             <title><![CDATA[Istanbul Patch 11b]]></title>
             <guid isPermaLink="false">Istanbul Patch 11b</guid>
             <pubDate>Mon, 09 Apr 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Istanbul Patch 11c]]></title>
+            <guid isPermaLink="false">Istanbul Patch 11c</guid>
+            <pubDate>Fri, 28 Sep 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Helsinki]]></title>
