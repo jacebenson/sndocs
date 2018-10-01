@@ -1,7 +1,7 @@
-var fs =  require('fs');
+var fs = require('fs');
 var feedData = require('./data.json');
 var families = feedData.reverse();
-//console.log(families)
+// console.log(families)
 /**
  * Generate the RSS feed
  */
@@ -21,38 +21,46 @@ var feed = new RSS({
     'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
   },
   custom_elements: [
-    {'itunes:subtitle': 'Unofficial Servicenow release list'},
-    {'itunes:author': 'John Doe'},
-    {'itunes:summary': 'All about SN Releases'},
-    {'itunes:owner': [
-      {'itunes:name': 'John Doe'},
-      {'itunes:email': 'john.doe@example.com'}
-    ]},
-    {'itunes:image': {
-      _attr: {
-        href: 'https://sndocs.jacebenson.com/favicon.png'
+    { 'itunes:subtitle': 'Unofficial Servicenow release list' },
+    { 'itunes:author': 'John Doe' },
+    { 'itunes:summary': 'All about SN Releases' },
+    {
+      'itunes:owner': [
+        { 'itunes:name': 'John Doe' },
+        { 'itunes:email': 'john.doe@example.com' }
+      ]
+    },
+    {
+      'itunes:image': {
+        _attr: {
+          href: 'https://sndocs.jacebenson.com/favicon.png'
+        }
       }
-    }},
-    {'itunes:category': [
-      {_attr: {
-        text: 'Technology'
-      }}
-    ]}
+    },
+    {
+      'itunes:category': [
+        {
+          _attr: {
+            text: 'Technology'
+          }
+        }
+      ]
+    }
   ]
 });
-//console.log(versions);
-feedData.map(function(family){
-  var familyStr = family.name + '';
-  //console.log(family.name);
+// console.log(versions);
+feedData.map(function (family) {
+  // var familyStr = family.name + '';
+  // console.log(family.name);
   feed.item({
     guid: family.name,
     title: family.name,
     url: family.url,
     date: family.date
   });
-  family.patches.map(function(patch){
-    familyStr += ' ' + patch.name;
-    if(patch.url == '#'){
+  family.patches.map(function (patch) {
+    // familyStr += ' ' + patch.name;
+    if (patch.url === '#') {
       patch.url = 'https://sndocs.jacebenson.com/#' + encodeURIComponent(patch.name);
     }
     feed.item({
@@ -63,11 +71,10 @@ feedData.map(function(family){
     });
   });
 });
-fs.writeFile('./public/rss.xml', feed.xml({indent: true}), function (err){
-  if(err) return console.log(err);
+fs.writeFile('./public/rss.xml', feed.xml({ indent: true }), function (err) {
+  if (err) return console.log(err);
   console.log('created ./rss.xml');
 });
-
 
 /**
  * Build HTML
@@ -75,86 +82,85 @@ fs.writeFile('./public/rss.xml', feed.xml({indent: true}), function (err){
 var headerColSpan = 22;
 var Table = require('table-builder');
 var headers = {
-  "name": "Family",
-  "url": "Docs",
-  "patches": "Patches",
-  "features": "Features"
+  'name': 'Family',
+  'url': 'Docs',
+  'patches': 'Patches',
+  'features': 'Features'
 };
-var tableHTML =   (new Table({'class': 'table table-responsive table-hover'}))
-.setHeaders(headers)
-.setPrism('patches', function(patches, row){
-  var returnHTML = '';
-  patches.map(function(patch){
-    //console.log(patch);
-    returnHTML += '<td>';
-    returnHTML += '<div class="row">';
-    returnHTML += '  <div class="col-12">';
-    if(patch.url){
-    returnHTML += '    <a title="'+patch.name+' Notes" href="'+patch.url+'">';
+var tableHTML = (new Table({ 'class': 'table table-responsive table-hover' }))
+  .setHeaders(headers)
+  .setPrism('patches', function (patches, row) {
+    var returnHTML = '';
+    patches.map(function (patch) {
+      // console.log(patch);
+      returnHTML += '<td>';
+      returnHTML += '<div class="' + row + '">';
+      returnHTML += '  <div class="col-12">';
+      if (patch.url) {
+        returnHTML += '    <a title="' + patch.name + ' Notes" href="' + patch.url + '">';
+      }
+      returnHTML += '      <strong>' + patch.number + '</strong>';
+      if (patch.url) {
+        returnHTML += '    </a>';
+      }
+      returnHTML += '  </div>';
+      returnHTML += '  <div class="col-12">';
+      if (patch.hi) {
+        returnHTML += '    <a title="' + patch.name + ' Security KB" href="' + patch.hi + '">';
+      }
+      returnHTML += '      <i class="fa fa-power-off"></i>';
+      if (patch.hi) {
+        returnHTML += '    </a>';
+      }
+      returnHTML += '  </div>';
+      returnHTML += '  <div class="col-12">';
+      if (patch.git) {
+        returnHTML += '    <a title="' + patch.name + ' Code" href="' + patch.git + '">';
+      }
+      returnHTML += '      <i class="fa fa-code-fork"></i>';
+      if (patch.git) {
+        returnHTML += '    </a>';
+      }
+      returnHTML += '  </div>';
+      returnHTML += '</div>';
+      returnHTML += '</td>';
+    });
+    // console.log(row.name + ': ' + patches.length);
+    for (var col = patches.length; col < headerColSpan; col++) {
+      returnHTML += '<td></td>';
     }
-    returnHTML += '      <strong>'+patch.number+'</strong>';
-    if(patch.url){
-    returnHTML += '    </a>';
-    }
-    returnHTML += '  </div>';
-    returnHTML += '  <div class="col-12">';
-    if(patch.hi){
-    returnHTML += '    <a title="'+patch.name+' Security KB" href="'+patch.hi+'">';
-    }
-    returnHTML += '      <i class="fa fa-power-off"></i>';
-    if(patch.hi){
-    returnHTML += '    </a>';
-    }
-    returnHTML += '  </div>';
-    returnHTML += '  <div class="col-12">';
-    if(patch.git){
-    returnHTML += '    <a title="'+patch.name+' Code" href="'+patch.git+'">';
-    }
-    returnHTML += '      <i class="fa fa-code-fork"></i>';
-    if(patch.git){
-    returnHTML += '    </a>';
-    }
-    returnHTML += '  </div>';
-    returnHTML += '</div>';
-    returnHTML += '</td>';
-  });
-  //console.log(row.name + ': ' + patches.length);
-  for(var col = patches.length;col<headerColSpan;col++){
-    returnHTML += '<td></td>';
-  }
-  return returnHTML;
-})
-.setPrism('family', function(cellData,row){
-  var returnHTML = '';
-  if(cellData){
-    returnHTML += cellData;
-  }
-  return returnHTML
-})
-.setPrism('url', function(cellData,row){
-  var returnHTML = '';
-  if(cellData){
-    //returnHTML += cellData;
-    returnHTML += '    <a title="Family Patch Notes" href="'+cellData+'">';
-    returnHTML += '      <i class="fa fa-power-off"></i>';
-    returnHTML += '    </a>';
-
-  }
-  return returnHTML
-})
-.setPrism('features', function(cellData, row){
-  var returnHTML = '';
-  if(cellData){
-  cellData.map(function(feature){
-    returnHTML += '<div><a href="https://docs.servicenow.com/search?q=' + feature + '">'+feature+'</a></div>'
+    return returnHTML;
   })
-  return returnHTML;
-  } else {
-    return "Unknown";
-  }
-})
-.setData(families)
-.render();
+  .setPrism('family', function (cellData, row) {
+    var returnHTML = '';
+    if (cellData) {
+      returnHTML += cellData;
+    }
+    return returnHTML;
+  })
+  .setPrism('url', function (cellData, row) {
+    var returnHTML = '';
+    if (cellData) {
+      // returnHTML += cellData;
+      returnHTML += '    <a title="Family Patch Notes" href="' + cellData + '">';
+      returnHTML += '      <i class="fa fa-power-off"></i>';
+      returnHTML += '    </a>';
+    }
+    return returnHTML;
+  })
+  .setPrism('features', function (cellData, row) {
+    var returnHTML = '';
+    if (cellData) {
+      cellData.map(function (feature) {
+        returnHTML += '<div><a href="https://docs.servicenow.com/search?q=' + feature + '">' + feature + '</a></div>';
+      });
+      return returnHTML;
+    } else {
+      return 'Unknown';
+    }
+  })
+  .setData(families)
+  .render();
 var indexHTML = '';
 indexHTML += '<html>';
 indexHTML += '<head>';
@@ -182,16 +188,16 @@ indexHTML += '        <link href="./css/fontawesome.css" rel="stylesheet"></link
 indexHTML += '        <script src="./js/script.js"></script>';
 indexHTML += '    </header>';
 indexHTML += '    <div class="container-fluid">';
-indexHTML += '        <div class="row">'
-indexHTML += '            <div class="col-sm-7">Unofficial SN Release List</div>'
+indexHTML += '        <div class="row">';
+indexHTML += '            <div class="col-sm-7">Unofficial SN Release List</div>';
 indexHTML += '            <div class="col-sm-2">';
 indexHTML += '                <a href="https://gitlab.com/jacebenson/sndocs/commits/master">';
 indexHTML += '                    <img alt="pipeline status" src="https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg" />';
 indexHTML += '                </a>';
 indexHTML += '            </div>';
-indexHTML += '            <div class="col-sm-2">Last Updated:'+new Date().toISOString()+'</div>'
-indexHTML += '            <div class="col-sm-1"><a href="/rss.xml">RSS <i class="fa fa-rss-square" aria-hidden="true"></i></a></div>'
-indexHTML += '        </div>'
+indexHTML += '            <div class="col-sm-2">Last Updated:' + new Date().toISOString() + '</div>';
+indexHTML += '            <div class="col-sm-1"><a href="/rss.xml">RSS <i class="fa fa-rss-square" aria-hidden="true"></i></a></div>';
+indexHTML += '        </div>';
 indexHTML += tableHTML;
 indexHTML += '    </div>';
 indexHTML += '    <style>';
@@ -203,8 +209,8 @@ indexHTML += '        td {';
 indexHTML += '            padding: 15px !important;';
 indexHTML += '        }';
 indexHTML += '    </style>';
-indexHTML += '    <script>$( document ).ready(function() {jQuery(".patches-th").attr("colspan","'+parseInt(headerColSpan+1,10)+'");});</script>';
-fs.writeFile('./public/index.html', indexHTML, function (err){
-  if(err) return console.log(err);
+indexHTML += '    <script>$( document ).ready(function() {jQuery(".patches-th").attr("colspan","' + parseInt(headerColSpan + 1, 10) + '");});</script>';
+fs.writeFile('./public/index.html', indexHTML, function (err) {
+  if (err) return console.log(err);
   console.log('created ./index.html');
 });
