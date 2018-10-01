@@ -1391,7 +1391,7 @@
         "name": "Istanbul Patch 11c",
         "url": "",
         "date": "2018-09-28",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=b68b1fafdbf39340e0e80b55ca9619f9",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11c/scripts/"
       }
     ],
@@ -1665,7 +1665,7 @@
         "number": "9",
         "name": "Kingston Patch 9",
         "url": "https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html",
-        "hi": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713018",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/9/scripts/",
         "date": "2018-09-28"
       }

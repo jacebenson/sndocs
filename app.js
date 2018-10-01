@@ -72,7 +72,7 @@ fs.writeFile('./public/rss.xml', feed.xml({indent: true}), function (err){
 /**
  * Build HTML
  */
-var headerColSpan = 20;
+var headerColSpan = 22;
 var Table = require('table-builder');
 var headers = {
   "name": "Family",
