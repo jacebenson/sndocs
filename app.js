@@ -94,7 +94,7 @@ var tableHTML = (new Table({ 'class': 'table table-responsive table-hover' }))
     patches.map(function (patch) {
       // console.log(patch);
       returnHTML += '<td>';
-      returnHTML += '<div class="' + row + '">';
+      returnHTML += '<div class="' + row + ' patchcol">';
       returnHTML += '  <div class="col-12">';
       if (patch.url) {
         returnHTML += '    <a title="' + patch.name + ' Notes" href="' + patch.url + '">';
@@ -186,10 +186,13 @@ indexHTML += '        <script src="./js/bootstrap.min.js"></script>';
 indexHTML += '        <link href="./css/bootstrap.min.css" rel="stylesheet"></link>';
 indexHTML += '        <link href="./css/fontawesome.css" rel="stylesheet"></link>';
 indexHTML += '        <script src="./js/script.js"></script>';
+indexHTML += '        <style>.patchcol {';
+indexHTML += '          width: 0px;';
+indexHTML += '        }</style>';
 indexHTML += '    </header>';
 indexHTML += '    <div class="container-fluid">';
 indexHTML += '        <div class="row">';
-indexHTML += '            <div class="col-sm-7">Unofficial SN Release List</div>';
+indexHTML += '            <div class="col-sm-4">Unofficial SN Release List</div>';
 indexHTML += '            <div class="col-sm-2">';
 indexHTML += '                <a href="https://gitlab.com/jacebenson/sndocs/commits/master">';
 indexHTML += '                    <img alt="pipeline status" src="https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg" />';
