@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 05 Oct 2018 13:01:56 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 08 Oct 2018 16:39:04 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Fri, 05 Oct 2018 13:01:56 GMT</pubDate>
+        <pubDate>Mon, 08 Oct 2018 16:39:04 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -41,6 +41,12 @@
             <link>https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html</link>
             <guid isPermaLink="false">London Patch 1</guid>
             <pubDate>Wed, 05 Sep 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 2]]></title>
+            <link>https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-2.html</link>
+            <guid isPermaLink="false">London Patch 2</guid>
+            <pubDate>Mon, 08 Oct 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
