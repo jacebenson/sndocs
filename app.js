@@ -192,7 +192,7 @@ indexHTML += '        }</style>';
 indexHTML += '    </header>';
 indexHTML += '    <div class="container-fluid">';
 indexHTML += '        <div class="row">';
-indexHTML += '            <div class="col-sm-4">Unofficial SN Release List</div>';
+indexHTML += '            <div class="col-sm-4" >Unofficial SN Release List</div>';
 indexHTML += '            <div class="col-sm-2">';
 indexHTML += '                <a href="https://gitlab.com/jacebenson/sndocs/commits/master">';
 indexHTML += '                    <img alt="pipeline status" src="https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg" />';
