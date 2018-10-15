@@ -47,13 +47,13 @@
     "5": "https://rmit.service-now.com",
     "6": "https://veritas.service-now.com",
     "7": "https://tanium.service-now.com",
-    "8": "https://pgaamerica.service-now.com",
+    "8": "https://lplfinancialprd.service-now.com",
     "9": "https://wusm.service-now.com",
     "10": "https://wwttest.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://invesco.service-now.com",
+    "8a": "https://sprouts.service-now.com",
     "8b": "https://smarttech.service-now.com",
     "9a": "https://umuc.service-now.com",
     "9b": "https://tesla.service-now.com",
@@ -76,7 +76,7 @@
   "london": {
     "0": "https://uoft.service-now.com",
     "1": "https://varian.service-now.com",
-    "2": "https://zillow.service-now.com"
+    "2": "https://voeazul.service-now.com"
   },
   "undefined": {
     "0": "https://springpathinc.service-now.com"
