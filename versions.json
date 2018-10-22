@@ -30,7 +30,7 @@
     "8": "https://macys.service-now.com/",
     "9": "https://varian.service-now.com",
     "10": "https://coretech.service-now.com",
-    "11": "https://uky.service-now.com",
+    "11": "https://ashley.service-now.com",
     "9a": "https://dignityhealth.service-now.com",
     "10a": "https://sephora.service-now.com",
     "10b": "https://businessnatixis.service-now.com",
@@ -53,11 +53,11 @@
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://sprouts.service-now.com",
+    "8a": "https://simplyfit.service-now.com",
     "8b": "https://smarttech.service-now.com",
-    "9a": "https://umichprod.service-now.com",
+    "9a": "https://ssmportal.service-now.com",
     "9b": "https://tesla.service-now.com",
-    "9c": "https://uwstest.service-now.com"
+    "9c": "https://graham.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -65,20 +65,18 @@
     "2": "https://moneysupermarket.service-now.com",
     "3": "https://vector.service-now.com",
     "4": "https://walmartglobal.service-now.com",
-    "5": "https://utsinsearchprod.service-now.com",
-    "6": "https://ven01601.service-now.com",
-    "7": "https://mygrantsdev.service-now.com",
+    "5": "https://wdpr.service-now.com",
+    "6": "https://uts.service-now.com",
+    "7": "https://utas1.service-now.com",
     "8": "https://wittel.service-now.com",
     "9": "https://zumtobelprod.service-now.com",
+    "10": "https://empnpike.service-now.com",
     "3a": "https://economie.service-now.com",
     "3b": "https://watts.service-now.com"
   },
   "london": {
     "0": "https://uoft.service-now.com",
     "1": "https://varian.service-now.com",
-    "2": "https://zillow.service-now.com"
-  },
-  "undefined": {
-    "0": "https://eefsprod.service-now.com"
+    "2": "https://wwe.service-now.com"
   }
 }

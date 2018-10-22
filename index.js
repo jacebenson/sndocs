@@ -23,11 +23,12 @@ config.instances.map(function (instance) {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload,
-    timeout: 30000
+    timeout: 30000,
+    rejectUnauthorized: false // added to get around ssl issue found.
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 
     console.log('Requesting: ' + url);
-    // console.log(response.body)
+    // console.log(response.body);
     if (error) {
       if (error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT') {
         console.log('Could not connect in ' + requestOptions.timeout / 1000 + ' seconds to ' + url);
