@@ -1,5 +1,6 @@
 # Servicenow Sync JSON
 service-now.json
+output.txt
 
 # Logs
 logs

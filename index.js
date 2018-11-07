@@ -23,7 +23,7 @@ config.instances.map(function (instance) {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload,
-    timeout: 30000,
+    timeout: 60000,
     rejectUnauthorized: false // added to get around ssl issue found.
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 

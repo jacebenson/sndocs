@@ -1,0 +1,82 @@
+{
+  "aspen": {},
+  "berlin": {},
+  "calgary": {},
+  "dublin": {},
+  "eureka": {
+    "0": "https://demonightlyeureka.service-now.com"
+  },
+  "fuji": {
+    "13": "https://visa.service-now.com/"
+  },
+  "geneva": {
+    "11": "https://sanofi.service-now.com/"
+  },
+  "helsinki": {
+    "5": "https://developers.service-now.com",
+    "9": "https://csscorp.service-now.com",
+    "11": "https://nyk.service-now.com",
+    "12": "https://agfa.service-now.com",
+    "12a": "https://wittel.service-now.com",
+    "11b": "https://saintfrancis.service-now.com"
+  },
+  "istanbul": {
+    "1": "https://pnmac.service-now.com",
+    "3": "https://ihg.service-now.com",
+    "4": "https://davita.service-now.com",
+    "5": "https://jnjprod.service-now.com",
+    "6": "https://wdpr.service-now.com",
+    "7": "https://dell.service-now.com",
+    "8": "https://macys.service-now.com/",
+    "9": "https://varian.service-now.com",
+    "10": "https://coretech.service-now.com",
+    "11": "https://ashley.service-now.com",
+    "9a": "https://dignityhealth.service-now.com",
+    "10a": "https://sephora.service-now.com",
+    "10b": "https://businessnatixis.service-now.com",
+    "10c": "https://msg.service-now.com",
+    "11a": "https://walmart.service-now.com",
+    "11b": "https://vub.service-now.com",
+    "11c": "https://wpcoprod.service-now.com"
+  },
+  "jakarta": {
+    "1": "https://upgrade.service-now.com",
+    "2": "https://medtronic.service-now.com",
+    "3": "https://medtronicprod.service-now.com",
+    "4": "https://uchicago.service-now.com",
+    "5": "https://rmit.service-now.com",
+    "6": "https://veritas.service-now.com",
+    "7": "https://spartan.service-now.com",
+    "8": "https://pgaamerica.service-now.com",
+    "9": "https://volvocars.service-now.com",
+    "10": "https://uwstest.service-now.com",
+    "3a": "https://oakhilladvisors.service-now.com/",
+    "6a": "https://link2ict.service-now.com",
+    "3b": "https://ge.service-now.com",
+    "8a": "https://southwest.service-now.com",
+    "8b": "https://smarttech.service-now.com",
+    "9a": "https://umuc.service-now.com",
+    "9b": "https://tesla.service-now.com",
+    "9c": "https://uws.service-now.com"
+  },
+  "kingston": {
+    "0": "https://logicalissmc.service-now.com/",
+    "1": "https://signon.service-now.com",
+    "2": "https://moneysupermarket.service-now.com",
+    "3": "https://vector.service-now.com",
+    "4": "https://pnmac.service-now.com",
+    "5": "https://utsinsearchprod.service-now.com",
+    "6": "https://ven01601.service-now.com",
+    "7": "https://universityofbirmingham.service-now.com",
+    "8": "https://wittel.service-now.com",
+    "9": "https://zumtobelprod.service-now.com",
+    "10": "https://wgu.service-now.com",
+    "3a": "https://economie.service-now.com",
+    "3b": "https://watts.service-now.com"
+  },
+  "london": {
+    "0": "https://uoft.service-now.com",
+    "1": "https://utas1.service-now.com",
+    "2": "https://zillow.service-now.com"
+  }
+}
