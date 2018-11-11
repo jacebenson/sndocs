@@ -1,4 +1,4 @@
-/*! RESOURCE: /scripts/js_includes_ngCommon.js */
+/*! RESOURCE: /scripts/js_includes_snTestRunner.js */
 /*! RESOURCE: /scripts/sn/common/js_includes_common.js */
 /*! RESOURCE: /scripts/sn/common/_module.js */
 angular.module('sn.common', [
@@ -14412,6589 +14412,7109 @@ var GlideWebAnalytics = (function() {
   }
   return api;
 })();;;
-/*! RESOURCE: /scripts/js_includes_ng_amb.js */
-/*! RESOURCE: /scripts/js_includes_amb.js */
-var amb = ambClientJs.default;
-amb.getClient();;
-/*! RESOURCE: /scripts/app.ng.amb/app.ng.amb.js */
-angular.module("ng.amb", ['sn.common.presence', 'sn.common.util'])
-  .value("ambLogLevel", 'info')
-  .value("ambServletURI", '/amb')
-  .value("cometd", angular.element.cometd)
-  .value("ambLoginWindow", 'true');;
-/*! RESOURCE: /scripts/app.ng.amb/service.AMB.js */
-angular.module("ng.amb").service("amb", function(AMBOverlay, $window, $q, $log, $rootScope, $timeout) {
-  "use strict";
-  var ambClient = null;
-  var _window = $window.self;
-  var loginWindow = null;
-  var sameScope = false;
-  ambClient = amb.getClient();
-  if (_window.g_ambClient) {
-    sameScope = true;
-  }
-  if (sameScope) {
-    var serverConnection = ambClient.getServerConnection();
-    serverConnection.loginShow = function() {
-      if (!serverConnection.isLoginWindowEnabled())
-        return;
-      if (loginWindow && loginWindow.isVisible())
-        return;
-      if (serverConnection.isLoginWindowOverride())
-        return;
-      loginWindow = new AMBOverlay();
-      loginWindow.render();
-      loginWindow.show();
-    };
-    serverConnection.loginHide = function() {
-      if (!loginWindow)
-        return;
-      loginWindow.hide();
-      loginWindow.destroy();
-      loginWindow = null;
-    }
-  }
-  var AUTO_CONNECT_TIMEOUT = 20 * 1000;
-  var connected = $q.defer();
-  var connectionInterrupted = false;
-  var monitorAMB = false;
-  $timeout(startMonitoringAMB, AUTO_CONNECT_TIMEOUT);
-  connected.promise.then(startMonitoringAMB);
+/*! RESOURCE: /scripts/app.snTestRunner/_snTestRunner.js */
+angular.module('sn.testRunner', ['sn.base', 'sn.common'])
+  .config(['$locationProvider', function($locationProvider) {
+    $locationProvider.html5Mode(true);
+  }]);;
+/*! RESOURCE: /scripts/app.snTestRunner/controller.snTestRunner.js */
+angular
+  .module('sn.testRunner')
+  .controller('TestRunner', TestRunner);
+TestRunner.$inject = ['$rootScope', '$scope', '$element', '$interval', '$timeout', '$q', '$document', '$window', '$httpParamSerializer', 'StepConfig', 'ClientErrorHandler', 'TestInformation', 'ATFConnectionService', 'ImpersonationHandler', 'ScreenshotsModeManager', 'snNotification', 'ReportUITestProgressHandler', 'ATFOpenURL'];
 
-  function startMonitoringAMB() {
-    monitorAMB = true;
-  }
+function TestRunner($rootScope, $scope, $element, $interval, $timeout, $q, $document, $window, $httpParamSerializer, stepConfig, clientErrorHandler, testInformation, atfConnectionService, impersonationHandler, screenshotsModeManager, snNotification, reportUITestProgressHandler, ATFOpenURL) {
+  'use strict';
+  var self = this;
+  self.MESSAGE_KEY_FAILED_WITH_ERROR = "Step execution failed with error: {0}";
+  self.MESSAGE_KEY_WAITING_FOR_TEST = "Waiting for a test to run";
+  self.MESSAGE_KEY_AN_ERROR_OCCURRED = "An error occurred while setting up the test runner. No tests can be processed. ";
+  self.MESSAGE_KEY_ERROR = "ERROR: {0}";
+  self.MESSAGE_KEY_WAITING = "Waiting...";
+  self.MESSAGE_KEY_LOADING = "Loading...";
+  self.MESSAGE_KEY_FAIL_USER_EMPTY = "Could not search for tests to run because the current user is empty.";
+  self.MESSAGE_KEY_CANCEL_REQUEST_RECEIVED = "A cancel request has been received";
+  self.MESSAGE_KEY_UNEXPECTED_ERROR = "An unexpected error occurred while processing the test.";
+  self.MESSAGE_KEY_FINISHED_REPORTING_RESULT = "Finished test execution, reporting result";
+  self.MESSAGE_KEY_REQUEST_SUCCESSFUL = "Request to run test was successful, running Test {0}";
+  self.MESSAGE_KEY_ERROR_RELOAD_PAGE = "An unexpected error occurred while cleaning up after the last test. Please reload the page to continue looking for tests.";
+  self.MESSAGE_KEY_FAIL_WRONG_VIEW = "Expected to open the '{0}' view of the form, but actually opened to the '{1}' view";
+  self.MESSAGE_KEY_FAIL_WRONG_FORM = "Expected to open form '{0}' but actually opened form '{1}'";
+  self.MESSAGE_KEY_FAIL_INVALID_FORM = "'{0}' is not a valid form";
+  self.MESSAGE_KEY_FAIL_WRONG_CATALOG_ITEM = "Expected to open '{0}' catalog item but actually opened '{1}' item";
+  self.MESSAGE_KEY_FAIL_INVALID_ACCESS_CATALOG_ITEM = "User does not have access to '{0}'";
+  self.MESSAGE_KEY_FAILED_REPORT_PROGRESS = "Failed on report step progress";
+  self.MESSAGE_KEY_TEST_CANCELED = "The test has been canceled";
+  self.MESSAGE_KEY_TAKING_SCREENSHOT = "Taking screenshot and sending it to server";
+  self.MESSAGE_KEY_NOT_TAKING_SCREENSHOT = "Not taking screenshot, test iframe is empty";
+  self.MESSAGE_KEY_JAVASCRIPT_ERROR = "This step failed because the client error '{0}' was detected on the page being tested. See failing Test Logs. To ignore these errors in the next test run, use 'Add all client errors to warning/ignored list' links.";
+  self.MESSAGE_KEY_RUNNING_STEP = "Running step {0} of {1} for {2}";
+  self.MESSAGE_KEY_ERROR_IN_UNIMPERSONATION = "Error during unimpersonation! Any further action will be done as user: {0}";
+  self.MESSAGE_KEY_ERROR_IN_REPORT_BATCH_RESULT = "Failed to report client batch progress. Test will time out.";
+  self.MESSAGE_KEY_FOUND_TEST_TO_RUN = "Found a scheduled test to run";
+  self.MESSAGE_KEY_EXECUTING_TEST = "Executing test...";
+  self.MESSAGE_KEY_ERROR_DETAIL = "Error detail: {0}";
+  self.MESSAGE_KEY_STEP_EXEC_FAILED = "Step execution failed with error ";
+  self.MESSAGE_KEY_CONFIRM_EXIT = "A test is currently running. Leaving this page will cause the test to time out.";
+  self.MESSAGE_KEY_INVALID_REFERENCE = "This step's '{0}' field is assigned an output value from a step that no longer exists. To fix this problem, edit this step and replace the value for the '{0}' field with a valid value.";
+  self.MESSAGE_KEY_REGISTER_RUNNER_ERROR = "An error occurred registering the test runner with the server";
+  self.MESSAGE_KEY_ATF_AGENT_DELETED = "Client test runner deleted. Reload page to activate this test runner.";
+  self.MESSAGE_KEY_USER_LOGGED_OUT = "Client test runner session has changed because the user logged out. Reload page to activate this test runner.";
+  self.MESSAGE_KEY_CONFIRM_SCHEDULE_SETUP = "Are you sure you want to configure this test runner to only run scheduled tests and suites? It will no longer be available to execute any tests or suites that are started manually.";
+  self.MESSAGE_KEY_CONFIRM_SCHEDULE_TEARDOWN = "Are you sure you want to configure this test runner to only run manually-started tests and suites? It will no longer be available to run scheduled tests or suites.";
+  self.MESSAGE_KEY_SCHEDULE_TOGGLE_ERROR_TEST_RUNNING = "Unable to toggle scheduled test preferences when a test is currently in progress. Try again when a test is not running.";
+  self.MESSAGE_KEY_SCHEDULE_SETUP_FAILED = "Failed to configure this page to run scheduled tests. Refresh the page and try again.";
+  self.MESSAGE_KEY_MANUAL_SETUP_FAILED = "Failed to configure this page to run manual tests. Refresh the page and try again.";
+  self.MESSAGE_KEY_SCHED_RUN_SCHEDULED_TESTS_ONLY = "Run Scheduled Tests Only";
+  self.MESSAGE_KEY_SCHED_RUN_MANUAL_TESTS_ONLY = "Run Manual Tests Only";
+  self.MESSAGE_KEY_EXECUTION_FRAME = "Execution Frame";
+  self.MESSAGE_KEY_CLOSED_TEST_RUNNER = "Client test runner closed or navigated away while step was running. If this was not intentional, it may have been caused by opening a page with a framebuster. Pages with framebusters are not currently testable.";
+  self.messageMap = new GwtMessage().getMessages([self.MESSAGE_KEY_WAITING_FOR_TEST, self.MESSAGE_KEY_AN_ERROR_OCCURRED,
+    self.MESSAGE_KEY_ERROR, self.MESSAGE_KEY_WAITING, self.MESSAGE_KEY_LOADING, self.MESSAGE_KEY_FAILED_WITH_ERROR,
+    self.MESSAGE_KEY_FAIL_USER_EMPTY, self.MESSAGE_KEY_CANCEL_REQUEST_RECEIVED, self.MESSAGE_KEY_UNEXPECTED_ERROR,
+    self.MESSAGE_KEY_FINISHED_REPORTING_RESULT, self.MESSAGE_KEY_REQUEST_SUCCESSFUL, self.MESSAGE_KEY_ERROR_RELOAD_PAGE,
+    self.MESSAGE_KEY_FAIL_WRONG_VIEW, self.MESSAGE_KEY_FAIL_WRONG_FORM, self.MESSAGE_KEY_STEP_EXEC_FAILED,
+    self.MESSAGE_KEY_FAIL_INVALID_FORM, self.MESSAGE_KEY_FAIL_WRONG_CATALOG_ITEM, self.MESSAGE_KEY_FAIL_INVALID_ACCESS_CATALOG_ITEM, self.MESSAGE_KEY_FAILED_REPORT_PROGRESS, self.MESSAGE_KEY_TEST_CANCELED,
+    self.MESSAGE_KEY_TAKING_SCREENSHOT, self.MESSAGE_KEY_NOT_TAKING_SCREENSHOT, self.MESSAGE_KEY_JAVASCRIPT_ERROR,
+    self.MESSAGE_KEY_RUNNING_STEP, self.MESSAGE_KEY_ERROR_IN_UNIMPERSONATION, self.MESSAGE_KEY_ERROR_IN_REPORT_BATCH_RESULT,
+    self.MESSAGE_KEY_FOUND_TEST_TO_RUN, self.MESSAGE_KEY_EXECUTING_TEST, self.MESSAGE_KEY_ERROR_DETAIL, self.MESSAGE_KEY_CONFIRM_EXIT,
+    self.MESSAGE_KEY_INVALID_REFERENCE, self.MESSAGE_KEY_REGISTER_RUNNER_ERROR, self.MESSAGE_KEY_ATF_AGENT_DELETED,
+    self.MESSAGE_KEY_CONFIRM_SCHEDULE_SETUP, self.MESSAGE_KEY_CONFIRM_SCHEDULE_TEARDOWN, self.MESSAGE_KEY_SCHEDULE_TOGGLE_ERROR_TEST_RUNNING,
+    self.MESSAGE_KEY_SCHEDULE_SETUP_FAILED, self.MESSAGE_KEY_MANUAL_SETUP_FAILED, self.MESSAGE_KEY_USER_LOGGED_OUT,
+    self.MESSAGE_KEY_SCHED_RUN_SCHEDULED_TESTS_ONLY, self.MESSAGE_KEY_SCHED_RUN_MANUAL_TESTS_ONLY, self.MESSAGE_KEY_EXECUTION_FRAME, self.MESSAGE_KEY_CLOSED_TEST_RUNNER
+  ]);
+  self.messageReference = "";
+  self.delayBetweenSteps = 10;
+  self.isDebugEnabled = false;
+  self.screenshotsQuality = 25;
+  self.heartbeatInterval = 60 * 1000;
+  self.findTestInterval = 5 * 1000;
+  self.isSchedulePluginActive = false;
+  self.runScheduledTestsOnly = false;
+  self.screenshotTimeoutSeconds = 60;
+  self.lockDownScreenshotModesWhileRunningTest = false;
+  self.stepConfigs = {};
+  self.AMBChannelName = self.messageMap[self.MESSAGE_KEY_LOADING];
+  self.AMBMessageDebug = self.messageMap[self.MESSAGE_KEY_WAITING];
+  self.AMBStepConfigChannelName = self.messageMap[self.MESSAGE_KEY_LOADING];
+  self.AMBStepConfigMessageDebug = self.messageMap[self.MESSAGE_KEY_WAITING];
+  self.AMBWhitelistedClientErrorChannelName = self.messageMap[self.MESSAGE_KEY_LOADING];
+  self.AMBWhitelistedClientErrorMessageDebug = self.messageMap[self.MESSAGE_KEY_WAITING];
+  self.AMBATFAgentChannelName = self.messageMap[self.MESSAGE_KEY_LOADING];
+  self.AMBATFAgentMessageDebug = self.messageMap[self.MESSAGE_KEY_WAITING];
+  self.currentStepBatch = {};
+  self.currentStepBatchResult = {};
+  self.testExecutionCount = 0;
+  self.stepConfig = stepConfig;
+  self.testInformation = testInformation;
+  self.atfConnectionService = atfConnectionService;
+  self.atfFormInterceptor = null;
+  self.impersonationHandler = impersonationHandler;
+  self.screenshotsModeManager = screenshotsModeManager;
+  self.snNotification = snNotification;
+  self.screenshot_status = true;
+  self.isRunningTest = false;
+  self.stepConfigStale = true;
+  self.showLoadingIcon = true;
+  self.hasConsoleError = false;
+  self.consoleErrorMessage = "";
+  self.batchPercentComplete = 0;
+  self.unimpersonationFailed = false;
+  self.showPreferences = false;
+  self.INVALID_REFERENCE_PREFIX = "_invalid variable name";
+  self.atfAgentSysId = "";
+  self.hasSetupHeartbeat = false;
+  self.heartbeatIntervalId = "";
+  self.findTestIntervalId = null;
+  self.clientConnected = true;
+  self.amb_connection = null;
+  self.handlers = [];
+  self._initializeDefaultStates = _initializeDefaultStates;
+  self.openFormAndAssert = openFormAndAssert;
+  self.openPortalPage = openPortalPage;
+  self.openURL = openURL;
+  self.openCatalogItem = openCatalogItem;
+  self.claimTest = claimTest;
+  self.orchestrateTest = orchestrateTest;
+  self.setTestStepStatusMessage = setTestStepStatusMessage;
+  self.setTestHeaderMessage = setTestHeaderMessage;
+  self.setCurrentUser = setCurrentUser;
+  self._getCurrentUser = _getCurrentUser;
+  self.setiFrameOnloadFunction = setiFrameOnloadFunction;
+  self.cleariFrameOnloadFunction = cleariFrameOnloadFunction;
+  self.overwriteFrameFunctions = overwriteFrameFunctions;
+  self._getFrameWindow = _getFrameWindow;
+  self._getFrameGForm = _getFrameGForm;
+  self._initializeListeners = _initializeListeners;
+  self.hidePreferences = hidePreferences;
+  self.togglePreferences = togglePreferences;
+  self.showPreferencesTab = showPreferencesTab;
+  self.screenshotsModeChanged = screenshotsModeChanged;
+  self.unimpersonationNeeded = unimpersonationNeeded;
+  self.afterAMBUnsubscribed = afterAMBUnsubscribed;
+  self.togglePreferencesDropdown = togglePreferencesDropdown;
+  self.toggleRunScheduledTestsOnly = toggleRunScheduledTestsOnly;
+  self.reportSetupError = reportSetupError;
+  self.teardownBatch = teardownBatch;
+  self.logAndNotifyExceptionAsErrorMessage = logAndNotifyExceptionAsErrorMessage;
+  self.logAndNotifyException = logAndNotifyException;
+  self.getExceptionMessage = getExceptionMessage;
+  self.handleTeardownImpersonationFailure = handleTeardownImpersonationFailure;
+  self.handleTeardownException = handleTeardownException;
+  self.impersonate = impersonate;
+  self.impersonationNeeded = impersonationNeeded;
+  self.reportBatchResult = reportBatchResult;
+  self.handleReportBatchResultException = handleReportBatchResultException;
+  self.teardownImpersonation = teardownImpersonation;
+  self.populateWithOriginalUserIfEmpty = populateWithOriginalUserIfEmpty;
+  self.setupBatch = setupBatch;
+  self._getFormattedUTCNowDateTime = _getFormattedUTCNowDateTime;
+  self.setupLogCapture = setupLogCapture;
+  self.setupAlertCapture = setupAlertCapture;
+  self.setupConfirmCapture = setupConfirmCapture;
+  self.setupPromptCapture = setupPromptCapture;
+  self.setupErrorCapture = setupErrorCapture;
+  self.setupJslogCapture = setupJslogCapture;
+  self.setupMandatoryCapture = setupMandatoryCapture;
+  self.processBatch = processBatch;
+  self.processStep = processStep;
+  self._runStep = _runStep;
+  self.resolveInputs = resolveInputs;
+  self.validateInputs = validateInputs;
+  self.handleStepRunException = handleStepRunException;
+  self.saveStepResultAndCheckStepFailure = saveStepResultAndCheckStepFailure;
+  self.takeScreenshot = takeScreenshot;
+  self.reportStepProgress = reportStepProgress;
+  self.pauseBetweenSteps = pauseBetweenSteps;
+  self.setTestErrorMessage = setTestErrorMessage;
+  self.atflog = atflog;
+  self.atflogDebug = atflogDebug;
+  self.activate = activate;
+  self.setupEvents = setupEvents;
+  self.setupConfirmExit = setupConfirmExit;
+  self.setupTestRunnerOnExit = setupTestRunnerOnExit;
+  self._registerRunner = _registerRunner;
+  self._setupStepConfigs = _setupStepConfigs;
+  self._setupWhitelistedClientErrors = _setupWhitelistedClientErrors;
+  self._handleCaughtClientJavascriptError = _handleCaughtClientJavascriptError;
+  self._setupTestInformation = _setupTestInformation;
+  self.setupHeartbeat = setUpHeartbeat;
+  self.sendHeartbeat = sendHeartbeat;
+  self.handleBatchProcessException = handleBatchProcessException;
+  self.logAndNotifyExceptionAsHeaderMessage = logAndNotifyExceptionAsHeaderMessage;
+  self.onAMBMessageReceived = onAMBMessageReceived;
+  self.onAMBMessageReceivedConfig = onAMBMessageReceivedConfig;
+  self.onAMBMessageReceivedWhitelistedClientError = onAMBMessageReceivedWhitelistedClientError;
+  self.debugOnAMBMessageReceivedWhitelistedClientError = debugOnAMBMessageReceivedWhitelistedClientError;
+  self.onAMBMessageReceivedATFAgent = onAMBMessageReceivedATFAgent;
+  self.debugOnAMBMessageReceived = debugOnAMBMessageReceived;
+  self.debugOnAMBMessageReceivedConfig = debugOnAMBMessageReceivedConfig;
+  self._getFileNameNoExtension = _getFileNameNoExtension;
+  self._ajaxClaimTest = _ajaxClaimTest;
+  self._ajaxClaimScheduledTest = _ajaxClaimScheduledTest;
+  self.resetIFrame = resetIFrame;
+  self._getFileFormattedUTCNowDateTime = _getFileFormattedUTCNowDateTime;
+  self._setupScheduledTests = _setupScheduledTests;
+  self._clearHeartbeatInterval = _clearHeartbeatInterval;
+  self.setupUserInfo = setupUserInfo;
+  self.handleSessionChange = handleSessionChange;
+  self.refreshStepConfigs = refreshStepConfigs;
+  self.failTestBeforeClosingTestRunner = failTestBeforeClosingTestRunner;
+  self.sendATFEvent = sendATFEvent;
+  self._refreshWhitelistedClientErrors = _refreshWhitelistedClientErrors;
+  self._setControllerStateIsRunningTest = _setControllerStateIsRunningTest;
+  self.findTestToRun = findTestToRun;
+  self._findTestToRunByRunnerType = _findTestToRunByRunnerType;
+  self._findScheduledTestToRun = _findScheduledTestToRun;
+  self._toggleFindTestInterval = _toggleFindTestInterval;
+  self.clearTestErrorMessage = clearTestErrorMessage;
+  self.activate();
 
-  function ambInterrupted() {
-    var state = ambClient.getState();
-    return monitorAMB && state !== "opened" && state !== "initialized"
-  }
-  var interruptionTimeout;
-  var extendedInterruption = false;
-
-  function setInterrupted(eventName) {
-    connectionInterrupted = true;
-    $rootScope.$broadcast(eventName);
-    if (!interruptionTimeout) {
-      interruptionTimeout = $timeout(function() {
-        extendedInterruption = true;
-      }, 30 * 1000)
-    }
-    connected = $q.defer();
-  }
-  var connectOpenedEventId = ambClient.subscribeToEvent("connection.opened", function() {
-    $rootScope.$broadcast("amb.connection.opened");
-    if (interruptionTimeout) {
-      $timeout.cancel(interruptionTimeout);
-      interruptionTimeout = null;
-    }
-    extendedInterruption = false;
-    if (connectionInterrupted) {
-      connectionInterrupted = false;
-      $rootScope.$broadcast("amb.connection.recovered");
-    }
-    connected.resolve();
-  });
-  var connectClosedEventId = ambClient.subscribeToEvent("connection.closed", function() {
-    setInterrupted("amb.connection.closed");
-  });
-  var connectBrokenEventId = ambClient.subscribeToEvent("connection.broken", function() {
-    setInterrupted("amb.connection.broken");
-  });
-  var onUnloadWindow = function() {
-    ambClient.unsubscribeFromEvent(connectOpenedEventId);
-    ambClient.unsubscribeFromEvent(connectClosedEventId);
-    ambClient.unsubscribeFromEvent(connectBrokenEventId);
-    angular.element($window).off('unload', onUnloadWindow);
-  };
-  angular.element($window).on('unload', onUnloadWindow);
-  var documentReadyState = $window.document ? $window.document.readyState : null;
-  if (documentReadyState === 'complete') {
-    autoConnect();
-  } else {
-    angular.element($window).on('load', autoConnect);
-  }
-  $timeout(autoConnect, 10000);
-  var initiatedConnection = false;
-
-  function autoConnect() {
-    if (!initiatedConnection) {
-      initiatedConnection = true;
-      ambClient.connect();
-    }
-  }
-  return {
-    getServerConnection: function() {
-      return ambClient.getServerConnection();
-    },
-    connect: function() {
-      if (initiatedConnection) {
-        ambClient.connect();
+  function activate() {
+    try {
+      self.iFrame = document.getElementById('testFrame');
+      self.frameWindow = self._getFrameWindow();
+      self.frameGForm = self._getFrameGForm();
+      self._originalLogFunction = console.log;
+      self._originalWindowAlert = window.alert;
+      self._originalWindowConfirm = window.confirm;
+      self._originalWindowPrompt = window.prompt;
+      self._originalConsoleError = console.error;
+      self._originalJSLog = jslog;
+      self._initializeDefaultStates();
+      self.setTestHeaderMessage(self.messageMap[self.MESSAGE_KEY_WAITING_FOR_TEST]);
+      self.setupEvents();
+      self.setupConfirmExit();
+      self.setupTestRunnerOnExit();
+      self._setupTestInformation();
+      try {
+        GlideWebAnalytics.trackPage();
+      } catch (e) {
+        console.log("Failed to track test runner with web analytics: " + e);
       }
-      return connected.promise;
-    },
-    get interrupted() {
-      return ambInterrupted();
-    },
-    get extendedInterruption() {
-      return extendedInterruption;
-    },
-    get connected() {
-      return connected.promise;
-    },
-    abort: function() {
-      ambClient.abort();
-    },
-    disconnect: function() {
-      ambClient.disconnect();
-    },
-    getConnectionState: function() {
-      return ambClient.getConnectionState();
-    },
-    getClientId: function() {
-      return ambClient.getClientId();
-    },
-    getChannel: function(channelName) {
-      return ambClient.getChannel(channelName);
-    },
-    registerExtension: function(extensionName, extension) {
-      ambClient.registerExtension(extensionName, extension);
-    },
-    unregisterExtension: function(extensionName) {
-      ambClient.unregisterExtension(extensionName);
-    },
-    batch: function(batch) {
-      ambClient.batch(batch);
-    },
-    getState: function() {
-      return ambClient.getState();
-    },
-    getFilterString: function(filter) {
-      filter = filter.
-      replace(/\^EQ/g, '').
-      replace(/\^ORDERBY(?:DESC)?[^^]*/g, '').
-      replace(/^GOTO/, '');
-      return btoa(filter).replace(/=/g, '-');
-    },
-    getChannelRW: function(table, filter) {
-      var t = '/rw/default/' + table + '/' + this.getFilterString(filter);
-      return this.getChannel(t);
-    },
-    isLoggedIn: function() {
-      return ambClient.isLoggedIn();
-    },
-    subscribeToEvent: function(event, callback) {
-      return ambClient.subscribeToEvent(event, callback);
-    },
-    getConnectionEvents: function() {
-      return ambClient.getConnectionEvents();
-    },
-    getEvents: function() {
-      return ambClient.getConnectionEvents();
-    },
-    loginComplete: function() {
-      ambClient.loginComplete();
+      self.original_user_id = g_user.userID;
+      self.setupUserInfo()
+        .then(self._registerRunner)
+        .then(self._setupWhitelistedClientErrors)
+        .then(self.stepConfig.getActiveConfigs)
+        .then(self._setupStepConfigs)
+        .then(self.setupHeartbeat)
+        .then(self._setupScheduledTests)
+        .then(self._findTestToRunByRunnerType)['catch'](self.reportSetupError);
+    } catch (e) {
+      console.log(e.message);
+      self.reportSetupError();
     }
-  };
-});;
-/*! RESOURCE: /scripts/app.ng.amb/controller.AMBRecordWatcher.js */
-angular.module("ng.amb").controller("AMBRecordWatcher", function($scope, $timeout, $window) {
-  "use strict";
-  var amb = $window.top.g_ambClient;
-  $scope.messages = [];
-  var lastFilter;
-  var watcherChannel;
-  var watcher;
-
-  function onMessage(message) {
-    $scope.messages.push(message.data);
   }
-  $scope.getState = function() {
-    return amb.getState();
-  };
-  $scope.initWatcher = function() {
-    angular.element(":focus").blur();
-    if (!$scope.filter || $scope.filter === lastFilter)
-      return;
-    lastFilter = $scope.filter;
-    console.log("initiating watcher on " + $scope.filter);
-    $scope.messages = [];
-    if (watcher) {
-      watcher.unsubscribe();
-    }
-    var base64EncodeQuery = btoa($scope.filter).replace(/=/g, '-');
-    var channelId = '/rw/' + base64EncodeQuery;
-    watcherChannel = amb.getChannel(channelId)
-    watcher = watcherChannel.subscribe(onMessage);
-  };
-  amb.connect();
-});
-/*! RESOURCE: /scripts/app.ng.amb/factory.snRecordWatcher.js */
-angular.module("ng.amb").factory('snRecordWatcher', function($rootScope, amb, $timeout, snPresence, $log, urlTools) {
-  "use strict";
-  var watcherChannel;
-  var connected = false;
-  var diagnosticLog = true;
 
-  function initWatcher(table, sys_id, query) {
-    if (!table)
+  function setupUserInfo() {
+    var defer = $q.defer();
+    self.impersonationHandler.getUserInfo(self.original_user_id)
+      .then(function success(userInfo) {
+        userInfo = self.populateWithOriginalUserIfEmpty(userInfo);
+        self.setCurrentUser(userInfo);
+        defer.resolve();
+      });
+    return defer.promise;
+  }
+
+  function reportSetupError(e) {
+    self.setTestHeaderMessage("");
+    self.showLoadingIcon = false;
+    self.logAndNotifyExceptionAsErrorMessage(self.messageMap[self.MESSAGE_KEY_AN_ERROR_OCCURRED], e);
+  }
+
+  function setupEvents() {
+    $scope.$on("TestInformation.AMBMessageReceived", self.onAMBMessageReceived);
+    $scope.$on("TestInformation.AMBMessageReceivedConfig", self.onAMBMessageReceivedConfig);
+    $scope.$on("TestInformation.AMBMessageReceivedATFAgent", self.onAMBMessageReceivedATFAgent);
+    $scope.$on("TestInformation.AMBMessageReceivedWhitelistedClientError", self.onAMBMessageReceivedWhitelistedClientError);
+    if (self.isDebugEnabled) {
+      $scope.$on("TestInformation.AMBMessageReceivedDebug", self.debugOnAMBMessageReceived);
+      $scope.$on("TestInformation.AMBMessageReceivedConfigDebug", self.debugOnAMBMessageReceivedConfig);
+      $scope.$on("TestInformation.AMBMessageReceivedWhitelistedClientErrorDebug", self.debugOnAMBMessageReceivedWhitelistedClientError);
+    }
+  }
+
+  function onAMBMessageReceivedATFAgent(event, messageData) {
+    if (self.isDebugEnabled)
+      self.AMBATFAgentMessageDebug = JSON.stringify(messageData, undefined, 1);
+    self.afterAMBUnsubscribed(self.messageMap[self.MESSAGE_KEY_ATF_AGENT_DELETED]);
+    self.clientConnected = false;
+    $scope.$apply();
+  }
+
+  function afterAMBUnsubscribed(headerMessage) {
+    self.setTestHeaderMessage(headerMessage);
+    self.showLoadingIcon = false;
+    $rootScope.$evalAsync(function() {
+      self.amb_connection = atfConnectionService.getAMBDisconnectedStatusObject();
+    });
+    self._clearHeartbeatInterval();
+  }
+
+  function debugOnAMBMessageReceived(event, messageData) {
+    self.AMBMessageDebug = JSON.stringify(messageData, undefined, 1);
+    $scope.$apply();
+  }
+
+  function onAMBMessageReceived(event, messageData, sysUtTestResultId) {
+    self.atflog("Found test to run from AMB");
+    self.claimTest(messageData, sysUtTestResultId);
+    $scope.$apply();
+  }
+
+  function onAMBMessageReceivedConfig(event) {
+    self.atflog("Step Config change message received");
+    self.stepConfigStale = true;
+    $scope.$apply();
+  }
+
+  function debugOnAMBMessageReceivedConfig(event, messageData) {
+    self.AMBStepConfigMessageDebug = JSON.stringify(messageData, undefined, 1);
+    $scope.$apply();
+  }
+
+  function onAMBMessageReceivedWhitelistedClientError(event) {
+    self.atflog("Client Error Handler change message received");
+    clientErrorHandler.setStale(true);
+    $scope.$apply();
+  }
+
+  function debugOnAMBMessageReceivedWhitelistedClientError(event, messageData) {
+    self.AMBWhitelistedClientErrorMessageDebug = JSON.stringify(messageData, undefined, 1);
+    $scope.$apply();
+  }
+
+  function setupConfirmExit() {
+    $window.onbeforeunload = function(event) {
+      if (self.isRunningTest)
+        return self.messageMap[self.MESSAGE_KEY_CONFIRM_EXIT];
+    }
+  }
+
+  function setupTestRunnerOnExit() {
+    var setupTestRunnerOnExitErrorCallback = function() {
+      self.atflog("ClientTestRunnerAjax.makeTestRunnerOffline script include is not found, " +
+        "client runner not marked for deletion.");
+    };
+    $window.onunload = function(event) {
+      if (self.isRunningTest)
+        self.failTestBeforeClosingTestRunner();
+      var ga = new GlideAjax("ClientTestRunnerAjax");
+      ga.addParam("sysparm_name", "makeTestRunnerOffline");
+      ga.addParam("sysparm_atf_agent_id", self.atfAgentSysId);
+      ga.addParam("sysparm_status_reason", "Closed/Navigated away");
+      ga.setErrorCallback(setupTestRunnerOnExitErrorCallback.bind(self));
+      ga.getXMLWait();
+    }
+  }
+
+  function failTestBeforeClosingTestRunner() {
+    self.currentStepResult.success = false;
+    self.currentStepResult.message = self.messageMap[self.MESSAGE_KEY_CLOSED_TEST_RUNNER];
+    self.saveStepResultAndCheckStepFailure();
+    reportUITestProgressHandler.reportStepProgressSynchronously(JSON.stringify(self.currentStepResult),
+      self.currentStepBatch.tracker_sys_id, self.currentStep._ui_step_index,
+      self.currentStepBatch.sys_atf_steps.length, self.currentStepBatchResult.sys_atf_test_result_sys_id,
+      self.atfAgentSysId);
+    reportUITestProgressHandler.reportUIBatchResultSynchronously(
+      JSON.stringify(self.currentStepBatchResult),
+      self.currentStepBatchResult.sys_atf_test_result_sys_id,
+      self.currentStepBatch.tracker_sys_id,
+      self.atfAgentSysId);
+  }
+
+  function setiFrameOnloadFunction(func) {
+    self.iFrame.onload = func;
+  }
+
+  function cleariFrameOnloadFunction() {
+    self.iFrame.onload = null;
+  }
+
+  function _initializeListeners() {
+    self.atfConnectionService.addListenersForInternalConnectionEvents(self.handlers, function(result) {
+      self.amb_connection = result;
+    });
+  }
+
+  function _setupTestInformation() {
+    self.testInformation.enableDebug(self.isDebugEnabled);
+    self._initializeListeners();
+    if (!self.isSchedulePluginActive || !self.runScheduledTestsOnly)
+      self.AMBChannelName = self.testInformation.registerAMBForPage(self.messageReference);
+    self.AMBStepConfigChannelName = self.testInformation.registerAMBStepConfigForPage();
+    self.AMBWhitelistedClientErrorChannelName = self.testInformation.registerAMBWhitelistedClientErrorForPage();
+    self.AMBATFAgentChannelName = self.testInformation.registerAMBATFAgentForPage(self.atfAgentSysId);
+  }
+
+  function _setupStepConfigs(configs) {
+    self.stepConfigs = configs;
+    self.stepConfigStale = false;
+    self.atflog("Step Configs loaded");
+  }
+
+  function _getFrameWindow() {
+    return self.iFrame.contentWindow;
+  }
+
+  function _getFrameGForm() {
+    return self.frameWindow.g_form;
+  }
+  var StepBatchResult = Class.create();
+  StepBatchResult.prototype = {
+    initialize: function() {
+      this.stepResults = [];
+      this.stepEvents = [];
+      this.hasFailure = false;
+      this.isCanceled = false;
+      this.hasWarning = false;
+      this.setupResults = [];
+      this.userAgent = navigator.userAgent;
+    },
+    setError: function() {
+      this.hasFailure = true;
+      this.status = "error";
+    },
+    setCancel: function() {
+      this.isCanceled = true;
+      this.status = "canceled";
+    }
+  };
+  var StepResult = Class.create();
+  StepResult.prototype = {
+    initialize: function() {
+      this.success = false;
+      this.message = "";
+      this.start_time = null;
+      this.end_time = null;
+      this.outputs = {};
+      this.status = "";
+    },
+    setError: function(message) {
+      this.success = false;
+      this.status = "error";
+      this.message = message;
+    },
+    isError: function() {
+      return ("error" === this.status);
+    },
+    setSuccessWithWarning: function(message) {
+      this.success = true;
+      this.status = "success_with_warnings";
+      this.message = message;
+    },
+    isSuccessWithWarnings: function() {
+      return ("success_with_warnings" === this.status);
+    }
+  };
+  var StepEvent = Class.create();
+  StepEvent.prototype = {
+    initialize: function() {
+      this.object = null;
+      this.type = null;
+      this.start_time = null;
+      this.end_time = null;
+      this.whitelisted_client_error = null;
+      this.step_id = null;
+      this.browser = null;
+      this.sys_atf_step_sys_id = (self.currentStep != null) ? self.currentStep.sys_id : null;
+    }
+  };
+
+  function findTestToRun() {
+    if (self.isRunningTest) {
+      self.atflog(formatMessage("Already running a test, not going to look for a waiting manual test"));
       return;
-    if (sys_id)
-      var filter = "sys_id=" + sys_id;
+    }
+    self._toggleFindTestInterval(false);
+    var userName;
+    if (self._getCurrentUser())
+      userName = self._getCurrentUser().user_name;
     else
-      filter = query;
-    if (!filter)
-      return;
-    return initChannel(table, filter);
-  }
-
-  function initList(table, query) {
-    if (!table)
-      return;
-    query = query || "sys_idISNOTEMPTY";
-    return initChannel(table, query);
-  }
-
-  function initTaskList(list, prevChannel) {
-    if (prevChannel)
-      prevChannel.unsubscribe();
-    var sys_ids = list.toString();
-    var filter = "sys_idIN" + sys_ids;
-    return initChannel("task", filter);
-  }
-
-  function initChannel(table, filter) {
-    if (isBlockedTable(table)) {
-      $log.log("Blocked from watching", table);
-      return null;
-    }
-    if (diagnosticLog)
-      log(">>> init " + table + "?" + filter);
-    watcherChannel = amb.getChannelRW(table, filter);
-    watcherChannel.subscribe(onMessage);
-    amb.connect();
-    return watcherChannel;
-  }
-
-  function onMessage(message) {
-    var r = message.data;
-    var c = message.channel;
-    if (diagnosticLog)
-      log(">>> record " + r.operation + ": " + r.table_name + "." + r.sys_id + " " + r.display_value);
-    $rootScope.$broadcast('record.updated', r);
-    $rootScope.$broadcast("sn.stream.tap");
-    $rootScope.$broadcast('list.updated', r, c);
-  }
-
-  function log(message) {
-    $log.log(message);
-  }
-
-  function isBlockedTable(table) {
-    return table == 'sys_amb_message' || table.startsWith('sys_rw');
-  }
-  return {
-    initTaskList: initTaskList,
-    initChannel: initChannel,
-    init: function() {
-      var location = urlTools.parseQueryString(window.location.search);
-      var table = location['table'] || location['sysparm_table'];
-      var sys_id = location['sys_id'] || location['sysparm_sys_id'];
-      var query = location['sysparm_query'];
-      initWatcher(table, sys_id, query);
-      snPresence.init(table, sys_id, query);
-    },
-    initList: initList,
-    initRecord: function(table, sysId) {
-      initWatcher(table, sysId, null);
-      snPresence.initPresence(table, sysId);
-    },
-    _initWatcher: initWatcher
-  }
-});;
-/*! RESOURCE: /scripts/app.ng.amb/factory.AMBOverlay.js */
-angular.module("ng.amb").factory("AMBOverlay", function($templateCache, $compile, $rootScope) {
-  "use strict";
-  var showCallbacks = [],
-    hideCallbacks = [],
-    isRendered = false,
-    modal,
-    modalScope,
-    modalOptions;
-  var defaults = {
-    backdrop: 'static',
-    keyboard: false,
-    show: true
-  };
-
-  function AMBOverlay(config) {
-    config = config || {};
-    if (angular.isFunction(config.onShow))
-      showCallbacks.push(config.onShow);
-    if (angular.isFunction(config.onHide))
-      hideCallbacks.push(config.onHide);
-
-    function lazyRender() {
-      if (!angular.element('html')['modal']) {
-        var bootstrapInclude = "/scripts/bootstrap3/bootstrap.js";
-        ScriptLoader.getScripts([bootstrapInclude], renderModal);
-      } else
-        renderModal();
-    }
-
-    function renderModal() {
-      if (isRendered)
-        return;
-      modalScope = angular.extend($rootScope.$new(), config);
-      modal = $compile($templateCache.get("amb_disconnect_modal.xml"))(modalScope);
-      angular.element("body").append(modal);
-      modal.on("shown.bs.modal", function(e) {
-        for (var i = 0, len = showCallbacks.length; i < len; i++)
-          showCallbacks[i](e);
-      });
-      modal.on("hidden.bs.modal", function(e) {
-        for (var i = 0, len = hideCallbacks.length; i < len; i++)
-          hideCallbacks[i](e);
-      });
-      modalOptions = angular.extend({}, defaults, config);
-      modal.modal(modalOptions);
-      isRendered = true;
-    }
-
-    function showModal() {
-      if (isRendered)
-        modal.modal('show');
-    }
-
-    function hideModal() {
-      if (isRendered)
-        modal.modal('hide');
-    }
-
-    function destroyModal() {
-      if (!isRendered)
-        return;
-      modal.modal('hide');
-      modal.remove();
-      modalScope.$destroy();
-      modalScope = void(0);
-      isRendered = false;
-      var pos = showCallbacks.indexOf(config.onShow);
-      if (pos >= 0)
-        showCallbacks.splice(pos, 1);
-      pos = hideCallbacks.indexOf(config.onShow);
-      if (pos >= 0)
-        hideCallbacks.splice(pos, 1);
-    }
-    return {
-      render: lazyRender,
-      destroy: destroyModal,
-      show: showModal,
-      hide: hideModal,
-      isVisible: function() {
-        if (!isRendered)
-          false;
-        return modal.visible();
-      }
-    }
-  }
-  $templateCache.put('amb_disconnect_modal.xml',
-    '<div id="amb_disconnect_modal" tabindex="-1" aria-hidden="true" class="modal" role="dialog">' +
-    '	<div class="modal-dialog small-modal" style="width:450px">' +
-    '		<div class="modal-content">' +
-    '			<header class="modal-header">' +
-    '				<h4 id="small_modal1_title" class="modal-title">{{title || "Login"}}</h4>' +
-    '			</header>' +
-    '			<div class="modal-body">' +
-    '			<iframe class="concourse_modal" ng-src=\'{{iframe || "/amb_login.do"}}\' frameborder="0" scrolling="no" height="400px" width="405px"></iframe>' +
-    '			</div>' +
-    '		</div>' +
-    '	</div>' +
-    '</div>'
-  );
-  return AMBOverlay;
-});;;
-/*! RESOURCE: /scripts/angularjs-1.4/thirdparty/angular-ui-bootstrap/ui-bootstrap-tpls-0.12.1.js */
-angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.transition", "ui.bootstrap.collapse", "ui.bootstrap.accordion", "ui.bootstrap.alert", "ui.bootstrap.bindHtml", "ui.bootstrap.buttons", "ui.bootstrap.carousel", "ui.bootstrap.dateparser", "ui.bootstrap.position", "ui.bootstrap.datepicker", "ui.bootstrap.dropdown", "ui.bootstrap.modal", "ui.bootstrap.pagination", "ui.bootstrap.tooltip", "ui.bootstrap.popover", "ui.bootstrap.progressbar", "ui.bootstrap.rating", "ui.bootstrap.tabs", "ui.bootstrap.timepicker", "ui.bootstrap.typeahead"]);
-angular.module("ui.bootstrap.tpls", ["template/accordion/accordion-group.html", "template/accordion/accordion.html", "template/alert/alert.html", "template/carousel/carousel.html", "template/carousel/slide.html", "template/datepicker/datepicker.html", "template/datepicker/day.html", "template/datepicker/month.html", "template/datepicker/popup.html", "template/datepicker/year.html", "template/modal/backdrop.html", "template/modal/window.html", "template/pagination/pager.html", "template/pagination/pagination.html", "template/tooltip/tooltip-html-unsafe-popup.html", "template/tooltip/tooltip-popup.html", "template/popover/popover.html", "template/progressbar/bar.html", "template/progressbar/progress.html", "template/progressbar/progressbar.html", "template/rating/rating.html", "template/tabs/tab.html", "template/tabs/tabset.html", "template/timepicker/timepicker.html", "template/typeahead/typeahead-match.html", "template/typeahead/typeahead-popup.html"]);
-angular.module('ui.bootstrap.transition', [])
-  .factory('$transition', ['$q', '$timeout', '$rootScope', function($q, $timeout, $rootScope) {
-    var $transition = function(element, trigger, options) {
-      options = options || {};
-      var deferred = $q.defer();
-      var endEventName = $transition[options.animation ? 'animationEndEventName' : 'transitionEndEventName'];
-      var transitionEndHandler = function(event) {
-        $rootScope.$apply(function() {
-          element.unbind(endEventName, transitionEndHandler);
-          deferred.resolve(element);
-        });
-      };
-      if (endEventName) {
-        element.bind(endEventName, transitionEndHandler);
-      }
-      $timeout(function() {
-        if (angular.isString(trigger)) {
-          element.addClass(trigger);
-        } else if (angular.isFunction(trigger)) {
-          trigger(element);
-        } else if (angular.isObject(trigger)) {
-          element.css(trigger);
-        }
-        if (!endEventName) {
-          deferred.resolve(element);
-        }
-      });
-      deferred.promise.cancel = function() {
-        if (endEventName) {
-          element.unbind(endEventName, transitionEndHandler);
-        }
-        deferred.reject('Transition cancelled');
-      };
-      return deferred.promise;
+      return $q.reject(self.messageMap[self.MESSAGE_KEY_FAIL_USER_EMPTY]);
+    var errorCallbackTestFinder = function(response) {
+      self.atflog(formatMessage(
+        "TestExecutorAjax.findOldestScheduledTest unknown error, skipping find manual tests, http status {0}.",
+        response.status));
+      self._toggleFindTestInterval(true);
+      $scope.$apply();
     };
-    var transElement = document.createElement('trans');
-    var transitionEndEventNames = {
-      'WebkitTransition': 'webkitTransitionEnd',
-      'MozTransition': 'transitionend',
-      'OTransition': 'oTransitionEnd',
-      'transition': 'transitionend'
-    };
-    var animationEndEventNames = {
-      'WebkitTransition': 'webkitAnimationEnd',
-      'MozTransition': 'animationend',
-      'OTransition': 'oAnimationEnd',
-      'transition': 'animationend'
-    };
+    var cftAjax = new GlideAjax('TestExecutorAjax');
+    cftAjax.addParam('sysparm_name', 'findOldestScheduledTest');
+    cftAjax.addParam('sysparm_user_name', userName);
+    cftAjax.addParam('sysparm_message_reference', self.messageReference);
+    cftAjax.setErrorCallback(errorCallbackTestFinder.bind(self));
+    cftAjax.getXMLAnswer(checkForTestsAnswer);
 
-    function findEndEventName(endEventNames) {
-      for (var name in endEventNames) {
-        if (transElement.style[name] !== undefined) {
-          return endEventNames[name];
-        }
-      }
-    }
-    $transition.transitionEndEventName = findEndEventName(transitionEndEventNames);
-    $transition.animationEndEventName = findEndEventName(animationEndEventNames);
-    return $transition;
-  }]);
-angular.module('ui.bootstrap.collapse', ['ui.bootstrap.transition'])
-  .directive('collapse', ['$transition', function($transition) {
-    return {
-      link: function(scope, element, attrs) {
-        var initialAnimSkip = true;
-        var currentTransition;
-
-        function doTransition(change) {
-          var newTransition = $transition(element, change);
-          if (currentTransition) {
-            currentTransition.cancel();
-          }
-          currentTransition = newTransition;
-          newTransition.then(newTransitionDone, newTransitionDone);
-          return newTransition;
-
-          function newTransitionDone() {
-            if (currentTransition === newTransition) {
-              currentTransition = undefined;
-            }
-          }
-        }
-
-        function expand() {
-          if (initialAnimSkip) {
-            initialAnimSkip = false;
-            expandDone();
-          } else {
-            element.removeClass('collapse').addClass('collapsing');
-            doTransition({
-              height: element[0].scrollHeight + 'px'
-            }).then(expandDone);
-          }
-        }
-
-        function expandDone() {
-          element.removeClass('collapsing');
-          element.addClass('collapse in');
-          element.css({
-            height: 'auto'
-          });
-        }
-
-        function collapse() {
-          if (initialAnimSkip) {
-            initialAnimSkip = false;
-            collapseDone();
-            element.css({
-              height: 0
-            });
-          } else {
-            element.css({
-              height: element[0].scrollHeight + 'px'
-            });
-            var x = element[0].offsetWidth;
-            element.removeClass('collapse in').addClass('collapsing');
-            doTransition({
-              height: 0
-            }).then(collapseDone);
-          }
-        }
-
-        function collapseDone() {
-          element.removeClass('collapsing');
-          element.addClass('collapse');
-        }
-        scope.$watch(attrs.collapse, function(shouldCollapse) {
-          if (shouldCollapse) {
-            collapse();
-          } else {
-            expand();
-          }
-        });
-      }
-    };
-  }]);
-angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
-  .constant('accordionConfig', {
-    closeOthers: true
-  })
-  .controller('AccordionController', ['$scope', '$attrs', 'accordionConfig', function($scope, $attrs, accordionConfig) {
-    this.groups = [];
-    this.closeOthers = function(openGroup) {
-      var closeOthers = angular.isDefined($attrs.closeOthers) ? $scope.$eval($attrs.closeOthers) : accordionConfig.closeOthers;
-      if (closeOthers) {
-        angular.forEach(this.groups, function(group) {
-          if (group !== openGroup) {
-            group.isOpen = false;
-          }
-        });
-      }
-    };
-    this.addGroup = function(groupScope) {
-      var that = this;
-      this.groups.push(groupScope);
-      groupScope.$on('$destroy', function(event) {
-        that.removeGroup(groupScope);
-      });
-    };
-    this.removeGroup = function(group) {
-      var index = this.groups.indexOf(group);
-      if (index !== -1) {
-        this.groups.splice(index, 1);
-      }
-    };
-  }])
-  .directive('accordion', function() {
-    return {
-      restrict: 'EA',
-      controller: 'AccordionController',
-      transclude: true,
-      replace: false,
-      templateUrl: 'template/accordion/accordion.html'
-    };
-  })
-  .directive('accordionGroup', function() {
-    return {
-      require: '^accordion',
-      restrict: 'EA',
-      transclude: true,
-      replace: true,
-      templateUrl: 'template/accordion/accordion-group.html',
-      scope: {
-        heading: '@',
-        isOpen: '=?',
-        isDisabled: '=?'
-      },
-      controller: function() {
-        this.setHeading = function(element) {
-          this.heading = element;
-        };
-      },
-      link: function(scope, element, attrs, accordionCtrl) {
-        accordionCtrl.addGroup(scope);
-        scope.$watch('isOpen', function(value) {
-          if (value) {
-            accordionCtrl.closeOthers(scope);
-          }
-        });
-        scope.toggleOpen = function() {
-          if (!scope.isDisabled) {
-            scope.isOpen = !scope.isOpen;
-          }
-        };
-      }
-    };
-  })
-  .directive('accordionHeading', function() {
-    return {
-      restrict: 'EA',
-      transclude: true,
-      template: '',
-      replace: true,
-      require: '^accordionGroup',
-      link: function(scope, element, attr, accordionGroupCtrl, transclude) {
-        accordionGroupCtrl.setHeading(transclude(scope, function() {}));
-      }
-    };
-  })
-  .directive('accordionTransclude', function() {
-    return {
-      require: '^accordionGroup',
-      link: function(scope, element, attr, controller) {
-        scope.$watch(function() {
-          return controller[attr.accordionTransclude];
-        }, function(heading) {
-          if (heading) {
-            element.html('');
-            element.append(heading);
-          }
-        });
-      }
-    };
-  });
-angular.module('ui.bootstrap.alert', [])
-  .controller('AlertController', ['$scope', '$attrs', function($scope, $attrs) {
-    $scope.closeable = 'close' in $attrs;
-    this.close = $scope.close;
-  }])
-  .directive('alert', function() {
-    return {
-      restrict: 'EA',
-      controller: 'AlertController',
-      templateUrl: 'template/alert/alert.html',
-      transclude: true,
-      replace: true,
-      scope: {
-        type: '@',
-        close: '&'
-      }
-    };
-  })
-  .directive('dismissOnTimeout', ['$timeout', function($timeout) {
-    return {
-      require: 'alert',
-      link: function(scope, element, attrs, alertCtrl) {
-        $timeout(function() {
-          alertCtrl.close();
-        }, parseInt(attrs.dismissOnTimeout, 10));
-      }
-    };
-  }]);
-angular.module('ui.bootstrap.bindHtml', [])
-  .directive('bindHtmlUnsafe', function() {
-    return function(scope, element, attr) {
-      element.addClass('ng-binding').data('$binding', attr.bindHtmlUnsafe);
-      scope.$watch(attr.bindHtmlUnsafe, function bindHtmlUnsafeWatchAction(value) {
-        element.html(value || '');
-      });
-    };
-  });
-angular.module('ui.bootstrap.buttons', [])
-  .constant('buttonConfig', {
-    activeClass: 'active',
-    toggleEvent: 'click'
-  })
-  .controller('ButtonsController', ['buttonConfig', function(buttonConfig) {
-    this.activeClass = buttonConfig.activeClass || 'active';
-    this.toggleEvent = buttonConfig.toggleEvent || 'click';
-  }])
-  .directive('btnRadio', function() {
-    return {
-      require: ['btnRadio', 'ngModel'],
-      controller: 'ButtonsController',
-      link: function(scope, element, attrs, ctrls) {
-        var buttonsCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        ngModelCtrl.$render = function() {
-          element.toggleClass(buttonsCtrl.activeClass, angular.equals(ngModelCtrl.$modelValue, scope.$eval(attrs.btnRadio)));
-        };
-        element.bind(buttonsCtrl.toggleEvent, function() {
-          var isActive = element.hasClass(buttonsCtrl.activeClass);
-          if (!isActive || angular.isDefined(attrs.uncheckable)) {
-            scope.$apply(function() {
-              ngModelCtrl.$setViewValue(isActive ? null : scope.$eval(attrs.btnRadio));
-              ngModelCtrl.$render();
-            });
-          }
-        });
-      }
-    };
-  })
-  .directive('btnCheckbox', function() {
-    return {
-      require: ['btnCheckbox', 'ngModel'],
-      controller: 'ButtonsController',
-      link: function(scope, element, attrs, ctrls) {
-        var buttonsCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-
-        function getTrueValue() {
-          return getCheckboxValue(attrs.btnCheckboxTrue, true);
-        }
-
-        function getFalseValue() {
-          return getCheckboxValue(attrs.btnCheckboxFalse, false);
-        }
-
-        function getCheckboxValue(attributeValue, defaultValue) {
-          var val = scope.$eval(attributeValue);
-          return angular.isDefined(val) ? val : defaultValue;
-        }
-        ngModelCtrl.$render = function() {
-          element.toggleClass(buttonsCtrl.activeClass, angular.equals(ngModelCtrl.$modelValue, getTrueValue()));
-        };
-        element.bind(buttonsCtrl.toggleEvent, function() {
-          scope.$apply(function() {
-            ngModelCtrl.$setViewValue(element.hasClass(buttonsCtrl.activeClass) ? getFalseValue() : getTrueValue());
-            ngModelCtrl.$render();
-          });
-        });
-      }
-    };
-  });
-angular.module('ui.bootstrap.carousel', ['ui.bootstrap.transition'])
-  .controller('CarouselController', ['$scope', '$timeout', '$interval', '$transition', function($scope, $timeout, $interval, $transition) {
-    var self = this,
-      slides = self.slides = $scope.slides = [],
-      currentIndex = -1,
-      currentInterval, isPlaying;
-    self.currentSlide = null;
-    var destroyed = false;
-    self.select = $scope.select = function(nextSlide, direction) {
-      var nextIndex = slides.indexOf(nextSlide);
-      if (direction === undefined) {
-        direction = nextIndex > currentIndex ? 'next' : 'prev';
-      }
-      if (nextSlide && nextSlide !== self.currentSlide) {
-        if ($scope.$currentTransition) {
-          $scope.$currentTransition.cancel();
-          $timeout(goNext);
-        } else {
-          goNext();
-        }
-      }
-
-      function goNext() {
-        if (destroyed) {
-          return;
-        }
-        if (self.currentSlide && angular.isString(direction) && !$scope.noTransition && nextSlide.$element) {
-          nextSlide.$element.addClass(direction);
-          var reflow = nextSlide.$element[0].offsetWidth;
-          angular.forEach(slides, function(slide) {
-            angular.extend(slide, {
-              direction: '',
-              entering: false,
-              leaving: false,
-              active: false
-            });
-          });
-          angular.extend(nextSlide, {
-            direction: direction,
-            active: true,
-            entering: true
-          });
-          angular.extend(self.currentSlide || {}, {
-            direction: direction,
-            leaving: true
-          });
-          $scope.$currentTransition = $transition(nextSlide.$element, {});
-          (function(next, current) {
-            $scope.$currentTransition.then(
-              function() {
-                transitionDone(next, current);
-              },
-              function() {
-                transitionDone(next, current);
-              }
-            );
-          }(nextSlide, self.currentSlide));
-        } else {
-          transitionDone(nextSlide, self.currentSlide);
-        }
-        self.currentSlide = nextSlide;
-        currentIndex = nextIndex;
-        restartTimer();
-      }
-
-      function transitionDone(next, current) {
-        angular.extend(next, {
-          direction: '',
-          active: true,
-          leaving: false,
-          entering: false
-        });
-        angular.extend(current || {}, {
-          direction: '',
-          active: false,
-          leaving: false,
-          entering: false
-        });
-        $scope.$currentTransition = null;
-      }
-    };
-    $scope.$on('$destroy', function() {
-      destroyed = true;
-    });
-    self.indexOfSlide = function(slide) {
-      return slides.indexOf(slide);
-    };
-    $scope.next = function() {
-      var newIndex = (currentIndex + 1) % slides.length;
-      if (!$scope.$currentTransition) {
-        return self.select(slides[newIndex], 'next');
-      }
-    };
-    $scope.prev = function() {
-      var newIndex = currentIndex - 1 < 0 ? slides.length - 1 : currentIndex - 1;
-      if (!$scope.$currentTransition) {
-        return self.select(slides[newIndex], 'prev');
-      }
-    };
-    $scope.isActive = function(slide) {
-      return self.currentSlide === slide;
-    };
-    $scope.$watch('interval', restartTimer);
-    $scope.$on('$destroy', resetTimer);
-
-    function restartTimer() {
-      resetTimer();
-      var interval = +$scope.interval;
-      if (!isNaN(interval) && interval > 0) {
-        currentInterval = $interval(timerFn, interval);
-      }
-    }
-
-    function resetTimer() {
-      if (currentInterval) {
-        $interval.cancel(currentInterval);
-        currentInterval = null;
-      }
-    }
-
-    function timerFn() {
-      var interval = +$scope.interval;
-      if (isPlaying && !isNaN(interval) && interval > 0) {
-        $scope.next();
+    function checkForTestsAnswer(answer) {
+      if (null == answer || false == answer) {
+        self._toggleFindTestInterval(true);
+        $scope.$apply();
       } else {
-        $scope.pause();
+        self._setControllerStateIsRunningTest(true);
+        var testJSON = JSON.parse(answer);
+        self.setTestStepStatusMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_FOUND_TEST_TO_RUN]));
+        self.orchestrateTest(testJSON, testJSON.sys_atf_test_result_sys_id);
       }
     }
-    $scope.play = function() {
-      if (!isPlaying) {
-        isPlaying = true;
-        restartTimer();
-      }
+  }
+
+  function _findScheduledTestToRun() {
+    if (self.isRunningTest) {
+      self.atflog(formatMessage("Already running a test, not going to look for a waiting scheduled test"));
+      return;
+    }
+    self.atflogDebug("Looking for a waiting scheduled test to run");
+    self._toggleFindTestInterval(false);
+    var errorCallbackScheduleTestFinder = function(response) {
+      self.atflog(formatMessage(
+        "ScheduledTestProcessor.findOldestScheduleRunTest unknown error, skipping find scheduled tests, http status {0}.",
+        response.status));
+      self._toggleFindTestInterval(true);
+      $scope.$apply();
     };
-    $scope.pause = function() {
-      if (!$scope.noPause) {
-        isPlaying = false;
-        resetTimer();
-      }
-    };
-    self.addSlide = function(slide, element) {
-      slide.$element = element;
-      slides.push(slide);
-      if (slides.length === 1 || slide.active) {
-        self.select(slides[slides.length - 1]);
-        if (slides.length == 1) {
-          $scope.play();
-        }
+    var claimScheduledTestAjax = new GlideAjax('ScheduledTestProcessor');
+    claimScheduledTestAjax.addParam('sysparm_ajax_processor_type', 'findOldestScheduleRunTest');
+    claimScheduledTestAjax.addParam('sysparm_atf_agent_id', self.atfAgentSysId);
+    claimScheduledTestAjax.setErrorCallback(errorCallbackScheduleTestFinder.bind(self));
+    claimScheduledTestAjax.getXMLAnswer(checkForScheduledTestsAnswer);
+
+    function checkForScheduledTestsAnswer(answer) {
+      if (!answer) {
+        self._toggleFindTestInterval(true);
+        $scope.$apply();
       } else {
-        slide.active = false;
+        self._setControllerStateIsRunningTest(true);
+        var testJSON = JSON.parse(answer);
+        self.setTestStepStatusMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_FOUND_TEST_TO_RUN]));
+        testJSON['executing_user'] = self._getCurrentUser();
+        self.orchestrateTest(testJSON, testJSON.sys_atf_test_result_sys_id);
       }
-    };
-    self.removeSlide = function(slide) {
-      var index = slides.indexOf(slide);
-      slides.splice(index, 1);
-      if (slides.length > 0 && slide.active) {
-        if (index >= slides.length) {
-          self.select(slides[index - 1]);
-        } else {
-          self.select(slides[index]);
-        }
-      } else if (currentIndex > index) {
-        currentIndex--;
-      }
-    };
-  }])
-  .directive('carousel', [function() {
-    return {
-      restrict: 'EA',
-      transclude: true,
-      replace: true,
-      controller: 'CarouselController',
-      require: 'carousel',
-      templateUrl: 'template/carousel/carousel.html',
-      scope: {
-        interval: '=',
-        noTransition: '=',
-        noPause: '='
-      }
-    };
-  }])
-  .directive('slide', function() {
-    return {
-      require: '^carousel',
-      restrict: 'EA',
-      transclude: true,
-      replace: true,
-      templateUrl: 'template/carousel/slide.html',
-      scope: {
-        active: '=?'
-      },
-      link: function(scope, element, attrs, carouselCtrl) {
-        carouselCtrl.addSlide(scope, element);
-        scope.$on('$destroy', function() {
-          carouselCtrl.removeSlide(scope);
-        });
-        scope.$watch('active', function(active) {
-          if (active) {
-            carouselCtrl.select(scope);
-          }
-        });
-      }
-    };
-  });
-angular.module('ui.bootstrap.dateparser', [])
-  .service('dateParser', ['$locale', 'orderByFilter', function($locale, orderByFilter) {
-    this.parsers = {};
-    var formatCodeToRegex = {
-      'yyyy': {
-        regex: '\\d{4}',
-        apply: function(value) {
-          this.year = +value;
-        }
-      },
-      'yy': {
-        regex: '\\d{2}',
-        apply: function(value) {
-          this.year = +value + 2000;
-        }
-      },
-      'y': {
-        regex: '\\d{1,4}',
-        apply: function(value) {
-          this.year = +value;
-        }
-      },
-      'MMMM': {
-        regex: $locale.DATETIME_FORMATS.MONTH.join('|'),
-        apply: function(value) {
-          this.month = $locale.DATETIME_FORMATS.MONTH.indexOf(value);
-        }
-      },
-      'MMM': {
-        regex: $locale.DATETIME_FORMATS.SHORTMONTH.join('|'),
-        apply: function(value) {
-          this.month = $locale.DATETIME_FORMATS.SHORTMONTH.indexOf(value);
-        }
-      },
-      'MM': {
-        regex: '0[1-9]|1[0-2]',
-        apply: function(value) {
-          this.month = value - 1;
-        }
-      },
-      'M': {
-        regex: '[1-9]|1[0-2]',
-        apply: function(value) {
-          this.month = value - 1;
-        }
-      },
-      'dd': {
-        regex: '[0-2][0-9]{1}|3[0-1]{1}',
-        apply: function(value) {
-          this.date = +value;
-        }
-      },
-      'd': {
-        regex: '[1-2]?[0-9]{1}|3[0-1]{1}',
-        apply: function(value) {
-          this.date = +value;
-        }
-      },
-      'EEEE': {
-        regex: $locale.DATETIME_FORMATS.DAY.join('|')
-      },
-      'EEE': {
-        regex: $locale.DATETIME_FORMATS.SHORTDAY.join('|')
-      }
-    };
-
-    function createParser(format) {
-      var map = [],
-        regex = format.split('');
-      angular.forEach(formatCodeToRegex, function(data, code) {
-        var index = format.indexOf(code);
-        if (index > -1) {
-          format = format.split('');
-          regex[index] = '(' + data.regex + ')';
-          format[index] = '$';
-          for (var i = index + 1, n = index + code.length; i < n; i++) {
-            regex[i] = '';
-            format[i] = '$';
-          }
-          format = format.join('');
-          map.push({
-            index: index,
-            apply: data.apply
-          });
-        }
-      });
-      return {
-        regex: new RegExp('^' + regex.join('') + '$'),
-        map: orderByFilter(map, 'index')
-      };
     }
-    this.parse = function(input, format) {
-      if (!angular.isString(input) || !format) {
-        return input;
-      }
-      format = $locale.DATETIME_FORMATS[format] || format;
-      if (!this.parsers[format]) {
-        this.parsers[format] = createParser(format);
-      }
-      var parser = this.parsers[format],
-        regex = parser.regex,
-        map = parser.map,
-        results = input.match(regex);
-      if (results && results.length) {
-        var fields = {
-            year: 1900,
-            month: 0,
-            date: 1,
-            hours: 0
-          },
-          dt;
-        for (var i = 1, n = results.length; i < n; i++) {
-          var mapper = map[i - 1];
-          if (mapper.apply) {
-            mapper.apply.call(fields, results[i]);
-          }
-        }
-        if (isValid(fields.year, fields.month, fields.date)) {
-          dt = new Date(fields.year, fields.month, fields.date, fields.hours);
-        }
-        return dt;
-      }
-    };
+  }
 
-    function isValid(year, month, date) {
-      if (month === 1 && date > 28) {
-        return date === 29 && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0);
+  function claimTest(stepBatch, utTestResultSysId) {
+    if (self.isRunningTest) {
+      self.atflog(formatMessage("Already running a test, ignoring this request {0}", utTestResultSysId));
+      return;
+    }
+    self._setControllerStateIsRunningTest(true);
+    if (self.runScheduledTestsOnly)
+      self._ajaxClaimScheduledTest(stepBatch, utTestResultSysId);
+    else
+      self._ajaxClaimTest(stepBatch, utTestResultSysId);
+  }
+
+  function _ajaxClaimTest(stepBatch, utTestResultSysId) {
+    self.atflog(formatMessage("Found a manual test to run, trying to claim it {0}", utTestResultSysId));
+    var errorCallbackClaimTestAjax = function(response) {
+      self.atflog(formatMessage(
+        "TestExecutorAjax.claimTest unknown error, skipping claim manual tests, http status {0}.",
+        response.status));
+      self._setControllerStateIsRunningTest(false);
+    };
+    var claimTestAjax = new GlideAjax('TestExecutorAjax');
+    claimTestAjax.addParam('sysparm_name', 'claimTest');
+    claimTestAjax.addParam('sysparm_test_result_sys_id', utTestResultSysId);
+    claimTestAjax.addParam('sysparm_batch_execution_tracker_sys_id', stepBatch.tracker_sys_id);
+    claimTestAjax.addParam('sysparm_batch_length', stepBatch.sys_atf_steps.length);
+    claimTestAjax.setErrorCallback(errorCallbackClaimTestAjax.bind(self));
+    claimTestAjax.getXMLAnswer(claimTestAnswer);
+
+    function claimTestAnswer(answer) {
+      if (answer.toString() == "true") {
+        self.setTestStepStatusMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_REQUEST_SUCCESSFUL],
+          utTestResultSysId));
+        self.orchestrateTest(stepBatch, utTestResultSysId);
+      } else {
+        self.atflog(formatMessage("Not running manual test, a different browser picked it up first: sys_atf_test_result id={0}", utTestResultSysId));
+        self._setControllerStateIsRunningTest(false);
       }
-      if (month === 3 || month === 5 || month === 8 || month === 10) {
-        return date < 31;
+    }
+  }
+
+  function _ajaxClaimScheduledTest(stepBatch, utTestResultSysId) {
+    self.atflog(formatMessage("Found a scheduled test to run, trying to claim it {0}", utTestResultSysId));
+    var errorCallbackClaimScheduledTestAjax = function(response) {
+      self.atflog(formatMessage(
+        "ScheduledTestProcessor.claimScheduledTest unknown error, skipping claim scheduled tests, http status {0}.",
+        response.status));
+      self._setControllerStateIsRunningTest(false);
+    };
+    var claimScheduledTestAjax = new GlideAjax('ScheduledTestProcessor');
+    claimScheduledTestAjax.addParam('sysparm_ajax_processor_type', 'claimScheduledTest');
+    claimScheduledTestAjax.addParam('sysparm_atf_agent_id', self.atfAgentSysId);
+    claimScheduledTestAjax.addParam('sysparm_test_result_sys_id', utTestResultSysId);
+    claimScheduledTestAjax.addParam('sysparm_batch_execution_tracker_sys_id', stepBatch.tracker_sys_id);
+    claimScheduledTestAjax.addParam('sysparm_batch_length', stepBatch.sys_atf_steps.length);
+    claimScheduledTestAjax.setErrorCallback(errorCallbackClaimScheduledTestAjax.bind(self));
+    claimScheduledTestAjax.getXMLAnswer(claimScheduledTestAnswer);
+
+    function claimScheduledTestAnswer(answer) {
+      if (answer.toString() == "true") {
+        self.setTestStepStatusMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_REQUEST_SUCCESSFUL],
+          utTestResultSysId));
+        stepBatch['executing_user'] = self._getCurrentUser();
+        self.orchestrateTest(stepBatch, utTestResultSysId);
+      } else {
+        self.atflog(formatMessage("Not running scheduled test, system constraints do not match or a different browser picked it up first: sys_atf_test_result id={0}", utTestResultSysId));
+        self._setControllerStateIsRunningTest(false);
       }
+    }
+  }
+
+  function orchestrateTest(stepBatch, utTestResultSysId) {
+    self.clearTestErrorMessage();
+    self.setTestHeaderMessage(self.messageMap[self.MESSAGE_KEY_EXECUTING_TEST]);
+    self.showLoadingIcon = false;
+    $q.when()
+      .then(self.refreshStepConfigs)
+      .then(self._refreshWhitelistedClientErrors)
+      .then(function runSetupBatch() {
+        return self.setupBatch(stepBatch, utTestResultSysId);
+      })
+      .then(function runProcessBatch() {
+        return self.processBatch(stepBatch);
+      })
+      .then(function() {
+        stepBatch = null;
+      })['catch'](self.handleBatchProcessException)
+      .then(self.teardownImpersonation)['catch'](self.handleTeardownImpersonationFailure)
+      .then(self.reportBatchResult)['catch'](self.handleReportBatchResultException)
+      .then(self.teardownBatch)['catch'](self.handleTeardownException);
+  }
+
+  function refreshStepConfigs() {
+    if (self.stepConfigStale) {
+      var defer = $q.defer();
+      try {
+        stepConfig.getActiveConfigs()
+          .then(self._setupStepConfigs)
+          .then(function() {
+            defer.resolve();
+          });
+      } catch (e) {
+        console.log(e.message);
+        self._setControllerStateIsRunningTest(false);
+        self.reportSetupError();
+        defer.reject();
+      }
+      return defer.promise;
+    } else
+      return $q.when();
+  }
+
+  function _setupWhitelistedClientErrors() {
+    return clientErrorHandler.populateActiveErrors()
+      .then(function(success) {
+        if (success === false)
+          self.atflog("TestRunner has skipped refreshing ClientErrorHandler");
+        else
+          self.atflog("TestRunner has updated ClientErrorHandler with active entries");
+      });
+  }
+
+  function _refreshWhitelistedClientErrors() {
+    if (clientErrorHandler.isStale()) {
+      var defer = $q.defer();
+      try {
+        self._setupWhitelistedClientErrors()
+          .then(function() {
+            defer.resolve();
+          });
+      } catch (e) {
+        console.log(e.message);
+        self._setControllerStateIsRunningTest(false);
+        self.reportSetupError();
+        defer.reject();
+      }
+      return defer.promise;
+    } else
+      return $q.when();
+  }
+
+  function handleBatchProcessException(e) {
+    if (!e)
+      return;
+    if (self.currentStepBatchResult.isCanceled) {
+      self.logAndNotifyExceptionAsHeaderMessage(self.messageMap[self.MESSAGE_KEY_CANCEL_REQUEST_RECEIVED],
+        self.messageMap[self.MESSAGE_KEY_CANCEL_REQUEST_RECEIVED]);
+      return;
+    }
+    self.logAndNotifyExceptionAsHeaderMessage(self.messageMap[self.MESSAGE_KEY_UNEXPECTED_ERROR], e);
+    if (self.currentStepBatchResult && self.currentStepBatchResult.setError)
+      self.currentStepBatchResult.setError();
+  }
+
+  function logAndNotifyExceptionAsHeaderMessage(message, e) {
+    self.logAndNotifyException(message, e, self.setTestHeaderMessage);
+  }
+
+  function logAndNotifyExceptionAsErrorMessage(message, e) {
+    self.logAndNotifyException(message, e, self.setTestErrorMessage);
+  }
+
+  function logAndNotifyException(message, e, notifyMethod) {
+    var exMessage = self.getExceptionMessage(e);
+    if (notifyMethod)
+      notifyMethod(formatMessage(self.messageMap[self.MESSAGE_KEY_ERROR], message));
+    self.setTestStepStatusMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_ERROR_DETAIL], exMessage));
+    if (e && Object.prototype.hasOwnProperty.call(e, "stack"))
+      console.log(e.stack);
+  }
+
+  function getExceptionMessage(e) {
+    var exMessage = "";
+    if (typeof e === "string")
+      exMessage = e;
+    else if (e)
+      exMessage = e.message;
+    return exMessage;
+  }
+
+  function handleTeardownImpersonationFailure(e) {
+    self.setTestErrorMessage(e);
+    self.setTestHeaderMessage("");
+  }
+
+  function handleTeardownException(e) {
+    if (self.unimpersonationFailed)
+      return;
+    self.logAndNotifyExceptionAsErrorMessage(self.messageMap[self.MESSAGE_KEY_ERROR_RELOAD_PAGE], e);
+  }
+
+  function impersonate() {
+    if (!self.impersonationNeeded())
+      return $q.when();
+    var impersonateDefer = $q.defer();
+    var batch = self.currentStepBatch;
+    var stepEvent = new StepEvent();
+    stepEvent.type = "client_log";
+    stepEvent.start_time = self._getFormattedUTCNowDateTime();
+    self.impersonationHandler.impersonate(batch.impersonating_user, stepEvent)
+      .then(function impersonateSuccess() {
+        self.setCurrentUser(batch.impersonating_user);
+        batch = null;
+        impersonateDefer.resolve();
+      }, function impersonateFailure() {
+        self.atflog(stepEvent.object);
+        if (self.currentStepBatchResult) {
+          stepEvent.end_time = self._getFormattedUTCNowDateTime();
+          stepEvent.status = "failure";
+          self.currentStepBatchResult.hasFailure = true;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
+        }
+        batch = null;
+        impersonateDefer.reject();
+      });
+    return impersonateDefer.promise;
+  }
+
+  function impersonationNeeded() {
+    var batch = self.currentStepBatch;
+    if (!batch)
+      return false;
+    var impersonatingUser = batch.impersonating_user;
+    if (impersonatingUser && impersonatingUser.user_sys_id && impersonatingUser.user_sys_id != "" &&
+      self._getCurrentUser() && self._getCurrentUser().user_sys_id != impersonatingUser.user_sys_id)
       return true;
-    }
-  }]);
-angular.module('ui.bootstrap.position', [])
-  .factory('$position', ['$document', '$window', function($document, $window) {
-    function getStyle(el, cssprop) {
-      if (el.currentStyle) {
-        return el.currentStyle[cssprop];
-      } else if ($window.getComputedStyle) {
-        return $window.getComputedStyle(el)[cssprop];
-      }
-      return el.style[cssprop];
-    }
+    return false;
+  }
 
-    function isStaticPositioned(element) {
-      return (getStyle(element, 'position') || 'static') === 'static';
+  function reportBatchResult() {
+    self.setTestStepStatusMessage(self.messageMap[self.MESSAGE_KEY_FINISHED_REPORTING_RESULT]);
+    var lastStepBatchResult = JSON.stringify(self.currentStepBatchResult);
+    return reportUITestProgressHandler.reportUIBatchResult(
+      lastStepBatchResult,
+      self.currentStepBatchResult.sys_atf_test_result_sys_id,
+      self.currentStepBatch.tracker_sys_id,
+      self.atfAgentSysId);
+  }
+
+  function handleReportBatchResultException(e) {
+    self.logAndNotifyExceptionAsHeaderMessage(self.messageMap[self.MESSAGE_KEY_ERROR_IN_REPORT_BATCH_RESULT], e);
+    if (self.currentStepBatchResult)
+      self.currentStepBatchResult.setError();
+  }
+
+  function teardownBatch() {
+    if (self.unimpersonationFailed)
+      return $q.reject();
+    self.atflog("Tearing down batch");
+    self.setTestHeaderMessage(self.messageMap[self.MESSAGE_KEY_WAITING_FOR_TEST]);
+    self.setTestStepStatusMessage("");
+    self.showLoadingIcon = true;
+    if (self.cleariFrameOnloadFunction)
+      self.cleariFrameOnloadFunction();
+    self.testExecutionCount++;
+    self.currentStepResult = null;
+    self.currentStepBatch = null;
+    self.currentStepBatchResult = null;
+    self.hasConsoleError = false;
+    self.consoleErrorMessage = "";
+    self.numberOfStepsInBatch = 0;
+    self.batchPercentComplete = 0;
+    self.atfFormInterceptor = null;
+    console.log = null;
+    console.log = self._originalLogFunction;
+    window.alert = null;
+    window.alert = self._originalWindowAlert;
+    window.confirm = null;
+    window.confirm = self._originalWindowConfirm;
+    window.prompt = null;
+    window.prompt = self._originalWindowPrompt;
+    console.error = null;
+    console.error = self._originalConsoleError;
+    jslog = null;
+    jslog = self._originalJSLog;
+    if (window.CustomEventManager)
+      CustomEventManager.unAll('glideform.mandatorycheck.failed');
+    self.resetIFrame();
+    self._setControllerStateIsRunningTest(false);
+    self._findTestToRunByRunnerType();
+  }
+
+  function resetIFrame() {
+    self.iFrame.src = "about:blank";
+    self.iFrame.contentWindow.location.reload();
+    self.iFrame = null;
+    self.frameWindow = null;
+    self.frameGForm = null;
+    var iframeId = "testFrame";
+    angular.element("#" + iframeId).unbind();
+    var iframe = document.getElementById(iframeId);
+    var iframeParent = document.getElementById("tabexecution");
+    if (iframeParent) {
+      iframeParent.removeChild(iframe);
+      var newIframe = document.createElement("iframe");
+      newIframe.setAttribute("id", "testFrame");
+      newIframe.setAttribute("width", "100%");
+      newIframe.setAttribute("height", "100%");
+      newIframe.setAttribute("aria-label", self.messageMap[self.MESSAGE_KEY_EXECUTION_FRAME]);
+      newIframe.setAttribute("ng-load", "testRunner._doWhenFrameLoaded()");
+      iframeParent.appendChild(newIframe);
     }
-    var parentOffsetEl = function(element) {
-      var docDomEl = $document[0];
-      var offsetParent = element.offsetParent || docDomEl;
-      while (offsetParent && offsetParent !== docDomEl && isStaticPositioned(offsetParent)) {
-        offsetParent = offsetParent.offsetParent;
-      }
-      return offsetParent || docDomEl;
-    };
-    return {
-      position: function(element) {
-        var elBCR = this.offset(element);
-        var offsetParentBCR = {
-          top: 0,
-          left: 0
-        };
-        var offsetParentEl = parentOffsetEl(element[0]);
-        if (offsetParentEl != $document[0]) {
-          offsetParentBCR = this.offset(angular.element(offsetParentEl));
-          offsetParentBCR.top += offsetParentEl.clientTop - offsetParentEl.scrollTop;
-          offsetParentBCR.left += offsetParentEl.clientLeft - offsetParentEl.scrollLeft;
+    self.iFrame = document.getElementById("testFrame");
+    self.frameWindow = self._getFrameWindow();
+    self.frameGForm = self._getFrameGForm();
+  }
+
+  function unimpersonationNeeded() {
+    var executingUser = self.currentStepBatch.executing_user;
+    if (self._getCurrentUser() && executingUser && self._getCurrentUser().user_sys_id == executingUser.user_sys_id)
+      return false;
+    return true;
+  }
+
+  function teardownImpersonation() {
+    if (!self.unimpersonationNeeded())
+      return $q.when();
+    var unimpersonationDefer = $q.defer();
+    var executingUser = self.currentStepBatch.executing_user;
+    executingUser = self.populateWithOriginalUserIfEmpty(executingUser);
+    var stepEvent = new StepEvent();
+    stepEvent.type = "client_log";
+    stepEvent.start_time = self._getFormattedUTCNowDateTime();
+    self.impersonationHandler.unimpersonate(executingUser, stepEvent)
+      .then(function unimpersonateSuccess() {
+        self.setCurrentUser(executingUser);
+        executingUser = null;
+        unimpersonationDefer.resolve();
+      }, function unimpersonateFailure() {
+        if (self.currentStepBatchResult) {
+          stepEvent.end_time = self._getFormattedUTCNowDateTime();
+          stepEvent.status = "failure";
+          self.currentStepBatchResult.hasFailure = true;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
         }
-        var boundingClientRect = element[0].getBoundingClientRect();
-        return {
-          width: boundingClientRect.width || element.prop('offsetWidth'),
-          height: boundingClientRect.height || element.prop('offsetHeight'),
-          top: elBCR.top - offsetParentBCR.top,
-          left: elBCR.left - offsetParentBCR.left
-        };
-      },
-      offset: function(element) {
-        var boundingClientRect = element[0].getBoundingClientRect();
-        return {
-          width: boundingClientRect.width || element.prop('offsetWidth'),
-          height: boundingClientRect.height || element.prop('offsetHeight'),
-          top: boundingClientRect.top + ($window.pageYOffset || $document[0].documentElement.scrollTop),
-          left: boundingClientRect.left + ($window.pageXOffset || $document[0].documentElement.scrollLeft)
-        };
-      },
-      positionElements: function(hostEl, targetEl, positionStr, appendToBody) {
-        var positionStrParts = positionStr.split('-');
-        var pos0 = positionStrParts[0],
-          pos1 = positionStrParts[1] || 'center';
-        var hostElPos,
-          targetElWidth,
-          targetElHeight,
-          targetElPos;
-        hostElPos = appendToBody ? this.offset(hostEl) : this.position(hostEl);
-        targetElWidth = targetEl.prop('offsetWidth');
-        targetElHeight = targetEl.prop('offsetHeight');
-        var shiftWidth = {
-          center: function() {
-            return hostElPos.left + hostElPos.width / 2 - targetElWidth / 2;
-          },
-          left: function() {
-            return hostElPos.left;
-          },
-          right: function() {
-            return hostElPos.left + hostElPos.width;
+        self.atflog(stepEvent.object);
+        self.unimpersonationFailed = true;
+        executingUser = null;
+        unimpersonationDefer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_ERROR_IN_UNIMPERSONATION],
+          self.currentStepBatch.impersonating_user.user_name));
+      });
+    return unimpersonationDefer.promise;
+  }
+
+  function populateWithOriginalUserIfEmpty(user) {
+    if (!user)
+      user = {};
+    if ((!user.user_sys_id || user.user_sys_id == "") && (!user.user_name || user.user_name == "")) {
+      user.user_sys_id = self.original_user_id;
+      user.user_name = self.original_user_id;
+    }
+    return user;
+  }
+
+  function setupBatch(stepBatch, utTestResultSysId) {
+    var testResult = new StepBatchResult();
+    testResult['sys_atf_test_result_sys_id'] = utTestResultSysId;
+    self.currentStepBatch = stepBatch;
+    self.currentStepBatchResult = testResult;
+    self.numberOfStepsInBatch = stepBatch.sys_atf_steps.length;
+    self.atfFormInterceptor = new ATFFormInterceptor(self.currentStepBatch[ATFFormInterceptor.ROLLBACK_CONTEXT_ID]);
+    self.setupLogCapture();
+    self.setupAlertCapture();
+    self.setupConfirmCapture();
+    self.setupPromptCapture();
+    self.setupErrorCapture();
+    self.setupJslogCapture();
+    self.setupMandatoryCapture();
+    self.setCurrentUser(self.currentStepBatch.executing_user);
+    return self.impersonate();
+  }
+
+  function _getFormattedUTCNowDateTime() {
+    var MOMENT_FORMAT_FOR_GLIDE_SYSTEM_DATETIME = "YYYY-MM-DD HH:mm:ss";
+    return moment().utc().format(MOMENT_FORMAT_FOR_GLIDE_SYSTEM_DATETIME);
+  }
+
+  function _getFileFormattedUTCNowDateTime() {
+    var MOMENT_FORMAT_FOR_GLIDE_SYSTEM_DATETIME = "YYYY_MM_DD_HH_mm_ss";
+    return moment().utc().format(MOMENT_FORMAT_FOR_GLIDE_SYSTEM_DATETIME);
+  }
+
+  function setupLogCapture() {
+    (function() {
+      var log = self._originalLogFunction;
+      console.log = function() {
+        var logStartTime = self._getFormattedUTCNowDateTime();
+        var argumentsArray = Array.prototype.slice.call(arguments);
+        log.apply(this, argumentsArray);
+        var logEndTime = self._getFormattedUTCNowDateTime();
+        if (self.currentStepBatchResult) {
+          var stepEvent = new StepEvent();
+          var logText = "";
+          for (var logIndex = 0; logIndex < argumentsArray.length; logIndex++) {
+            logText += (logText) ? "\n" + argumentsArray[logIndex] : argumentsArray[logIndex];
           }
-        };
-        var shiftHeight = {
-          center: function() {
-            return hostElPos.top + hostElPos.height / 2 - targetElHeight / 2;
-          },
-          top: function() {
-            return hostElPos.top;
-          },
-          bottom: function() {
-            return hostElPos.top + hostElPos.height;
-          }
-        };
-        switch (pos0) {
-          case 'right':
-            targetElPos = {
-              top: shiftHeight[pos1](),
-              left: shiftWidth[pos0]()
-            };
-            break;
-          case 'left':
-            targetElPos = {
-              top: shiftHeight[pos1](),
-              left: hostElPos.left - targetElWidth
-            };
-            break;
-          case 'bottom':
-            targetElPos = {
-              top: shiftHeight[pos0](),
-              left: shiftWidth[pos1]()
-            };
-            break;
-          default:
-            targetElPos = {
-              top: hostElPos.top - targetElHeight,
-              left: shiftWidth[pos1]()
-            };
-            break;
+          stepEvent.object = logText;
+          stepEvent.type = "client_log";
+          stepEvent.start_time = logStartTime;
+          stepEvent.end_time = logEndTime;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
         }
-        return targetElPos;
-      }
-    };
-  }]);
-angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.dateparser', 'ui.bootstrap.position'])
-  .constant('datepickerConfig', {
-    formatDay: 'dd',
-    formatMonth: 'MMMM',
-    formatYear: 'yyyy',
-    formatDayHeader: 'EEE',
-    formatDayTitle: 'MMMM yyyy',
-    formatMonthTitle: 'yyyy',
-    datepickerMode: 'day',
-    minMode: 'day',
-    maxMode: 'year',
-    showWeeks: true,
-    startingDay: 0,
-    yearRange: 20,
-    minDate: null,
-    maxDate: null
-  })
-  .controller('DatepickerController', ['$scope', '$attrs', '$parse', '$interpolate', '$timeout', '$log', 'dateFilter', 'datepickerConfig', function($scope, $attrs, $parse, $interpolate, $timeout, $log, dateFilter, datepickerConfig) {
-    var self = this,
-      ngModelCtrl = {
-        $setViewValue: angular.noop
       };
-    this.modes = ['day', 'month', 'year'];
-    angular.forEach(['formatDay', 'formatMonth', 'formatYear', 'formatDayHeader', 'formatDayTitle', 'formatMonthTitle',
-      'minMode', 'maxMode', 'showWeeks', 'startingDay', 'yearRange'
-    ], function(key, index) {
-      self[key] = angular.isDefined($attrs[key]) ? (index < 8 ? $interpolate($attrs[key])($scope.$parent) : $scope.$parent.$eval($attrs[key])) : datepickerConfig[key];
-    });
-    angular.forEach(['minDate', 'maxDate'], function(key) {
-      if ($attrs[key]) {
-        $scope.$parent.$watch($parse($attrs[key]), function(value) {
-          self[key] = value ? new Date(value) : null;
-          self.refreshView();
-        });
-      } else {
-        self[key] = datepickerConfig[key] ? new Date(datepickerConfig[key]) : null;
-      }
-    });
-    $scope.datepickerMode = $scope.datepickerMode || datepickerConfig.datepickerMode;
-    $scope.uniqueId = 'datepicker-' + $scope.$id + '-' + Math.floor(Math.random() * 10000);
-    this.activeDate = angular.isDefined($attrs.initDate) ? $scope.$parent.$eval($attrs.initDate) : new Date();
-    $scope.isActive = function(dateObject) {
-      if (self.compare(dateObject.date, self.activeDate) === 0) {
-        $scope.activeDateId = dateObject.uid;
+    }());
+  }
+
+  function setupAlertCapture() {
+    (function() {
+      window.alert = function() {
+        if (self.currentStepBatchResult) {
+          var occurrenceDateTime = self._getFormattedUTCNowDateTime();
+          var stepEvent = new StepEvent();
+          stepEvent.object = arguments[0];
+          stepEvent.type = "client_alert";
+          stepEvent.start_time = occurrenceDateTime;
+          stepEvent.end_time = occurrenceDateTime;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
+        }
+      };
+    }());
+  }
+
+  function setupConfirmCapture() {
+    (function() {
+      window.confirm = function() {
+        if (self.currentStepBatchResult) {
+          var occurrenceDateTime = self._getFormattedUTCNowDateTime();
+          var stepEvent = new StepEvent();
+          stepEvent.object = arguments[0];
+          stepEvent.type = "client_confirm";
+          stepEvent.start_time = occurrenceDateTime;
+          stepEvent.end_time = occurrenceDateTime;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
+        }
         return true;
       }
-      return false;
-    };
-    this.init = function(ngModelCtrl_) {
-      ngModelCtrl = ngModelCtrl_;
-      ngModelCtrl.$render = function() {
-        self.render();
+    }());
+  }
+
+  function setupPromptCapture() {
+    (function() {
+      window.prompt = function() {
+        if (self.currentStepBatchResult) {
+          var occurrenceDateTime = self._getFormattedUTCNowDateTime();
+          var stepEvent = new StepEvent();
+          stepEvent.object = arguments[0];
+          stepEvent.type = "client_prompt";
+          stepEvent.start_time = occurrenceDateTime;
+          stepEvent.end_time = occurrenceDateTime;
+          self.currentStepBatchResult.stepEvents.push(stepEvent);
+        }
+        return "test value";
+      }
+    }());
+  }
+
+  function setupErrorCapture() {
+    (function() {
+      console.error = function() {
+        if (self.currentStepBatchResult && arguments[0])
+          self._handleCaughtClientJavascriptError(arguments[0].toString());
       };
-    };
-    this.render = function() {
-      if (ngModelCtrl.$modelValue) {
-        var date = new Date(ngModelCtrl.$modelValue),
-          isValid = !isNaN(date);
-        if (isValid) {
-          this.activeDate = date;
-        } else {
-          $log.error('Datepicker directive: "ng-model" value must be a Date object, a number of milliseconds since 01.01.1970 or a string representing an RFC2822 or ISO 8601 date.');
-        }
-        ngModelCtrl.$setValidity('date', isValid);
-      }
-      this.refreshView();
-    };
-    this.refreshView = function() {
-      if (this.element) {
-        this._refreshView();
-        var date = ngModelCtrl.$modelValue ? new Date(ngModelCtrl.$modelValue) : null;
-        ngModelCtrl.$setValidity('date-disabled', !date || (this.element && !this.isDisabled(date)));
-      }
-    };
-    this.createDateObject = function(date, format) {
-      var model = ngModelCtrl.$modelValue ? new Date(ngModelCtrl.$modelValue) : null;
-      return {
-        date: date,
-        label: dateFilter(date, format),
-        selected: model && this.compare(date, model) === 0,
-        disabled: this.isDisabled(date),
-        current: this.compare(date, new Date()) === 0
-      };
-    };
-    this.isDisabled = function(date) {
-      return ((this.minDate && this.compare(date, this.minDate) < 0) || (this.maxDate && this.compare(date, this.maxDate) > 0) || ($attrs.dateDisabled && $scope.dateDisabled({
-        date: date,
-        mode: $scope.datepickerMode
-      })));
-    };
-    this.split = function(arr, size) {
-      var arrays = [];
-      while (arr.length > 0) {
-        arrays.push(arr.splice(0, size));
-      }
-      return arrays;
-    };
-    $scope.select = function(date) {
-      if ($scope.datepickerMode === self.minMode) {
-        var dt = ngModelCtrl.$modelValue ? new Date(ngModelCtrl.$modelValue) : new Date(0, 0, 0, 0, 0, 0, 0);
-        dt.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-        ngModelCtrl.$setViewValue(dt);
-        ngModelCtrl.$render();
-      } else {
-        self.activeDate = date;
-        $scope.datepickerMode = self.modes[self.modes.indexOf($scope.datepickerMode) - 1];
-      }
-    };
-    $scope.move = function(direction) {
-      var year = self.activeDate.getFullYear() + direction * (self.step.years || 0),
-        month = self.activeDate.getMonth() + direction * (self.step.months || 0);
-      self.activeDate.setFullYear(year, month, 1);
-      self.refreshView();
-    };
-    $scope.toggleMode = function(direction) {
-      direction = direction || 1;
-      if (($scope.datepickerMode === self.maxMode && direction === 1) || ($scope.datepickerMode === self.minMode && direction === -1)) {
-        return;
-      }
-      $scope.datepickerMode = self.modes[self.modes.indexOf($scope.datepickerMode) + direction];
-    };
-    $scope.keys = {
-      13: 'enter',
-      32: 'space',
-      33: 'pageup',
-      34: 'pagedown',
-      35: 'end',
-      36: 'home',
-      37: 'left',
-      38: 'up',
-      39: 'right',
-      40: 'down'
-    };
-    var focusElement = function() {
-      $timeout(function() {
-        self.element[0].focus();
-      }, 0, false);
-    };
-    $scope.$on('datepicker.focus', focusElement);
-    $scope.keydown = function(evt) {
-      var key = $scope.keys[evt.which];
-      if (!key || evt.shiftKey || evt.altKey) {
-        return;
-      }
-      evt.preventDefault();
-      evt.stopPropagation();
-      if (key === 'enter' || key === 'space') {
-        if (self.isDisabled(self.activeDate)) {
-          return;
-        }
-        $scope.select(self.activeDate);
-        focusElement();
-      } else if (evt.ctrlKey && (key === 'up' || key === 'down')) {
-        $scope.toggleMode(key === 'up' ? 1 : -1);
-        focusElement();
-      } else {
-        self.handleKeyDown(key, evt);
-        self.refreshView();
-      }
-    };
-  }])
-  .directive('datepicker', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/datepicker/datepicker.html',
-      scope: {
-        datepickerMode: '=?',
-        dateDisabled: '&'
-      },
-      require: ['datepicker', '?^ngModel'],
-      controller: 'DatepickerController',
-      link: function(scope, element, attrs, ctrls) {
-        var datepickerCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        if (ngModelCtrl) {
-          datepickerCtrl.init(ngModelCtrl);
-        }
-      }
-    };
-  })
-  .directive('daypicker', ['dateFilter', function(dateFilter) {
-    return {
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/datepicker/day.html',
-      require: '^datepicker',
-      link: function(scope, element, attrs, ctrl) {
-        scope.showWeeks = ctrl.showWeeks;
-        ctrl.step = {
-          months: 1
-        };
-        ctrl.element = element;
-        var DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    }());
+  }
 
-        function getDaysInMonth(year, month) {
-          return ((month === 1) && (year % 4 === 0) && ((year % 100 !== 0) || (year % 400 === 0))) ? 29 : DAYS_IN_MONTH[month];
-        }
-
-        function getDates(startDate, n) {
-          var dates = new Array(n),
-            current = new Date(startDate),
-            i = 0;
-          current.setHours(12);
-          while (i < n) {
-            dates[i++] = new Date(current);
-            current.setDate(current.getDate() + 1);
-          }
-          return dates;
-        }
-        ctrl._refreshView = function() {
-          var year = ctrl.activeDate.getFullYear(),
-            month = ctrl.activeDate.getMonth(),
-            firstDayOfMonth = new Date(year, month, 1),
-            difference = ctrl.startingDay - firstDayOfMonth.getDay(),
-            numDisplayedFromPreviousMonth = (difference > 0) ? 7 - difference : -difference,
-            firstDate = new Date(firstDayOfMonth);
-          if (numDisplayedFromPreviousMonth > 0) {
-            firstDate.setDate(-numDisplayedFromPreviousMonth + 1);
-          }
-          var days = getDates(firstDate, 42);
-          for (var i = 0; i < 42; i++) {
-            days[i] = angular.extend(ctrl.createDateObject(days[i], ctrl.formatDay), {
-              secondary: days[i].getMonth() !== month,
-              uid: scope.uniqueId + '-' + i
-            });
-          }
-          scope.labels = new Array(7);
-          for (var j = 0; j < 7; j++) {
-            scope.labels[j] = {
-              abbr: dateFilter(days[j].date, ctrl.formatDayHeader),
-              full: dateFilter(days[j].date, 'EEEE')
-            };
-          }
-          scope.title = dateFilter(ctrl.activeDate, ctrl.formatDayTitle);
-          scope.rows = ctrl.split(days, 7);
-          if (scope.showWeeks) {
-            scope.weekNumbers = [];
-            var weekNumber = getISO8601WeekNumber(scope.rows[0][0].date),
-              numWeeks = scope.rows.length;
-            while (scope.weekNumbers.push(weekNumber++) < numWeeks) {}
-          }
-        };
-        ctrl.compare = function(date1, date2) {
-          return (new Date(date1.getFullYear(), date1.getMonth(), date1.getDate()) - new Date(date2.getFullYear(), date2.getMonth(), date2.getDate()));
-        };
-
-        function getISO8601WeekNumber(date) {
-          var checkDate = new Date(date);
-          checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
-          var time = checkDate.getTime();
-          checkDate.setMonth(0);
-          checkDate.setDate(1);
-          return Math.floor(Math.round((time - checkDate) / 86400000) / 7) + 1;
-        }
-        ctrl.handleKeyDown = function(key, evt) {
-          var date = ctrl.activeDate.getDate();
-          if (key === 'left') {
-            date = date - 1;
-          } else if (key === 'up') {
-            date = date - 7;
-          } else if (key === 'right') {
-            date = date + 1;
-          } else if (key === 'down') {
-            date = date + 7;
-          } else if (key === 'pageup' || key === 'pagedown') {
-            var month = ctrl.activeDate.getMonth() + (key === 'pageup' ? -1 : 1);
-            ctrl.activeDate.setMonth(month, 1);
-            date = Math.min(getDaysInMonth(ctrl.activeDate.getFullYear(), ctrl.activeDate.getMonth()), date);
-          } else if (key === 'home') {
-            date = 1;
-          } else if (key === 'end') {
-            date = getDaysInMonth(ctrl.activeDate.getFullYear(), ctrl.activeDate.getMonth());
-          }
-          ctrl.activeDate.setDate(date);
-        };
-        ctrl.refreshView();
-      }
-    };
-  }])
-  .directive('monthpicker', ['dateFilter', function(dateFilter) {
-    return {
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/datepicker/month.html',
-      require: '^datepicker',
-      link: function(scope, element, attrs, ctrl) {
-        ctrl.step = {
-          years: 1
-        };
-        ctrl.element = element;
-        ctrl._refreshView = function() {
-          var months = new Array(12),
-            year = ctrl.activeDate.getFullYear();
-          for (var i = 0; i < 12; i++) {
-            months[i] = angular.extend(ctrl.createDateObject(new Date(year, i, 1), ctrl.formatMonth), {
-              uid: scope.uniqueId + '-' + i
-            });
-          }
-          scope.title = dateFilter(ctrl.activeDate, ctrl.formatMonthTitle);
-          scope.rows = ctrl.split(months, 3);
-        };
-        ctrl.compare = function(date1, date2) {
-          return new Date(date1.getFullYear(), date1.getMonth()) - new Date(date2.getFullYear(), date2.getMonth());
-        };
-        ctrl.handleKeyDown = function(key, evt) {
-          var date = ctrl.activeDate.getMonth();
-          if (key === 'left') {
-            date = date - 1;
-          } else if (key === 'up') {
-            date = date - 3;
-          } else if (key === 'right') {
-            date = date + 1;
-          } else if (key === 'down') {
-            date = date + 3;
-          } else if (key === 'pageup' || key === 'pagedown') {
-            var year = ctrl.activeDate.getFullYear() + (key === 'pageup' ? -1 : 1);
-            ctrl.activeDate.setFullYear(year);
-          } else if (key === 'home') {
-            date = 0;
-          } else if (key === 'end') {
-            date = 11;
-          }
-          ctrl.activeDate.setMonth(date);
-        };
-        ctrl.refreshView();
-      }
-    };
-  }])
-  .directive('yearpicker', ['dateFilter', function(dateFilter) {
-    return {
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/datepicker/year.html',
-      require: '^datepicker',
-      link: function(scope, element, attrs, ctrl) {
-        var range = ctrl.yearRange;
-        ctrl.step = {
-          years: range
-        };
-        ctrl.element = element;
-
-        function getStartingYear(year) {
-          return parseInt((year - 1) / range, 10) * range + 1;
-        }
-        ctrl._refreshView = function() {
-          var years = new Array(range);
-          for (var i = 0, start = getStartingYear(ctrl.activeDate.getFullYear()); i < range; i++) {
-            years[i] = angular.extend(ctrl.createDateObject(new Date(start + i, 0, 1), ctrl.formatYear), {
-              uid: scope.uniqueId + '-' + i
-            });
-          }
-          scope.title = [years[0].label, years[range - 1].label].join(' - ');
-          scope.rows = ctrl.split(years, 5);
-        };
-        ctrl.compare = function(date1, date2) {
-          return date1.getFullYear() - date2.getFullYear();
-        };
-        ctrl.handleKeyDown = function(key, evt) {
-          var date = ctrl.activeDate.getFullYear();
-          if (key === 'left') {
-            date = date - 1;
-          } else if (key === 'up') {
-            date = date - 5;
-          } else if (key === 'right') {
-            date = date + 1;
-          } else if (key === 'down') {
-            date = date + 5;
-          } else if (key === 'pageup' || key === 'pagedown') {
-            date += (key === 'pageup' ? -1 : 1) * ctrl.step.years;
-          } else if (key === 'home') {
-            date = getStartingYear(ctrl.activeDate.getFullYear());
-          } else if (key === 'end') {
-            date = getStartingYear(ctrl.activeDate.getFullYear()) + range - 1;
-          }
-          ctrl.activeDate.setFullYear(date);
-        };
-        ctrl.refreshView();
-      }
-    };
-  }])
-  .constant('datepickerPopupConfig', {
-    datepickerPopup: 'yyyy-MM-dd',
-    currentText: 'Today',
-    clearText: 'Clear',
-    closeText: 'Done',
-    closeOnDateSelection: true,
-    appendToBody: false,
-    showButtonBar: true
-  })
-  .directive('datepickerPopup', ['$compile', '$parse', '$document', '$position', 'dateFilter', 'dateParser', 'datepickerPopupConfig',
-    function($compile, $parse, $document, $position, dateFilter, dateParser, datepickerPopupConfig) {
-      return {
-        restrict: 'EA',
-        require: 'ngModel',
-        scope: {
-          isOpen: '=?',
-          currentText: '@',
-          clearText: '@',
-          closeText: '@',
-          dateDisabled: '&'
-        },
-        link: function(scope, element, attrs, ngModel) {
-          var dateFormat,
-            closeOnDateSelection = angular.isDefined(attrs.closeOnDateSelection) ? scope.$parent.$eval(attrs.closeOnDateSelection) : datepickerPopupConfig.closeOnDateSelection,
-            appendToBody = angular.isDefined(attrs.datepickerAppendToBody) ? scope.$parent.$eval(attrs.datepickerAppendToBody) : datepickerPopupConfig.appendToBody;
-          scope.showButtonBar = angular.isDefined(attrs.showButtonBar) ? scope.$parent.$eval(attrs.showButtonBar) : datepickerPopupConfig.showButtonBar;
-          scope.getText = function(key) {
-            return scope[key + 'Text'] || datepickerPopupConfig[key + 'Text'];
-          };
-          attrs.$observe('datepickerPopup', function(value) {
-            dateFormat = value || datepickerPopupConfig.datepickerPopup;
-            ngModel.$render();
-          });
-          var popupEl = angular.element('<div datepicker-popup-wrap><div datepicker></div></div>');
-          popupEl.attr({
-            'ng-model': 'date',
-            'ng-change': 'dateSelection()'
-          });
-
-          function cameltoDash(string) {
-            return string.replace(/([A-Z])/g, function($1) {
-              return '-' + $1.toLowerCase();
-            });
-          }
-          var datepickerEl = angular.element(popupEl.children()[0]);
-          if (attrs.datepickerOptions) {
-            angular.forEach(scope.$parent.$eval(attrs.datepickerOptions), function(value, option) {
-              datepickerEl.attr(cameltoDash(option), value);
-            });
-          }
-          scope.watchData = {};
-          angular.forEach(['minDate', 'maxDate', 'datepickerMode'], function(key) {
-            if (attrs[key]) {
-              var getAttribute = $parse(attrs[key]);
-              scope.$parent.$watch(getAttribute, function(value) {
-                scope.watchData[key] = value;
-              });
-              datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
-              if (key === 'datepickerMode') {
-                var setAttribute = getAttribute.assign;
-                scope.$watch('watchData.' + key, function(value, oldvalue) {
-                  if (value !== oldvalue) {
-                    setAttribute(scope.$parent, value);
-                  }
-                });
-              }
-            }
-          });
-          if (attrs.dateDisabled) {
-            datepickerEl.attr('date-disabled', 'dateDisabled({ date: date, mode: mode })');
-          }
-
-          function parseDate(viewValue) {
-            if (!viewValue) {
-              ngModel.$setValidity('date', true);
-              return null;
-            } else if (angular.isDate(viewValue) && !isNaN(viewValue)) {
-              ngModel.$setValidity('date', true);
-              return viewValue;
-            } else if (angular.isString(viewValue)) {
-              var date = dateParser.parse(viewValue, dateFormat) || new Date(viewValue);
-              if (isNaN(date)) {
-                ngModel.$setValidity('date', false);
-                return undefined;
-              } else {
-                ngModel.$setValidity('date', true);
-                return date;
-              }
-            } else {
-              ngModel.$setValidity('date', false);
-              return undefined;
-            }
-          }
-          ngModel.$parsers.unshift(parseDate);
-          scope.dateSelection = function(dt) {
-            if (angular.isDefined(dt)) {
-              scope.date = dt;
-            }
-            ngModel.$setViewValue(scope.date);
-            ngModel.$render();
-            if (closeOnDateSelection) {
-              scope.isOpen = false;
-              element[0].focus();
-            }
-          };
-          element.bind('input change keyup', function() {
-            scope.$apply(function() {
-              scope.date = ngModel.$modelValue;
-            });
-          });
-          ngModel.$render = function() {
-            var date = ngModel.$viewValue ? dateFilter(ngModel.$viewValue, dateFormat) : '';
-            element.val(date);
-            scope.date = parseDate(ngModel.$modelValue);
-          };
-          var documentClickBind = function(event) {
-            if (scope.isOpen && event.target !== element[0]) {
-              scope.$apply(function() {
-                scope.isOpen = false;
-              });
-            }
-          };
-          var keydown = function(evt, noApply) {
-            scope.keydown(evt);
-          };
-          element.bind('keydown', keydown);
-          scope.keydown = function(evt) {
-            if (evt.which === 27) {
-              evt.preventDefault();
-              evt.stopPropagation();
-              scope.close();
-            } else if (evt.which === 40 && !scope.isOpen) {
-              scope.isOpen = true;
-            }
-          };
-          scope.$watch('isOpen', function(value) {
-            if (value) {
-              scope.$broadcast('datepicker.focus');
-              scope.position = appendToBody ? $position.offset(element) : $position.position(element);
-              scope.position.top = scope.position.top + element.prop('offsetHeight');
-              $document.bind('click', documentClickBind);
-            } else {
-              $document.unbind('click', documentClickBind);
-            }
-          });
-          scope.select = function(date) {
-            if (date === 'today') {
-              var today = new Date();
-              if (angular.isDate(ngModel.$modelValue)) {
-                date = new Date(ngModel.$modelValue);
-                date.setFullYear(today.getFullYear(), today.getMonth(), today.getDate());
-              } else {
-                date = new Date(today.setHours(0, 0, 0, 0));
-              }
-            }
-            scope.dateSelection(date);
-          };
-          scope.close = function() {
-            scope.isOpen = false;
-            element[0].focus();
-          };
-          var $popup = $compile(popupEl)(scope);
-          popupEl.remove();
-          if (appendToBody) {
-            $document.find('body').append($popup);
-          } else {
-            element.after($popup);
-          }
-          scope.$on('$destroy', function() {
-            $popup.remove();
-            element.unbind('keydown', keydown);
-            $document.unbind('click', documentClickBind);
-          });
-        }
-      };
+  function _handleCaughtClientJavascriptError(errorMessage) {
+    var errorStartTime = self._getFormattedUTCNowDateTime();
+    var errorEndTime = self._getFormattedUTCNowDateTime();
+    var stepEvent = new StepEvent();
+    stepEvent.object = errorMessage;
+    self.atflog(errorMessage);
+    var clientJavascriptError = clientErrorHandler.getErrorType(errorMessage, self.atflog);
+    if (clientJavascriptError.isIgnored()) {
+      stepEvent.status = "ignored";
+      self.sendATFEvent('Client Error', 'Client Error ignored');
+    } else if (clientJavascriptError.isWarning()) {
+      stepEvent.status = "warning";
+      self.currentStepResult.setSuccessWithWarning(errorMessage);
+      self.currentStepBatchResult.hasWarning = true;
+      self.sendATFEvent('Client Error', 'Client Error captured as warning');
+    } else if (clientJavascriptError.isFailure() || clientJavascriptError.isUnknown()) {
+      stepEvent.status = "failure";
+      self.hasConsoleError = true;
+      if (self.consoleErrorMessage == "")
+        self.consoleErrorMessage = errorMessage;
+      self.sendATFEvent('Client Error', 'Client Error captured');
     }
-  ])
-  .directive('datepickerPopupWrap', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      transclude: true,
-      templateUrl: 'template/datepicker/popup.html',
-      link: function(scope, element, attrs) {
-        element.bind('click', function(event) {
-          event.preventDefault();
-          event.stopPropagation();
-        });
-      }
-    };
-  });
-angular.module('ui.bootstrap.dropdown', [])
-  .constant('dropdownConfig', {
-    openClass: 'open'
-  })
-  .service('dropdownService', ['$document', function($document) {
-    var openScope = null;
-    this.open = function(dropdownScope) {
-      if (!openScope) {
-        $document.bind('click', closeDropdown);
-        $document.bind('keydown', escapeKeyBind);
-      }
-      if (openScope && openScope !== dropdownScope) {
-        openScope.isOpen = false;
-      }
-      openScope = dropdownScope;
-    };
-    this.close = function(dropdownScope) {
-      if (openScope === dropdownScope) {
-        openScope = null;
-        $document.unbind('click', closeDropdown);
-        $document.unbind('keydown', escapeKeyBind);
-      }
-    };
-    var closeDropdown = function(evt) {
-      if (!openScope) {
-        return;
-      }
-      var toggleElement = openScope.getToggleElement();
-      if (evt && toggleElement && toggleElement[0].contains(evt.target)) {
-        return;
-      }
-      openScope.$apply(function() {
-        openScope.isOpen = false;
-      });
-    };
-    var escapeKeyBind = function(evt) {
-      if (evt.which === 27) {
-        openScope.focusToggleElement();
-        closeDropdown();
-      }
-    };
-  }])
-  .controller('DropdownController', ['$scope', '$attrs', '$parse', 'dropdownConfig', 'dropdownService', '$animate', function($scope, $attrs, $parse, dropdownConfig, dropdownService, $animate) {
-    var self = this,
-      scope = $scope.$new(),
-      openClass = dropdownConfig.openClass,
-      getIsOpen,
-      setIsOpen = angular.noop,
-      toggleInvoker = $attrs.onToggle ? $parse($attrs.onToggle) : angular.noop;
-    this.init = function(element) {
-      self.$element = element;
-      if ($attrs.isOpen) {
-        getIsOpen = $parse($attrs.isOpen);
-        setIsOpen = getIsOpen.assign;
-        $scope.$watch(getIsOpen, function(value) {
-          scope.isOpen = !!value;
-        });
-      }
-    };
-    this.toggle = function(open) {
-      return scope.isOpen = arguments.length ? !!open : !scope.isOpen;
-    };
-    this.isOpen = function() {
-      return scope.isOpen;
-    };
-    scope.getToggleElement = function() {
-      return self.toggleElement;
-    };
-    scope.focusToggleElement = function() {
-      if (self.toggleElement) {
-        self.toggleElement[0].focus();
-      }
-    };
-    scope.$watch('isOpen', function(isOpen, wasOpen) {
-      $animate[isOpen ? 'addClass' : 'removeClass'](self.$element, openClass);
-      if (isOpen) {
-        scope.focusToggleElement();
-        dropdownService.open(scope);
-      } else {
-        dropdownService.close(scope);
-      }
-      setIsOpen($scope, isOpen);
-      if (angular.isDefined(isOpen) && isOpen !== wasOpen) {
-        toggleInvoker($scope, {
-          open: !!isOpen
-        });
-      }
-    });
-    $scope.$on('$locationChangeSuccess', function() {
-      scope.isOpen = false;
-    });
-    $scope.$on('$destroy', function() {
-      scope.$destroy();
-    });
-  }])
-  .directive('dropdown', function() {
-    return {
-      controller: 'DropdownController',
-      link: function(scope, element, attrs, dropdownCtrl) {
-        dropdownCtrl.init(element);
-      }
-    };
-  })
-  .directive('dropdownToggle', function() {
-    return {
-      require: '?^dropdown',
-      link: function(scope, element, attrs, dropdownCtrl) {
-        if (!dropdownCtrl) {
+    stepEvent.type = "client_error";
+    stepEvent.start_time = errorStartTime;
+    stepEvent.end_time = errorEndTime;
+    stepEvent.whitelisted_client_error = clientJavascriptError.sysId;
+    stepEvent.step_id = self.currentStep.sys_id;
+    stepEvent.browser = navigator.userAgent;
+    self.currentStepBatchResult.stepEvents.push(stepEvent);
+  }
+
+  function setupJslogCapture() {
+    (function() {
+      var nextMsgIsError = false;
+      jslog = function() {
+        var msg = arguments[0];
+        if (nextMsgIsError) {
+          console.error(msg);
+          nextMsgIsError = false;
           return;
         }
-        dropdownCtrl.toggleElement = element;
-        var toggleDropdown = function(event) {
-          event.preventDefault();
-          if (!element.hasClass('disabled') && !attrs.disabled) {
-            scope.$apply(function() {
-              dropdownCtrl.toggle();
-            });
-          }
-        };
-        element.bind('click', toggleDropdown);
-        element.attr({
-          'aria-haspopup': true,
-          'aria-expanded': false
-        });
-        scope.$watch(dropdownCtrl.isOpen, function(isOpen) {
-          element.attr('aria-expanded', !!isOpen);
-        });
-        scope.$on('$destroy', function() {
-          element.unbind('click', toggleDropdown);
-        });
-      }
-    };
-  });
-angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
-  .factory('$$stackedMap', function() {
-    return {
-      createNew: function() {
-        var stack = [];
-        return {
-          add: function(key, value) {
-            stack.push({
-              key: key,
-              value: value
-            });
-          },
-          get: function(key) {
-            for (var i = 0; i < stack.length; i++) {
-              if (key == stack[i].key) {
-                return stack[i];
-              }
-            }
-          },
-          keys: function() {
-            var keys = [];
-            for (var i = 0; i < stack.length; i++) {
-              keys.push(stack[i].key);
-            }
-            return keys;
-          },
-          top: function() {
-            return stack[stack.length - 1];
-          },
-          remove: function(key) {
-            var idx = -1;
-            for (var i = 0; i < stack.length; i++) {
-              if (key == stack[i].key) {
-                idx = i;
-                break;
-              }
-            }
-            return stack.splice(idx, 1)[0];
-          },
-          removeTop: function() {
-            return stack.splice(stack.length - 1, 1)[0];
-          },
-          length: function() {
-            return stack.length;
-          }
-        };
-      }
-    };
-  })
-  .directive('modalBackdrop', ['$timeout', function($timeout) {
-    return {
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/modal/backdrop.html',
-      link: function(scope, element, attrs) {
-        scope.backdropClass = attrs.backdropClass || '';
-        scope.animate = false;
-        $timeout(function() {
-          scope.animate = true;
-        });
-      }
-    };
-  }])
-  .directive('modalWindow', ['$modalStack', '$timeout', function($modalStack, $timeout) {
-    return {
-      restrict: 'EA',
-      scope: {
-        index: '@',
-        animate: '='
-      },
-      replace: true,
-      transclude: true,
-      templateUrl: function(tElement, tAttrs) {
-        return tAttrs.templateUrl || 'template/modal/window.html';
-      },
-      link: function(scope, element, attrs) {
-        element.addClass(attrs.windowClass || '');
-        scope.size = attrs.size;
-        $timeout(function() {
-          scope.animate = true;
-          if (!element[0].querySelectorAll('[autofocus]').length) {
-            element[0].focus();
-          }
-        });
-        scope.close = function(evt) {
-          var modal = $modalStack.getTop();
-          if (modal && modal.value.backdrop && modal.value.backdrop != 'static' && (evt.target === evt.currentTarget)) {
-            evt.preventDefault();
-            evt.stopPropagation();
-            $modalStack.dismiss(modal.key, 'backdrop click');
-          }
-        };
-      }
-    };
-  }])
-  .directive('modalTransclude', function() {
-    return {
-      link: function($scope, $element, $attrs, controller, $transclude) {
-        $transclude($scope.$parent, function(clone) {
-          $element.empty();
-          $element.append(clone);
-        });
-      }
-    };
-  })
-  .factory('$modalStack', ['$transition', '$timeout', '$document', '$compile', '$rootScope', '$$stackedMap',
-    function($transition, $timeout, $document, $compile, $rootScope, $$stackedMap) {
-      var OPENED_MODAL_CLASS = 'modal-open';
-      var backdropDomEl, backdropScope;
-      var openedWindows = $$stackedMap.createNew();
-      var $modalStack = {};
+        if (msg === "A script has encountered an error in render events")
+          nextMsgIsError = true;
+        console.log(arguments[0]);
+      };
+    }());
+  }
 
-      function backdropIndex() {
-        var topBackdropIndex = -1;
-        var opened = openedWindows.keys();
-        for (var i = 0; i < opened.length; i++) {
-          if (openedWindows.get(opened[i]).value.backdrop) {
-            topBackdropIndex = i;
-          }
-        }
-        return topBackdropIndex;
-      }
-      $rootScope.$watch(backdropIndex, function(newBackdropIndex) {
-        if (backdropScope) {
-          backdropScope.index = newBackdropIndex;
-        }
+  function setupMandatoryCapture() {
+    (function() {
+      if (!window.CustomEventManager || !CustomEventManager.observe)
+        return;
+      CustomEventManager.observe('glideform.mandatorycheck.failed', function(msg) {
+        if (!self.currentStepBatchResult)
+          return;
+        var occurrenceDateTime = self._getFormattedUTCNowDateTime();
+        var stepEvent = new StepEvent();
+        stepEvent.object = msg;
+        stepEvent.type = "client_alert";
+        stepEvent.start_time = occurrenceDateTime;
+        stepEvent.end_time = occurrenceDateTime;
+        self.currentStepBatchResult.stepEvents.push(stepEvent);
       });
+    })();
+  }
 
-      function removeModalWindow(modalInstance) {
-        var body = $document.find('body').eq(0);
-        var modalWindow = openedWindows.get(modalInstance).value;
-        openedWindows.remove(modalInstance);
-        removeAfterAnimate(modalWindow.modalDomEl, modalWindow.modalScope, 300, function() {
-          modalWindow.modalScope.$destroy();
-          body.toggleClass(OPENED_MODAL_CLASS, openedWindows.length() > 0);
-          checkRemoveBackdrop();
-        });
+  function processBatch(batch) {
+    self.atflog("Processing batch with order: " + batch.order);
+    var steps = batch.sys_atf_steps;
+    var firstPromise = $q.when();
+    var stepPromiseChain = steps.reduce(function(previousPromise, currentStep, currentIndex) {
+      return previousPromise.then(function() {
+        currentStep._ui_step_index = currentIndex + 1;
+        self.currentStep = currentStep;
+        return self.processStep(batch, currentStep);
+      });
+    }, firstPromise);
+    return stepPromiseChain;
+  }
+
+  function processStep(batch, step) {
+    self.setTestHeaderMessage(formatMessage(self.messageMap[self.MESSAGE_KEY_RUNNING_STEP], step._ui_step_index,
+      batch.sys_atf_steps.length, batch.test_name));
+    return $q.when()
+      .then(function doRunStep() {
+        return self._runStep(step);
+      })['catch'](self.handleStepRunException)['finally'](self.saveStepResultAndCheckStepFailure)['finally'](self.takeScreenshot)['finally'](function runReportStepProgress() {
+        return self.reportStepProgress(batch, step);
+      })
+      .then(self.pauseBetweenSteps);
+  }
+
+  function _runStep(step) {
+    var stepResult = new StepResult();
+    stepResult.sys_atf_step_sys_id = step.sys_id;
+    self.currentStepResult = stepResult;
+    var assertDefer = $q.defer();
+    step.defer = assertDefer;
+    step.test_result_id = self.currentStepBatchResult.sys_atf_test_result_sys_id;
+    var stepConfig = self.stepConfigs[step.step_config_sys_id];
+    self.assertionFunction = new Function("step", "stepResult", stepConfig.step_execution_generator);
+    if (self.atfFormInterceptor) {
+      var testIFrameWindow = self._getFrameWindow();
+      self.atfFormInterceptor.interceptGFormWithRollbackContextId(testIFrameWindow);
+      self.atfFormInterceptor.interceptGFormWithStepIdAndTestResultId(self.currentStepResult.sys_atf_step_sys_id, self.currentStepBatchResult.sys_atf_test_result_sys_id, testIFrameWindow);
+      self.atfFormInterceptor.interceptXMLHttpRequestWithStepIdandTestResultId(self.currentStepResult.sys_atf_step_sys_id, self.currentStepBatchResult.sys_atf_test_result_sys_id, testIFrameWindow, self.isDebugEnabled);
+    }
+    self.currentStepResult.start_time = self._getFormattedUTCNowDateTime();
+    step = self.resolveInputs(step);
+    if (!self.validateInputs(step))
+      return $q.reject();
+    self.assertionFunction(step, self.currentStepResult);
+    return assertDefer.promise;
+  }
+
+  function resolveInputs(step) {
+    for (var key in step.inputs) {
+      if (typeof step.inputs[key] == 'string' && step.inputs[key].indexOf("{{step['") > -1) {
+        var testExecutorAjax = new GlideAjax('TestExecutorAjax');
+        testExecutorAjax.addParam('sysparm_name', 'resolveInputs');
+        testExecutorAjax.addParam('sysparm_atf_test_result', self.currentStepBatchResult.sys_atf_test_result_sys_id);
+        testExecutorAjax.addParam('sysparm_atf_step_id', step.sys_id);
+        testExecutorAjax.getXMLWait();
+        var newStep = JSON.parse(testExecutorAjax.getAnswer());
+        step.inputs = newStep.inputs;
+        return step;
       }
+    }
+    return step;
+  }
 
-      function checkRemoveBackdrop() {
-        if (backdropDomEl && backdropIndex() == -1) {
-          var backdropScopeRef = backdropScope;
-          removeAfterAnimate(backdropDomEl, backdropScope, 150, function() {
-            backdropScopeRef.$destroy();
-            backdropScopeRef = null;
-          });
-          backdropDomEl = undefined;
-          backdropScope = undefined;
+  function validateInputs(step) {
+    for (var key in step.inputs) {
+      if (typeof step.inputs[key] == 'string' && step.inputs[key].indexOf(self.INVALID_REFERENCE_PREFIX) > -1) {
+        var variable = key;
+        if (step.input_variable_labels && step.input_variable_labels[key])
+          variable = step.input_variable_labels[key];
+        self.currentStepResult.setError(formatMessage(self.messageMap[self.MESSAGE_KEY_INVALID_REFERENCE], variable));
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function handleStepRunException(e) {
+    if (!e)
+      return;
+    self.logAndNotifyExceptionAsHeaderMessage(self.messageMap[self.MESSAGE_KEY_STEP_EXEC_FAILED], e);
+    if (!self.currentStepResult)
+      return;
+    self.currentStepResult.setError(formatMessage(self.messageMap[self.MESSAGE_KEY_FAILED_WITH_ERROR], e.message));
+  }
+
+  function saveStepResultAndCheckStepFailure() {
+    if (self.hasConsoleError) {
+      self.currentStepResult.success = false;
+      self.currentStepResult.message = formatMessage(self.messageMap[self.MESSAGE_KEY_JAVASCRIPT_ERROR], self.consoleErrorMessage);
+    }
+    self.currentStepResult.end_time = self._getFormattedUTCNowDateTime();
+    self.currentStepBatchResult.stepResults.push(self.currentStepResult);
+    var stepEvent = new StepEvent();
+    stepEvent.type = "step_completion";
+    stepEvent.start_time = self.currentStepResult.start_time;
+    stepEvent.end_time = self.currentStepResult.end_time;
+    self.currentStepBatchResult.stepEvents.push(stepEvent);
+    if (self.currentStepResult.success) {
+      if (!self.currentStepResult.isSuccessWithWarnings())
+        self.currentStepResult.status = 'success';
+      return $q.when();
+    } else {
+      self.currentStepBatchResult.hasFailure = true;
+      if (!self.currentStepResult.isError())
+        self.currentStepResult.status = 'failure';
+      return $q.reject();
+    }
+  }
+
+  function takeScreenshot() {
+    if (self.screenshotsModeManager.shouldSkipScreenshot(self.currentStepResult)) {
+      self.atflog("Skipping screenshot, screenshot mode: " + self.screenshotsModeManager.getCurrentModeValue());
+      return $q.when();
+    }
+
+    function afterScreenshotTaken(error) {
+      if (typeof error !== 'undefined') {
+        var stepEvent = new StepEvent();
+        stepEvent.object = error;
+        stepEvent.type = "client_log";
+        stepEvent.start_time = self._getFormattedUTCNowDateTime();
+        stepEvent.step_id = self.currentStep.sys_id;
+        stepEvent.browser = navigator.userAgent;
+        stepEvent.end_time = self._getFormattedUTCNowDateTime();
+        self.currentStepBatchResult.stepEvents.push(stepEvent);
+      }
+      self.atflog("Finished taking screenshot, continuing test");
+      testFrameDoc = null;
+      ha = null;
+      ssDefer.resolve();
+    }
+    var ssDefer = $q.defer();
+    try {
+      if (typeof Promise == "undefined")
+        return;
+      var testFrameDoc = self.iFrame.contentDocument || self.iFrame.contentWindow.document;
+      if (testFrameDoc.body.innerHTML.length == 0) {
+        self.setTestStepStatusMessage(self.messageMap[self.MESSAGE_KEY_NOT_TAKING_SCREENSHOT]);
+        return;
+      }
+      self.setTestStepStatusMessage(self.messageMap[self.MESSAGE_KEY_TAKING_SCREENSHOT]);
+      var ha = new GlideScreenshot(self.screenshotTimeoutSeconds);
+      ha.generateAndAttach(testFrameDoc.body, "sys_atf_test_result", self.currentStepBatchResult.sys_atf_test_result_sys_id,
+        self._getFileNameNoExtension(), self.screenshotsQuality, afterScreenshotTaken);
+    } catch (e) {
+      console.log("An error occurred while trying to take a screenshot: " + e.message);
+      ssDefer.resolve();
+    }
+    return ssDefer.promise;
+  }
+
+  function reportStepProgress(batch, step) {
+    self.batchPercentComplete = (step._ui_step_index / self.numberOfStepsInBatch) * 100;
+    var reportStepProgressDefer = $q.defer();
+    var reportProgressAjax = new GlideAjax('ReportUITestProgress');
+    reportProgressAjax.addParam('sysparm_name', 'reportStepProgress');
+    reportProgressAjax.addParam('sysparm_batch_execution_tracker_sys_id', batch.tracker_sys_id);
+    reportProgressAjax.addParam('sysparm_next_step_index', step._ui_step_index + 1);
+    reportProgressAjax.addParam('sysparm_batch_length', batch.sys_atf_steps.length);
+    reportProgressAjax.addParam('sysparm_test_result_sys_id', self.currentStepBatchResult.sys_atf_test_result_sys_id);
+    reportProgressAjax.addParam('sysparm_step_result', JSON.stringify(self.currentStepResult));
+    reportProgressAjax.addParam('sysparm_atf_agent_sys_id', self.atfAgentSysId);
+    reportProgressAjax.getXMLAnswer(handleReportStepProgress);
+    self.assertionFunction = null;
+    self.currentStep = null;
+
+    function handleReportStepProgress(answer) {
+      var answerObj = JSON.parse(answer);
+      if (answerObj.cancel_request_received) {
+        self.currentStepBatchResult.setCancel();
+        reportStepProgressDefer.reject(self.messageMap[self.MESSAGE_KEY_TEST_CANCELED]);
+      } else if (!answerObj.report_step_progress_success) {
+        self.currentStepBatchResult.setError();
+        reportStepProgressDefer.reject(self.messageMap[self.MESSAGE_KEY_FAILED_REPORT_PROGRESS]);
+      } else
+        reportStepProgressDefer.resolve();
+    }
+    return reportStepProgressDefer.promise;
+  }
+
+  function pauseBetweenSteps() {
+    return $timeout(function() {
+      self.atflog("Delay between steps completed. Continuing...");
+    }, self.delayBetweenSteps);
+  }
+
+  function setTestHeaderMessage(message) {
+    self.testHeaderMessage = message;
+    self.atflog(message);
+  }
+
+  function setTestErrorMessage(message) {
+    if (!message)
+      self.clearTestErrorMessage();
+    self.errorMessage = message;
+    $element.find("#errorMessageDiv").show();
+    self.atflog(message);
+  }
+
+  function clearTestErrorMessage() {
+    self.errorMessage = "";
+    $element.find("#errorMessageDiv").hide();
+  }
+
+  function setCurrentUser(user) {
+    self.currentUser = user;
+  }
+
+  function _getCurrentUser() {
+    return self.currentUser;
+  }
+
+  function _registerRunner() {
+    var defer = $q.defer();
+    var errorCallbackRegisterTestRunner = function(response) {
+      if (response.status == 404) {
+        self.atflog("ClientTestRunnerAjax.registerTestRunner script include not found, registration skipped, " +
+          "this client will not pick up Pick a Browser client tests.");
+        if (defer)
+          defer.resolve();
+      } else {
+        self.atflog(formatMessage(
+          "ClientTestRunnerAjax.registerTestRunner unknown error, registration failed, http status {0}.",
+          response.status));
+        if (defer)
+          defer.reject(self.messageMap[self.MESSAGE_KEY_REGISTER_RUNNER_ERROR]);
+      }
+    };
+    var ga = new GlideAjax("ClientTestRunnerAjax");
+    ga.addParam("sysparm_name", "registerTestRunner");
+    ga.addParam("sysparm_atf_user_agent", navigator.userAgent);
+    ga.addParam("sysparm_atf_agent_id", self.atfAgentSysId);
+    ga.addParam("sysparm_user", self._getCurrentUser().user_sys_id);
+    ga.setErrorCallback(errorCallbackRegisterTestRunner.bind(self));
+    ga.getXMLAnswer(function registerRunnerResponseHandler(answer) {
+      if (!answer) {
+        defer.reject(self.messageMap[self.MESSAGE_KEY_REGISTER_RUNNER_ERROR]);
+      } else {
+        var testRunner = JSON.parse(answer);
+        if (testRunner.id != self.atfAgentSysId) {
+          self.atfAgentSysId = testRunner.id;
+          self.AMBATFAgentChannelName = self.testInformation.registerAMBATFAgentForPage(self.atfAgentSysId);
+          self.atflog("atf agent id has changed: " + self.atfAgentSysId);
+        }
+        defer.resolve();
+      }
+    });
+    return defer.promise;
+  }
+
+  function setUpHeartbeat() {
+    if (self.hasSetupHeartbeat)
+      return $q.when();
+    self.heartbeatIntervalId = setInterval(self.sendHeartbeat, self.heartbeatInterval);
+    self.hasSetupHeartbeat = true;
+    return $q.when();
+  }
+
+  function _findTestToRunByRunnerType() {
+    if (self.isSchedulePluginActive && self.runScheduledTestsOnly)
+      self._findScheduledTestToRun();
+    else
+      self.findTestToRun();
+  }
+
+  function _toggleFindTestInterval(doSetInterval) {
+    if (self.findTestIntervalId) {
+      window.clearInterval(self.findTestIntervalId);
+      self.findTestIntervalId = null;
+    }
+    if (doSetInterval && self.clientConnected)
+      self.findTestIntervalId = window.setInterval(self._findTestToRunByRunnerType, self.findTestInterval);
+  }
+
+  function sendHeartbeat() {
+    var errorCallbackClientAjaxTestRunnerHeartbeat = function(response) {
+      if (response.status == 404) {
+        self.atflog("ClientTestRunnerAjax.testRunnerHeartbeat script include not found, heartbeat disabled, " +
+          "this client will not update its online status with the server.");
+        self._clearHeartbeatInterval();
+      } else
+        self.atflog(formatMessage(
+          "ClientTestRunnerAjax.testRunnerHeartbeat unknown error, skipping heartbeat, http status {0}.",
+          response.status));
+    };
+    var ga = new GlideAjax("ClientTestRunnerAjax");
+    ga.addParam("sysparm_name", "testRunnerHeartbeat");
+    ga.addParam("sysparm_atf_agent_id", self.atfAgentSysId);
+    ga.setErrorCallback(errorCallbackClientAjaxTestRunnerHeartbeat.bind(self));
+    ga.getXMLAnswer(function heartbeatResponse(answer) {
+      if (answer) {
+        var response = JSON.parse(answer);
+        if (response.action == "DELETE") {
+          self.testInformation.unsubscribeFromAMBChannels();
+          self.afterAMBUnsubscribed(self.messageMap[self.MESSAGE_KEY_ATF_AGENT_DELETED]);
+          self.clientConnected = false;
+        } else if (response.action == "SESSION_CHANGE") {
+          self.handleSessionChange(response);
         }
       }
+    });
+  }
 
-      function removeAfterAnimate(domEl, scope, emulateTime, done) {
-        scope.animate = false;
-        var transitionEndEventName = $transition.transitionEndEventName;
-        if (transitionEndEventName) {
-          var timeout = $timeout(afterAnimating, emulateTime);
-          domEl.bind(transitionEndEventName, function() {
-            $timeout.cancel(timeout);
-            afterAnimating();
-            scope.$apply();
-          });
-        } else {
-          $timeout(afterAnimating);
+  function handleSessionChange(response) {
+    self.atflog("Test runner session has changed. Re-subscribing to amb channels");
+    self.messageReference = response.sessionId;
+    $q.when()
+      .then(function() {
+        if (self.original_user_id != response.user) {
+          self.original_user_id = response.user;
+          self.setupUserInfo();
         }
+      })
+      .then(function() {
+        self._setupTestInformation();
+        self._findTestToRunByRunnerType();
+      });
+  }
 
-        function afterAnimating() {
-          if (afterAnimating.done) {
+  function setTestStepStatusMessage(message) {
+    self.testStepStatusMessage = message;
+    self.atflog(message);
+  }
+
+  function openFormAndAssert(url, recordId, view, assertFrameLoaded) {
+    assertFrameLoaded = (angular.isFunction(assertFrameLoaded)) ? assertFrameLoaded : defaultAssertFrameLoaded;
+    var parentDefer = $q.defer();
+    self.setiFrameOnloadFunction(whenFrameCleared);
+    self.iFrame.src = "";
+    return parentDefer.promise;
+
+    function whenFrameCleared() {
+      self.setiFrameOnloadFunction(assertFrameLoaded);
+      var urlParameters = {};
+      if (recordId)
+        urlParameters["sys_id"] = recordId;
+      urlParameters["sysparm_view"] = (view == null) ? "" : view.trim();
+      urlParameters["sysparm_view_forced"] = "true";
+      urlParameters["sysparm_atf_step_sys_id"] = self.currentStepResult.sys_atf_step_sys_id;
+      urlParameters["sysparm_atf_test_result_sys_id"] = self.currentStepBatchResult.sys_atf_test_result_sys_id;
+      urlParameters["sysparm_atf_debug"] = self.isDebugEnabled;
+      self.atfFormInterceptor.interceptFormLoadURLWithRollbackContextId(urlParameters);
+      self.atfFormInterceptor.interceptFormLoadURLWithTestRunnerIndicator(urlParameters);
+      var completeUrl = url + ".do?" + $httpParamSerializer(urlParameters);
+      var emptySrcLogFunc = (!self.frameWindow["console"]) ? console.log : self.frameWindow.console.log;
+      self.iFrame.src = completeUrl;
+      self.overwriteFrameFunctions(emptySrcLogFunc);
+    }
+
+    function defaultAssertFrameLoaded() {
+      if (self.cleariFrameOnloadFunction)
+        self.cleariFrameOnloadFunction();
+      if (self._getFrameGForm()) {
+        var openedFormTable = self._getFrameGForm().getTableName();
+        if (openedFormTable == url) {
+          if (view && view != self._getFrameGForm().getViewName()) {
+            parentDefer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_FAIL_WRONG_VIEW],
+              view, self._getFrameGForm().getViewName()));
             return;
           }
-          afterAnimating.done = true;
-          domEl.remove();
-          if (done) {
-            done();
-          }
-        }
-      }
-      $document.bind('keydown', function(evt) {
-        var modal;
-        if (evt.which === 27) {
-          modal = openedWindows.top();
-          if (modal && modal.value.keyboard) {
-            evt.preventDefault();
-            $rootScope.$apply(function() {
-              $modalStack.dismiss(modal.key, 'escape key press');
+          if (self.frameWindow.CustomEvent)
+            self.frameWindow.CustomEvent.observe('glideform:script_error', function(err) {
+              console.error(err)
             });
-          }
-        }
-      });
-      $modalStack.open = function(modalInstance, modal) {
-        openedWindows.add(modalInstance, {
-          deferred: modal.deferred,
-          modalScope: modal.scope,
-          backdrop: modal.backdrop,
-          keyboard: modal.keyboard
-        });
-        var body = $document.find('body').eq(0),
-          currBackdropIndex = backdropIndex();
-        if (currBackdropIndex >= 0 && !backdropDomEl) {
-          backdropScope = $rootScope.$new(true);
-          backdropScope.index = currBackdropIndex;
-          var angularBackgroundDomEl = angular.element('<div modal-backdrop></div>');
-          angularBackgroundDomEl.attr('backdrop-class', modal.backdropClass);
-          backdropDomEl = $compile(angularBackgroundDomEl)(backdropScope);
-          body.append(backdropDomEl);
-        }
-        var angularDomEl = angular.element('<div modal-window></div>');
-        angularDomEl.attr({
-          'template-url': modal.windowTemplateUrl,
-          'window-class': modal.windowClass,
-          'size': modal.size,
-          'index': openedWindows.length() - 1,
-          'animate': 'animate'
-        }).html(modal.content);
-        var modalDomEl = $compile(angularDomEl)(modal.scope);
-        openedWindows.top().value.modalDomEl = modalDomEl;
-        body.append(modalDomEl);
-        body.addClass(OPENED_MODAL_CLASS);
-      };
-      $modalStack.close = function(modalInstance, result) {
-        var modalWindow = openedWindows.get(modalInstance);
-        if (modalWindow) {
-          modalWindow.value.deferred.resolve(result);
-          removeModalWindow(modalInstance);
-        }
-      };
-      $modalStack.dismiss = function(modalInstance, reason) {
-        var modalWindow = openedWindows.get(modalInstance);
-        if (modalWindow) {
-          modalWindow.value.deferred.reject(reason);
-          removeModalWindow(modalInstance);
-        }
-      };
-      $modalStack.dismissAll = function(reason) {
-        var topModal = this.getTop();
-        while (topModal) {
-          this.dismiss(topModal.key, reason);
-          topModal = this.getTop();
-        }
-      };
-      $modalStack.getTop = function() {
-        return openedWindows.top();
-      };
-      return $modalStack;
-    }
-  ])
-  .provider('$modal', function() {
-    var $modalProvider = {
-      options: {
-        backdrop: true,
-        keyboard: true
-      },
-      $get: ['$injector', '$rootScope', '$q', '$http', '$templateCache', '$controller', '$modalStack',
-        function($injector, $rootScope, $q, $http, $templateCache, $controller, $modalStack) {
-          var $modal = {};
-
-          function getTemplatePromise(options) {
-            return options.template ? $q.when(options.template) :
-              $http.get(angular.isFunction(options.templateUrl) ? (options.templateUrl)() : options.templateUrl, {
-                cache: $templateCache
-              }).then(function(result) {
-                return result.data;
-              });
-          }
-
-          function getResolvePromises(resolves) {
-            var promisesArr = [];
-            angular.forEach(resolves, function(value) {
-              if (angular.isFunction(value) || angular.isArray(value)) {
-                promisesArr.push($q.when($injector.invoke(value)));
-              }
-            });
-            return promisesArr;
-          }
-          $modal.open = function(modalOptions) {
-            var modalResultDeferred = $q.defer();
-            var modalOpenedDeferred = $q.defer();
-            var modalInstance = {
-              result: modalResultDeferred.promise,
-              opened: modalOpenedDeferred.promise,
-              close: function(result) {
-                $modalStack.close(modalInstance, result);
-              },
-              dismiss: function(reason) {
-                $modalStack.dismiss(modalInstance, reason);
-              }
-            };
-            modalOptions = angular.extend({}, $modalProvider.options, modalOptions);
-            modalOptions.resolve = modalOptions.resolve || {};
-            if (!modalOptions.template && !modalOptions.templateUrl) {
-              throw new Error('One of template or templateUrl options is required.');
-            }
-            var templateAndResolvePromise =
-              $q.all([getTemplatePromise(modalOptions)].concat(getResolvePromises(modalOptions.resolve)));
-            templateAndResolvePromise.then(function resolveSuccess(tplAndVars) {
-              var modalScope = (modalOptions.scope || $rootScope).$new();
-              modalScope.$close = modalInstance.close;
-              modalScope.$dismiss = modalInstance.dismiss;
-              var ctrlInstance, ctrlLocals = {};
-              var resolveIter = 1;
-              if (modalOptions.controller) {
-                ctrlLocals.$scope = modalScope;
-                ctrlLocals.$modalInstance = modalInstance;
-                angular.forEach(modalOptions.resolve, function(value, key) {
-                  ctrlLocals[key] = tplAndVars[resolveIter++];
-                });
-                ctrlInstance = $controller(modalOptions.controller, ctrlLocals);
-                if (modalOptions.controllerAs) {
-                  modalScope[modalOptions.controllerAs] = ctrlInstance;
-                }
-              }
-              $modalStack.open(modalInstance, {
-                scope: modalScope,
-                deferred: modalResultDeferred,
-                content: tplAndVars[0],
-                backdrop: modalOptions.backdrop,
-                keyboard: modalOptions.keyboard,
-                backdropClass: modalOptions.backdropClass,
-                windowClass: modalOptions.windowClass,
-                windowTemplateUrl: modalOptions.windowTemplateUrl,
-                size: modalOptions.size
-              });
-            }, function resolveError(reason) {
-              modalResultDeferred.reject(reason);
-            });
-            templateAndResolvePromise.then(function() {
-              modalOpenedDeferred.resolve(true);
-            }, function() {
-              modalOpenedDeferred.reject(false);
-            });
-            return modalInstance;
-          };
-          return $modal;
-        }
-      ]
-    };
-    return $modalProvider;
-  });
-angular.module('ui.bootstrap.pagination', [])
-  .controller('PaginationController', ['$scope', '$attrs', '$parse', function($scope, $attrs, $parse) {
-    var self = this,
-      ngModelCtrl = {
-        $setViewValue: angular.noop
-      },
-      setNumPages = $attrs.numPages ? $parse($attrs.numPages).assign : angular.noop;
-    this.init = function(ngModelCtrl_, config) {
-      ngModelCtrl = ngModelCtrl_;
-      this.config = config;
-      ngModelCtrl.$render = function() {
-        self.render();
-      };
-      if ($attrs.itemsPerPage) {
-        $scope.$parent.$watch($parse($attrs.itemsPerPage), function(value) {
-          self.itemsPerPage = parseInt(value, 10);
-          $scope.totalPages = self.calculateTotalPages();
-        });
-      } else {
-        this.itemsPerPage = config.itemsPerPage;
-      }
-    };
-    this.calculateTotalPages = function() {
-      var totalPages = this.itemsPerPage < 1 ? 1 : Math.ceil($scope.totalItems / this.itemsPerPage);
-      return Math.max(totalPages || 0, 1);
-    };
-    this.render = function() {
-      $scope.page = parseInt(ngModelCtrl.$viewValue, 10) || 1;
-    };
-    $scope.selectPage = function(page) {
-      if ($scope.page !== page && page > 0 && page <= $scope.totalPages) {
-        ngModelCtrl.$setViewValue(page);
-        ngModelCtrl.$render();
-      }
-    };
-    $scope.getText = function(key) {
-      return $scope[key + 'Text'] || self.config[key + 'Text'];
-    };
-    $scope.noPrevious = function() {
-      return $scope.page === 1;
-    };
-    $scope.noNext = function() {
-      return $scope.page === $scope.totalPages;
-    };
-    $scope.$watch('totalItems', function() {
-      $scope.totalPages = self.calculateTotalPages();
-    });
-    $scope.$watch('totalPages', function(value) {
-      setNumPages($scope.$parent, value);
-      if ($scope.page > value) {
-        $scope.selectPage(value);
-      } else {
-        ngModelCtrl.$render();
-      }
-    });
-  }])
-  .constant('paginationConfig', {
-    itemsPerPage: 10,
-    boundaryLinks: false,
-    directionLinks: true,
-    firstText: 'First',
-    previousText: 'Previous',
-    nextText: 'Next',
-    lastText: 'Last',
-    rotate: true
-  })
-  .directive('pagination', ['$parse', 'paginationConfig', function($parse, paginationConfig) {
-    return {
-      restrict: 'EA',
-      scope: {
-        totalItems: '=',
-        firstText: '@',
-        previousText: '@',
-        nextText: '@',
-        lastText: '@'
-      },
-      require: ['pagination', '?ngModel'],
-      controller: 'PaginationController',
-      templateUrl: 'template/pagination/pagination.html',
-      replace: true,
-      link: function(scope, element, attrs, ctrls) {
-        var paginationCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        if (!ngModelCtrl) {
-          return;
-        }
-        var maxSize = angular.isDefined(attrs.maxSize) ? scope.$parent.$eval(attrs.maxSize) : paginationConfig.maxSize,
-          rotate = angular.isDefined(attrs.rotate) ? scope.$parent.$eval(attrs.rotate) : paginationConfig.rotate;
-        scope.boundaryLinks = angular.isDefined(attrs.boundaryLinks) ? scope.$parent.$eval(attrs.boundaryLinks) : paginationConfig.boundaryLinks;
-        scope.directionLinks = angular.isDefined(attrs.directionLinks) ? scope.$parent.$eval(attrs.directionLinks) : paginationConfig.directionLinks;
-        paginationCtrl.init(ngModelCtrl, paginationConfig);
-        if (attrs.maxSize) {
-          scope.$parent.$watch($parse(attrs.maxSize), function(value) {
-            maxSize = parseInt(value, 10);
-            paginationCtrl.render();
-          });
-        }
-
-        function makePage(number, text, isActive) {
-          return {
-            number: number,
-            text: text,
-            active: isActive
-          };
-        }
-
-        function getPages(currentPage, totalPages) {
-          var pages = [];
-          var startPage = 1,
-            endPage = totalPages;
-          var isMaxSized = (angular.isDefined(maxSize) && maxSize < totalPages);
-          if (isMaxSized) {
-            if (rotate) {
-              startPage = Math.max(currentPage - Math.floor(maxSize / 2), 1);
-              endPage = startPage + maxSize - 1;
-              if (endPage > totalPages) {
-                endPage = totalPages;
-                startPage = endPage - maxSize + 1;
-              }
-            } else {
-              startPage = ((Math.ceil(currentPage / maxSize) - 1) * maxSize) + 1;
-              endPage = Math.min(startPage + maxSize - 1, totalPages);
-            }
-          }
-          for (var number = startPage; number <= endPage; number++) {
-            var page = makePage(number, number, number === currentPage);
-            pages.push(page);
-          }
-          if (isMaxSized && !rotate) {
-            if (startPage > 1) {
-              var previousPageSet = makePage(startPage - 1, '...', false);
-              pages.unshift(previousPageSet);
-            }
-            if (endPage < totalPages) {
-              var nextPageSet = makePage(endPage + 1, '...', false);
-              pages.push(nextPageSet);
-            }
-          }
-          return pages;
-        }
-        var originalRender = paginationCtrl.render;
-        paginationCtrl.render = function() {
-          originalRender();
-          if (scope.page > 0 && scope.page <= scope.totalPages) {
-            scope.pages = getPages(scope.page, scope.totalPages);
-          }
-        };
-      }
-    };
-  }])
-  .constant('pagerConfig', {
-    itemsPerPage: 10,
-    previousText: '« Previous',
-    nextText: 'Next »',
-    align: true
-  })
-  .directive('pager', ['pagerConfig', function(pagerConfig) {
-    return {
-      restrict: 'EA',
-      scope: {
-        totalItems: '=',
-        previousText: '@',
-        nextText: '@'
-      },
-      require: ['pager', '?ngModel'],
-      controller: 'PaginationController',
-      templateUrl: 'template/pagination/pager.html',
-      replace: true,
-      link: function(scope, element, attrs, ctrls) {
-        var paginationCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        if (!ngModelCtrl) {
-          return;
-        }
-        scope.align = angular.isDefined(attrs.align) ? scope.$parent.$eval(attrs.align) : pagerConfig.align;
-        paginationCtrl.init(ngModelCtrl, pagerConfig);
-      }
-    };
-  }]);
-angular.module('ui.bootstrap.tooltip', ['ui.bootstrap.position', 'ui.bootstrap.bindHtml'])
-  .provider('$tooltip', function() {
-    var defaultOptions = {
-      placement: 'top',
-      animation: true,
-      popupDelay: 0
-    };
-    var triggerMap = {
-      'mouseenter': 'mouseleave',
-      'click': 'click',
-      'focus': 'blur'
-    };
-    var globalOptions = {};
-    this.options = function(value) {
-      angular.extend(globalOptions, value);
-    };
-    this.setTriggers = function setTriggers(triggers) {
-      angular.extend(triggerMap, triggers);
-    };
-
-    function snake_case(name) {
-      var regexp = /[A-Z]/g;
-      var separator = '-';
-      return name.replace(regexp, function(letter, pos) {
-        return (pos ? separator : '') + letter.toLowerCase();
-      });
-    }
-    this.$get = ['$window', '$compile', '$timeout', '$document', '$position', '$interpolate', function($window, $compile, $timeout, $document, $position, $interpolate) {
-      return function $tooltip(type, prefix, defaultTriggerShow) {
-        var options = angular.extend({}, defaultOptions, globalOptions);
-
-        function getTriggers(trigger) {
-          var show = trigger || options.trigger || defaultTriggerShow;
-          var hide = triggerMap[show] || show;
-          return {
-            show: show,
-            hide: hide
-          };
-        }
-        var directiveName = snake_case(type);
-        var startSym = $interpolate.startSymbol();
-        var endSym = $interpolate.endSymbol();
-        var template =
-          '<div ' + directiveName + '-popup ' +
-          'title="' + startSym + 'title' + endSym + '" ' +
-          'content="' + startSym + 'content' + endSym + '" ' +
-          'placement="' + startSym + 'placement' + endSym + '" ' +
-          'animation="animation" ' +
-          'is-open="isOpen"' +
-          '>' +
-          '</div>';
-        return {
-          restrict: 'EA',
-          compile: function(tElem, tAttrs) {
-            var tooltipLinker = $compile(template);
-            return function link(scope, element, attrs) {
-              var tooltip;
-              var tooltipLinkedScope;
-              var transitionTimeout;
-              var popupTimeout;
-              var appendToBody = angular.isDefined(options.appendToBody) ? options.appendToBody : false;
-              var triggers = getTriggers(undefined);
-              var hasEnableExp = angular.isDefined(attrs[prefix + 'Enable']);
-              var ttScope = scope.$new(true);
-              var positionTooltip = function() {
-                var ttPosition = $position.positionElements(element, tooltip, ttScope.placement, appendToBody);
-                ttPosition.top += 'px';
-                ttPosition.left += 'px';
-                tooltip.css(ttPosition);
-              };
-              ttScope.isOpen = false;
-
-              function toggleTooltipBind() {
-                if (!ttScope.isOpen) {
-                  showTooltipBind();
-                } else {
-                  hideTooltipBind();
-                }
-              }
-
-              function showTooltipBind() {
-                if (hasEnableExp && !scope.$eval(attrs[prefix + 'Enable'])) {
-                  return;
-                }
-                prepareTooltip();
-                if (ttScope.popupDelay) {
-                  if (!popupTimeout) {
-                    popupTimeout = $timeout(show, ttScope.popupDelay, false);
-                    popupTimeout.then(function(reposition) {
-                      reposition();
-                    });
-                  }
-                } else {
-                  show()();
-                }
-              }
-
-              function hideTooltipBind() {
-                scope.$apply(function() {
-                  hide();
-                });
-              }
-
-              function show() {
-                popupTimeout = null;
-                if (transitionTimeout) {
-                  $timeout.cancel(transitionTimeout);
-                  transitionTimeout = null;
-                }
-                if (!ttScope.content) {
-                  return angular.noop;
-                }
-                createTooltip();
-                tooltip.css({
-                  top: 0,
-                  left: 0,
-                  display: 'block'
-                });
-                ttScope.$digest();
-                positionTooltip();
-                ttScope.isOpen = true;
-                ttScope.$digest();
-                return positionTooltip;
-              }
-
-              function hide() {
-                ttScope.isOpen = false;
-                $timeout.cancel(popupTimeout);
-                popupTimeout = null;
-                if (ttScope.animation) {
-                  if (!transitionTimeout) {
-                    transitionTimeout = $timeout(removeTooltip, 500);
-                  }
-                } else {
-                  removeTooltip();
-                }
-              }
-
-              function createTooltip() {
-                if (tooltip) {
-                  removeTooltip();
-                }
-                tooltipLinkedScope = ttScope.$new();
-                tooltip = tooltipLinker(tooltipLinkedScope, function(tooltip) {
-                  if (appendToBody) {
-                    $document.find('body').append(tooltip);
-                  } else {
-                    element.after(tooltip);
-                  }
-                });
-              }
-
-              function removeTooltip() {
-                transitionTimeout = null;
-                if (tooltip) {
-                  tooltip.remove();
-                  tooltip = null;
-                }
-                if (tooltipLinkedScope) {
-                  tooltipLinkedScope.$destroy();
-                  tooltipLinkedScope = null;
-                }
-              }
-
-              function prepareTooltip() {
-                prepPlacement();
-                prepPopupDelay();
-              }
-              attrs.$observe(type, function(val) {
-                ttScope.content = val;
-                if (!val && ttScope.isOpen) {
-                  hide();
-                }
-              });
-              attrs.$observe(prefix + 'Title', function(val) {
-                ttScope.title = val;
-              });
-
-              function prepPlacement() {
-                var val = attrs[prefix + 'Placement'];
-                ttScope.placement = angular.isDefined(val) ? val : options.placement;
-              }
-
-              function prepPopupDelay() {
-                var val = attrs[prefix + 'PopupDelay'];
-                var delay = parseInt(val, 10);
-                ttScope.popupDelay = !isNaN(delay) ? delay : options.popupDelay;
-              }
-              var unregisterTriggers = function() {
-                element.unbind(triggers.show, showTooltipBind);
-                element.unbind(triggers.hide, hideTooltipBind);
-              };
-
-              function prepTriggers() {
-                var val = attrs[prefix + 'Trigger'];
-                unregisterTriggers();
-                triggers = getTriggers(val);
-                if (triggers.show === triggers.hide) {
-                  element.bind(triggers.show, toggleTooltipBind);
-                } else {
-                  element.bind(triggers.show, showTooltipBind);
-                  element.bind(triggers.hide, hideTooltipBind);
-                }
-              }
-              prepTriggers();
-              var animation = scope.$eval(attrs[prefix + 'Animation']);
-              ttScope.animation = angular.isDefined(animation) ? !!animation : options.animation;
-              var appendToBodyVal = scope.$eval(attrs[prefix + 'AppendToBody']);
-              appendToBody = angular.isDefined(appendToBodyVal) ? appendToBodyVal : appendToBody;
-              if (appendToBody) {
-                scope.$on('$locationChangeSuccess', function closeTooltipOnLocationChangeSuccess() {
-                  if (ttScope.isOpen) {
-                    hide();
-                  }
-                });
-              }
-              scope.$on('$destroy', function onDestroyTooltip() {
-                $timeout.cancel(transitionTimeout);
-                $timeout.cancel(popupTimeout);
-                unregisterTriggers();
-                removeTooltip();
-                ttScope = null;
-              });
-            };
-          }
-        };
-      };
-    }];
-  })
-  .directive('tooltipPopup', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      scope: {
-        content: '@',
-        placement: '@',
-        animation: '&',
-        isOpen: '&'
-      },
-      templateUrl: 'template/tooltip/tooltip-popup.html'
-    };
-  })
-  .directive('tooltip', ['$tooltip', function($tooltip) {
-    return $tooltip('tooltip', 'tooltip', 'mouseenter');
-  }])
-  .directive('tooltipHtmlUnsafePopup', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      scope: {
-        content: '@',
-        placement: '@',
-        animation: '&',
-        isOpen: '&'
-      },
-      templateUrl: 'template/tooltip/tooltip-html-unsafe-popup.html'
-    };
-  })
-  .directive('tooltipHtmlUnsafe', ['$tooltip', function($tooltip) {
-    return $tooltip('tooltipHtmlUnsafe', 'tooltip', 'mouseenter');
-  }]);
-angular.module('ui.bootstrap.popover', ['ui.bootstrap.tooltip'])
-  .directive('popoverPopup', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      scope: {
-        title: '@',
-        content: '@',
-        placement: '@',
-        animation: '&',
-        isOpen: '&'
-      },
-      templateUrl: 'template/popover/popover.html'
-    };
-  })
-  .directive('popover', ['$tooltip', function($tooltip) {
-    return $tooltip('popover', 'popover', 'click');
-  }]);
-angular.module('ui.bootstrap.progressbar', [])
-  .constant('progressConfig', {
-    animate: true,
-    max: 100
-  })
-  .controller('ProgressController', ['$scope', '$attrs', 'progressConfig', function($scope, $attrs, progressConfig) {
-    var self = this,
-      animate = angular.isDefined($attrs.animate) ? $scope.$parent.$eval($attrs.animate) : progressConfig.animate;
-    this.bars = [];
-    $scope.max = angular.isDefined($attrs.max) ? $scope.$parent.$eval($attrs.max) : progressConfig.max;
-    this.addBar = function(bar, element) {
-      if (!animate) {
-        element.css({
-          'transition': 'none'
-        });
-      }
-      this.bars.push(bar);
-      bar.$watch('value', function(value) {
-        bar.percent = +(100 * value / $scope.max).toFixed(2);
-      });
-      bar.$on('$destroy', function() {
-        element = null;
-        self.removeBar(bar);
-      });
-    };
-    this.removeBar = function(bar) {
-      this.bars.splice(this.bars.indexOf(bar), 1);
-    };
-  }])
-  .directive('progress', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      transclude: true,
-      controller: 'ProgressController',
-      require: 'progress',
-      scope: {},
-      templateUrl: 'template/progressbar/progress.html'
-    };
-  })
-  .directive('bar', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      transclude: true,
-      require: '^progress',
-      scope: {
-        value: '=',
-        type: '@'
-      },
-      templateUrl: 'template/progressbar/bar.html',
-      link: function(scope, element, attrs, progressCtrl) {
-        progressCtrl.addBar(scope, element);
-      }
-    };
-  })
-  .directive('progressbar', function() {
-    return {
-      restrict: 'EA',
-      replace: true,
-      transclude: true,
-      controller: 'ProgressController',
-      scope: {
-        value: '=',
-        type: '@'
-      },
-      templateUrl: 'template/progressbar/progressbar.html',
-      link: function(scope, element, attrs, progressCtrl) {
-        progressCtrl.addBar(scope, angular.element(element.children()[0]));
-      }
-    };
-  });
-angular.module('ui.bootstrap.rating', [])
-  .constant('ratingConfig', {
-    max: 5,
-    stateOn: null,
-    stateOff: null
-  })
-  .controller('RatingController', ['$scope', '$attrs', 'ratingConfig', function($scope, $attrs, ratingConfig) {
-    var ngModelCtrl = {
-      $setViewValue: angular.noop
-    };
-    this.init = function(ngModelCtrl_) {
-      ngModelCtrl = ngModelCtrl_;
-      ngModelCtrl.$render = this.render;
-      this.stateOn = angular.isDefined($attrs.stateOn) ? $scope.$parent.$eval($attrs.stateOn) : ratingConfig.stateOn;
-      this.stateOff = angular.isDefined($attrs.stateOff) ? $scope.$parent.$eval($attrs.stateOff) : ratingConfig.stateOff;
-      var ratingStates = angular.isDefined($attrs.ratingStates) ? $scope.$parent.$eval($attrs.ratingStates) :
-        new Array(angular.isDefined($attrs.max) ? $scope.$parent.$eval($attrs.max) : ratingConfig.max);
-      $scope.range = this.buildTemplateObjects(ratingStates);
-    };
-    this.buildTemplateObjects = function(states) {
-      for (var i = 0, n = states.length; i < n; i++) {
-        states[i] = angular.extend({
-          index: i
-        }, {
-          stateOn: this.stateOn,
-          stateOff: this.stateOff
-        }, states[i]);
-      }
-      return states;
-    };
-    $scope.rate = function(value) {
-      if (!$scope.readonly && value >= 0 && value <= $scope.range.length) {
-        ngModelCtrl.$setViewValue(value);
-        ngModelCtrl.$render();
-      }
-    };
-    $scope.enter = function(value) {
-      if (!$scope.readonly) {
-        $scope.value = value;
-      }
-      $scope.onHover({
-        value: value
-      });
-    };
-    $scope.reset = function() {
-      $scope.value = ngModelCtrl.$viewValue;
-      $scope.onLeave();
-    };
-    $scope.onKeydown = function(evt) {
-      if (/(37|38|39|40)/.test(evt.which)) {
-        evt.preventDefault();
-        evt.stopPropagation();
-        $scope.rate($scope.value + (evt.which === 38 || evt.which === 39 ? 1 : -1));
-      }
-    };
-    this.render = function() {
-      $scope.value = ngModelCtrl.$viewValue;
-    };
-  }])
-  .directive('rating', function() {
-    return {
-      restrict: 'EA',
-      require: ['rating', 'ngModel'],
-      scope: {
-        readonly: '=?',
-        onHover: '&',
-        onLeave: '&'
-      },
-      controller: 'RatingController',
-      templateUrl: 'template/rating/rating.html',
-      replace: true,
-      link: function(scope, element, attrs, ctrls) {
-        var ratingCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        if (ngModelCtrl) {
-          ratingCtrl.init(ngModelCtrl);
-        }
-      }
-    };
-  });
-angular.module('ui.bootstrap.tabs', [])
-  .controller('TabsetController', ['$scope', function TabsetCtrl($scope) {
-    var ctrl = this,
-      tabs = ctrl.tabs = $scope.tabs = [];
-    ctrl.select = function(selectedTab) {
-      angular.forEach(tabs, function(tab) {
-        if (tab.active && tab !== selectedTab) {
-          tab.active = false;
-          tab.onDeselect();
-        }
-      });
-      selectedTab.active = true;
-      selectedTab.onSelect();
-    };
-    ctrl.addTab = function addTab(tab) {
-      tabs.push(tab);
-      if (tabs.length === 1) {
-        tab.active = true;
-      } else if (tab.active) {
-        ctrl.select(tab);
-      }
-    };
-    ctrl.removeTab = function removeTab(tab) {
-      var index = tabs.indexOf(tab);
-      if (tab.active && tabs.length > 1 && !destroyed) {
-        var newActiveIndex = index == tabs.length - 1 ? index - 1 : index + 1;
-        ctrl.select(tabs[newActiveIndex]);
-      }
-      tabs.splice(index, 1);
-    };
-    var destroyed;
-    $scope.$on('$destroy', function() {
-      destroyed = true;
-    });
-  }])
-  .directive('tabset', function() {
-    return {
-      restrict: 'EA',
-      transclude: true,
-      replace: true,
-      scope: {
-        type: '@'
-      },
-      controller: 'TabsetController',
-      templateUrl: 'template/tabs/tabset.html',
-      link: function(scope, element, attrs) {
-        scope.vertical = angular.isDefined(attrs.vertical) ? scope.$parent.$eval(attrs.vertical) : false;
-        scope.justified = angular.isDefined(attrs.justified) ? scope.$parent.$eval(attrs.justified) : false;
-      }
-    };
-  })
-  .directive('tab', ['$parse', function($parse) {
-    return {
-      require: '^tabset',
-      restrict: 'EA',
-      replace: true,
-      templateUrl: 'template/tabs/tab.html',
-      transclude: true,
-      scope: {
-        active: '=?',
-        heading: '@',
-        onSelect: '&select',
-        onDeselect: '&deselect'
-      },
-      controller: function() {},
-      compile: function(elm, attrs, transclude) {
-        return function postLink(scope, elm, attrs, tabsetCtrl) {
-          scope.$watch('active', function(active) {
-            if (active) {
-              tabsetCtrl.select(scope);
-            }
-          });
-          scope.disabled = false;
-          if (attrs.disabled) {
-            scope.$parent.$watch($parse(attrs.disabled), function(value) {
-              scope.disabled = !!value;
-            });
-          }
-          scope.select = function() {
-            if (!scope.disabled) {
-              scope.active = true;
-            }
-          };
-          tabsetCtrl.addTab(scope);
-          scope.$on('$destroy', function() {
-            tabsetCtrl.removeTab(scope);
-          });
-          scope.$transcludeFn = transclude;
-        };
-      }
-    };
-  }])
-  .directive('tabHeadingTransclude', [function() {
-    return {
-      restrict: 'A',
-      require: '^tab',
-      link: function(scope, elm, attrs, tabCtrl) {
-        scope.$watch('headingElement', function updateHeadingElement(heading) {
-          if (heading) {
-            elm.html('');
-            elm.append(heading);
-          }
-        });
-      }
-    };
-  }])
-  .directive('tabContentTransclude', function() {
-    return {
-      restrict: 'A',
-      require: '^tabset',
-      link: function(scope, elm, attrs) {
-        var tab = scope.$eval(attrs.tabContentTransclude);
-        tab.$transcludeFn(tab.$parent, function(contents) {
-          angular.forEach(contents, function(node) {
-            if (isTabHeading(node)) {
-              tab.headingElement = node;
-            } else {
-              elm.append(node);
-            }
-          });
-        });
-      }
-    };
-
-    function isTabHeading(node) {
-      return node.tagName && (
-        node.hasAttribute('tab-heading') ||
-        node.hasAttribute('data-tab-heading') ||
-        node.tagName.toLowerCase() === 'tab-heading' ||
-        node.tagName.toLowerCase() === 'data-tab-heading'
-      );
-    }
-  });
-angular.module('ui.bootstrap.timepicker', [])
-  .constant('timepickerConfig', {
-    hourStep: 1,
-    minuteStep: 1,
-    showMeridian: true,
-    meridians: null,
-    readonlyInput: false,
-    mousewheel: true
-  })
-  .controller('TimepickerController', ['$scope', '$attrs', '$parse', '$log', '$locale', 'timepickerConfig', function($scope, $attrs, $parse, $log, $locale, timepickerConfig) {
-    var selected = new Date(),
-      ngModelCtrl = {
-        $setViewValue: angular.noop
-      },
-      meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
-    this.init = function(ngModelCtrl_, inputs) {
-      ngModelCtrl = ngModelCtrl_;
-      ngModelCtrl.$render = this.render;
-      var hoursInputEl = inputs.eq(0),
-        minutesInputEl = inputs.eq(1);
-      var mousewheel = angular.isDefined($attrs.mousewheel) ? $scope.$parent.$eval($attrs.mousewheel) : timepickerConfig.mousewheel;
-      if (mousewheel) {
-        this.setupMousewheelEvents(hoursInputEl, minutesInputEl);
-      }
-      $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
-      this.setupInputEvents(hoursInputEl, minutesInputEl);
-    };
-    var hourStep = timepickerConfig.hourStep;
-    if ($attrs.hourStep) {
-      $scope.$parent.$watch($parse($attrs.hourStep), function(value) {
-        hourStep = parseInt(value, 10);
-      });
-    }
-    var minuteStep = timepickerConfig.minuteStep;
-    if ($attrs.minuteStep) {
-      $scope.$parent.$watch($parse($attrs.minuteStep), function(value) {
-        minuteStep = parseInt(value, 10);
-      });
-    }
-    $scope.showMeridian = timepickerConfig.showMeridian;
-    if ($attrs.showMeridian) {
-      $scope.$parent.$watch($parse($attrs.showMeridian), function(value) {
-        $scope.showMeridian = !!value;
-        if (ngModelCtrl.$error.time) {
-          var hours = getHoursFromTemplate(),
-            minutes = getMinutesFromTemplate();
-          if (angular.isDefined(hours) && angular.isDefined(minutes)) {
-            selected.setHours(hours);
-            refresh();
-          }
+          parentDefer.resolve();
         } else {
-          updateTemplate();
+          parentDefer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_FAIL_WRONG_FORM],
+            url, openedFormTable));
         }
-      });
-    }
-
-    function getHoursFromTemplate() {
-      var hours = parseInt($scope.hours, 10);
-      var valid = ($scope.showMeridian) ? (hours > 0 && hours < 13) : (hours >= 0 && hours < 24);
-      if (!valid) {
-        return undefined;
+      } else {
+        parentDefer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_FAIL_INVALID_FORM], url));
       }
-      if ($scope.showMeridian) {
-        if (hours === 12) {
-          hours = 0;
-        }
-        if ($scope.meridian === meridians[1]) {
-          hours = hours + 12;
+    }
+  }
+
+  function openPortalPage(portalUrlSfx, pageId, queryParams, waitTimeout) {
+    var parentDefer = $q.defer();
+    self.setiFrameOnloadFunction(whenFrameCleared);
+    self.iFrame.src = "";
+    return parentDefer.promise;
+
+    function whenFrameCleared() {
+      self.setiFrameOnloadFunction(defaultAssertFrameLoaded);
+      var urlParameters = {};
+      urlParameters["sysparm_atf_step_sys_id"] = self.currentStepResult.sys_atf_step_sys_id;
+      urlParameters["sysparm_atf_test_result_sys_id"] = self.currentStepBatchResult.sys_atf_test_result_sys_id;
+      urlParameters["sysparm_atf_debug"] = self.isDebugEnabled;
+      urlParameters["v"] = 1;
+      urlParameters["id"] = pageId;
+      for (var p in queryParams) {
+        if (queryParams.hasOwnProperty(p)) {
+          urlParameters[p] = queryParams[p];
         }
       }
-      return hours;
+      self.atfFormInterceptor.interceptFormLoadURLWithRollbackContextId(urlParameters);
+      self.atfFormInterceptor.interceptFormLoadURLWithTestRunnerIndicator(urlParameters);
+      var completeUrl = "/" + portalUrlSfx + "?" + $httpParamSerializer(urlParameters);
+      var emptySrcLogFunc = (!self.frameWindow["console"]) ? console.log : self.frameWindow.console.log;
+      self.iFrame.src = completeUrl;
+      self.overwriteFrameFunctions(emptySrcLogFunc);
     }
 
-    function getMinutesFromTemplate() {
-      var minutes = parseInt($scope.minutes, 10);
-      return (minutes >= 0 && minutes < 60) ? minutes : undefined;
-    }
-
-    function pad(value) {
-      return (angular.isDefined(value) && value.toString().length < 2) ? '0' + value : value;
-    }
-    this.setupMousewheelEvents = function(hoursInputEl, minutesInputEl) {
-      var isScrollingUp = function(e) {
-        if (e.originalEvent) {
-          e = e.originalEvent;
-        }
-        var delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
-        return (e.detail || delta > 0);
+    function defaultAssertFrameLoaded() {
+      if (self.cleariFrameOnloadFunction) {
+        self.cleariFrameOnloadFunction();
+      }
+      var resolved = false;
+      var triggerPortalPageLoaded = function() {
+        parentDefer.resolve();
+        resolved = true;
       };
-      hoursInputEl.bind('mousewheel wheel', function(e) {
-        $scope.$apply((isScrollingUp(e)) ? $scope.incrementHours() : $scope.decrementHours());
-        e.preventDefault();
-      });
-      minutesInputEl.bind('mousewheel wheel', function(e) {
-        $scope.$apply((isScrollingUp(e)) ? $scope.incrementMinutes() : $scope.decrementMinutes());
-        e.preventDefault();
-      });
-    };
-    this.setupInputEvents = function(hoursInputEl, minutesInputEl) {
-      if ($scope.readonlyInput) {
-        $scope.updateHours = angular.noop;
-        $scope.updateMinutes = angular.noop;
+      self._expose('triggerPortalPageLoaded', triggerPortalPageLoaded);
+      $timeout(function() {
+        if (!resolved) {
+          parentDefer.reject();
+        }
+      }, waitTimeout);
+    }
+  }
+
+  function openURL(url) {
+    var stepId = self.currentStepResult.sys_atf_step_sys_id;
+    var testResultId = self.currentStepBatchResult.sys_atf_test_result_sys_id;
+    var rollbackContextId = self.atfFormInterceptor.getRollbackContextId();
+    return ATFOpenURL.openURL(url, stepId, testResultId, self.isDebugEnabled, rollbackContextId);
+  }
+
+  function openCatalogItem(catItemId) {
+    var parentDefer = $q.defer();
+    self.setiFrameOnloadFunction(whenFrameCleared);
+    self.iFrame.src = "";
+    return parentDefer.promise;
+
+    function whenFrameCleared() {
+      self.setiFrameOnloadFunction(defaultAssertFrameLoaded);
+      var urlParameters = {};
+      urlParameters["sysparm_atf_step_sys_id"] = self.currentStepResult.sys_atf_step_sys_id;
+      urlParameters["sysparm_atf_test_result_sys_id"] = self.currentStepBatchResult.sys_atf_test_result_sys_id;
+      urlParameters["sysparm_atf_debug"] = self.isDebugEnabled;
+      urlParameters["sysparm_id"] = catItemId;
+      urlParameters["v"] = 1;
+      self.atfFormInterceptor.interceptFormLoadURLWithRollbackContextId(urlParameters);
+      self.atfFormInterceptor.interceptFormLoadURLWithTestRunnerIndicator(urlParameters);
+      var completeUrl = "com.glideapp.servicecatalog_cat_item_view.do?" + $httpParamSerializer(urlParameters);
+      var emptySrcLogFunc = (!self.frameWindow["console"]) ? console.log : self.frameWindow.console.log;
+      self.iFrame.src = completeUrl;
+      self.overwriteFrameFunctions(emptySrcLogFunc);
+    }
+
+    function defaultAssertFrameLoaded() {
+      if (self.cleariFrameOnloadFunction)
+        self.cleariFrameOnloadFunction();
+      if (self._getFrameGForm()) {
+        var openedCatItem = self._getFrameGForm().getUniqueValue();
+        if (openedCatItem == catItemId) {
+          if (self.frameWindow.CustomEvent)
+            self.frameWindow.CustomEvent.observe('glideform:script_error', function(err) {
+              console.error(err)
+            });
+          parentDefer.resolve();
+        } else {
+          parentDefer.reject(formatMessage(new GwtMessage().getMessage(self.messageMap[self.MESSAGE_KEY_FAIL_WRONG_CATALOG_ITEM]), catItemId, openedCatItem));
+        }
+      } else {
+        parentDefer.reject(formatMessage(new GwtMessage().getMessage(self.messageMap[self.MESSAGE_KEY_FAIL_INVALID_ACCESS_CATALOG_ITEM]), catItemId));
+      }
+    }
+  }
+
+  function atflog(msg) {
+    if (self.isDebugEnabled)
+      console.log(msg);
+    else {
+      if (self._originalLogFunction.call)
+        self._originalLogFunction.call(console, msg);
+    }
+  }
+
+  function atflogDebug(msg) {
+    if (self.isDebugEnabled)
+      atflog("DEBUG " + msg);
+  }
+
+  function overwriteFrameFunctions(currFramesLogFunc) {
+    var overwriteFuncIntvlId = setInterval(_overwriteFrameFunctions, 1);
+    return overwriteFuncIntvlId;
+
+    function _overwriteFrameFunctions() {
+      if (!self.frameWindow["console"])
+        return;
+      var frameLog = self.frameWindow.console.log;
+      if (currFramesLogFunc === frameLog)
+        return;
+      window.clearInterval(overwriteFuncIntvlId);
+      self.frameWindow.alert = alert;
+      self.frameWindow.confirm = confirm;
+      self.frameWindow.prompt = prompt;
+      self.frameWindow.console.log = console.log;
+      self.frameWindow.console.error = console.error;
+      self.frameWindow['onerror'] = function(msg) {
+        console.error(msg);
+      };
+    }
+  }
+
+  function hidePreferences() {
+    self.showPreferences = false;
+    var preferencesTab = $element.find("#preferencesTab");
+    preferencesTab.width("0");
+    preferencesTab.css("visibility", "hidden");
+  }
+
+  function togglePreferences() {
+    if (self.showPreferences)
+      self.hidePreferences();
+    else
+      self.showPreferencesTab();
+  }
+
+  function showPreferencesTab() {
+    self.showPreferences = true;
+    var preferencesTab = $element.find("#preferencesTab");
+    preferencesTab.width("340");
+    preferencesTab.css("visibility", "visible");
+  }
+
+  function screenshotsModeChanged() {
+    self.snNotification.show("info", self.screenshotsModeManager.getScreenshotsModeChangedMessage());
+  }
+
+  function _getFileNameNoExtension() {
+    var fileEnding = (self.currentStepBatchResult.hasFailure == true) ? "_failed" : "";
+    return "screenshot_" + self._getFileFormattedUTCNowDateTime() + fileEnding;
+  }
+
+  function togglePreferencesDropdown() {
+    if (!self.lockDownScreenshotModesWhileRunningTest)
+      return;
+    var screenshotsModeDropdown = $element.find("#screenshotOptions");
+    if (self.isRunningTest) {
+      screenshotsModeDropdown.addClass("disabled");
+      screenshotsModeDropdown.attr("disabled", "disabled");
+    } else {
+      screenshotsModeDropdown.removeClass("disabled");
+      screenshotsModeDropdown.removeAttr("disabled");
+    }
+  }
+
+  function _setupScheduledTests() {
+    if (!self.isSchedulePluginActive)
+      return;
+    if (!self.runScheduledTestsOnly)
+      return;
+    return _ajaxToggleRunnerType('scheduled');
+  }
+
+  function toggleRunScheduledTestsOnly() {
+    var newCheckedValue = document.getElementById("runScheduledTestsOnlyMode").checked;
+    _resetRunScheduledTestsOnlyValue(!newCheckedValue);
+    if (self.isRunningTest) {
+      self.snNotification.show("info", formatMessage(self.messageMap[self.MESSAGE_KEY_SCHEDULE_TOGGLE_ERROR_TEST_RUNNING]));
+      return;
+    }
+    var confirmationTitle;
+    var confirmationMsg;
+    var newRunnerType;
+    if (newCheckedValue) {
+      confirmationTitle = self.messageMap[self.MESSAGE_KEY_SCHED_RUN_SCHEDULED_TESTS_ONLY];
+      confirmationMsg = self.messageMap[self.MESSAGE_KEY_CONFIRM_SCHEDULE_SETUP];
+      newRunnerType = 'scheduled';
+    } else {
+      confirmationTitle = self.messageMap[self.MESSAGE_KEY_SCHED_RUN_MANUAL_TESTS_ONLY];
+      confirmationMsg = self.messageMap[self.MESSAGE_KEY_CONFIRM_SCHEDULE_TEARDOWN];
+      newRunnerType = 'manual';
+    }
+    var dialogClass = window.GlideModal ? GlideModal : GlideDialogWindow;
+    var dialog = new dialogClass('glide_confirm_standard');
+    dialog.setTitle(confirmationTitle);
+    dialog.setPreference('warning', true);
+    dialog.setPreference('title', confirmationMsg);
+    dialog.setPreference('defaultButton', 'ok_button');
+    dialog.setPreference('focusTrap', true);
+    dialog.setPreference("onPromptComplete", function() {
+      if (self.isRunningTest) {
+        self.snNotification.show("info", formatMessage(self.messageMap[self.MESSAGE_KEY_SCHEDULE_TOGGLE_ERROR_TEST_RUNNING]));
         return;
       }
-      var invalidate = function(invalidHours, invalidMinutes) {
-        ngModelCtrl.$setViewValue(null);
-        ngModelCtrl.$setValidity('time', false);
-        if (angular.isDefined(invalidHours)) {
-          $scope.invalidHours = invalidHours;
-        }
-        if (angular.isDefined(invalidMinutes)) {
-          $scope.invalidMinutes = invalidMinutes;
-        }
-      };
-      $scope.updateHours = function() {
-        var hours = getHoursFromTemplate();
-        if (angular.isDefined(hours)) {
-          selected.setHours(hours);
-          refresh('h');
-        } else {
-          invalidate(true);
-        }
-      };
-      hoursInputEl.bind('blur', function(e) {
-        if (!$scope.invalidHours && $scope.hours < 10) {
-          $scope.$apply(function() {
-            $scope.hours = pad($scope.hours);
-          });
-        }
-      });
-      $scope.updateMinutes = function() {
-        var minutes = getMinutesFromTemplate();
-        if (angular.isDefined(minutes)) {
-          selected.setMinutes(minutes);
-          refresh('m');
-        } else {
-          invalidate(undefined, true);
-        }
-      };
-      minutesInputEl.bind('blur', function(e) {
-        if (!$scope.invalidMinutes && $scope.minutes < 10) {
-          $scope.$apply(function() {
-            $scope.minutes = pad($scope.minutes);
-          });
-        }
-      });
+      _ajaxToggleRunnerType(newRunnerType);
+    });
+    dialog.render();
+  }
+
+  function _setControllerStateIsRunningTest(isRunningTest) {
+    self.isRunningTest = isRunningTest;
+    self._toggleFindTestInterval(!isRunningTest);
+    self.togglePreferencesDropdown();
+  }
+
+  function _ajaxToggleRunnerType(newRunnerType) {
+    self._setControllerStateIsRunningTest(true);
+    var errorCallbackToggleATFAgentType = function(response) {
+      self.atflog(formatMessage(
+        "ScheduledTestProcessor.toggleATFAgentType unknown error, failed to toggle runner type, http status {0}.",
+        response.status));
+      self._setControllerStateIsRunningTest(false);
+      if (toggleDefer)
+        return toggleDefer.reject();
     };
-    this.render = function() {
-      var date = ngModelCtrl.$modelValue ? new Date(ngModelCtrl.$modelValue) : null;
-      if (isNaN(date)) {
-        ngModelCtrl.$setValidity('time', false);
-        $log.error('Timepicker directive: "ng-model" value must be a Date object, a number of milliseconds since 01.01.1970 or a string representing an RFC2822 or ISO 8601 date.');
+    var toggleDefer = $q.defer();
+    var ga = new GlideAjax("ScheduledTestProcessor");
+    ga.addParam("sysparm_ajax_processor_type", "toggleATFAgentType");
+    ga.addParam("sysparm_ajax_new_runner_type", newRunnerType);
+    ga.addParam("sysparm_atf_agent_id", self.atfAgentSysId);
+    ga.setErrorCallback(errorCallbackToggleATFAgentType.bind(self));
+    ga.getXMLAnswer(toggleATFAgentTypeResponse);
+    return toggleDefer.promise;
+
+    function toggleATFAgentTypeResponse(response) {
+      var responseObject = JSON.parse(response);
+      if (responseObject && responseObject.hasOwnProperty("status") && responseObject.status === "success") {
+        self.atflog(responseObject.message);
+        if (newRunnerType === 'manual') {
+          $element.find("#pinnedToScheduleNotification").hide();
+          self.AMBChannelName = testInformation.registerAMBForPage(self.messageReference);
+          self.runScheduledTestsOnly = false;
+        } else if (newRunnerType === 'scheduled') {
+          $element.find("#pinnedToScheduleNotification").show();
+          self.AMBChannelName = testInformation.registerAMBForPage("schedule");
+          self.runScheduledTestsOnly = true;
+        }
+        _addRemoveScheduleURLParam(newRunnerType);
+        self._setControllerStateIsRunningTest(false);
+        return toggleDefer.resolve();
       } else {
-        if (date) {
-          selected = date;
+        responseObject ? self.atflog(responseObject.message) : self.atflog("Invalid response object when toggling ATF Agent between scheduled/manual execution");
+        if (newRunnerType === 'manual') {
+          self.snNotification.show("error", formatMessage(self.messageMap[self.MESSAGE_KEY_MANUAL_SETUP_FAILED]));
+          _resetRunScheduledTestsOnlyValue(true);
+        } else if (newRunnerType === 'scheduled') {
+          self.snNotification.show("error", formatMessage(self.messageMap[self.MESSAGE_KEY_SCHEDULE_SETUP_FAILED]));
+          _resetRunScheduledTestsOnlyValue(false);
         }
-        makeValid();
-        updateTemplate();
+        self._setControllerStateIsRunningTest(false);
+        return toggleDefer.reject();
       }
-    };
-
-    function refresh(keyboardChange) {
-      makeValid();
-      ngModelCtrl.$setViewValue(new Date(selected));
-      updateTemplate(keyboardChange);
     }
+  }
 
-    function makeValid() {
-      ngModelCtrl.$setValidity('time', true);
-      $scope.invalidHours = false;
-      $scope.invalidMinutes = false;
+  function _addRemoveScheduleURLParam(newRunnerType) {
+    var url = new GlideURL(window.location.href);
+    if (newRunnerType === 'manual')
+      url.deleteParam('sysparm_scheduled_tests_only');
+    else if (newRunnerType === 'scheduled')
+      url.addParam('sysparm_scheduled_tests_only', 'true');
+    if (window.history && window.history.replaceState)
+      window.history.replaceState({}, "", url.getURL());
+    else
+      self.atflog("Not rewriting scheduled tests URL param, history.replaceState is not valid");
+  }
+
+  function _resetRunScheduledTestsOnlyValue(value) {
+    self.runScheduledTestsOnly = value;
+    document.getElementById("runScheduledTestsOnlyMode").checked = value;
+  }
+
+  function _clearHeartbeatInterval() {
+    if (self.hasSetupHeartbeat) {
+      clearInterval(self.heartbeatIntervalId);
+      self.hasSetupHeartbeat = false;
     }
+  }
 
-    function updateTemplate(keyboardChange) {
-      var hours = selected.getHours(),
-        minutes = selected.getMinutes();
-      if ($scope.showMeridian) {
-        hours = (hours === 0 || hours === 12) ? 12 : hours % 12;
+  function sendATFEvent(eventCategory, eventName) {
+    if (GlideWebAnalytics && GlideWebAnalytics.trackEvent) {
+      try {
+        GlideWebAnalytics.trackEvent('com.glide.automated_testing_framework', eventCategory, eventName);
+      } catch (e) {
+        console.log('Failed to send ATF analytic event: ' + eventName);
+        console.log(e);
       }
-      $scope.hours = keyboardChange === 'h' ? hours : pad(hours);
-      $scope.minutes = keyboardChange === 'm' ? minutes : pad(minutes);
-      $scope.meridian = selected.getHours() < 12 ? meridians[0] : meridians[1];
+    }
+  }
+
+  function _initializeDefaultStates() {
+    self.atflog("testRunner configuration on page load:");
+    if (typeof sys_atf_message_reference != 'undefined')
+      self.messageReference = sys_atf_message_reference;
+    self.atflog("testRunner.messageReference: " + self.messageReference);
+    if (typeof sys_atf_step_delay != 'undefined')
+      self.delayBetweenSteps = sys_atf_step_delay;
+    self.atflog("testRunner.delayBetweenSteps: " + self.delayBetweenSteps + " milliseconds");
+    if (typeof sys_atf_debug_enabled != 'undefined')
+      self.isDebugEnabled = sys_atf_debug_enabled;
+    self.atflog("testRunner.isDebugEnabled: " + self.isDebugEnabled);
+    if (typeof sys_atf_screenshots_mode != 'undefined')
+      self.screenshotsModeManager.setScreenshotsModeByValue(sys_atf_screenshots_mode);
+    self.atflog("testRunner.screenshotsModeManager.currentMode.value: " + self.screenshotsModeManager.getCurrentModeValue());
+    if (typeof sys_atf_screenshots_quality != 'undefined')
+      self.screenshotsQuality = sys_atf_screenshots_quality;
+    self.atflog("testRunner.screenshotsQuality: " + self.screenshotsQuality + "%");
+    if (typeof atf_agent_sys_id != 'undefined')
+      self.atfAgentSysId = atf_agent_sys_id;
+    self.atflog("testRunner.atfAgentSysId: " + self.atfAgentSysId);
+    if (typeof atf_runner_heartbeat_interval_seconds != 'undefined')
+      self.heartbeatInterval = atf_runner_heartbeat_interval_seconds * 1000;
+    self.atflog("testRunner.heartbeatInterval: " + (self.heartbeatInterval / 1000) + " seconds");
+    if (typeof atf_runner_find_test_interval_seconds != 'undefined')
+      self.findTestInterval = atf_runner_find_test_interval_seconds * 1000;
+    self.atflog("testRunner.findTestInterval: " + (self.findTestInterval / 1000) + " seconds");
+    if (typeof is_schedule_plugin_active != 'undefined')
+      self.isSchedulePluginActive = is_schedule_plugin_active;
+    self.atflog("testRunner.isSchedulePluginActive: " + self.isSchedulePluginActive);
+    if (typeof run_scheduled_tests_only != 'undefined')
+      self.runScheduledTestsOnly = run_scheduled_tests_only;
+    self.atflog("testRunner.runScheduledTestsOnly: " + self.runScheduledTestsOnly);
+    if (typeof window['screenshot_timeout_seconds'] !== 'undefined')
+      self.screenshotTimeoutSeconds = window['screenshot_timeout_seconds'];
+    self.atflog("testRunner.screenshotTimeoutSeconds: " + self.screenshotTimeoutSeconds + " seconds");
+    if (typeof lock_screenshot_modes_while_running_test != 'undefined')
+      self.lockDownScreenshotModesWhileRunningTest = lock_screenshot_modes_while_running_test;
+    self.atflog("testRunner.lockDownScreenshotModesWhileRunningTest: " + self.lockDownScreenshotModesWhileRunningTest);
+  }
+  self._expose = function(fnName, fn) {
+    var frameWin = self.iFrame.contentWindow || self.iFrame;
+    frameWin.ATF = frameWin.ATF || {};
+    frameWin.ATF[fnName] = fn;
+  };
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snClientErrorHandler.js */
+angular
+  .module('sn.testRunner')
+  .factory('ClientErrorHandler', ClientErrorHandler);
+ClientErrorHandler.$inject = ['$http', '$q'];
+
+function ClientErrorHandler($http, $q) {
+  'use strict';
+
+  function ClientJavaScriptError() {}
+  ClientJavaScriptError.prototype = {
+    errorMessage: '',
+    reportLevel: '',
+    table: '',
+    sysId: '',
+    formType: '',
+    uiPage: '',
+    isUnknown: function() {
+      return this.reportLevel === 'unknown';
+    },
+    isWarning: function() {
+      return this.reportLevel === 'warning';
+    },
+    isFailure: function() {
+      return this.reportLevel === 'failure';
+    },
+    isIgnored: function() {
+      return this.reportLevel === 'ignored';
+    }
+  };
+  var clientErrorHandler = {
+    _isValid: true,
+    _whitelistedClientErrors: [],
+    populateActiveErrors: populateActiveErrors,
+    getErrorType: getErrorType,
+    _isStale: true,
+    isStale: isStale,
+    setStale: setStale,
+    _resetPopulateActiveErrorsRetries: _resetPopulateActiveErrorsRetries,
+    _MAX_TRIES: 5,
+    _totalTries: 0,
+    _populateActiveErrorsRetries: 0,
+    _REQUEST: "/api/now/table/sys_atf_whitelist?sysparm_query=active%3Dtrue&sysparm_fields=error_message%2Creport_level%2Csys_id"
+  };
+  return clientErrorHandler;
+
+  function populateActiveErrors() {
+    if (!clientErrorHandler._isValid) {
+      jslog("ClientErrorHandler has invalid state, check access to Whitelisted Client Errors table and refresh Client Test Runner");
+      return $q.when(false);
+    }
+    var populateActiveErrorsPromise = Promise.reject();
+    for (var i = 0; i < clientErrorHandler._MAX_TRIES; i++) {
+      populateActiveErrorsPromise = populateActiveErrorsPromise.catch(getWBE).catch(processAttemptError);
+    }
+    populateActiveErrorsPromise = populateActiveErrorsPromise.then(processResult).catch(processFinalAttemptError);
+
+    function getWBE() {
+      return $http.get(clientErrorHandler._REQUEST, {
+        cache: false
+      });
     }
 
-    function addMinutes(minutes) {
-      var dt = new Date(selected.getTime() + minutes * 60000);
-      selected.setHours(dt.getHours(), dt.getMinutes());
-      refresh();
+    function processFinalAttemptError() {
+      jslog(formatMessage("ClientErrorHandler failed to access Whitelisted Client Errors table after {0} tries, continuing",
+        clientErrorHandler._populateActiveErrorsRetries));
+      clientErrorHandler._resetPopulateActiveErrorsRetries();
+      return $q.when(false);
     }
-    $scope.incrementHours = function() {
-      addMinutes(hourStep * 60);
-    };
-    $scope.decrementHours = function() {
-      addMinutes(-hourStep * 60);
-    };
-    $scope.incrementMinutes = function() {
-      addMinutes(minuteStep);
-    };
-    $scope.decrementMinutes = function() {
-      addMinutes(-minuteStep);
-    };
-    $scope.toggleMeridian = function() {
-      addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
-    };
-  }])
-  .directive('timepicker', function() {
+
+    function processAttemptError() {
+      var defer = $q.defer();
+      if (++clientErrorHandler._populateActiveErrorsRetries !== clientErrorHandler._MAX_TRIES) {
+        jslog(formatMessage("ClientErrorHandler failed to access Whitelisted Client Errors table {0} time(s), trying again",
+          clientErrorHandler._populateActiveErrorsRetries));
+      }
+      clientErrorHandler._totalTries++;
+      setTimeout(function() {
+        defer.reject();
+      }, 1000);
+      return defer.promise;
+    }
+
+    function processResult(response) {
+      clientErrorHandler._whitelistedClientErrors = response.data.result;
+      clientErrorHandler._isStale = false;
+      clientErrorHandler._resetPopulateActiveErrorsRetries();
+    }
+    return populateActiveErrorsPromise;
+  }
+
+  function getErrorType(errorMessage, atflog) {
+    function findError(error) {
+      return errorMessage.indexOf(error['error_message']) !== -1;
+    }
+    var whitelistedError = clientErrorHandler._whitelistedClientErrors.find(findError);
+    var clientJavaScriptError = new ClientJavaScriptError();
+    if (typeof whitelistedError === 'undefined') {
+      atflog('Unknown client error found: ' + errorMessage);
+      clientJavaScriptError.reportLevel = 'unknown';
+      return clientJavaScriptError;
+    } else {
+      atflog('Whitelisted client error found: ' + errorMessage);
+      clientJavaScriptError.errorMessage = whitelistedError['error_message'];
+      clientJavaScriptError.reportLevel = whitelistedError['report_level'];
+      clientJavaScriptError.sysId = whitelistedError['sys_id'];
+      return clientJavaScriptError;
+    }
+  }
+
+  function isStale() {
+    return clientErrorHandler._isStale;
+  }
+
+  function setStale(bool) {
+    clientErrorHandler._isStale = bool;
+  }
+
+  function _resetPopulateActiveErrorsRetries() {
+    clientErrorHandler._populateActiveErrorsRetries = 0;
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snStepConfig.js */
+angular
+  .module('sn.testRunner')
+  .factory('StepConfig', StepConfig);
+StepConfig.$inject = ['$http', '$q'];
+
+function StepConfig($http) {
+  'use strict';
+  var stepConfig = {
+    configs: {},
+    getActiveConfigs: getActiveConfigs,
+    _configsLoaded: false
+  };
+  return stepConfig;
+
+  function getActiveConfigs() {
+    return $http.get("/api/now/table/sys_atf_step_config?" +
+        "sysparm_query=active%3Dtrue&" +
+        "sysparm_fields=step_config%2Cicon%2Cdescription%2Csys_id%2Csys_name%2Cstep_env%2Cstep_execution_generator%2Cname", {
+          cache: false
+        })
+      .then(getAllActiveConfigsComplete);
+
+    function getAllActiveConfigsComplete(response) {
+      var self = stepConfig;
+      var results = response.data.result;
+      results.forEach(function(result) {
+        self.configs[result.sys_id] = result;
+      });
+      self._configsLoaded = true;
+      return self.configs;
+    }
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snImpersonationHandler.js */
+angular
+  .module('sn.testRunner')
+  .factory('ImpersonationHandler', ImpersonationHandler);
+ImpersonationHandler.$inject = ['$http', '$q'];
+
+function ImpersonationHandler($http, $q) {
+  'use strict';
+  var self = {
+    impersonate: impersonate,
+    unimpersonate: unimpersonate,
+    getUserInfo: getUserInfo,
+    _impersonateResponse200: _impersonateResponse200,
+    _unimpersonateResponse200: _unimpersonateResponse200,
+    _errorCallbackImpersonate: _errorCallbackImpersonate,
+    _errorCallbackUnimpersonate: _errorCallbackUnimpersonate,
+    _resetImpersonationRetries: _resetImpersonationRetries,
+    _resetUnimpersonationRetries: _resetUnimpersonationRetries,
+    _impersonateAjax: null,
+    _unImpersonateAjax: null,
+    _MAX_RETRIES: 3,
+    _impersonateHttpErrorRetries: 0,
+    _unImpersonateHttpErrorRetries: 0
+  };
+  return self;
+
+  function getUserInfo(userId) {
+    return $http.get("/api/now/ui/user/" + userId).then(function(response) {
+      return response.data.result;
+    });
+  }
+
+  function impersonate(impersonatingUser, stepEvent) {
+    if (!impersonatingUser || !impersonatingUser.user_sys_id)
+      return $q.when();
+    var impersonateDefer = $q.defer();
+    self._impersonateAjax = new GlideAjax('TestExecutorAjax');
+    self._impersonateAjax.addParam('sysparm_name', 'impersonate');
+    self._impersonateAjax.addParam('sysparm_impersonating_user', impersonatingUser.user_sys_id);
+    self._impersonateAjax.setErrorCallback(self._errorCallbackImpersonate.bind(self), null, [impersonatingUser, stepEvent, impersonateDefer]);
+    self._impersonateAjax.getXMLAnswer(self._impersonateResponse200.bind(self), null, [impersonatingUser, stepEvent, impersonateDefer]);
+    return impersonateDefer.promise;
+  }
+
+  function unimpersonate(executingUser, stepEvent) {
+    if (!executingUser || !executingUser.user_sys_id)
+      return $q.when();
+    var unimpersonateDefer = $q.defer();
+    self._unImpersonateAjax = new GlideAjax('TestExecutorAjax');
+    self._unImpersonateAjax.addParam('sysparm_name', 'unimpersonate');
+    self._unImpersonateAjax.setErrorCallback(self._errorCallbackUnimpersonate.bind(self), null, [executingUser, stepEvent, unimpersonateDefer]);
+    self._unImpersonateAjax.getXMLAnswer(self._unimpersonateResponse200.bind(self), null, [executingUser, stepEvent, unimpersonateDefer]);
+    return unimpersonateDefer.promise;
+  }
+
+  function _impersonateResponse200(response, responseParams) {
+    var impersonatingUser = responseParams[0];
+    var stepEvent = responseParams[1];
+    var impersonateDefer = responseParams[2];
+    self._resetImpersonationRetries();
+    if (response == impersonatingUser.user_sys_id) {
+      jslog(formatMessage("Impersonation successful in the UI session. Impersonated user: {0}", impersonatingUser.user_name));
+      impersonateDefer.resolve();
+    } else {
+      stepEvent.object = "Error impersonating the user " + impersonatingUser.user_name;
+      impersonateDefer.reject();
+    }
+  }
+
+  function _unimpersonateResponse200(response, responseParams) {
+    var executingUser = responseParams[0];
+    var stepEvent = responseParams[1];
+    var unimpersonateDefer = responseParams[2];
+    self._resetUnimpersonationRetries();
+    if (response == executingUser.user_sys_id) {
+      jslog("Successfully ended impersonation in the UI session");
+      unimpersonateDefer.resolve();
+    } else {
+      stepEvent.object = "Error ending impersonation in the UI session";
+      unimpersonateDefer.reject();
+    }
+  }
+
+  function _errorCallbackImpersonate(response, responseParams) {
+    var impersonatingUser = responseParams[0];
+    var stepEvent = responseParams[1];
+    var impersonateDefer = responseParams[2];
+    if (self._impersonateHttpErrorRetries++ === self._MAX_RETRIES) {
+      stepEvent.object = formatMessage("Error impersonating the user {0} after {1} tries, http status {2}",
+        impersonatingUser.user_name, self._impersonateHttpErrorRetries, response.status);
+      self._resetImpersonationRetries();
+      if (impersonateDefer)
+        impersonateDefer.reject();
+    } else {
+      jslog(formatMessage("Impersonation: failed {0} time(s) to impersonate user: {1}, http status {2}, trying again",
+        self._impersonateHttpErrorRetries, impersonatingUser.user_name, response.status));
+      self._impersonateAjax.getXMLAnswer(self._impersonateResponse200.bind(self), null, [impersonatingUser, stepEvent, impersonateDefer]);
+    }
+  }
+
+  function _errorCallbackUnimpersonate(response, responseParams) {
+    var executingUser = responseParams[0];
+    var stepEvent = responseParams[1];
+    var unimpersonateDefer = responseParams[2];
+    if (self._unImpersonateHttpErrorRetries++ === self._MAX_RETRIES) {
+      stepEvent.object = formatMessage("Error ending impersonation in the client session after {0} tries, http status {1}",
+        self._unImpersonateHttpErrorRetries, response.status);
+      self._resetUnimpersonationRetries();
+      if (unimpersonateDefer)
+        unimpersonateDefer.reject();
+    } else {
+      jslog(formatMessage("Unimpersonation: failed {0} time(s) to return to user: {1}, http status {2}, trying again",
+        self._unImpersonateHttpErrorRetries, executingUser.user_name, response.status));
+      self._unImpersonateAjax.getXMLAnswer(self._unimpersonateResponse200.bind(self), null, [executingUser, stepEvent, unimpersonateDefer]);
+    }
+  }
+
+  function _resetImpersonationRetries() {
+    self._impersonateHttpErrorRetries = 0;
+  }
+
+  function _resetUnimpersonationRetries() {
+    self._unImpersonateHttpErrorRetries = 0;
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snReportUITestProgressHandler.js */
+angular
+  .module('sn.testRunner')
+  .factory('ReportUITestProgressHandler', ReportUITestProgressHandler);
+ReportUITestProgressHandler.$inject = ['$q'];
+
+function ReportUITestProgressHandler($q) {
+  'use strict';
+  var self = {
+    reportUIBatchResult: reportUIBatchResult,
+    reportUIBatchResultSynchronously: reportUIBatchResultSynchronously,
+    reportStepProgressSynchronously: reportStepProgressSynchronously,
+    _reportBatchResultAjax: null,
+    _errorCallbackReportBatchResult: _errorCallbackReportBatchResult,
+    _handleReportBatchResultResponse200: _handleReportBatchResultResponse200,
+    _resetReportBatchResultRetries: _resetReportBatchResultRetries,
+    _MAX_RETRIES: 5,
+    _reportBatchResultErrorRetries: 0
+  };
+  return self;
+
+  function reportUIBatchResult(stringifiedTestResults, testResultSysId, trackerSysId, atfAgentSysId) {
+    var reportDefer = $q.defer();
+    self._reportBatchResultAjax = new GlideAjax('ReportUITestProgress');
+    self._reportBatchResultAjax.addParam('sysparm_name', 'reportBatchResult');
+    self._reportBatchResultAjax.addParam('sysparm_test_result', stringifiedTestResults);
+    self._reportBatchResultAjax.addParam('sysparm_test_result_sys_id', testResultSysId);
+    self._reportBatchResultAjax.addParam('sysparm_batch_tracker_sys_id', trackerSysId);
+    self._reportBatchResultAjax.addParam('sysparm_atf_agent_sys_id', atfAgentSysId);
+    self._reportBatchResultAjax.setErrorCallback(self._errorCallbackReportBatchResult.bind(self), null, [reportDefer]);
+    self._reportBatchResultAjax.getXMLAnswer(self._handleReportBatchResultResponse200.bind(self), null, [reportDefer]);
+    return reportDefer.promise;
+  }
+
+  function reportUIBatchResultSynchronously(stringifiedTestResults, testResultSysId, trackerSysId, atfAgentSysId) {
+    var ga = new GlideAjax('ReportUITestProgress');
+    ga.addParam('sysparm_name', 'reportBatchResult');
+    ga.addParam('sysparm_test_result', stringifiedTestResults);
+    ga.addParam('sysparm_test_result_sys_id', testResultSysId);
+    ga.addParam('sysparm_batch_tracker_sys_id', trackerSysId);
+    ga.addParam('sysparm_atf_agent_sys_id', atfAgentSysId);
+    ga.getXMLWait();
+  }
+
+  function reportStepProgressSynchronously(stringifiedStepResult, trackerId, currStepIndex, batchLength, testResultId, atfAgentSysId) {
+    var ga = new GlideAjax('ReportUITestProgress');
+    ga.addParam('sysparm_name', 'reportStepProgress');
+    ga.addParam('sysparm_step_result', stringifiedStepResult);
+    ga.addParam('sysparm_batch_execution_tracker_sys_id', trackerId);
+    ga.addParam('sysparm_next_step_index', currStepIndex + 1);
+    ga.addParam('sysparm_batch_length', batchLength);
+    ga.addParam('sysparm_test_result_sys_id', testResultId);
+    ga.addParam('sysparm_atf_agent_sys_id', atfAgentSysId);
+    ga.getXMLWait();
+  }
+
+  function _errorCallbackReportBatchResult(response, responseParams) {
+    var reportDefer = responseParams[0];
+    if (self._reportBatchResultErrorRetries++ === self._MAX_RETRIES) {
+      jslog(formatMessage("ReportUITestProgress.reportBatchResult: Error reporting batch result after {0} tries, http status {1}",
+        self._reportBatchResultErrorRetries, response.status));
+      self._resetReportBatchResultRetries();
+      if (reportDefer)
+        reportDefer.reject();
+    } else {
+      jslog(formatMessage("ReportUITestProgress.reportBatchResult: failed {0} time(s) to report batch result, http status {1}, trying again",
+        self._reportBatchResultErrorRetries, response.status));
+      window.setTimeout(function retryReportBatchResultInOneSecond() {
+        self._reportBatchResultAjax.getXMLAnswer(self._handleReportBatchResultResponse200.bind(self), null, [reportDefer]);
+      }, 1000);
+    }
+  }
+
+  function _handleReportBatchResultResponse200(response, responseParams) {
+    var reportDefer = responseParams[0];
+    var responseObject = JSON.parse(response);
+    self._resetReportBatchResultRetries();
+    if (responseObject && responseObject.hasOwnProperty("status"))
+      if (responseObject.status === 'error')
+        jslog("ReportUITestProgress: Error: " + responseObject.message);
+      else
+        jslog("ReportUITestProgress: Test Result reported to sys_atf_test_result.sys_id: " + responseObject.message);
+    else
+      jslog(formatMessage("ReportUITestProgress: invalid response, http status {0}, response: {1}", response.status, response));
+    reportDefer.resolve();
+  }
+
+  function _resetReportBatchResultRetries() {
+    self._reportBatchResultErrorRetries = 0;
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snScreenshotsModeManager.js */
+angular.module("sn.testRunner")
+  .factory("ScreenshotsModeManager", ScreenshotsModeManager);
+
+function ScreenshotsModeManager() {
+  'use strict';
+  var SCREENSHOTS_MODE_ENABLED = "enabledAll";
+  var SCREENSHOTS_MODE_ENABLED_FOR_FAILING_STEP = "enabledFailedSteps";
+  var SCREENSHOTS_DISABLED = "disabled";
+  var MODE_LABEL_0_ENABLE_FOR_ALL_STEPS = "Enable for all steps";
+  var MODE_LABEL_1_ENABLE_FOR_FAILED_STEPS = "Enable for failed steps";
+  var MODE_LABEL_2_DIABLE_FOR_ALL_STEPS = "Disable for all steps";
+  var MODE_CHANGE_MSG_0_MESSAGE_DISABLED = "Screenshots disabled";
+  var MODE_CHANGE_MSG_1_MESSAGE_ENABLED_ALL = "Screenshots enabled for all steps";
+  var MODE_CHANGE_MSG_2_MESSAGE_ENABLED_FAILED_STEPS = "Screenshots enabled for failing steps";
+  var _messageMap = new GwtMessage().getMessages([
+    MODE_LABEL_0_ENABLE_FOR_ALL_STEPS, MODE_LABEL_1_ENABLE_FOR_FAILED_STEPS, MODE_LABEL_2_DIABLE_FOR_ALL_STEPS,
+    MODE_CHANGE_MSG_0_MESSAGE_DISABLED, MODE_CHANGE_MSG_1_MESSAGE_ENABLED_ALL,
+    MODE_CHANGE_MSG_2_MESSAGE_ENABLED_FAILED_STEPS
+  ]);
+  var modes = [{
+      name: _messageMap[MODE_LABEL_0_ENABLE_FOR_ALL_STEPS],
+      value: SCREENSHOTS_MODE_ENABLED
+    },
+    {
+      name: _messageMap[MODE_LABEL_1_ENABLE_FOR_FAILED_STEPS],
+      value: SCREENSHOTS_MODE_ENABLED_FOR_FAILING_STEP
+    },
+    {
+      name: _messageMap[MODE_LABEL_2_DIABLE_FOR_ALL_STEPS],
+      value: SCREENSHOTS_DISABLED
+    }
+  ];
+  return {
+    setScreenshotsModeByValue: setScreenshotsModeByValue,
+    shouldSkipScreenshot: shouldSkipScreenshot,
+    getScreenshotsModeChangedMessage: getScreenshotsModeChangedMessage,
+    getCurrentModeValue: getCurrentModeValue,
+    currentMode: modes[0],
+    modes: modes
+  };
+
+  function setScreenshotsModeByValue(screenshotsMode) {
+    if (null != screenshotsMode) {
+      for (var i = 0; i < modes.length; i++) {
+        var mode = modes[i];
+        if (screenshotsMode == mode.value) {
+          this.currentMode = mode;
+          break;
+        }
+      }
+    }
+  }
+
+  function shouldSkipScreenshot(stepResult) {
+    if (this.currentMode.value == SCREENSHOTS_MODE_ENABLED ||
+      (this.currentMode.value == SCREENSHOTS_MODE_ENABLED_FOR_FAILING_STEP && stepResult && !stepResult.success))
+      return false;
+    return true;
+  }
+
+  function getScreenshotsModeChangedMessage() {
+    if (this.currentMode.value == SCREENSHOTS_DISABLED)
+      return _messageMap[MODE_CHANGE_MSG_0_MESSAGE_DISABLED];
+    if (this.currentMode.value == SCREENSHOTS_MODE_ENABLED)
+      return _messageMap[MODE_CHANGE_MSG_1_MESSAGE_ENABLED_ALL];
+    return _messageMap[MODE_CHANGE_MSG_2_MESSAGE_ENABLED_FAILED_STEPS];
+  }
+
+  function getCurrentModeValue() {
+    return this.currentMode.value;
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snTestInformation.js */
+angular
+  .module('sn.testRunner')
+  .factory('TestInformation', TestInformation);
+TestInformation.$inject = ['$rootScope', '$http', '$q', 'ATFConnectionService'];
+
+function TestInformation($rootScope, $http, $q, atfConnectionService) {
+  'use strict';
+  var testInformation = {
+    registerAMBForPage: registerAMBForPage,
+    registerAMBStepConfigForPage: registerAMBStepConfigForPage,
+    registerAMBWhitelistedClientErrorForPage: registerAMBWhitelistedClientErrorForPage,
+    registerAMBATFAgentForPage: registerAMBATFAgentForPage,
+    enableDebug: enableDebug,
+    unsubscribeFromAMBChannels: unsubscribeFromAMBChannels
+  };
+  activate();
+  return testInformation;
+
+  function activate() {
+    testInformation.isDebugEnabled = false;
+  }
+
+  function registerAMBForPage(messageReference) {
+    return atfConnectionService.subscribeToTestResultChannel(testInformation.isDebugEnabled, messageReference);
+  }
+
+  function registerAMBStepConfigForPage() {
+    return atfConnectionService.subscribeToStepConfigChannel(testInformation.isDebugEnabled);
+  }
+
+  function registerAMBWhitelistedClientErrorForPage() {
+    return atfConnectionService.subscribeToWhitelistedClientErrorChannel(testInformation.isDebugEnabled);
+  }
+
+  function registerAMBATFAgentForPage(atfAgentSysId) {
+    return atfConnectionService.subscribeToATFAgentChannel(testInformation.isDebugEnabled, atfAgentSysId);
+  }
+
+  function enableDebug(shouldEnable) {
+    testInformation.isDebugEnabled = shouldEnable;
+  }
+
+  function unsubscribeFromAMBChannels() {
+    atfConnectionService.unsubscribeFromAllChannels();
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snConnectionStatusHelper.js */
+angular.module("sn.testRunner")
+  .factory("ConnectionStatusHelper", function() {
+    'use strict';
+    var _STATUS_KEY_CONNECTED = "Connected";
+    var _STATUS_KEY_DISCONNECTED = "Disconnected";
+    var _i18nStatusMap = new GwtMessage().getMessages([_STATUS_KEY_CONNECTED, _STATUS_KEY_DISCONNECTED]);
     return {
-      restrict: 'EA',
-      require: ['timepicker', '?^ngModel'],
-      controller: 'TimepickerController',
-      replace: true,
-      scope: {},
-      templateUrl: 'template/timepicker/timepicker.html',
-      link: function(scope, element, attrs, ctrls) {
-        var timepickerCtrl = ctrls[0],
-          ngModelCtrl = ctrls[1];
-        if (ngModelCtrl) {
-          timepickerCtrl.init(ngModelCtrl, element.find('input'));
-        }
-      }
-    };
-  });
-angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap.bindHtml'])
-  .factory('typeaheadParser', ['$parse', function($parse) {
-    var TYPEAHEAD_REGEXP = /^\s*([\s\S]+?)(?:\s+as\s+([\s\S]+?))?\s+for\s+(?:([\$\w][\$\w\d]*))\s+in\s+([\s\S]+?)$/;
-    return {
-      parse: function(input) {
-        var match = input.match(TYPEAHEAD_REGEXP);
-        if (!match) {
-          throw new Error(
-            'Expected typeahead specification in form of "_modelValue_ (as _label_)? for _item_ in _collection_"' +
-            ' but got "' + input + '".');
-        }
+      LOCAL_CONNECTION_CHANGE_EVENTS: [
+        "TestInformation.AMBConnectionInitialized",
+        "TestInformation.AMBConnectionOpened",
+        "TestInformation.AMBConnectionBroken",
+        "TestInformation.AMBConnectionClosed"
+      ],
+      buildConnectionStatus: function(ambEmitEventMessageType) {
+        return this._buildConnectionStatusByEvent(ambEmitEventMessageType);
+      },
+      _buildConnectionStatus: function(isConnected, statusMapKey) {
         return {
-          itemName: match[3],
-          source: $parse(match[4]),
-          viewMapper: $parse(match[2] || match[1]),
-          modelMapper: $parse(match[1])
+          connected: isConnected,
+          status: _i18nStatusMap[statusMapKey]
         };
-      }
-    };
-  }])
-  .directive('typeahead', ['$compile', '$parse', '$q', '$timeout', '$document', '$position', 'typeaheadParser',
-    function($compile, $parse, $q, $timeout, $document, $position, typeaheadParser) {
-      var HOT_KEYS = [9, 13, 27, 38, 40];
-      return {
-        require: 'ngModel',
-        link: function(originalScope, element, attrs, modelCtrl) {
-          var minSearch = originalScope.$eval(attrs.typeaheadMinLength) || 1;
-          var waitTime = originalScope.$eval(attrs.typeaheadWaitMs) || 0;
-          var isEditable = originalScope.$eval(attrs.typeaheadEditable) !== false;
-          var isLoadingSetter = $parse(attrs.typeaheadLoading).assign || angular.noop;
-          var onSelectCallback = $parse(attrs.typeaheadOnSelect);
-          var inputFormatter = attrs.typeaheadInputFormatter ? $parse(attrs.typeaheadInputFormatter) : undefined;
-          var appendToBody = attrs.typeaheadAppendToBody ? originalScope.$eval(attrs.typeaheadAppendToBody) : false;
-          var focusFirst = originalScope.$eval(attrs.typeaheadFocusFirst) !== false;
-          var $setModelValue = $parse(attrs.ngModel).assign;
-          var parserResult = typeaheadParser.parse(attrs.typeahead);
-          var hasFocus;
-          var scope = originalScope.$new();
-          originalScope.$on('$destroy', function() {
-            scope.$destroy();
-          });
-          var popupId = 'typeahead-' + scope.$id + '-' + Math.floor(Math.random() * 10000);
-          element.attr({
-            'aria-autocomplete': 'list',
-            'aria-expanded': false,
-            'aria-owns': popupId
-          });
-          var popUpEl = angular.element('<div typeahead-popup></div>');
-          popUpEl.attr({
-            id: popupId,
-            matches: 'matches',
-            active: 'activeIdx',
-            select: 'select(activeIdx)',
-            query: 'query',
-            position: 'position'
-          });
-          if (angular.isDefined(attrs.typeaheadTemplateUrl)) {
-            popUpEl.attr('template-url', attrs.typeaheadTemplateUrl);
-          }
-          var resetMatches = function() {
-            scope.matches = [];
-            scope.activeIdx = -1;
-            element.attr('aria-expanded', false);
-          };
-          var getMatchId = function(index) {
-            return popupId + '-option-' + index;
-          };
-          scope.$watch('activeIdx', function(index) {
-            if (index < 0) {
-              element.removeAttr('aria-activedescendant');
-            } else {
-              element.attr('aria-activedescendant', getMatchId(index));
-            }
-          });
-          var getMatchesAsync = function(inputValue) {
-            var locals = {
-              $viewValue: inputValue
-            };
-            isLoadingSetter(originalScope, true);
-            $q.when(parserResult.source(originalScope, locals)).then(function(matches) {
-              var onCurrentRequest = (inputValue === modelCtrl.$viewValue);
-              if (onCurrentRequest && hasFocus) {
-                if (matches.length > 0) {
-                  scope.activeIdx = focusFirst ? 0 : -1;
-                  scope.matches.length = 0;
-                  for (var i = 0; i < matches.length; i++) {
-                    locals[parserResult.itemName] = matches[i];
-                    scope.matches.push({
-                      id: getMatchId(i),
-                      label: parserResult.viewMapper(scope, locals),
-                      model: matches[i]
-                    });
-                  }
-                  scope.query = inputValue;
-                  scope.position = appendToBody ? $position.offset(element) : $position.position(element);
-                  scope.position.top = scope.position.top + element.prop('offsetHeight');
-                  element.attr('aria-expanded', true);
-                } else {
-                  resetMatches();
-                }
-              }
-              if (onCurrentRequest) {
-                isLoadingSetter(originalScope, false);
-              }
-            }, function() {
-              resetMatches();
-              isLoadingSetter(originalScope, false);
-            });
-          };
-          resetMatches();
-          scope.query = undefined;
-          var timeoutPromise;
-          var scheduleSearchWithTimeout = function(inputValue) {
-            timeoutPromise = $timeout(function() {
-              getMatchesAsync(inputValue);
-            }, waitTime);
-          };
-          var cancelPreviousTimeout = function() {
-            if (timeoutPromise) {
-              $timeout.cancel(timeoutPromise);
-            }
-          };
-          modelCtrl.$parsers.unshift(function(inputValue) {
-            hasFocus = true;
-            if (inputValue && inputValue.length >= minSearch) {
-              if (waitTime > 0) {
-                cancelPreviousTimeout();
-                scheduleSearchWithTimeout(inputValue);
-              } else {
-                getMatchesAsync(inputValue);
-              }
-            } else {
-              isLoadingSetter(originalScope, false);
-              cancelPreviousTimeout();
-              resetMatches();
-            }
-            if (isEditable) {
-              return inputValue;
-            } else {
-              if (!inputValue) {
-                modelCtrl.$setValidity('editable', true);
-                return inputValue;
-              } else {
-                modelCtrl.$setValidity('editable', false);
-                return undefined;
-              }
-            }
-          });
-          modelCtrl.$formatters.push(function(modelValue) {
-            var candidateViewValue, emptyViewValue;
-            var locals = {};
-            if (inputFormatter) {
-              locals.$model = modelValue;
-              return inputFormatter(originalScope, locals);
-            } else {
-              locals[parserResult.itemName] = modelValue;
-              candidateViewValue = parserResult.viewMapper(originalScope, locals);
-              locals[parserResult.itemName] = undefined;
-              emptyViewValue = parserResult.viewMapper(originalScope, locals);
-              return candidateViewValue !== emptyViewValue ? candidateViewValue : modelValue;
-            }
-          });
-          scope.select = function(activeIdx) {
-            var locals = {};
-            var model, item;
-            locals[parserResult.itemName] = item = scope.matches[activeIdx].model;
-            model = parserResult.modelMapper(originalScope, locals);
-            $setModelValue(originalScope, model);
-            modelCtrl.$setValidity('editable', true);
-            onSelectCallback(originalScope, {
-              $item: item,
-              $model: model,
-              $label: parserResult.viewMapper(originalScope, locals)
-            });
-            resetMatches();
-            $timeout(function() {
-              element[0].focus();
-            }, 0, false);
-          };
-          element.bind('keydown', function(evt) {
-            if (scope.matches.length === 0 || HOT_KEYS.indexOf(evt.which) === -1) {
-              return;
-            }
-            if (scope.activeIdx == -1 && (evt.which === 13 || evt.which === 9)) {
-              return;
-            }
-            evt.preventDefault();
-            if (evt.which === 40) {
-              scope.activeIdx = (scope.activeIdx + 1) % scope.matches.length;
-              scope.$digest();
-            } else if (evt.which === 38) {
-              scope.activeIdx = (scope.activeIdx > 0 ? scope.activeIdx : scope.matches.length) - 1;
-              scope.$digest();
-            } else if (evt.which === 13 || evt.which === 9) {
-              scope.$apply(function() {
-                scope.select(scope.activeIdx);
-              });
-            } else if (evt.which === 27) {
-              evt.stopPropagation();
-              resetMatches();
-              scope.$digest();
-            }
-          });
-          element.bind('blur', function(evt) {
-            hasFocus = false;
-          });
-          var dismissClickHandler = function(evt) {
-            if (element[0] !== evt.target) {
-              resetMatches();
-              scope.$digest();
-            }
-          };
-          $document.bind('click', dismissClickHandler);
-          originalScope.$on('$destroy', function() {
-            $document.unbind('click', dismissClickHandler);
-            if (appendToBody) {
-              $popup.remove();
-            }
-          });
-          var $popup = $compile(popUpEl)(scope);
-          if (appendToBody) {
-            $document.find('body').append($popup);
-          } else {
-            element.after($popup);
-          }
+      },
+      _buildConnectionStatusByEvent: function(ambEmitEventMessageType) {
+        switch (ambEmitEventMessageType) {
+          case this.LOCAL_CONNECTION_CHANGE_EVENTS[0]:
+          case this.LOCAL_CONNECTION_CHANGE_EVENTS[1]:
+            return this._buildConnectionStatus(true, _STATUS_KEY_CONNECTED);
+          case this.LOCAL_CONNECTION_CHANGE_EVENTS[2]:
+          case this.LOCAL_CONNECTION_CHANGE_EVENTS[3]:
+          default:
+            return this._buildConnectionStatus(false, _STATUS_KEY_DISCONNECTED);
         }
-      };
+      }
     }
-  ])
-  .directive('typeaheadPopup', function() {
-    return {
-      restrict: 'EA',
-      scope: {
-        matches: '=',
-        query: '=',
-        active: '=',
-        position: '=',
-        select: '&'
-      },
-      replace: true,
-      templateUrl: 'template/typeahead/typeahead-popup.html',
-      link: function(scope, element, attrs) {
-        scope.templateUrl = attrs.templateUrl;
-        scope.isOpen = function() {
-          return scope.matches.length > 0;
-        };
-        scope.isActive = function(matchIdx) {
-          return scope.active == matchIdx;
-        };
-        scope.selectActive = function(matchIdx) {
-          scope.active = matchIdx;
-        };
-        scope.selectMatch = function(activeIdx) {
-          scope.select({
-            activeIdx: activeIdx
+  });;
+/*! RESOURCE: /scripts/app.snTestRunner/service.snATFConnectionService.js */
+angular.module("sn.testRunner").service("ATFConnectionService", ['$window', '$q', '$log', '$rootScope', '$timeout', 'ConnectionStatusHelper',
+  function($window, $q, $log, $rootScope, $timeout, connectionStatusHelper) {
+    "use strict";
+    this.ambConnectionStateSubscription = {
+      initialized: null,
+      opened: null,
+      broken: null,
+      closed: null
+    };
+    this._messageClient = amb.getClient();
+    this._recordWatcher = new amb.RecordWatcher(this._messageClient);
+    this._stepConfigWatcher = new amb.RecordWatcher(this._messageClient);
+    this._channelListener = null;
+    this._stepConfigChannelListener = null;
+    this._whitelistedClientErrorWatcher = new amb.RecordWatcher(this._messageClient);
+    this._whitelistedClientErrorChannelListener = null;
+    this._atfAgentWatcher = new amb.RecordWatcher(this._messageClient);
+    this._atfAgentChannelListener = null;
+    var AMBRecordWatcherUTRClient = Class.create();
+    AMBRecordWatcherUTRClient.TABLE = "sys_atf_test_result";
+    AMBRecordWatcherUTRClient.TABLE_COLUMN_TEST_CASE_JSON = "test_case_json";
+    AMBRecordWatcherUTRClient.TABLE_COLUMN_STATUS = "status";
+    AMBRecordWatcherUTRClient.TABLE_COLUMN_STATUS_WAITING = "waiting";
+    AMBRecordWatcherUTRClient.MESSAGE_CONDITION_DEFAULT_QUERY =
+      AMBRecordWatcherUTRClient.TABLE_COLUMN_TEST_CASE_JSON + "ISNOTEMPTY^" +
+      AMBRecordWatcherUTRClient.TABLE_COLUMN_STATUS + "=" +
+      AMBRecordWatcherUTRClient.TABLE_COLUMN_STATUS_WAITING;
+    AMBRecordWatcherUTRClient.TABLE_STEP_CONFIG = "sys_atf_step_config";
+    AMBRecordWatcherUTRClient.STEP_CONFIG_CONDITION = "active=true";
+    AMBRecordWatcherUTRClient.TABLE_ATF_WHITELISTED_CLIENT_ERROR = "sys_atf_whitelist";
+    AMBRecordWatcherUTRClient.WHITELISTED_CLIENT_ERROR_CONDITION = "active=true";
+    AMBRecordWatcherUTRClient.TABLE_ATF_AGENT = "sys_atf_agent";
+    AMBRecordWatcherUTRClient.TEST_RUNNER_MESSAGE_PROCESSOR = "Test Runner Message Processor";
+    AMBRecordWatcherUTRClient.ERROR = "Error";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_NEW = "{0}: New message received";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_MISSING_ACTION_OPERATION = "{0}: {1}: Received message that is missing required attributes 'action' and 'operation'";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_MISSING_RECORD = "{0}: {1}: Received message that does not contain a record to process.";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_IGNORED_NOT_ENTRY_ACTION =
+      "{0}: Incoming message ignored. We only process messages when a " + AMBRecordWatcherUTRClient.TABLE +
+      " record begins matching the registered filter condition.";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_IGNORED_STATUS_JSON_NOT_SET = "{0}: Message ignored since both 'status' and 'test_case_json' were not set by this record operation.";
+    AMBRecordWatcherUTRClient.RECEIVED_MSG_LOG_STATE = "{0}: Received message action={1}, operation={2}, record.status={3}";
+    AMBRecordWatcherUTRClient.REPORT_START_TEST = "{0}: Starting test execution";
+    AMBRecordWatcherUTRClient.REPORT_TEST_STARTED_PROCESSING_COMPLETE = "{0}: UI Test has started. Message processing complete.";
+    AMBRecordWatcherUTRClient.REPORT_UNEXPECTED_EXCEPTION = "{0}: Reached unexpected exception: {1}";
+    AMBRecordWatcherUTRClient.UNSUBSCRIBED = "Unsubscribed from all AMB channels";
+    AMBRecordWatcherUTRClient.i18nSubscribedToChannelMsg = new GwtMessage().getMessage("Subscribed to channel: {0}");
+    this.STATIC = AMBRecordWatcherUTRClient;
+    this.subscribeToTestResultChannel = function(isDebugEnabled, messageReference) {
+      this.setMessageReceivedDebugCallback(this._AMBMessageReceivedDebugCallback);
+      this.setMessageReceivedCallback(this._AMBMessageReceivedCallback);
+      if (isDebugEnabled)
+        this.setMessageReceivedDebugCallback(this._AMBMessageReceivedDebugCallback);
+      this.prepareCallbacks();
+      var table = AMBRecordWatcherUTRClient.TABLE;
+      var condition = this._getTestRunnerEventQuery(messageReference);
+      if (this._channelListener)
+        this._channelListener.unsubscribe();
+      this._channelListener = this._recordWatcher.getChannel(table, condition, null);
+      this._channelListener.subscribe(this.receiveMessage.bind(this));
+      return this.getRegisteredChannelName(this._channelListener);
+    };
+    this.subscribeToStepConfigChannel = function(isDebugEnabled) {
+      this.setMessageReceivedConfigCallback(this._AMBMessageReceivedConfigCallback);
+      if (isDebugEnabled)
+        this.setMessageReceivedConfigDebugCallback(this._AMBMessageReceivedConfigDebugCallback);
+      if (this._stepConfigChannelListener)
+        this._stepConfigChannelListener.unsubscribe();
+      this._stepConfigChannelListener = this._stepConfigWatcher.getChannel(AMBRecordWatcherUTRClient.TABLE_STEP_CONFIG, AMBRecordWatcherUTRClient.STEP_CONFIG_CONDITION, null);
+      this._stepConfigChannelListener.subscribe(this.receiveConfigMessage.bind(this));
+      return this.getRegisteredChannelName(this._stepConfigChannelListener);
+    };
+    this.subscribeToWhitelistedClientErrorChannel = function(isDebugEnabled) {
+      this.setMessageReceivedWhitelistedClientErrorCallback(this._AMBMessageReceivedWhitelistedClientErrorCallback);
+      if (isDebugEnabled)
+        this.setMessageReceivedWhitelistedClientErrorDebugCallback(this._AMBMessageReceivedWhitelistedClientErrorDebugCallback);
+      if (this._whitelistedClientErrorChannelListener)
+        this._whitelistedClientErrorChannelListener.unsubscribe();
+      this._whitelistedClientErrorChannelListener = this._whitelistedClientErrorWatcher.getChannel(AMBRecordWatcherUTRClient.TABLE_ATF_WHITELISTED_CLIENT_ERROR, AMBRecordWatcherUTRClient.WHITELISTED_CLIENT_ERROR_CONDITION, null);
+      this._whitelistedClientErrorChannelListener.subscribe(this.receiveWhitelistedClientErrorMessage.bind(this));
+      return this.getRegisteredChannelName(this._whitelistedClientErrorChannelListener);
+    };
+    this.subscribeToATFAgentChannel = function(isDebugEnabled, atfAgentSysId) {
+      this.setMessageReceivedATFAgentCallback(this._AMBMessageReceivedATFAgentCallback);
+      if (this._atfAgentChannelListener)
+        this._atfAgentChannelListener.unsubscribe();
+      var condition = "sys_id=" + atfAgentSysId;
+      this._atfAgentChannelListener = this._atfAgentWatcher.getChannel(AMBRecordWatcherUTRClient.TABLE_ATF_AGENT, condition, null);
+      this._atfAgentChannelListener.subscribe(this.receiveATFAgentMessage.bind(this));
+      return this.getRegisteredChannelName(this._atfAgentChannelListener);
+    }
+    this.getRegisteredChannelName = function(channel) {
+      return formatMessage(this.STATIC.i18nSubscribedToChannelMsg, channel.getName());
+    };
+    this.asyncApplyOnExternalEvent = function(eventMessageName, callback) {
+      jslog("External event triggered, notifying: " + eventMessageName);
+      $rootScope.$evalAsync(callback);
+    };
+    this.addListenersForInternalConnectionEvents = function(handlers, controllerCallback) {
+      var self = this;
+      var eventNames = connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS;
+      for (var index = 0; index < eventNames.length; index++) {
+        var eventName = eventNames[index];
+        (function(eventNameToPass) {
+          var handler = $rootScope.$on(eventName, function() {
+            var result = connectionStatusHelper.buildConnectionStatus(eventNameToPass);
+            self.asyncApplyOnExternalEvent(eventNameToPass, controllerCallback(result));
           });
-        };
+          handlers.push(handler);
+        })(eventName);
       }
     };
-  })
-  .directive('typeaheadMatch', ['$http', '$templateCache', '$compile', '$parse', function($http, $templateCache, $compile, $parse) {
-    return {
-      restrict: 'EA',
-      scope: {
-        index: '=',
-        match: '=',
-        query: '='
-      },
-      link: function(scope, element, attrs) {
-        var tplUrl = $parse(attrs.templateUrl)(scope.$parent) || 'template/typeahead/typeahead-match.html';
-        $http.get(tplUrl, {
-          cache: $templateCache
-        }).success(function(tplContent) {
-          element.replaceWith($compile(tplContent.trim())(scope));
+    this.receiveMessage = function(message) {
+      try {
+        ATFCommon.log(this.STATIC.RECEIVED_MSG_NEW, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR]);
+        var messageData = message.data;
+        if (!ATFCommon.hasOwnProperty(messageData, "action") || !ATFCommon.hasOwnProperty(messageData, "operation")) {
+          ATFCommon.log(this.STATIC.RECEIVED_MSG_MISSING_ACTION_OPERATION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, this.STATIC.ERROR]);
+          return;
+        }
+        if (!ATFCommon.hasOwnProperty(messageData, "record")) {
+          ATFCommon.log(this.STATIC.RECEIVED_MSG_MISSING_RECORD, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, this.STATIC.ERROR]);
+          return;
+        }
+        var messageDataAction = messageData.action;
+        if ("entry" !== messageDataAction) {
+          ATFCommon.log(this.STATIC.RECEIVED_MSG_IGNORED_NOT_ENTRY_ACTION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, this.STATIC.ERROR]);
+          return;
+        }
+        if (!ATFCommon.hasOwnProperty(messageData, "changes") ||
+          messageData.changes.indexOf(this.STATIC.TABLE_COLUMN_TEST_CASE_JSON) === -1 ||
+          messageData.changes.indexOf(this.STATIC.TABLE_COLUMN_STATUS) === -1) {
+          ATFCommon.log(this.STATIC.RECEIVED_MSG_IGNORED_STATUS_JSON_NOT_SET, this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR);
+          return;
+        }
+        this._onMessageReceivedDebug(messageData);
+        var messageDataOperation = messageData.operation;
+        var messageDataRecord = messageData.record;
+        var messageDataRecordStatusValue = ATFCommon.getValueOrNullFromRecord(messageDataRecord, this.STATIC.TABLE_COLUMN_STATUS);
+        ATFCommon.log(this.STATIC.RECEIVED_MSG_LOG_STATE, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, messageDataAction, messageDataOperation, messageDataRecordStatusValue]);
+        var testJsonString = ATFCommon.getValueOrNullFromRecord(messageDataRecord, this.STATIC.TABLE_COLUMN_TEST_CASE_JSON);
+        var testJson = JSON.parse(testJsonString);
+        var testResultSysId = messageData.sys_id;
+        if (this.STATIC.TABLE_COLUMN_STATUS_WAITING === messageDataRecordStatusValue) {
+          ATFCommon.log(this.STATIC.REPORT_START_TEST, this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR);
+          this._onMessageReceived(testJson, testResultSysId);
+          ATFCommon.log(this.STATIC.REPORT_TEST_STARTED_PROCESSING_COMPLETE, this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR);
+        }
+      } catch (e) {
+        ATFCommon.log(this.STATIC.REPORT_UNEXPECTED_EXCEPTION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, e.message]);
+        if (ATFCommon.hasOwnProperty(e, "stack"))
+          ATFCommon.log(e.stack);
+      }
+    };
+    this.receiveConfigMessage = function(message) {
+      try {
+        ATFCommon.log(this.STATIC.RECEIVED_MSG_NEW, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR]);
+        var messageData = message.data;
+        this._onMessageReceivedConfigDebug(messageData);
+        this._onMessageReceivedConfig();
+      } catch (e) {
+        ATFCommon.log(this.STATIC.REPORT_UNEXPECTED_EXCEPTION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, e.message]);
+        if (ATFCommon.hasOwnProperty(e, "stack"))
+          ATFCommon.log(e.stack);
+      }
+    };
+    this.receiveWhitelistedClientErrorMessage = function(message) {
+      try {
+        ATFCommon.log(this.STATIC.RECEIVED_MSG_NEW, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR]);
+        var messageData = message.data;
+        this._onMessageReceivedWhitelistedClientErrorDebug(messageData);
+        this._onMessageReceivedWhitelistedClientError();
+      } catch (e) {
+        ATFCommon.log(this.STATIC.REPORT_UNEXPECTED_EXCEPTION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, e.message]);
+        if (ATFCommon.hasOwnProperty(e, "stack"))
+          ATFCommon.log(e.stack);
+      }
+    };
+    this.receiveATFAgentMessage = function(message) {
+      try {
+        var messageData = message.data;
+        if (!ATFCommon.hasOwnProperty(messageData, "action") || !ATFCommon.hasOwnProperty(messageData, "operation")) {
+          ATFCommon.log(this.STATIC.RECEIVED_MSG_MISSING_ACTION_OPERATION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, this.STATIC.ERROR]);
+          return;
+        }
+        if ("delete" !== messageData.operation)
+          return;
+        this.unsubscribeFromAllChannels();
+        this._onMessageReceivedATFAgent(messageData);
+      } catch (e) {
+        ATFCommon.log(this.STATIC.REPORT_UNEXPECTED_EXCEPTION, [this.STATIC.TEST_RUNNER_MESSAGE_PROCESSOR, e.message]);
+        if (ATFCommon.hasOwnProperty(e, "stack"))
+          ATFCommon.log(e.stack);
+      }
+    };
+    this.unsubscribeFromAllChannels = function() {
+      if (this._channelListener)
+        this._channelListener.unsubscribe();
+      if (this._stepConfigChannelListener)
+        this._stepConfigChannelListener.unsubscribe();
+      if (this._whitelistedClientErrorChannelListener)
+        this._whitelistedClientErrorChannelListener.unsubscribe();
+      if (this._atfAgentChannelListener)
+        this._atfAgentChannelListener.unsubscribe();
+      ATFCommon.log(this.STATIC.UNSUBSCRIBED);
+    };
+    this.prepareCallbacks = function() {
+      this.ambConnectionStateSubscription.closed = this._subscribeToAMBConnectionStateChange(
+        "connection.closed", connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS[3]);
+      this.ambConnectionStateSubscription.initialized = this._subscribeToAMBConnectionStateChange(
+        "connection.initialized", connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS[0]);
+      this.ambConnectionStateSubscription.broken = this._subscribeToAMBConnectionStateChange(
+        "connection.broken", connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS[2]);
+      this.ambConnectionStateSubscription.opened = this._subscribeToAMBConnectionStateChange(
+        "connection.opened", connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS[1]);
+    };
+    this._subscribeToAMBConnectionStateChange = function(ambEventNameToSubscribe, messageToEmit) {
+      return this._messageClient.subscribeToEvent(ambEventNameToSubscribe, function() {
+        $rootScope.$emit(messageToEmit);
+      });
+    };
+    this.setMessageReceivedDebugCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedDebugCallback = theFunction;
+    };
+    this._onMessageReceivedDebug = function(messageData) {
+      if (!ATFCommon.isFunction(this._customMessageReceivedDebugCallback))
+        return;
+      this._customMessageReceivedDebugCallback(messageData);
+    };
+    this.setMessageReceivedCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedCallback = theFunction;
+    };
+    this._onMessageReceived = function(testJson, testResultSysId) {
+      if (!ATFCommon.isFunction(this._customMessageReceivedCallback))
+        return;
+      this._customMessageReceivedCallback(testJson, testResultSysId);
+    };
+    this.setMessageReceivedConfigCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedConfigCallback = theFunction;
+    };
+    this.setMessageReceivedWhitelistedClientErrorCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedWhitelistedClientErrorCallback = theFunction;
+    };
+    this._onMessageReceivedConfig = function() {
+      if (!ATFCommon.isFunction(this._customMessageReceivedConfigCallback))
+        return;
+      this._customMessageReceivedConfigCallback();
+    };
+    this._onMessageReceivedWhitelistedClientError = function() {
+      if (!ATFCommon.isFunction(this._customMessageReceivedWhitelistedClientErrorCallback))
+        return;
+      this._customMessageReceivedWhitelistedClientErrorCallback();
+    };
+    this._onMessageReceivedATFAgent = function(messageData) {
+      if (!ATFCommon.isFunction(this._customMessageReceivedATFAgentCallback))
+        return;
+      this._customMessageReceivedATFAgentCallback(messageData);
+    }
+    this.setMessageReceivedConfigDebugCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedConfigDebugCallback = theFunction;
+    };
+    this.setMessageReceivedWhitelistedClientErrorDebugCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedWhitelistedClientErrorDebugCallback = theFunction;
+    };
+    this.setMessageReceivedATFAgentCallback = function(theFunction) {
+      if (ATFCommon.isFunction(theFunction))
+        this._customMessageReceivedATFAgentCallback = theFunction;
+    };
+    this._onMessageReceivedConfigDebug = function(messageData) {
+      if (!ATFCommon.isFunction(this._customMessageReceivedConfigDebugCallback))
+        return;
+      this._customMessageReceivedConfigDebugCallback(messageData);
+    };
+    this._onMessageReceivedWhitelistedClientErrorDebug = function(messageData) {
+      if (!ATFCommon.isFunction(this._customMessageReceivedWhitelistedClientErrorDebugCallback))
+        return;
+      this._customMessageReceivedWhitelistedClientErrorDebugCallback(messageData);
+    };
+    this._AMBMessageReceivedDebugCallback = function(messageData) {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedDebug", messageData);
+    };
+    this._AMBMessageReceivedCallback = function(testJson, testResultSysId) {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceived", testJson, testResultSysId);
+    };
+    this._AMBMessageReceivedConfigCallback = function() {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedConfig");
+    };
+    this._AMBMessageReceivedWhitelistedClientErrorCallback = function() {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedWhitelistedClientError");
+    };
+    this._AMBMessageReceivedConfigDebugCallback = function(messageData) {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedConfigDebug", messageData);
+    };
+    this._AMBMessageReceivedWhitelistedClientErrorDebugCallback = function(messageData) {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedWhitelistedClientErrorDebug", messageData);
+    };
+    this._AMBMessageReceivedATFAgentCallback = function(messageData) {
+      $rootScope.$broadcast("TestInformation.AMBMessageReceivedATFAgent", messageData);
+    }
+    this._getTestRunnerEventQuery = function(messageReference) {
+      var query = "message_reference=" + messageReference;
+      query += "^" + AMBRecordWatcherUTRClient.MESSAGE_CONDITION_DEFAULT_QUERY;
+      return query;
+    };
+    this.getAMBDisconnectedStatusObject = function() {
+      return connectionStatusHelper.buildConnectionStatus(connectionStatusHelper.LOCAL_CONNECTION_CHANGE_EVENTS[3]);
+    };
+  }
+]);;
+/*! RESOURCE: /scripts/app.snTestRunner/factory.snATFOpenURL.js */
+angular
+  .module('sn.testRunner')
+  .factory('ATFOpenURL', ATFOpenURL);
+ATFOpenURL.$inject = ['$q'];
+
+function ATFOpenURL($q) {
+  'use strict';
+  return {
+    openURL: openURL
+  };
+
+  function openURL(url, stepId, testResultId, isDebugEnabled, rollbackContextId) {
+    var defer = $q.defer();
+    var testIframe = g_ui_testing_util.getTestIFrame();
+    testIframe.onload = whenFrameCleared;
+    testIframe.src = "";
+    return defer.promise;
+
+    function whenFrameCleared() {
+      testIframe.onload = whenFrameLoaded;
+      var gurl = new GlideURL(url);
+      gurl.setEncode(false);
+      gurl.addParam("sysparm_atf_step_sys_id", stepId);
+      gurl.addParam("sysparm_atf_test_result_sys_id", testResultId);
+      gurl.addParam("sysparm_atf_debug", isDebugEnabled ? "true" : "false");
+      gurl.addParam(ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID, rollbackContextId);
+      gurl.addParam(ATFFormInterceptor.SYSPARM_FROM_ATF_TEST_RUNNER, "true");
+      var testFrameWindow = g_ui_testing_util.getTestIFrameWindow();
+      var emptySrcLogFunc = (!testFrameWindow["console"]) ? console.log : testFrameWindow.console.log;
+      testIframe.src = gurl.getURL();
+      g_ui_testing_util.overwriteFrameFunctions(emptySrcLogFunc);
+    }
+
+    function whenFrameLoaded() {
+      testIframe.onload = null;
+      if (g_ui_testing_util.getTestIFrameGForm()) {
+        var testFrameWindow = g_ui_testing_util.getTestIFrameWindow();
+        if (testFrameWindow.CustomEvent)
+          testFrameWindow.CustomEvent.observe('glideform:script_error', function(err) {
+            console.error(err)
+          });
+      }
+      defer.resolve();
+    }
+  }
+};
+/*! RESOURCE: /scripts/app.snTestRunner/GlideScreenshot.js */
+'use strict';
+var GlideScreenshot = Class.create({
+  TARGET_CANVAS_ID: "glideScreenshotCanvas",
+  FILE_EXTENSION: ".jpg",
+  captureTimeoutSeconds: 60,
+  initialize: function(timeout) {
+    this.captureTimeoutSeconds = timeout;
+  },
+  generateAndAttach: function(domElement, tableName, sysId, fileName, screenshotsQuality, callback) {
+    var self = this;
+    this.generate(domElement)
+      .then(function onGenerateComplete(doAttach) {
+        if (!doAttach)
+          return;
+        callback();
+        self.attach(tableName, sysId, fileName, screenshotsQuality);
+      }, function onGenerateException(result) {
+        if (result['isTimeout']) {
+          var translatedTimeoutMsg = new GwtMessage().getMessage("screenshot_capture_canceled_by_timeout", self.captureTimeoutSeconds);
+          self._sendScreenshotEvent("Screenshot timed out");
+          callback(translatedTimeoutMsg);
+        }
+        if (result['message']) {
+          self._sendScreenshotEvent("Screenshot failed");
+          callback(result['message']);
+        }
+      });
+  },
+  generate: function(domElement) {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      if (!self._isThirdPartyLibraryLoaded()) {
+        resolve(false);
+        return;
+      }
+      var targetCanvas = document.getElementById(self.TARGET_CANVAS_ID);
+      if (targetCanvas && targetCanvas != null)
+        targetCanvas.parentElement.removeChild(targetCanvas);
+      try {
+        var timeoutRef = setTimeout(function() {
+          reject({
+            isTimeout: true
+          });
+        }, self.captureTimeoutSeconds * 1000);
+        html2canvas(domElement, {
+            background: '#FFFFFF'
+          })
+          .then(function(canvas) {
+            clearTimeout(timeoutRef);
+            canvas.id = self.TARGET_CANVAS_ID;
+            canvas.style.display = "none";
+            document.body.appendChild(canvas);
+            resolve(true);
+          });
+      } catch (exception) {
+        clearTimeout(timeoutRef);
+        var exceptionDetails = exception['stack'] ? exception['stack'] : exception.toString();
+        var message = "Error occurred while generating screenshot:\n" + exceptionDetails;
+        reject({
+          message: message
         });
       }
-    };
-  }])
-  .filter('typeaheadHighlight', function() {
-    function escapeRegexp(queryToEscape) {
-      return queryToEscape.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1');
-    }
-    return function(matchItem, query) {
-      return query ? ('' + matchItem).replace(new RegExp(escapeRegexp(query), 'gi'), '<strong>$&</strong>') : matchItem;
-    };
-  });
-angular.module("template/accordion/accordion-group.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/accordion/accordion-group.html",
-    "<div class=\"panel panel-default\">\n" +
-    "  <div class=\"panel-heading\">\n" +
-    "    <h4 class=\"panel-title\">\n" +
-    "      <a href class=\"accordion-toggle\" ng-click=\"toggleOpen()\" accordion-transclude=\"heading\"><span ng-class=\"{'text-muted': isDisabled}\">{{heading}}</span></a>\n" +
-    "    </h4>\n" +
-    "  </div>\n" +
-    "  <div class=\"panel-collapse\" collapse=\"!isOpen\">\n" +
-    "	  <div class=\"panel-body\" ng-transclude></div>\n" +
-    "  </div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/accordion/accordion.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/accordion/accordion.html",
-    "<div class=\"panel-group\" ng-transclude></div>");
-}]);
-angular.module("template/alert/alert.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/alert/alert.html",
-    "<div class=\"alert\" ng-class=\"['alert-' + (type || 'warning'), closeable ? 'alert-dismissable' : null]\" role=\"alert\">\n" +
-    "    <button ng-show=\"closeable\" type=\"button\" class=\"close\" ng-click=\"close()\">\n" +
-    "        <span aria-hidden=\"true\">&times;</span>\n" +
-    "        <span class=\"sr-only\">Close</span>\n" +
-    "    </button>\n" +
-    "    <div ng-transclude></div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/carousel/carousel.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/carousel/carousel.html",
-    "<div ng-mouseenter=\"pause()\" ng-mouseleave=\"play()\" class=\"carousel\" ng-swipe-right=\"prev()\" ng-swipe-left=\"next()\">\n" +
-    "    <ol class=\"carousel-indicators\" ng-show=\"slides.length > 1\">\n" +
-    "        <li ng-repeat=\"slide in slides track by $index\" ng-class=\"{active: isActive(slide)}\" ng-click=\"select(slide)\"></li>\n" +
-    "    </ol>\n" +
-    "    <div class=\"carousel-inner\" ng-transclude></div>\n" +
-    "    <a class=\"left carousel-control\" ng-click=\"prev()\" ng-show=\"slides.length > 1\"><span class=\"glyphicon glyphicon-chevron-left\"></span></a>\n" +
-    "    <a class=\"right carousel-control\" ng-click=\"next()\" ng-show=\"slides.length > 1\"><span class=\"glyphicon glyphicon-chevron-right\"></span></a>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/carousel/slide.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/carousel/slide.html",
-    "<div ng-class=\"{\n" +
-    "    'active': leaving || (active && !entering),\n" +
-    "    'prev': (next || active) && direction=='prev',\n" +
-    "    'next': (next || active) && direction=='next',\n" +
-    "    'right': direction=='prev',\n" +
-    "    'left': direction=='next'\n" +
-    "  }\" class=\"item text-center\" ng-transclude></div>\n" +
-    "");
-}]);
-angular.module("template/datepicker/datepicker.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/datepicker.html",
-    "<div ng-switch=\"datepickerMode\" role=\"application\" ng-keydown=\"keydown($event)\">\n" +
-    "  <daypicker ng-switch-when=\"day\" tabindex=\"0\"></daypicker>\n" +
-    "  <monthpicker ng-switch-when=\"month\" tabindex=\"0\"></monthpicker>\n" +
-    "  <yearpicker ng-switch-when=\"year\" tabindex=\"0\"></yearpicker>\n" +
-    "</div>");
-}]);
-angular.module("template/datepicker/day.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/day.html",
-    "<table role=\"grid\" aria-labelledby=\"{{uniqueId}}-title\" aria-activedescendant=\"{{activeDateId}}\">\n" +
-    "  <thead>\n" +
-    "    <tr>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-left\" ng-click=\"move(-1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-left\"></i></button></th>\n" +
-    "      <th colspan=\"{{5 + showWeeks}}\"><button id=\"{{uniqueId}}-title\" role=\"heading\" aria-live=\"assertive\" aria-atomic=\"true\" type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"toggleMode()\" tabindex=\"-1\" style=\"width:100%;\"><strong>{{title}}</strong></button></th>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-right\" ng-click=\"move(1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-right\"></i></button></th>\n" +
-    "    </tr>\n" +
-    "    <tr>\n" +
-    "      <th ng-show=\"showWeeks\" class=\"text-center\"></th>\n" +
-    "      <th ng-repeat=\"label in labels track by $index\" class=\"text-center\"><small aria-label=\"{{label.full}}\">{{label.abbr}}</small></th>\n" +
-    "    </tr>\n" +
-    "  </thead>\n" +
-    "  <tbody>\n" +
-    "    <tr ng-repeat=\"row in rows track by $index\">\n" +
-    "      <td ng-show=\"showWeeks\" class=\"text-center h6\"><em>{{ weekNumbers[$index] }}</em></td>\n" +
-    "      <td ng-repeat=\"dt in row track by dt.date\" class=\"text-center\" role=\"gridcell\" id=\"{{dt.uid}}\" aria-disabled=\"{{!!dt.disabled}}\">\n" +
-    "        <button type=\"button\" style=\"width:100%;\" class=\"btn btn-default btn-sm\" ng-class=\"{'btn-info': dt.selected, active: isActive(dt)}\" ng-click=\"select(dt.date)\" ng-disabled=\"dt.disabled\" tabindex=\"-1\"><span ng-class=\"{'text-muted': dt.secondary, 'text-info': dt.current}\">{{dt.label}}</span></button>\n" +
-    "      </td>\n" +
-    "    </tr>\n" +
-    "  </tbody>\n" +
-    "</table>\n" +
-    "");
-}]);
-angular.module("template/datepicker/month.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/month.html",
-    "<table role=\"grid\" aria-labelledby=\"{{uniqueId}}-title\" aria-activedescendant=\"{{activeDateId}}\">\n" +
-    "  <thead>\n" +
-    "    <tr>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-left\" ng-click=\"move(-1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-left\"></i></button></th>\n" +
-    "      <th><button id=\"{{uniqueId}}-title\" role=\"heading\" aria-live=\"assertive\" aria-atomic=\"true\" type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"toggleMode()\" tabindex=\"-1\" style=\"width:100%;\"><strong>{{title}}</strong></button></th>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-right\" ng-click=\"move(1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-right\"></i></button></th>\n" +
-    "    </tr>\n" +
-    "  </thead>\n" +
-    "  <tbody>\n" +
-    "    <tr ng-repeat=\"row in rows track by $index\">\n" +
-    "      <td ng-repeat=\"dt in row track by dt.date\" class=\"text-center\" role=\"gridcell\" id=\"{{dt.uid}}\" aria-disabled=\"{{!!dt.disabled}}\">\n" +
-    "        <button type=\"button\" style=\"width:100%;\" class=\"btn btn-default\" ng-class=\"{'btn-info': dt.selected, active: isActive(dt)}\" ng-click=\"select(dt.date)\" ng-disabled=\"dt.disabled\" tabindex=\"-1\"><span ng-class=\"{'text-info': dt.current}\">{{dt.label}}</span></button>\n" +
-    "      </td>\n" +
-    "    </tr>\n" +
-    "  </tbody>\n" +
-    "</table>\n" +
-    "");
-}]);
-angular.module("template/datepicker/popup.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/popup.html",
-    "<ul class=\"dropdown-menu\" ng-style=\"{display: (isOpen && 'block') || 'none', top: position.top+'px', left: position.left+'px'}\" ng-keydown=\"keydown($event)\">\n" +
-    "	<li ng-transclude></li>\n" +
-    "	<li ng-if=\"showButtonBar\" style=\"padding:10px 9px 2px\">\n" +
-    "		<span class=\"btn-group pull-left\">\n" +
-    "			<button type=\"button\" class=\"btn btn-sm btn-info\" ng-click=\"select('today')\">{{ getText('current') }}</button>\n" +
-    "			<button type=\"button\" class=\"btn btn-sm btn-danger\" ng-click=\"select(null)\">{{ getText('clear') }}</button>\n" +
-    "		</span>\n" +
-    "		<button type=\"button\" class=\"btn btn-sm btn-success pull-right\" ng-click=\"close()\">{{ getText('close') }}</button>\n" +
-    "	</li>\n" +
-    "</ul>\n" +
-    "");
-}]);
-angular.module("template/datepicker/year.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/datepicker/year.html",
-    "<table role=\"grid\" aria-labelledby=\"{{uniqueId}}-title\" aria-activedescendant=\"{{activeDateId}}\">\n" +
-    "  <thead>\n" +
-    "    <tr>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-left\" ng-click=\"move(-1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-left\"></i></button></th>\n" +
-    "      <th colspan=\"3\"><button id=\"{{uniqueId}}-title\" role=\"heading\" aria-live=\"assertive\" aria-atomic=\"true\" type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"toggleMode()\" tabindex=\"-1\" style=\"width:100%;\"><strong>{{title}}</strong></button></th>\n" +
-    "      <th><button type=\"button\" class=\"btn btn-default btn-sm pull-right\" ng-click=\"move(1)\" tabindex=\"-1\"><i class=\"glyphicon glyphicon-chevron-right\"></i></button></th>\n" +
-    "    </tr>\n" +
-    "  </thead>\n" +
-    "  <tbody>\n" +
-    "    <tr ng-repeat=\"row in rows track by $index\">\n" +
-    "      <td ng-repeat=\"dt in row track by dt.date\" class=\"text-center\" role=\"gridcell\" id=\"{{dt.uid}}\" aria-disabled=\"{{!!dt.disabled}}\">\n" +
-    "        <button type=\"button\" style=\"width:100%;\" class=\"btn btn-default\" ng-class=\"{'btn-info': dt.selected, active: isActive(dt)}\" ng-click=\"select(dt.date)\" ng-disabled=\"dt.disabled\" tabindex=\"-1\"><span ng-class=\"{'text-info': dt.current}\">{{dt.label}}</span></button>\n" +
-    "      </td>\n" +
-    "    </tr>\n" +
-    "  </tbody>\n" +
-    "</table>\n" +
-    "");
-}]);
-angular.module("template/modal/backdrop.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/modal/backdrop.html",
-    "<div class=\"modal-backdrop fade {{ backdropClass }}\"\n" +
-    "     ng-class=\"{in: animate}\"\n" +
-    "     ng-style=\"{'z-index': 1040 + (index && 1 || 0) + index*10}\"\n" +
-    "></div>\n" +
-    "");
-}]);
-angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/modal/window.html",
-    "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\n" +
-    "    <div class=\"modal-dialog\" ng-class=\"{'modal-sm': size == 'sm', 'modal-lg': size == 'lg'}\"><div class=\"modal-content\" modal-transclude></div></div>\n" +
-    "</div>");
-}]);
-angular.module("template/pagination/pager.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/pagination/pager.html",
-    "<ul class=\"pager\">\n" +
-    "  <li ng-class=\"{disabled: noPrevious(), previous: align}\"><a href ng-click=\"selectPage(page - 1)\">{{getText('previous')}}</a></li>\n" +
-    "  <li ng-class=\"{disabled: noNext(), next: align}\"><a href ng-click=\"selectPage(page + 1)\">{{getText('next')}}</a></li>\n" +
-    "</ul>");
-}]);
-angular.module("template/pagination/pagination.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/pagination/pagination.html",
-    "<ul class=\"pagination\">\n" +
-    "  <li ng-if=\"boundaryLinks\" ng-class=\"{disabled: noPrevious()}\"><a href ng-click=\"selectPage(1)\">{{getText('first')}}</a></li>\n" +
-    "  <li ng-if=\"directionLinks\" ng-class=\"{disabled: noPrevious()}\"><a href ng-click=\"selectPage(page - 1)\">{{getText('previous')}}</a></li>\n" +
-    "  <li ng-repeat=\"page in pages track by $index\" ng-class=\"{active: page.active}\"><a href ng-click=\"selectPage(page.number)\">{{page.text}}</a></li>\n" +
-    "  <li ng-if=\"directionLinks\" ng-class=\"{disabled: noNext()}\"><a href ng-click=\"selectPage(page + 1)\">{{getText('next')}}</a></li>\n" +
-    "  <li ng-if=\"boundaryLinks\" ng-class=\"{disabled: noNext()}\"><a href ng-click=\"selectPage(totalPages)\">{{getText('last')}}</a></li>\n" +
-    "</ul>");
-}]);
-angular.module("template/tooltip/tooltip-html-unsafe-popup.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/tooltip/tooltip-html-unsafe-popup.html",
-    "<div class=\"tooltip {{placement}}\" ng-class=\"{ in: isOpen(), fade: animation() }\">\n" +
-    "  <div class=\"tooltip-arrow\"></div>\n" +
-    "  <div class=\"tooltip-inner\" bind-html-unsafe=\"content\"></div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/tooltip/tooltip-popup.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/tooltip/tooltip-popup.html",
-    "<div class=\"tooltip {{placement}}\" ng-class=\"{ in: isOpen(), fade: animation() }\">\n" +
-    "  <div class=\"tooltip-arrow\"></div>\n" +
-    "  <div class=\"tooltip-inner\" ng-bind=\"content\"></div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/popover/popover.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/popover/popover.html",
-    "<div class=\"popover {{placement}}\" ng-class=\"{ in: isOpen(), fade: animation() }\">\n" +
-    "  <div class=\"arrow\"></div>\n" +
-    "\n" +
-    "  <div class=\"popover-inner\">\n" +
-    "      <h3 class=\"popover-title\" ng-bind=\"title\" ng-show=\"title\"></h3>\n" +
-    "      <div class=\"popover-content\" ng-bind=\"content\"></div>\n" +
-    "  </div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/progressbar/bar.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/progressbar/bar.html",
-    "<div class=\"progress-bar\" ng-class=\"type && 'progress-bar-' + type\" role=\"progressbar\" aria-valuenow=\"{{value}}\" aria-valuemin=\"0\" aria-valuemax=\"{{max}}\" ng-style=\"{width: percent + '%'}\" aria-valuetext=\"{{percent | number:0}}%\" ng-transclude></div>");
-}]);
-angular.module("template/progressbar/progress.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/progressbar/progress.html",
-    "<div class=\"progress\" ng-transclude></div>");
-}]);
-angular.module("template/progressbar/progressbar.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/progressbar/progressbar.html",
-    "<div class=\"progress\">\n" +
-    "  <div class=\"progress-bar\" ng-class=\"type && 'progress-bar-' + type\" role=\"progressbar\" aria-valuenow=\"{{value}}\" aria-valuemin=\"0\" aria-valuemax=\"{{max}}\" ng-style=\"{width: percent + '%'}\" aria-valuetext=\"{{percent | number:0}}%\" ng-transclude></div>\n" +
-    "</div>");
-}]);
-angular.module("template/rating/rating.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/rating/rating.html",
-    "<span ng-mouseleave=\"reset()\" ng-keydown=\"onKeydown($event)\" tabindex=\"0\" role=\"slider\" aria-valuemin=\"0\" aria-valuemax=\"{{range.length}}\" aria-valuenow=\"{{value}}\">\n" +
-    "    <i ng-repeat=\"r in range track by $index\" ng-mouseenter=\"enter($index + 1)\" ng-click=\"rate($index + 1)\" class=\"glyphicon\" ng-class=\"$index < value && (r.stateOn || 'glyphicon-star') || (r.stateOff || 'glyphicon-star-empty')\">\n" +
-    "        <span class=\"sr-only\">({{ $index < value ? '*' : ' ' }})</span>\n" +
-    "    </i>\n" +
-    "</span>");
-}]);
-angular.module("template/tabs/tab.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/tabs/tab.html",
-    "<li ng-class=\"{active: active, disabled: disabled}\">\n" +
-    "  <a href ng-click=\"select()\" tab-heading-transclude>{{heading}}</a>\n" +
-    "</li>\n" +
-    "");
-}]);
-angular.module("template/tabs/tabset.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/tabs/tabset.html",
-    "<div>\n" +
-    "  <ul class=\"nav nav-{{type || 'tabs'}}\" ng-class=\"{'nav-stacked': vertical, 'nav-justified': justified}\" ng-transclude></ul>\n" +
-    "  <div class=\"tab-content\">\n" +
-    "    <div class=\"tab-pane\" \n" +
-    "         ng-repeat=\"tab in tabs\" \n" +
-    "         ng-class=\"{active: tab.active}\"\n" +
-    "         tab-content-transclude=\"tab\">\n" +
-    "    </div>\n" +
-    "  </div>\n" +
-    "</div>\n" +
-    "");
-}]);
-angular.module("template/timepicker/timepicker.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/timepicker/timepicker.html",
-    "<table>\n" +
-    "	<tbody>\n" +
-    "		<tr class=\"text-center\">\n" +
-    "			<td><a ng-click=\"incrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
-    "			<td>&nbsp;</td>\n" +
-    "			<td><a ng-click=\"incrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
-    "			<td ng-show=\"showMeridian\"></td>\n" +
-    "		</tr>\n" +
-    "		<tr>\n" +
-    "			<td style=\"width:50px;\" class=\"form-group\" ng-class=\"{'has-error': invalidHours}\">\n" +
-    "				<input type=\"text\" ng-model=\"hours\" ng-change=\"updateHours()\" class=\"form-control text-center\" ng-mousewheel=\"incrementHours()\" ng-readonly=\"readonlyInput\" maxlength=\"2\">\n" +
-    "			</td>\n" +
-    "			<td>:</td>\n" +
-    "			<td style=\"width:50px;\" class=\"form-group\" ng-class=\"{'has-error': invalidMinutes}\">\n" +
-    "				<input type=\"text\" ng-model=\"minutes\" ng-change=\"updateMinutes()\" class=\"form-control text-center\" ng-readonly=\"readonlyInput\" maxlength=\"2\">\n" +
-    "			</td>\n" +
-    "			<td ng-show=\"showMeridian\"><button type=\"button\" class=\"btn btn-default text-center\" ng-click=\"toggleMeridian()\">{{meridian}}</button></td>\n" +
-    "		</tr>\n" +
-    "		<tr class=\"text-center\">\n" +
-    "			<td><a ng-click=\"decrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
-    "			<td>&nbsp;</td>\n" +
-    "			<td><a ng-click=\"decrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
-    "			<td ng-show=\"showMeridian\"></td>\n" +
-    "		</tr>\n" +
-    "	</tbody>\n" +
-    "</table>\n" +
-    "");
-}]);
-angular.module("template/typeahead/typeahead-match.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/typeahead/typeahead-match.html",
-    "<a tabindex=\"-1\" bind-html-unsafe=\"match.label | typeaheadHighlight:query\"></a>");
-}]);
-angular.module("template/typeahead/typeahead-popup.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("template/typeahead/typeahead-popup.html",
-    "<ul class=\"dropdown-menu\" ng-show=\"isOpen()\" ng-style=\"{top: position.top+'px', left: position.left+'px'}\" style=\"display: block;\" role=\"listbox\" aria-hidden=\"{{!isOpen()}}\">\n" +
-    "    <li ng-repeat=\"match in matches track by $index\" ng-class=\"{active: isActive($index) }\" ng-mouseenter=\"selectActive($index)\" ng-click=\"selectMatch($index)\" role=\"option\" id=\"{{match.id}}\">\n" +
-    "        <div typeahead-match index=\"$index\" match=\"match\" query=\"query\" template-url=\"templateUrl\"></div>\n" +
-    "    </li>\n" +
-    "</ul>\n" +
-    "");
-}]);;
-/*! RESOURCE: /scripts/thirdparty/modernizr/modernizr.custom.min.js */
-/* Modernizr 2.8.3 (Custom Build) | MIT & BSD
- * Build: http://modernizr.com/download/#-applicationcache-canvas-canvastext-draganddrop-hashchange-history-audio-video-indexeddb-localstorage-postmessage-websockets-webworkers-touch-cssclasses-teststyles-testprop-testallprops-hasevent-prefixes-domprefixes-load
- */
-;
-window.Modernizr = function(a, b, c) {
-    function A(a) {
-      j.cssText = a
-    }
-
-    function B(a, b) {
-      return A(m.join(a + ";") + (b || ""))
-    }
-
-    function C(a, b) {
-      return typeof a === b
-    }
-
-    function D(a, b) {
-      return !!~("" + a).indexOf(b)
-    }
-
-    function E(a, b) {
-      for (var d in a) {
-        var e = a[d];
-        if (!D(e, "-") && j[e] !== c) return b == "pfx" ? e : !0
-      }
-      return !1
-    }
-
-    function F(a, b, d) {
-      for (var e in a) {
-        var f = b[a[e]];
-        if (f !== c) return d === !1 ? a[e] : C(f, "function") ? f.bind(d || b) : f
-      }
-      return !1
-    }
-
-    function G(a, b, c) {
-      var d = a.charAt(0).toUpperCase() + a.slice(1),
-        e = (a + " " + o.join(d + " ") + d).split(" ");
-      return C(b, "string") || C(b, "undefined") ? E(e, b) : (e = (a + " " + p.join(d + " ") + d).split(" "), F(e, b, c))
-    }
-    var d = "2.8.3",
-      e = {},
-      f = !0,
-      g = b.documentElement,
-      h = "modernizr",
-      i = b.createElement(h),
-      j = i.style,
-      k, l = {}.toString,
-      m = " -webkit- -moz- -o- -ms- ".split(" "),
-      n = "Webkit Moz O ms",
-      o = n.split(" "),
-      p = n.toLowerCase().split(" "),
-      q = {},
-      r = {},
-      s = {},
-      t = [],
-      u = t.slice,
-      v, w = function(a, c, d, e) {
-        var f, i, j, k, l = b.createElement("div"),
-          m = b.body,
-          n = m || b.createElement("body");
-        if (parseInt(d, 10))
-          while (d--) j = b.createElement("div"), j.id = e ? e[d] : h + (d + 1), l.appendChild(j);
-        return f = ["&#173;", '<style id="s', h, '">', a, "</style>"].join(""), l.id = h, (m ? l : n).innerHTML += f, n.appendChild(l), m || (n.style.background = "", n.style.overflow = "hidden", k = g.style.overflow, g.style.overflow = "hidden", g.appendChild(n)), i = c(l, a), m ? l.parentNode.removeChild(l) : (n.parentNode.removeChild(n), g.style.overflow = k), !!i
-      },
-      x = function() {
-        function d(d, e) {
-          e = e || b.createElement(a[d] || "div"), d = "on" + d;
-          var f = d in e;
-          return f || (e.setAttribute || (e = b.createElement("div")), e.setAttribute && e.removeAttribute && (e.setAttribute(d, ""), f = C(e[d], "function"), C(e[d], "undefined") || (e[d] = c), e.removeAttribute(d))), e = null, f
-        }
-        var a = {
-          select: "input",
-          change: "input",
-          submit: "form",
-          reset: "form",
-          error: "img",
-          load: "img",
-          abort: "img"
-        };
-        return d
-      }(),
-      y = {}.hasOwnProperty,
-      z;
-    !C(y, "undefined") && !C(y.call, "undefined") ? z = function(a, b) {
-      return y.call(a, b)
-    } : z = function(a, b) {
-      return b in a && C(a.constructor.prototype[b], "undefined")
-    }, Function.prototype.bind || (Function.prototype.bind = function(b) {
-      var c = this;
-      if (typeof c != "function") throw new TypeError;
-      var d = u.call(arguments, 1),
-        e = function() {
-          if (this instanceof e) {
-            var a = function() {};
-            a.prototype = c.prototype;
-            var f = new a,
-              g = c.apply(f, d.concat(u.call(arguments)));
-            return Object(g) === g ? g : f
-          }
-          return c.apply(b, d.concat(u.call(arguments)))
-        };
-      return e
-    }), q.canvas = function() {
-      var a = b.createElement("canvas");
-      return !!a.getContext && !!a.getContext("2d")
-    }, q.canvastext = function() {
-      return !!e.canvas && !!C(b.createElement("canvas").getContext("2d").fillText, "function")
-    }, q.touch = function() {
-      var c;
-      return "ontouchstart" in a || a.DocumentTouch && b instanceof DocumentTouch ? c = !0 : w(["@media (", m.join("touch-enabled),("), h, ")", "{#modernizr{top:9px;position:absolute}}"].join(""), function(a) {
-        c = a.offsetTop === 9
-      }), c
-    }, q.postmessage = function() {
-      return !!a.postMessage
-    }, q.indexedDB = function() {
-      return !!G("indexedDB", a)
-    }, q.hashchange = function() {
-      return x("hashchange", a) && (b.documentMode === c || b.documentMode > 7)
-    }, q.history = function() {
-      return !!a.history && !!history.pushState
-    }, q.draganddrop = function() {
-      var a = b.createElement("div");
-      return "draggable" in a || "ondragstart" in a && "ondrop" in a
-    }, q.websockets = function() {
-      return "WebSocket" in a || "MozWebSocket" in a
-    }, q.video = function() {
-      var a = b.createElement("video"),
-        c = !1;
+    });
+  },
+  attach: function(tableName, sysId, fileName, screenshotsQuality) {
+    var imageType = 'image/jpeg';
+    var percentQuality;
+    if (parseFloat(screenshotsQuality) == screenshotsQuality)
+      percentQuality = screenshotsQuality / 100;
+    else
+      percentQuality = 0.25;
+    var canvasData = document.getElementById(this.TARGET_CANVAS_ID).toDataURL(imageType, percentQuality);
+    var ga = new GlideAjax('ScreenCaptureAPI');
+    ga.addParam('sysparm_name', 'attachScreenShot');
+    ga.addParam('sysparm_target_table_name', tableName);
+    ga.addParam('sysparm_target_sys_id', sysId);
+    ga.addParam('sysparm_image_data', canvasData);
+    ga.addParam('sysparm_file_name', fileName + this.FILE_EXTENSION);
+    ga.addParam('sysparm_file_type', imageType);
+    ga.getXML();
+  },
+  _isThirdPartyLibraryLoaded: function() {
+    var found = ATFCommon.isFunction(html2canvas);
+    if (!found)
+      console.warn("GlideScreenshot: unable to find third party library 'html2canvas'");
+    return found;
+  },
+  _sendScreenshotEvent: function(eventName) {
+    if (GlideWebAnalytics && GlideWebAnalytics.trackEvent) {
       try {
-        if (c = !!a.canPlayType) c = new Boolean(c), c.ogg = a.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, ""), c.h264 = a.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, ""), c.webm = a.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, "")
-      } catch (d) {}
-      return c
-    }, q.audio = function() {
-      var a = b.createElement("audio"),
-        c = !1;
-      try {
-        if (c = !!a.canPlayType) c = new Boolean(c), c.ogg = a.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ""), c.mp3 = a.canPlayType("audio/mpeg;").replace(/^no$/, ""), c.wav = a.canPlayType('audio/wav; codecs="1"').replace(/^no$/, ""), c.m4a = (a.canPlayType("audio/x-m4a;") || a.canPlayType("audio/aac;")).replace(/^no$/, "")
-      } catch (d) {}
-      return c
-    }, q.localstorage = function() {
-      try {
-        return localStorage.setItem(h, h), localStorage.removeItem(h), !0
-      } catch (a) {
-        return !1
+        GlideWebAnalytics.trackEvent('com.glide.automated_testing_framework', "Screenshot", eventName);
+      } catch (e) {
+        console.log('Failed to send ATF analytic event: ' + eventName);
+        console.log(e);
       }
-    }, q.webworkers = function() {
-      return !!a.Worker
-    }, q.applicationcache = function() {
-      return !!a.applicationCache
-    };
-    for (var H in q) z(q, H) && (v = H.toLowerCase(), e[v] = q[H](), t.push((e[v] ? "" : "no-") + v));
-    return e.addTest = function(a, b) {
-      if (typeof a == "object")
-        for (var d in a) z(a, d) && e.addTest(d, a[d]);
-      else {
-        a = a.toLowerCase();
-        if (e[a] !== c) return e;
-        b = typeof b == "function" ? b() : b, typeof f != "undefined" && f && (g.className += " " + (b ? "" : "no-") + a), e[a] = b
-      }
-      return e
-    }, A(""), i = k = null, e._version = d, e._prefixes = m, e._domPrefixes = p, e._cssomPrefixes = o, e.hasEvent = x, e.testProp = function(a) {
-      return E([a])
-    }, e.testAllProps = G, e.testStyles = w, g.className = g.className.replace(/(^|\s)no-js(\s|$)/, "$1$2") + (f ? " js " + t.join(" ") : ""), e
-  }(this, this.document),
-  function(a, b, c) {
-    function d(a) {
-      return "[object Function]" == o.call(a)
     }
-
-    function e(a) {
-      return "string" == typeof a
-    }
-
-    function f() {}
-
-    function g(a) {
-      return !a || "loaded" == a || "complete" == a || "uninitialized" == a
-    }
-
-    function h() {
-      var a = p.shift();
-      q = 1, a ? a.t ? m(function() {
-        ("c" == a.t ? B.injectCss : B.injectJs)(a.s, 0, a.a, a.x, a.e, 1)
-      }, 0) : (a(), h()) : q = 0
-    }
-
-    function i(a, c, d, e, f, i, j) {
-      function k(b) {
-        if (!o && g(l.readyState) && (u.r = o = 1, !q && h(), l.onload = l.onreadystatechange = null, b)) {
-          "img" != a && m(function() {
-            t.removeChild(l)
-          }, 50);
-          for (var d in y[c]) y[c].hasOwnProperty(d) && y[c][d].onload()
-        }
-      }
-      var j = j || B.errorTimeout,
-        l = b.createElement(a),
-        o = 0,
-        r = 0,
-        u = {
-          t: d,
-          s: c,
-          e: f,
-          a: i,
-          x: j
-        };
-      1 === y[c] && (r = 1, y[c] = []), "object" == a ? l.data = c : (l.src = c, l.type = a), l.width = l.height = "0", l.onerror = l.onload = l.onreadystatechange = function() {
-        k.call(this, r)
-      }, p.splice(e, 0, u), "img" != a && (r || 2 === y[c] ? (t.insertBefore(l, s ? null : n), m(k, j)) : y[c].push(l))
-    }
-
-    function j(a, b, c, d, f) {
-      return q = 0, b = b || "j", e(a) ? i("c" == b ? v : u, a, b, this.i++, c, d, f) : (p.splice(this.i++, 0, a), 1 == p.length && h()), this
-    }
-
-    function k() {
-      var a = B;
-      return a.loader = {
-        load: j,
-        i: 0
-      }, a
-    }
-    var l = b.documentElement,
-      m = a.setTimeout,
-      n = b.getElementsByTagName("script")[0],
-      o = {}.toString,
-      p = [],
-      q = 0,
-      r = "MozAppearance" in l.style,
-      s = r && !!b.createRange().compareNode,
-      t = s ? l : n.parentNode,
-      l = a.opera && "[object Opera]" == o.call(a.opera),
-      l = !!b.attachEvent && !l,
-      u = r ? "object" : l ? "script" : "img",
-      v = l ? "script" : u,
-      w = Array.isArray || function(a) {
-        return "[object Array]" == o.call(a)
-      },
-      x = [],
-      y = {},
-      z = {
-        timeout: function(a, b) {
-          return b.length && (a.timeout = b[0]), a
-        }
-      },
-      A, B;
-    B = function(a) {
-      function b(a) {
-        var a = a.split("!"),
-          b = x.length,
-          c = a.pop(),
-          d = a.length,
-          c = {
-            url: c,
-            origUrl: c,
-            prefixes: a
-          },
-          e, f, g;
-        for (f = 0; f < d; f++) g = a[f].split("="), (e = z[g.shift()]) && (c = e(c, g));
-        for (f = 0; f < b; f++) c = x[f](c);
-        return c
-      }
-
-      function g(a, e, f, g, h) {
-        var i = b(a),
-          j = i.autoCallback;
-        i.url.split(".").pop().split("?").shift(), i.bypass || (e && (e = d(e) ? e : e[a] || e[g] || e[a.split("/").pop().split("?")[0]]), i.instead ? i.instead(a, e, f, g, h) : (y[i.url] ? i.noexec = !0 : y[i.url] = 1, f.load(i.url, i.forceCSS || !i.forceJS && "css" == i.url.split(".").pop().split("?").shift() ? "c" : c, i.noexec, i.attrs, i.timeout), (d(e) || d(j)) && f.load(function() {
-          k(), e && e(i.origUrl, h, g), j && j(i.origUrl, h, g), y[i.url] = 2
-        })))
-      }
-
-      function h(a, b) {
-        function c(a, c) {
-          if (a) {
-            if (e(a)) c || (j = function() {
-              var a = [].slice.call(arguments);
-              k.apply(this, a), l()
-            }), g(a, j, b, 0, h);
-            else if (Object(a) === a)
-              for (n in m = function() {
-                  var b = 0,
-                    c;
-                  for (c in a) a.hasOwnProperty(c) && b++;
-                  return b
-                }(), a) a.hasOwnProperty(n) && (!c && !--m && (d(j) ? j = function() {
-                var a = [].slice.call(arguments);
-                k.apply(this, a), l()
-              } : j[n] = function(a) {
-                return function() {
-                  var b = [].slice.call(arguments);
-                  a && a.apply(this, b), l()
-                }
-              }(k[n])), g(a[n], j, b, n, h))
-          } else !c && l()
-        }
-        var h = !!a.test,
-          i = a.load || a.both,
-          j = a.callback || f,
-          k = j,
-          l = a.complete || f,
-          m, n;
-        c(h ? a.yep : a.nope, !!i), i && c(i)
-      }
-      var i, j, l = this.yepnope.loader;
-      if (e(a)) g(a, 0, l, 0);
-      else if (w(a))
-        for (i = 0; i < a.length; i++) j = a[i], e(j) ? g(j, 0, l, 0) : w(j) ? B(j) : Object(j) === j && h(j, l);
-      else Object(a) === a && h(a, l)
-    }, B.addPrefix = function(a, b) {
-      z[a] = b
-    }, B.addFilter = function(a) {
-      x.push(a)
-    }, B.errorTimeout = 1e4, null == b.readyState && b.addEventListener && (b.readyState = "loading", b.addEventListener("DOMContentLoaded", A = function() {
-      b.removeEventListener("DOMContentLoaded", A, 0), b.readyState = "complete"
-    }, 0)), a.yepnope = k(), a.yepnope.executeStack = h, a.yepnope.injectJs = function(a, c, d, e, i, j) {
-      var k = b.createElement("script"),
-        l, o, e = e || B.errorTimeout;
-      k.src = a;
-      for (o in d) k.setAttribute(o, d[o]);
-      c = j ? h : c || f, k.onreadystatechange = k.onload = function() {
-        !l && g(k.readyState) && (l = 1, c(), k.onload = k.onreadystatechange = null)
-      }, m(function() {
-        l || (l = 1, c(1))
-      }, e), i ? k.onload() : n.parentNode.insertBefore(k, n)
-    }, a.yepnope.injectCss = function(a, c, d, e, g, i) {
-      var e = b.createElement("link"),
-        j, c = i ? h : c || f;
-      e.href = a, e.rel = "stylesheet", e.type = "text/css";
-      for (j in d) e.setAttribute(j, d[j]);
-      g || (n.parentNode.insertBefore(e, n), m(c, 0))
-    }
-  }(this, document), Modernizr.load = function() {
-    yepnope.apply(window, [].slice.call(arguments, 0))
-  };
-/*! RESOURCE: /scripts/thirdparty/velocity/velocity.min.js */
-/*! VelocityJS.org (1.2.2). (C) 2014 Julian Shapiro. MIT @license: en.wikipedia.org/wiki/MIT_License */
-/*! VelocityJS.org jQuery Shim (1.0.1). (C) 2014 The jQuery Foundation. MIT @license: en.wikipedia.org/wiki/MIT_License. */
-! function(e) {
-  function t(e) {
-    var t = e.length,
-      r = $.type(e);
-    return "function" === r || $.isWindow(e) ? !1 : 1 === e.nodeType && t ? !0 : "array" === r || 0 === t || "number" == typeof t && t > 0 && t - 1 in e
+  },
+  toString: function() {
+    return 'GlideScreenshot';
   }
-
-  if (!e.jQuery) {
-    var $ = function(e, t) {
-      return new $.fn.init(e, t)
-    };
-    $.isWindow = function(e) {
-      return null != e && e == e.window
-    }, $.type = function(e) {
-      return null == e ? e + "" : "object" == typeof e || "function" == typeof e ? a[o.call(e)] || "object" : typeof e
-    }, $.isArray = Array.isArray || function(e) {
-      return "array" === $.type(e)
-    }, $.isPlainObject = function(e) {
-      var t;
-      if (!e || "object" !== $.type(e) || e.nodeType || $.isWindow(e)) return !1;
-      try {
-        if (e.constructor && !n.call(e, "constructor") && !n.call(e.constructor.prototype, "isPrototypeOf")) return !1
-      } catch (r) {
-        return !1
+});;
+/*! RESOURCE: /scripts/app.snTestRunner/util/ATFCommon.js */
+var ATFCommon = Class.create();
+var STATIC = ATFCommon;
+ATFCommon.isFunction = function(possibleFunction) {
+  if (possibleFunction === undefined || possibleFunction === null)
+    return false;
+  return Object.prototype.toString.call(possibleFunction) == '[object Function]';
+};
+ATFCommon.hasOwnProperty = function(object, property) {
+  if (object === undefined || object === null)
+    return false;
+  return Object.prototype.hasOwnProperty.call(object, property);
+};
+ATFCommon.log = function(parameterizedMessageKey, messageKeyComponents) {
+  jslog(formatMessage(parameterizedMessageKey, messageKeyComponents));
+};
+ATFCommon.getValueOrNullFromRecord = function(record, column) {
+  return (STATIC.hasOwnProperty(record, column)) ? record[column].value : null;
+};
+ATFCommon.logError = function(e) {
+  if (STATIC.hasOwnProperty(e, "stack"))
+    STATIC.log(e.message + "\n" + e.stack);
+  else
+    STATIC.log(e.message);
+};;
+/*! RESOURCE: /scripts/app.snTestRunner/util/GUITestingUtil.js */
+var GUITestingUtil = Class.create();
+GUITestingUtil.prototype = {
+  initialize: function() {},
+  getAngularScope: function() {
+    return angular.element("#test_runner_container").scope().testRunner;
+  },
+  _getAngularInjector: function(injectorName) {
+    return angular.element("#test_runner_container").injector().get(injectorName);
+  },
+  q: function() {
+    return this._getAngularInjector("$q");
+  },
+  http: function() {
+    return this._getAngularInjector("$http");
+  },
+  interval: function() {
+    return this._getAngularInjector("$interval");
+  },
+  getTestIFrame: function() {
+    return this.getAngularScope().iFrame;
+  },
+  getTestIFrameGForm: function() {
+    return this.getAngularScope()._getFrameGForm();
+  },
+  getTestIFrameWindow: function() {
+    return this.getAngularScope().frameWindow;
+  },
+  setTestIFrameOnloadFunction: function(func) {
+    this.getAngularScope().setiFrameOnloadFunction(func);
+  },
+  clearTestIFrameOnloadFunction: function() {
+    this.getAngularScope().cleariFrameOnloadFunction();
+  },
+  setTestStepStatusMessage: function(message) {
+    return this.getAngularScope().setTestStepStatusMessage(message);
+  },
+  getRollbackContextId: function() {
+    var testRunnerObj = this.getAngularScope();
+    if (null == testRunnerObj.atfFormInterceptor)
+      return null;
+    return testRunnerObj.atfFormInterceptor.getRollbackContextId();
+  },
+  openFormAndAssert: function(url, recordId, view) {
+    return this.getAngularScope().openFormAndAssert(url, recordId, view);
+  },
+  openPortalPage: function(portalUrlSfx, pageId, queryParams, waitTimeout) {
+    return this.getAngularScope().openPortalPage(portalUrlSfx, pageId, queryParams, waitTimeout);
+  },
+  openURL: function(url) {
+    return this.getAngularScope().openURL(url);
+  },
+  openCatalogItem: function(catItemId) {
+    return this.getAngularScope().openCatalogItem(catItemId);
+  },
+  overwriteFrameFunctions: function(currFramesLogFunc) {
+    return this.getAngularScope().overwriteFrameFunctions(currFramesLogFunc);
+  },
+  type: "GUITestingUtil"
+};;
+/*! RESOURCE: /scripts/app.snTestRunner/util/ATFFormInterceptor.js */
+var ATFFormInterceptor = Class.create();
+ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID = 'sysparm_rollback_context_id';
+ATFFormInterceptor.SYSPARM_FROM_ATF_TEST_RUNNER = 'sysparm_from_atf_test_runner';
+ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID = 'sysparm_atf_step_sys_id';
+ATFFormInterceptor.SYSPARM_ATF_TEST_RESULT_SYS_ID = 'sysparm_atf_test_result_sys_id';
+ATFFormInterceptor.XMLHTTP_INTERCEPT_SCRIPT_TAG_ID = 'xmlhttp_intercept_script_tag_id';
+ATFFormInterceptor.ROLLBACK_CONTEXT_ID = 'rollback_context_id';
+ATFFormInterceptor.prototype = {
+  initialize: function(rollbackContext) {
+    this._rollbackContextId = rollbackContext;
+  },
+  interceptGFormWithRollbackContextId: function(testIFrameWindow) {
+    if (testIFrameWindow.g_form &&
+      testIFrameWindow.g_form.getParameter(ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID) === '') {
+      var inputTag = testIFrameWindow.document.createElement('input');
+      inputTag.setAttribute("type", "hidden");
+      inputTag.setAttribute("name", ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID);
+      inputTag.setAttribute("id", ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID);
+      inputTag.setAttribute("value", this._rollbackContextId);
+      var formEle = testIFrameWindow.g_form.getFormElement();
+      if (formEle)
+        formEle.appendChild(inputTag);
+    }
+  },
+  interceptGFormWithStepIdAndTestResultId: function(sys_atf_step_sys_id, sys_atf_test_result_sys_id, testIFrameWindow) {
+    if (testIFrameWindow.g_form) {
+      if (testIFrameWindow.g_form.getParameter(ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID) === '') {
+        var inputTagStep1 = testIFrameWindow.document.createElement('input');
+        inputTagStep1.setAttribute("type", "hidden");
+        inputTagStep1.setAttribute("name", ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID);
+        inputTagStep1.setAttribute("id", ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID);
+        inputTagStep1.setAttribute("value", sys_atf_step_sys_id);
+        var formEle = testIFrameWindow.g_form.getFormElement();
+        if (formEle)
+          formEle.appendChild(inputTagStep1);
+        var inputTagTest1 = testIFrameWindow.document.createElement('input');
+        inputTagTest1.setAttribute("type", "hidden");
+        inputTagTest1.setAttribute("name", ATFFormInterceptor.SYSPARM_ATF_TEST_RESULT_SYS_ID);
+        inputTagTest1.setAttribute("id", ATFFormInterceptor.SYSPARM_ATF_TEST_RESULT_SYS_ID);
+        inputTagTest1.setAttribute("value", sys_atf_test_result_sys_id);
+        var formEle = testIFrameWindow.g_form.getFormElement();
+        if (formEle)
+          formEle.appendChild(inputTagTest1);
+      } else {
+        var inputTagStep = testIFrameWindow.document.getElementById(ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID);
+        inputTagStep.setAttribute("value", sys_atf_step_sys_id);
+        var inputTagTest = testIFrameWindow.document.getElementById(ATFFormInterceptor.SYSPARM_ATF_TEST_RESULT_SYS_ID);
+        inputTagTest.setAttribute("value", sys_atf_test_result_sys_id);
       }
-      for (t in e);
-      return void 0 === t || n.call(e, t)
-    }, $.each = function(e, r, a) {
-      var n, o = 0,
-        i = e.length,
-        s = t(e);
-      if (a) {
-        if (s)
-          for (; i > o && (n = r.apply(e[o], a), n !== !1); o++);
+    }
+  },
+  interceptXMLHttpRequestWithStepIdandTestResultId: function(sys_atf_step_sys_id, sys_atf_test_result_sys_id, testIFrameWindow, sys_atf_debug) {
+    var docB = testIFrameWindow.document.body;
+    if (typeof docB === "undefined" || docB == null ||
+      typeof docB.innerHTML === "undefined" ||
+      docB.innerHTML == null ||
+      docB.innerHTML === "") {
+      return;
+    }
+    if (typeof testIFrameWindow.XMLHttpRequest.prototype.origOpen === 'undefined') {
+      testIFrameWindow.XMLHttpRequest.prototype.origOpen = testIFrameWindow.XMLHttpRequest.prototype.open;
+    }
+    testIFrameWindow.XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+      var rollbackContextId = new GUITestingUtil().getRollbackContextId();
+      if (url.indexOf("form_interceptor") == -1 && sys_atf_debug) {
+        if (url.indexOf("?") == -1)
+          url += "?form_interceptor=true";
         else
-          for (o in e)
-            if (n = r.apply(e[o], a), n === !1) break
-      } else if (s)
-        for (; i > o && (n = r.call(e[o], o, e[o]), n !== !1); o++);
-      else
-        for (o in e)
-          if (n = r.call(e[o], o, e[o]), n === !1) break;
-      return e
-    }, $.data = function(e, t, a) {
-      if (void 0 === a) {
-        var n = e[$.expando],
-          o = n && r[n];
-        if (void 0 === t) return o;
-        if (o && t in o) return o[t]
-      } else if (void 0 !== t) {
-        var n = e[$.expando] || (e[$.expando] = ++$.uuid);
-        return r[n] = r[n] || {}, r[n][t] = a, a
+          url += "&form_interceptor=true";
       }
-    }, $.removeData = function(e, t) {
-      var a = e[$.expando],
-        n = a && r[a];
-      n && $.each(t, function(e, t) {
-        delete n[t]
-      })
-    }, $.extend = function() {
-      var e, t, r, a, n, o, i = arguments[0] || {},
-        s = 1,
-        l = arguments.length,
-        u = !1;
-      for ("boolean" == typeof i && (u = i, i = arguments[s] || {}, s++), "object" != typeof i && "function" !== $.type(i) && (i = {}), s === l && (i = this, s--); l > s; s++)
-        if (null != (n = arguments[s]))
-          for (a in n) e = i[a], r = n[a], i !== r && (u && r && ($.isPlainObject(r) || (t = $.isArray(r))) ? (t ? (t = !1, o = e && $.isArray(e) ? e : []) : o = e && $.isPlainObject(e) ? e : {}, i[a] = $.extend(u, o, r)) : void 0 !== r && (i[a] = r));
-      return i
-    }, $.queue = function(e, r, a) {
-      function n(e, r) {
-        var a = r || [];
-        return null != e && (t(Object(e)) ? ! function(e, t) {
-          for (var r = +t.length, a = 0, n = e.length; r > a;) e[n++] = t[a++];
-          if (r !== r)
-            for (; void 0 !== t[a];) e[n++] = t[a++];
-          return e.length = n, e
-        }(a, "string" == typeof e ? [e] : e) : [].push.call(a, e)), a
+      if (url.indexOf("rollback_context_id") == -1) {
+        if (url.indexOf("?") == -1)
+          url += "?sysparm_rollback_context_id=" + rollbackContextId;
+        else
+          url += "&sysparm_rollback_context_id=" + rollbackContextId;
       }
-
-      if (e) {
-        r = (r || "fx") + "queue";
-        var o = $.data(e, r);
-        return a ? (!o || $.isArray(a) ? o = $.data(e, r, n(a)) : o.push(a), o) : o || []
+      if (url.indexOf(ATFFormInterceptor.SYSPARM_ATF_STEP_SYS_ID) == -1) {
+        if (url.indexOf("?") == -1)
+          url += "?sysparm_atf_step_sys_id=" + sys_atf_step_sys_id;
+        else
+          url += "&sysparm_atf_step_sys_id=" + sys_atf_step_sys_id;
       }
-    }, $.dequeue = function(e, t) {
-      $.each(e.nodeType ? [e] : e, function(e, r) {
-        t = t || "fx";
-        var a = $.queue(r, t),
-          n = a.shift();
-        "inprogress" === n && (n = a.shift()), n && ("fx" === t && a.unshift("inprogress"), n.call(r, function() {
-          $.dequeue(r, t)
-        }))
-      })
-    }, $.fn = $.prototype = {
-      init: function(e) {
-        if (e.nodeType) return this[0] = e, this;
-        throw new Error("Not a DOM node.")
-      },
-      offset: function() {
-        var t = this[0].getBoundingClientRect ? this[0].getBoundingClientRect() : {
-          top: 0,
-          left: 0
-        };
-        return {
-          top: t.top + (e.pageYOffset || document.scrollTop || 0) - (document.clientTop || 0),
-          left: t.left + (e.pageXOffset || document.scrollLeft || 0) - (document.clientLeft || 0)
-        }
-      },
-      position: function() {
-        function e() {
-          for (var e = this.offsetParent || document; e && "html" === !e.nodeType.toLowerCase && "static" === e.style.position;) e = e.offsetParent;
-          return e || document
-        }
-
-        var t = this[0],
-          e = e.apply(t),
-          r = this.offset(),
-          a = /^(?:body|html)$/i.test(e.nodeName) ? {
-            top: 0,
-            left: 0
-          } : $(e).offset();
-        return r.top -= parseFloat(t.style.marginTop) || 0, r.left -= parseFloat(t.style.marginLeft) || 0, e.style && (a.top += parseFloat(e.style.borderTopWidth) || 0, a.left += parseFloat(e.style.borderLeftWidth) || 0), {
-          top: r.top - a.top,
-          left: r.left - a.left
-        }
+      if (url.indexOf(ATFFormInterceptor.SYSPARM_ATF_TEST_RESULT_SYS_ID) == -1) {
+        if (url.indexOf("?") == -1)
+          url += "?sysparm_atf_test_result_sys_id=" + sys_atf_test_result_sys_id;
+        else
+          url += "&sysparm_atf_test_result_sys_id=" + sys_atf_test_result_sys_id;
       }
+      testIFrameWindow.XMLHttpRequest.prototype.origOpen.call(this, method, url, async, user, password);
     };
-    var r = {};
-    $.expando = "velocity" + (new Date).getTime(), $.uuid = 0;
-    for (var a = {}, n = a.hasOwnProperty, o = a.toString, i = "Boolean Number String Function Array Date RegExp Object Error".split(" "), s = 0; s < i.length; s++) a["[object " + i[s] + "]"] = i[s].toLowerCase();
-    $.fn.init.prototype = $.fn, e.Velocity = {
-      Utilities: $
+  },
+  interceptFormLoadURLWithRollbackContextId: function(urlParameters) {
+    urlParameters[ATFFormInterceptor.SYSPARM_ROLLBACK_CONTEXT_ID] = this._rollbackContextId;
+  },
+  interceptFormLoadURLWithTestRunnerIndicator: function(urlParameters) {
+    urlParameters[ATFFormInterceptor.SYSPARM_FROM_ATF_TEST_RUNNER] = "true";
+  },
+  getRollbackContextId: function() {
+    return this._rollbackContextId;
+  },
+  type: 'ATFFormInterceptor'
+};;
+/*! RESOURCE: /scripts/js_includes_left_nav_snTestRunner.js */
+/*! RESOURCE: /scripts/app.snTestRunner/util/ATFLeftNavUtil.js */
+var ATFLeftNavUtil = Class.create();
+ATFLeftNavUtil.SEPARATOR = "SEPARATOR";
+ATFLeftNavUtil.prototype = {
+  initialize: function() {
+    this.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS = "Error retrieving application navigator information";
+    this.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS_STATUS_CODE = "Error retrieving application navigator information. HTTP Status Code: {0}";
+    this.messageMap = new GwtMessage().getMessages([this.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS, this.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS_STATUS_CODE]);
+  },
+  openNavigator: function(whenNavigatorOpen) {
+    if (typeof whenNavigatorOpen !== "function")
+      return;
+    if (g_ui_testing_util.getTestIFrame().src &&
+      g_ui_testing_util.getTestIFrame().src.indexOf("/navigator.do") > -1)
+      whenNavigatorOpen();
+    else {
+      g_ui_testing_util.setTestIFrameOnloadFunction(whenNavigatorOpen);
+      g_ui_testing_util.getTestIFrame().src = "/navigator.do";
+    }
+  },
+  getLeftNavJSON: function() {
+    var self = this;
+    var defer = g_ui_testing_util.q().defer();
+    g_ui_testing_util.http().get('/api/now/ui/navigator').then(function(response) {
+      if (!response || !response.data)
+        defer.reject(self.messageMap[self.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS]);
+      else if (response.status != 200)
+        defer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS_STATUS_CODE], response.status));
+      else
+        defer.resolve(response.data.result);
+    })['catch'](function(e) {
+      if (e && e.status)
+        defer.reject(formatMessage(self.messageMap[self.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS_STATUS_CODE], e.status));
+      else
+        defer.reject(self.messageMap[self.MESSAGE_KEY_ERROR_RETRIEVING_APPLICATIONS]);
+    });
+    return defer.promise;
+  },
+  findModules: function(modulesToFind, leftNavJSON) {
+    var modulesFound = [];
+    for (var i = 0; i < leftNavJSON.length; i += 1) {
+      var moduleList = leftNavJSON[i].modules;
+      for (var j = 0; j < moduleList.length; j += 1) {
+        var mod = moduleList[j];
+        if (modulesToFind.indexOf(mod.id) != -1)
+          modulesFound.push(mod.id);
+        if (mod.type === ATFLeftNavUtil.SEPARATOR) {
+          for (var k = 0; k < mod.modules.length; k += 1) {
+            var modInSeparator = mod.modules[k];
+            if (modulesToFind.indexOf(modInSeparator.id) != -1)
+              modulesFound.push(modInSeparator.id);
+          }
+        }
+      }
+    }
+    return modulesFound;
+  },
+  findApplications: function(appsToFind, leftNavJSON) {
+    var appsFound = [];
+    for (var i = 0; i < leftNavJSON.length; i += 1) {
+      var app = leftNavJSON[i];
+      if (appsToFind.indexOf(app.id) != -1)
+        appsFound.push(app.id);
+    }
+    return appsFound;
+  },
+  getCollapsedModuleJSON: function(leftNavJSON) {
+    var collapsedJSON = [];
+    for (var i = 0; i < leftNavJSON.length; i += 1) {
+      var moduleList = leftNavJSON[i].modules;
+      for (var j = 0; j < moduleList.length; j += 1) {
+        var mod = moduleList[j];
+        collapsedJSON.push({
+          id: mod.id,
+          title: mod.title,
+          uri: mod.uri,
+          type: mod.type
+        });
+        if (mod.type === ATFLeftNavUtil.SEPARATOR) {
+          for (var k = 0; k < mod.modules.length; k += 1)
+            collapsedJSON.push({
+              id: mod.modules[k].id,
+              title: mod.modules[k].title,
+              uri: mod.modules[k].uri,
+              type: mod.modules[k].type
+            });
+        }
+      }
+    }
+    return collapsedJSON;
+  },
+  getModule: function(moduleID) {
+    var self = this;
+    var defer = g_ui_testing_util.q().defer();
+    self.getLeftNavJSON().then(function(leftNavJSON) {
+      var moduleList = self.getCollapsedModuleJSON(leftNavJSON);
+      for (var i = 0; i < moduleList.length; i += 1) {
+        var mod = moduleList[i];
+        if (moduleID === mod.id)
+          defer.resolve(mod);
+      }
+      defer.resolve(null);
+    })['catch'](function(e) {
+      defer.reject(e);
+    });
+    return defer.promise;
+  },
+  type: 'ATFLeftNavUtil'
+};;;
+/*! RESOURCE: /scripts/app.snTestRunner/html2canvas-polyfills.js */
+! function(t) {
+  "object" == typeof exports ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : "undefined" != typeof window ? window.Promise = t() : "undefined" != typeof global ? global.Promise = t() : "undefined" != typeof self && (self.Promise = t())
+}(function() {
+  var t;
+  return function e(t, n, o) {
+    function r(u, c) {
+      if (!n[u]) {
+        if (!t[u]) {
+          var s = "function" == typeof require && require;
+          if (!c && s) return s(u, !0);
+          if (i) return i(u, !0);
+          throw new Error("Cannot find module '" + u + "'")
+        }
+        var f = n[u] = {
+          exports: {}
+        };
+        t[u][0].call(f.exports, function(e) {
+          var n = t[u][1][e];
+          return r(n ? n : e)
+        }, f, f.exports, e, t, n, o)
+      }
+      return n[u].exports
+    }
+    for (var i = "function" == typeof require && require, u = 0; u < o.length; u++) r(o[u]);
+    return r
+  }({
+    1: [function(t, e, n) {
+      var o = t("../lib/decorators/unhandledRejection"),
+        r = o(t("../lib/Promise"));
+      e.exports = "undefined" != typeof global ? global.Promise = r : "undefined" != typeof self ? self.Promise = r : r
+    }, {
+      "../lib/Promise": 2,
+      "../lib/decorators/unhandledRejection": 4
+    }],
+    2: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function(t) {
+          var e = t("./makePromise"),
+            n = t("./Scheduler"),
+            o = t("./env").asap;
+          return e({
+            scheduler: new n(o)
+          })
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t(e)
+      })
+    }, {
+      "./Scheduler": 3,
+      "./env": 5,
+      "./makePromise": 7
+    }],
+    3: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function() {
+          function t(t) {
+            this._async = t, this._running = !1, this._queue = this, this._queueLen = 0, this._afterQueue = {}, this._afterQueueLen = 0;
+            var e = this;
+            this.drain = function() {
+              e._drain()
+            }
+          }
+          return t.prototype.enqueue = function(t) {
+            this._queue[this._queueLen++] = t, this.run()
+          }, t.prototype.afterQueue = function(t) {
+            this._afterQueue[this._afterQueueLen++] = t, this.run()
+          }, t.prototype.run = function() {
+            this._running || (this._running = !0, this._async(this.drain))
+          }, t.prototype._drain = function() {
+            for (var t = 0; t < this._queueLen; ++t) this._queue[t].run(), this._queue[t] = void 0;
+            for (this._queueLen = 0, this._running = !1, t = 0; t < this._afterQueueLen; ++t) this._afterQueue[t].run(), this._afterQueue[t] = void 0;
+            this._afterQueueLen = 0
+          }, t
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t()
+      })
+    }, {}],
+    4: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function(t) {
+          function e(t) {
+            throw t
+          }
+
+          function n() {}
+          var o = t("../env").setTimer,
+            r = t("../format");
+          return function(t) {
+            function i(t) {
+              t.handled || (l.push(t), a("Potentially unhandled rejection [" + t.id + "] " + r.formatError(t.value)))
+            }
+
+            function u(t) {
+              var e = l.indexOf(t);
+              e >= 0 && (l.splice(e, 1), h("Handled previous rejection [" + t.id + "] " + r.formatObject(t.value)))
+            }
+
+            function c(t, e) {
+              p.push(t, e), null === d && (d = o(s, 0))
+            }
+
+            function s() {
+              for (d = null; p.length > 0;) p.shift()(p.shift())
+            }
+            var f, a = n,
+              h = n;
+            "undefined" != typeof console && (f = console, a = "undefined" != typeof f.error ? function(t) {
+              f.error(t)
+            } : function(t) {
+              f.log(t)
+            }, h = "undefined" != typeof f.info ? function(t) {
+              f.info(t)
+            } : function(t) {
+              f.log(t)
+            }), t.onPotentiallyUnhandledRejection = function(t) {
+              c(i, t)
+            }, t.onPotentiallyUnhandledRejectionHandled = function(t) {
+              c(u, t)
+            }, t.onFatalRejection = function(t) {
+              c(e, t.value)
+            };
+            var p = [],
+              l = [],
+              d = null;
+            return t
+          }
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t(e)
+      })
+    }, {
+      "../env": 5,
+      "../format": 6
+    }],
+    5: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function(t) {
+          function e() {
+            return "undefined" != typeof process && null !== process && "function" == typeof process.nextTick
+          }
+
+          function n() {
+            return "function" == typeof MutationObserver && MutationObserver || "function" == typeof WebKitMutationObserver && WebKitMutationObserver
+          }
+
+          function o(t) {
+            function e() {
+              var t = n;
+              n = void 0, t()
+            }
+            var n, o = document.createTextNode(""),
+              r = new t(e);
+            r.observe(o, {
+              characterData: !0
+            });
+            var i = 0;
+            return function(t) {
+              n = t, o.data = i ^= 1
+            }
+          }
+          var r, i = "undefined" != typeof setTimeout && setTimeout,
+            u = function(t, e) {
+              return setTimeout(t, e)
+            },
+            c = function(t) {
+              return clearTimeout(t)
+            },
+            s = function(t) {
+              return i(t, 0)
+            };
+          if (e()) s = function(t) {
+            return process.nextTick(t)
+          };
+          else if (r = n()) s = o(r);
+          else if (!i) {
+            var f = t,
+              a = f("vertx");
+            u = function(t, e) {
+              return a.setTimer(e, t)
+            }, c = a.cancelTimer, s = a.runOnLoop || a.runOnContext
+          }
+          return {
+            setTimer: u,
+            clearTimer: c,
+            asap: s
+          }
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t(e)
+      })
+    }, {}],
+    6: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function() {
+          function t(t) {
+            var n = "object" == typeof t && null !== t && t.stack ? t.stack : e(t);
+            return t instanceof Error ? n : n + " (WARNING: non-Error used)"
+          }
+
+          function e(t) {
+            var e = String(t);
+            return "[object Object]" === e && "undefined" != typeof JSON && (e = n(t, e)), e
+          }
+
+          function n(t, e) {
+            try {
+              return JSON.stringify(t)
+            } catch (n) {
+              return e
+            }
+          }
+          return {
+            formatError: t,
+            formatObject: e,
+            tryStringify: n
+          }
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t()
+      })
+    }, {}],
+    7: [function(e, n, o) {
+      ! function(t) {
+        "use strict";
+        t(function() {
+          return function(t) {
+            function e(t, e) {
+              this._handler = t === j ? e : n(t)
+            }
+
+            function n(t) {
+              function e(t) {
+                r.resolve(t)
+              }
+
+              function n(t) {
+                r.reject(t)
+              }
+
+              function o(t) {
+                r.notify(t)
+              }
+              var r = new b;
+              try {
+                t(e, n, o)
+              } catch (i) {
+                n(i)
+              }
+              return r
+            }
+
+            function o(t) {
+              return k(t) ? t : new e(j, new x(v(t)))
+            }
+
+            function r(t) {
+              return new e(j, new x(new q(t)))
+            }
+
+            function i() {
+              return Z
+            }
+
+            function u() {
+              return new e(j, new b)
+            }
+
+            function c(t, e) {
+              var n = new b(t.receiver, t.join().context);
+              return new e(j, n)
+            }
+
+            function s(t) {
+              return a(z, null, t)
+            }
+
+            function f(t, e) {
+              return a(J, t, e)
+            }
+
+            function a(t, n, o) {
+              function r(e, r, u) {
+                u.resolved || h(o, i, e, t(n, r, e), u)
+              }
+
+              function i(t, e, n) {
+                a[t] = e, 0 === --f && n.become(new R(a))
+              }
+              for (var u, c = "function" == typeof n ? r : i, s = new b, f = o.length >>> 0, a = new Array(f), p = 0; p < o.length && !s.resolved; ++p) u = o[p], void 0 !== u || p in o ? h(o, c, p, u, s) : --f;
+              return 0 === f && s.become(new R(a)), new e(j, s)
+            }
+
+            function h(t, e, n, o, r) {
+              if (U(o)) {
+                var i = m(o),
+                  u = i.state();
+                0 === u ? i.fold(e, n, void 0, r) : u > 0 ? e(n, i.value, r) : (r.become(i), p(t, n + 1, i))
+              } else e(n, o, r)
+            }
+
+            function p(t, e, n) {
+              for (var o = e; o < t.length; ++o) l(v(t[o]), n)
+            }
+
+            function l(t, e) {
+              if (t !== e) {
+                var n = t.state();
+                0 === n ? t.visit(t, void 0, t._unreport) : 0 > n && t._unreport()
+              }
+            }
+
+            function d(t) {
+              return "object" != typeof t || null === t ? r(new TypeError("non-iterable passed to race()")) : 0 === t.length ? i() : 1 === t.length ? o(t[0]) : y(t)
+            }
+
+            function y(t) {
+              var n, o, r, i = new b;
+              for (n = 0; n < t.length; ++n)
+                if (o = t[n], void 0 !== o || n in t) {
+                  if (r = v(o), 0 !== r.state()) {
+                    i.become(r), p(t, n + 1, r);
+                    break
+                  }
+                  r.visit(i, i.resolve, i.reject)
+                }
+              return new e(j, i)
+            }
+
+            function v(t) {
+              return k(t) ? t._handler.join() : U(t) ? w(t) : new R(t)
+            }
+
+            function m(t) {
+              return k(t) ? t._handler.join() : w(t)
+            }
+
+            function w(t) {
+              try {
+                var e = t.then;
+                return "function" == typeof e ? new g(e, t) : new R(t)
+              } catch (n) {
+                return new q(n)
+              }
+            }
+
+            function j() {}
+
+            function _() {}
+
+            function b(t, n) {
+              e.createContext(this, n), this.consumers = void 0, this.receiver = t, this.handler = void 0, this.resolved = !1
+            }
+
+            function x(t) {
+              this.handler = t
+            }
+
+            function g(t, e) {
+              b.call(this), K.enqueue(new L(t, e, this))
+            }
+
+            function R(t) {
+              e.createContext(this), this.value = t
+            }
+
+            function q(t) {
+              e.createContext(this), this.id = ++X, this.value = t, this.handled = !1, this.reported = !1, this._report()
+            }
+
+            function P(t, e) {
+              this.rejection = t, this.context = e
+            }
+
+            function C(t) {
+              this.rejection = t
+            }
+
+            function T() {
+              return new q(new TypeError("Promise cycle"))
+            }
+
+            function O(t, e) {
+              this.continuation = t, this.handler = e
+            }
+
+            function E(t, e) {
+              this.handler = e, this.value = t
+            }
+
+            function L(t, e, n) {
+              this._then = t, this.thenable = e, this.resolver = n
+            }
+
+            function Q(t, e, n, o, r) {
+              try {
+                t.call(e, n, o, r)
+              } catch (i) {
+                o(i)
+              }
+            }
+
+            function S(t, e, n, o) {
+              this.f = t, this.z = e, this.c = n, this.to = o, this.resolver = V, this.receiver = this
+            }
+
+            function k(t) {
+              return t instanceof e
+            }
+
+            function U(t) {
+              return ("object" == typeof t || "function" == typeof t) && null !== t
+            }
+
+            function H(t, n, o, r) {
+              return "function" != typeof t ? r.become(n) : (e.enterContext(n), M(t, n.value, o, r), void e.exitContext())
+            }
+
+            function N(t, n, o, r, i) {
+              return "function" != typeof t ? i.become(o) : (e.enterContext(o), $(t, n, o.value, r, i), void e.exitContext())
+            }
+
+            function A(t, n, o, r, i) {
+              return "function" != typeof t ? i.notify(n) : (e.enterContext(o), F(t, n, r, i), void e.exitContext())
+            }
+
+            function J(t, e, n) {
+              try {
+                return t(e, n)
+              } catch (o) {
+                return r(o)
+              }
+            }
+
+            function M(t, e, n, o) {
+              try {
+                o.become(v(t.call(n, e)))
+              } catch (r) {
+                o.become(new q(r))
+              }
+            }
+
+            function $(t, e, n, o, r) {
+              try {
+                t.call(o, e, n, r)
+              } catch (i) {
+                r.become(new q(i))
+              }
+            }
+
+            function F(t, e, n, o) {
+              try {
+                o.notify(t.call(n, e))
+              } catch (r) {
+                o.notify(r)
+              }
+            }
+
+            function W(t, e) {
+              e.prototype = G(t.prototype), e.prototype.constructor = e
+            }
+
+            function z(t, e) {
+              return e
+            }
+
+            function B() {}
+
+            function I() {
+              return "undefined" != typeof process && null !== process && "function" == typeof process.emit ? function(t, e) {
+                return "unhandledRejection" === t ? process.emit(t, e.value, e) : process.emit(t, e)
+              } : "undefined" != typeof self && "function" == typeof CustomEvent ? function(t, e, n) {
+                var o = !1;
+                try {
+                  var r = new n("unhandledRejection");
+                  o = r instanceof n
+                } catch (i) {}
+                return o ? function(t, o) {
+                  var r = new n(t, {
+                    detail: {
+                      reason: o.value,
+                      key: o
+                    },
+                    bubbles: !1,
+                    cancelable: !0
+                  });
+                  return !e.dispatchEvent(r)
+                } : t
+              }(B, self, CustomEvent) : B
+            }
+            var K = t.scheduler,
+              D = I(),
+              G = Object.create || function(t) {
+                function e() {}
+                return e.prototype = t, new e
+              };
+            e.resolve = o, e.reject = r, e.never = i, e._defer = u, e._handler = v, e.prototype.then = function(t, e, n) {
+              var o = this._handler,
+                r = o.join().state();
+              if ("function" != typeof t && r > 0 || "function" != typeof e && 0 > r) return new this.constructor(j, o);
+              var i = this._beget(),
+                u = i._handler;
+              return o.chain(u, o.receiver, t, e, n), i
+            }, e.prototype["catch"] = function(t) {
+              return this.then(void 0, t)
+            }, e.prototype._beget = function() {
+              return c(this._handler, this.constructor)
+            }, e.all = s, e.race = d, e._traverse = f, e._visitRemaining = p, j.prototype.when = j.prototype.become = j.prototype.notify = j.prototype.fail = j.prototype._unreport = j.prototype._report = B, j.prototype._state = 0, j.prototype.state = function() {
+              return this._state
+            }, j.prototype.join = function() {
+              for (var t = this; void 0 !== t.handler;) t = t.handler;
+              return t
+            }, j.prototype.chain = function(t, e, n, o, r) {
+              this.when({
+                resolver: t,
+                receiver: e,
+                fulfilled: n,
+                rejected: o,
+                progress: r
+              })
+            }, j.prototype.visit = function(t, e, n, o) {
+              this.chain(V, t, e, n, o)
+            }, j.prototype.fold = function(t, e, n, o) {
+              this.when(new S(t, e, n, o))
+            }, W(j, _), _.prototype.become = function(t) {
+              t.fail()
+            };
+            var V = new _;
+            W(j, b), b.prototype._state = 0, b.prototype.resolve = function(t) {
+              this.become(v(t))
+            }, b.prototype.reject = function(t) {
+              this.resolved || this.become(new q(t))
+            }, b.prototype.join = function() {
+              if (!this.resolved) return this;
+              for (var t = this; void 0 !== t.handler;)
+                if (t = t.handler, t === this) return this.handler = T();
+              return t
+            }, b.prototype.run = function() {
+              var t = this.consumers,
+                e = this.handler;
+              this.handler = this.handler.join(), this.consumers = void 0;
+              for (var n = 0; n < t.length; ++n) e.when(t[n])
+            }, b.prototype.become = function(t) {
+              this.resolved || (this.resolved = !0, this.handler = t, void 0 !== this.consumers && K.enqueue(this), void 0 !== this.context && t._report(this.context))
+            }, b.prototype.when = function(t) {
+              this.resolved ? K.enqueue(new O(t, this.handler)) : void 0 === this.consumers ? this.consumers = [t] : this.consumers.push(t)
+            }, b.prototype.notify = function(t) {
+              this.resolved || K.enqueue(new E(t, this))
+            }, b.prototype.fail = function(t) {
+              var e = "undefined" == typeof t ? this.context : t;
+              this.resolved && this.handler.join().fail(e)
+            }, b.prototype._report = function(t) {
+              this.resolved && this.handler.join()._report(t)
+            }, b.prototype._unreport = function() {
+              this.resolved && this.handler.join()._unreport()
+            }, W(j, x), x.prototype.when = function(t) {
+              K.enqueue(new O(t, this))
+            }, x.prototype._report = function(t) {
+              this.join()._report(t)
+            }, x.prototype._unreport = function() {
+              this.join()._unreport()
+            }, W(b, g), W(j, R), R.prototype._state = 1, R.prototype.fold = function(t, e, n, o) {
+              N(t, e, this, n, o)
+            }, R.prototype.when = function(t) {
+              H(t.fulfilled, this, t.receiver, t.resolver)
+            };
+            var X = 0;
+            W(j, q), q.prototype._state = -1, q.prototype.fold = function(t, e, n, o) {
+              o.become(this)
+            }, q.prototype.when = function(t) {
+              "function" == typeof t.rejected && this._unreport(), H(t.rejected, this, t.receiver, t.resolver)
+            }, q.prototype._report = function(t) {
+              K.afterQueue(new P(this, t))
+            }, q.prototype._unreport = function() {
+              this.handled || (this.handled = !0, K.afterQueue(new C(this)))
+            }, q.prototype.fail = function(t) {
+              this.reported = !0, D("unhandledRejection", this), e.onFatalRejection(this, void 0 === t ? this.context : t)
+            }, P.prototype.run = function() {
+              this.rejection.handled || this.rejection.reported || (this.rejection.reported = !0, D("unhandledRejection", this.rejection) || e.onPotentiallyUnhandledRejection(this.rejection, this.context))
+            }, C.prototype.run = function() {
+              this.rejection.reported && (D("rejectionHandled", this.rejection) || e.onPotentiallyUnhandledRejectionHandled(this.rejection))
+            }, e.createContext = e.enterContext = e.exitContext = e.onPotentiallyUnhandledRejection = e.onPotentiallyUnhandledRejectionHandled = e.onFatalRejection = B;
+            var Y = new j,
+              Z = new e(j, Y);
+            return O.prototype.run = function() {
+              this.handler.join().when(this.continuation)
+            }, E.prototype.run = function() {
+              var t = this.handler.consumers;
+              if (void 0 !== t)
+                for (var e, n = 0; n < t.length; ++n) e = t[n], A(e.progress, this.value, this.handler, e.receiver, e.resolver)
+            }, L.prototype.run = function() {
+              function t(t) {
+                o.resolve(t)
+              }
+
+              function e(t) {
+                o.reject(t)
+              }
+
+              function n(t) {
+                o.notify(t)
+              }
+              var o = this.resolver;
+              Q(this._then, this.thenable, t, e, n)
+            }, S.prototype.fulfilled = function(t) {
+              this.f.call(this.c, this.z, t, this.to)
+            }, S.prototype.rejected = function(t) {
+              this.to.reject(t)
+            }, S.prototype.progress = function(t) {
+              this.to.notify(t)
+            }, e
+          }
+        })
+      }("function" == typeof t && t.amd ? t : function(t) {
+        n.exports = t()
+      })
+    }, {}]
+  }, {}, [1])(1)
+}), "undefined" != typeof systemJSBootstrap && systemJSBootstrap();;
+/*! RESOURCE: /scripts/app.snTestRunner/html2canvas-prototype-overrides.js */
+Array.prototype.filter = function(c) {
+  if (void 0 === this || null === this) throw new TypeError;
+  var d = Object(this),
+    g = d.length >>> 0;
+  if ("function" !== typeof c) throw new TypeError;
+  for (var e = [], b = 2 <= arguments.length ? arguments[1] : void 0, a = 0; a < g; a++)
+    if (a in d) {
+      var f = d[a];
+      c.call(b, f, a, d) && e.push(f)
+    }
+  return e
+};
+Array.prototype.map = function(c, d) {
+  var g, e, b;
+  if (null == this) throw new TypeError(" this is null or not defined");
+  var a = Object(this),
+    f = a.length >>> 0;
+  if ("function" !== typeof c) throw new TypeError(c + " is not a function");
+  1 < arguments.length && (g = d);
+  e = Array(f);
+  for (b = 0; b < f;) {
+    var h;
+    b in a && (h = a[b], h = c.call(g, h, b, a), e[b] = h);
+    b++
+  }
+  return e
+};;
+/*! RESOURCE: /scripts/app.snTestRunner/thirdparty/moment.min.js */
+//! moment.js
+//! version : 2.10.3
+//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
+//! license : MIT
+//! momentjs.com
+! function(a, b) {
+  "object" == typeof exports && "undefined" != typeof module ? module.exports = b() : "function" == typeof define && define.amd ? define(b) : a.moment = b()
+}(this, function() {
+  "use strict";
+
+  function a() {
+    return Dc.apply(null, arguments)
+  }
+
+  function b(a) {
+    Dc = a
+  }
+
+  function c(a) {
+    return "[object Array]" === Object.prototype.toString.call(a)
+  }
+
+  function d(a) {
+    return a instanceof Date || "[object Date]" === Object.prototype.toString.call(a)
+  }
+
+  function e(a, b) {
+    var c, d = [];
+    for (c = 0; c < a.length; ++c) d.push(b(a[c], c));
+    return d
+  }
+
+  function f(a, b) {
+    return Object.prototype.hasOwnProperty.call(a, b)
+  }
+
+  function g(a, b) {
+    for (var c in b) f(b, c) && (a[c] = b[c]);
+    return f(b, "toString") && (a.toString = b.toString), f(b, "valueOf") && (a.valueOf = b.valueOf), a
+  }
+
+  function h(a, b, c, d) {
+    return za(a, b, c, d, !0).utc()
+  }
+
+  function i() {
+    return {
+      empty: !1,
+      unusedTokens: [],
+      unusedInput: [],
+      overflow: -2,
+      charsLeftOver: 0,
+      nullInput: !1,
+      invalidMonth: null,
+      invalidFormat: !1,
+      userInvalidated: !1,
+      iso: !1
     }
   }
-}(window),
-function(e) {
-  "object" == typeof module && "object" == typeof module.exports ? module.exports = e() : "function" == typeof define && define.amd ? define(e) : e()
+
+  function j(a) {
+    return null == a._pf && (a._pf = i()), a._pf
+  }
+
+  function k(a) {
+    if (null == a._isValid) {
+      var b = j(a);
+      a._isValid = !isNaN(a._d.getTime()) && b.overflow < 0 && !b.empty && !b.invalidMonth && !b.nullInput && !b.invalidFormat && !b.userInvalidated, a._strict && (a._isValid = a._isValid && 0 === b.charsLeftOver && 0 === b.unusedTokens.length && void 0 === b.bigHour)
+    }
+    return a._isValid
+  }
+
+  function l(a) {
+    var b = h(0 / 0);
+    return null != a ? g(j(b), a) : j(b).userInvalidated = !0, b
+  }
+
+  function m(a, b) {
+    var c, d, e;
+    if ("undefined" != typeof b._isAMomentObject && (a._isAMomentObject = b._isAMomentObject), "undefined" != typeof b._i && (a._i = b._i), "undefined" != typeof b._f && (a._f = b._f), "undefined" != typeof b._l && (a._l = b._l), "undefined" != typeof b._strict && (a._strict = b._strict), "undefined" != typeof b._tzm && (a._tzm = b._tzm), "undefined" != typeof b._isUTC && (a._isUTC = b._isUTC), "undefined" != typeof b._offset && (a._offset = b._offset), "undefined" != typeof b._pf && (a._pf = j(b)), "undefined" != typeof b._locale && (a._locale = b._locale), Fc.length > 0)
+      for (c in Fc) d = Fc[c], e = b[d], "undefined" != typeof e && (a[d] = e);
+    return a
+  }
+
+  function n(b) {
+    m(this, b), this._d = new Date(+b._d), Gc === !1 && (Gc = !0, a.updateOffset(this), Gc = !1)
+  }
+
+  function o(a) {
+    return a instanceof n || null != a && null != a._isAMomentObject
+  }
+
+  function p(a) {
+    var b = +a,
+      c = 0;
+    return 0 !== b && isFinite(b) && (c = b >= 0 ? Math.floor(b) : Math.ceil(b)), c
+  }
+
+  function q(a, b, c) {
+    var d, e = Math.min(a.length, b.length),
+      f = Math.abs(a.length - b.length),
+      g = 0;
+    for (d = 0; e > d; d++)(c && a[d] !== b[d] || !c && p(a[d]) !== p(b[d])) && g++;
+    return g + f
+  }
+
+  function r() {}
+
+  function s(a) {
+    return a ? a.toLowerCase().replace("_", "-") : a
+  }
+
+  function t(a) {
+    for (var b, c, d, e, f = 0; f < a.length;) {
+      for (e = s(a[f]).split("-"), b = e.length, c = s(a[f + 1]), c = c ? c.split("-") : null; b > 0;) {
+        if (d = u(e.slice(0, b).join("-"))) return d;
+        if (c && c.length >= b && q(e, c, !0) >= b - 1) break;
+        b--
+      }
+      f++
+    }
+    return null
+  }
+
+  function u(a) {
+    var b = null;
+    if (!Hc[a] && "undefined" != typeof module && module && module.exports) try {
+      b = Ec._abbr, require("./locale/" + a), v(b)
+    } catch (c) {}
+    return Hc[a]
+  }
+
+  function v(a, b) {
+    var c;
+    return a && (c = "undefined" == typeof b ? x(a) : w(a, b), c && (Ec = c)), Ec._abbr
+  }
+
+  function w(a, b) {
+    return null !== b ? (b.abbr = a, Hc[a] || (Hc[a] = new r), Hc[a].set(b), v(a), Hc[a]) : (delete Hc[a], null)
+  }
+
+  function x(a) {
+    var b;
+    if (a && a._locale && a._locale._abbr && (a = a._locale._abbr), !a) return Ec;
+    if (!c(a)) {
+      if (b = u(a)) return b;
+      a = [a]
+    }
+    return t(a)
+  }
+
+  function y(a, b) {
+    var c = a.toLowerCase();
+    Ic[c] = Ic[c + "s"] = Ic[b] = a
+  }
+
+  function z(a) {
+    return "string" == typeof a ? Ic[a] || Ic[a.toLowerCase()] : void 0
+  }
+
+  function A(a) {
+    var b, c, d = {};
+    for (c in a) f(a, c) && (b = z(c), b && (d[b] = a[c]));
+    return d
+  }
+
+  function B(b, c) {
+    return function(d) {
+      return null != d ? (D(this, b, d), a.updateOffset(this, c), this) : C(this, b)
+    }
+  }
+
+  function C(a, b) {
+    return a._d["get" + (a._isUTC ? "UTC" : "") + b]()
+  }
+
+  function D(a, b, c) {
+    return a._d["set" + (a._isUTC ? "UTC" : "") + b](c)
+  }
+
+  function E(a, b) {
+    var c;
+    if ("object" == typeof a)
+      for (c in a) this.set(c, a[c]);
+    else if (a = z(a), "function" == typeof this[a]) return this[a](b);
+    return this
+  }
+
+  function F(a, b, c) {
+    for (var d = "" + Math.abs(a), e = a >= 0; d.length < b;) d = "0" + d;
+    return (e ? c ? "+" : "" : "-") + d
+  }
+
+  function G(a, b, c, d) {
+    var e = d;
+    "string" == typeof d && (e = function() {
+      return this[d]()
+    }), a && (Mc[a] = e), b && (Mc[b[0]] = function() {
+      return F(e.apply(this, arguments), b[1], b[2])
+    }), c && (Mc[c] = function() {
+      return this.localeData().ordinal(e.apply(this, arguments), a)
+    })
+  }
+
+  function H(a) {
+    return a.match(/\[[\s\S]/) ? a.replace(/^\[|\]$/g, "") : a.replace(/\\/g, "")
+  }
+
+  function I(a) {
+    var b, c, d = a.match(Jc);
+    for (b = 0, c = d.length; c > b; b++) Mc[d[b]] ? d[b] = Mc[d[b]] : d[b] = H(d[b]);
+    return function(e) {
+      var f = "";
+      for (b = 0; c > b; b++) f += d[b] instanceof Function ? d[b].call(e, a) : d[b];
+      return f
+    }
+  }
+
+  function J(a, b) {
+    return a.isValid() ? (b = K(b, a.localeData()), Lc[b] || (Lc[b] = I(b)), Lc[b](a)) : a.localeData().invalidDate()
+  }
+
+  function K(a, b) {
+    function c(a) {
+      return b.longDateFormat(a) || a
+    }
+    var d = 5;
+    for (Kc.lastIndex = 0; d >= 0 && Kc.test(a);) a = a.replace(Kc, c), Kc.lastIndex = 0, d -= 1;
+    return a
+  }
+
+  function L(a, b, c) {
+    _c[a] = "function" == typeof b ? b : function(a) {
+      return a && c ? c : b
+    }
+  }
+
+  function M(a, b) {
+    return f(_c, a) ? _c[a](b._strict, b._locale) : new RegExp(N(a))
+  }
+
+  function N(a) {
+    return a.replace("\\", "").replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function(a, b, c, d, e) {
+      return b || c || d || e
+    }).replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")
+  }
+
+  function O(a, b) {
+    var c, d = b;
+    for ("string" == typeof a && (a = [a]), "number" == typeof b && (d = function(a, c) {
+        c[b] = p(a)
+      }), c = 0; c < a.length; c++) ad[a[c]] = d
+  }
+
+  function P(a, b) {
+    O(a, function(a, c, d, e) {
+      d._w = d._w || {}, b(a, d._w, d, e)
+    })
+  }
+
+  function Q(a, b, c) {
+    null != b && f(ad, a) && ad[a](b, c._a, c, a)
+  }
+
+  function R(a, b) {
+    return new Date(Date.UTC(a, b + 1, 0)).getUTCDate()
+  }
+
+  function S(a) {
+    return this._months[a.month()]
+  }
+
+  function T(a) {
+    return this._monthsShort[a.month()]
+  }
+
+  function U(a, b, c) {
+    var d, e, f;
+    for (this._monthsParse || (this._monthsParse = [], this._longMonthsParse = [], this._shortMonthsParse = []), d = 0; 12 > d; d++) {
+      if (e = h([2e3, d]), c && !this._longMonthsParse[d] && (this._longMonthsParse[d] = new RegExp("^" + this.months(e, "").replace(".", "") + "$", "i"), this._shortMonthsParse[d] = new RegExp("^" + this.monthsShort(e, "").replace(".", "") + "$", "i")), c || this._monthsParse[d] || (f = "^" + this.months(e, "") + "|^" + this.monthsShort(e, ""), this._monthsParse[d] = new RegExp(f.replace(".", ""), "i")), c && "MMMM" === b && this._longMonthsParse[d].test(a)) return d;
+      if (c && "MMM" === b && this._shortMonthsParse[d].test(a)) return d;
+      if (!c && this._monthsParse[d].test(a)) return d
+    }
+  }
+
+  function V(a, b) {
+    var c;
+    return "string" == typeof b && (b = a.localeData().monthsParse(b), "number" != typeof b) ? a : (c = Math.min(a.date(), R(a.year(), b)), a._d["set" + (a._isUTC ? "UTC" : "") + "Month"](b, c), a)
+  }
+
+  function W(b) {
+    return null != b ? (V(this, b), a.updateOffset(this, !0), this) : C(this, "Month")
+  }
+
+  function X() {
+    return R(this.year(), this.month())
+  }
+
+  function Y(a) {
+    var b, c = a._a;
+    return c && -2 === j(a).overflow && (b = c[cd] < 0 || c[cd] > 11 ? cd : c[dd] < 1 || c[dd] > R(c[bd], c[cd]) ? dd : c[ed] < 0 || c[ed] > 24 || 24 === c[ed] && (0 !== c[fd] || 0 !== c[gd] || 0 !== c[hd]) ? ed : c[fd] < 0 || c[fd] > 59 ? fd : c[gd] < 0 || c[gd] > 59 ? gd : c[hd] < 0 || c[hd] > 999 ? hd : -1, j(a)._overflowDayOfYear && (bd > b || b > dd) && (b = dd), j(a).overflow = b), a
+  }
+
+  function Z(b) {
+    a.suppressDeprecationWarnings === !1 && "undefined" != typeof console && console.warn && console.warn("Deprecation warning: " + b)
+  }
+
+  function $(a, b) {
+    var c = !0,
+      d = a + "\n" + (new Error).stack;
+    return g(function() {
+      return c && (Z(d), c = !1), b.apply(this, arguments)
+    }, b)
+  }
+
+  function _(a, b) {
+    kd[a] || (Z(b), kd[a] = !0)
+  }
+
+  function aa(a) {
+    var b, c, d = a._i,
+      e = ld.exec(d);
+    if (e) {
+      for (j(a).iso = !0, b = 0, c = md.length; c > b; b++)
+        if (md[b][1].exec(d)) {
+          a._f = md[b][0] + (e[6] || " ");
+          break
+        }
+      for (b = 0, c = nd.length; c > b; b++)
+        if (nd[b][1].exec(d)) {
+          a._f += nd[b][0];
+          break
+        }
+      d.match(Yc) && (a._f += "Z"), ta(a)
+    } else a._isValid = !1
+  }
+
+  function ba(b) {
+    var c = od.exec(b._i);
+    return null !== c ? void(b._d = new Date(+c[1])) : (aa(b), void(b._isValid === !1 && (delete b._isValid, a.createFromInputFallback(b))))
+  }
+
+  function ca(a, b, c, d, e, f, g) {
+    var h = new Date(a, b, c, d, e, f, g);
+    return 1970 > a && h.setFullYear(a), h
+  }
+
+  function da(a) {
+    var b = new Date(Date.UTC.apply(null, arguments));
+    return 1970 > a && b.setUTCFullYear(a), b
+  }
+
+  function ea(a) {
+    return fa(a) ? 366 : 365
+  }
+
+  function fa(a) {
+    return a % 4 === 0 && a % 100 !== 0 || a % 400 === 0
+  }
+
+  function ga() {
+    return fa(this.year())
+  }
+
+  function ha(a, b, c) {
+    var d, e = c - b,
+      f = c - a.day();
+    return f > e && (f -= 7), e - 7 > f && (f += 7), d = Aa(a).add(f, "d"), {
+      week: Math.ceil(d.dayOfYear() / 7),
+      year: d.year()
+    }
+  }
+
+  function ia(a) {
+    return ha(a, this._week.dow, this._week.doy).week
+  }
+
+  function ja() {
+    return this._week.dow
+  }
+
+  function ka() {
+    return this._week.doy
+  }
+
+  function la(a) {
+    var b = this.localeData().week(this);
+    return null == a ? b : this.add(7 * (a - b), "d")
+  }
+
+  function ma(a) {
+    var b = ha(this, 1, 4).week;
+    return null == a ? b : this.add(7 * (a - b), "d")
+  }
+
+  function na(a, b, c, d, e) {
+    var f, g, h = da(a, 0, 1).getUTCDay();
+    return h = 0 === h ? 7 : h, c = null != c ? c : e, f = e - h + (h > d ? 7 : 0) - (e > h ? 7 : 0), g = 7 * (b - 1) + (c - e) + f + 1, {
+      year: g > 0 ? a : a - 1,
+      dayOfYear: g > 0 ? g : ea(a - 1) + g
+    }
+  }
+
+  function oa(a) {
+    var b = Math.round((this.clone().startOf("day") - this.clone().startOf("year")) / 864e5) + 1;
+    return null == a ? b : this.add(a - b, "d")
+  }
+
+  function pa(a, b, c) {
+    return null != a ? a : null != b ? b : c
+  }
+
+  function qa(a) {
+    var b = new Date;
+    return a._useUTC ? [b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate()] : [b.getFullYear(), b.getMonth(), b.getDate()]
+  }
+
+  function ra(a) {
+    var b, c, d, e, f = [];
+    if (!a._d) {
+      for (d = qa(a), a._w && null == a._a[dd] && null == a._a[cd] && sa(a), a._dayOfYear && (e = pa(a._a[bd], d[bd]), a._dayOfYear > ea(e) && (j(a)._overflowDayOfYear = !0), c = da(e, 0, a._dayOfYear), a._a[cd] = c.getUTCMonth(), a._a[dd] = c.getUTCDate()), b = 0; 3 > b && null == a._a[b]; ++b) a._a[b] = f[b] = d[b];
+      for (; 7 > b; b++) a._a[b] = f[b] = null == a._a[b] ? 2 === b ? 1 : 0 : a._a[b];
+      24 === a._a[ed] && 0 === a._a[fd] && 0 === a._a[gd] && 0 === a._a[hd] && (a._nextDay = !0, a._a[ed] = 0), a._d = (a._useUTC ? da : ca).apply(null, f), null != a._tzm && a._d.setUTCMinutes(a._d.getUTCMinutes() - a._tzm), a._nextDay && (a._a[ed] = 24)
+    }
+  }
+
+  function sa(a) {
+    var b, c, d, e, f, g, h;
+    b = a._w, null != b.GG || null != b.W || null != b.E ? (f = 1, g = 4, c = pa(b.GG, a._a[bd], ha(Aa(), 1, 4).year), d = pa(b.W, 1), e = pa(b.E, 1)) : (f = a._locale._week.dow, g = a._locale._week.doy, c = pa(b.gg, a._a[bd], ha(Aa(), f, g).year), d = pa(b.w, 1), null != b.d ? (e = b.d, f > e && ++d) : e = null != b.e ? b.e + f : f), h = na(c, d, e, g, f), a._a[bd] = h.year, a._dayOfYear = h.dayOfYear
+  }
+
+  function ta(b) {
+    if (b._f === a.ISO_8601) return void aa(b);
+    b._a = [], j(b).empty = !0;
+    var c, d, e, f, g, h = "" + b._i,
+      i = h.length,
+      k = 0;
+    for (e = K(b._f, b._locale).match(Jc) || [], c = 0; c < e.length; c++) f = e[c], d = (h.match(M(f, b)) || [])[0], d && (g = h.substr(0, h.indexOf(d)), g.length > 0 && j(b).unusedInput.push(g), h = h.slice(h.indexOf(d) + d.length), k += d.length), Mc[f] ? (d ? j(b).empty = !1 : j(b).unusedTokens.push(f), Q(f, d, b)) : b._strict && !d && j(b).unusedTokens.push(f);
+    j(b).charsLeftOver = i - k, h.length > 0 && j(b).unusedInput.push(h), j(b).bigHour === !0 && b._a[ed] <= 12 && b._a[ed] > 0 && (j(b).bigHour = void 0), b._a[ed] = ua(b._locale, b._a[ed], b._meridiem), ra(b), Y(b)
+  }
+
+  function ua(a, b, c) {
+    var d;
+    return null == c ? b : null != a.meridiemHour ? a.meridiemHour(b, c) : null != a.isPM ? (d = a.isPM(c), d && 12 > b && (b += 12), d || 12 !== b || (b = 0), b) : b
+  }
+
+  function va(a) {
+    var b, c, d, e, f;
+    if (0 === a._f.length) return j(a).invalidFormat = !0, void(a._d = new Date(0 / 0));
+    for (e = 0; e < a._f.length; e++) f = 0, b = m({}, a), null != a._useUTC && (b._useUTC = a._useUTC), b._f = a._f[e], ta(b), k(b) && (f += j(b).charsLeftOver, f += 10 * j(b).unusedTokens.length, j(b).score = f, (null == d || d > f) && (d = f, c = b));
+    g(a, c || b)
+  }
+
+  function wa(a) {
+    if (!a._d) {
+      var b = A(a._i);
+      a._a = [b.year, b.month, b.day || b.date, b.hour, b.minute, b.second, b.millisecond], ra(a)
+    }
+  }
+
+  function xa(a) {
+    var b, e = a._i,
+      f = a._f;
+    return a._locale = a._locale || x(a._l), null === e || void 0 === f && "" === e ? l({
+      nullInput: !0
+    }) : ("string" == typeof e && (a._i = e = a._locale.preparse(e)), o(e) ? new n(Y(e)) : (c(f) ? va(a) : f ? ta(a) : d(e) ? a._d = e : ya(a), b = new n(Y(a)), b._nextDay && (b.add(1, "d"), b._nextDay = void 0), b))
+  }
+
+  function ya(b) {
+    var f = b._i;
+    void 0 === f ? b._d = new Date : d(f) ? b._d = new Date(+f) : "string" == typeof f ? ba(b) : c(f) ? (b._a = e(f.slice(0), function(a) {
+      return parseInt(a, 10)
+    }), ra(b)) : "object" == typeof f ? wa(b) : "number" == typeof f ? b._d = new Date(f) : a.createFromInputFallback(b)
+  }
+
+  function za(a, b, c, d, e) {
+    var f = {};
+    return "boolean" == typeof c && (d = c, c = void 0), f._isAMomentObject = !0, f._useUTC = f._isUTC = e, f._l = c, f._i = a, f._f = b, f._strict = d, xa(f)
+  }
+
+  function Aa(a, b, c, d) {
+    return za(a, b, c, d, !1)
+  }
+
+  function Ba(a, b) {
+    var d, e;
+    if (1 === b.length && c(b[0]) && (b = b[0]), !b.length) return Aa();
+    for (d = b[0], e = 1; e < b.length; ++e) b[e][a](d) && (d = b[e]);
+    return d
+  }
+
+  function Ca() {
+    var a = [].slice.call(arguments, 0);
+    return Ba("isBefore", a)
+  }
+
+  function Da() {
+    var a = [].slice.call(arguments, 0);
+    return Ba("isAfter", a)
+  }
+
+  function Ea(a) {
+    var b = A(a),
+      c = b.year || 0,
+      d = b.quarter || 0,
+      e = b.month || 0,
+      f = b.week || 0,
+      g = b.day || 0,
+      h = b.hour || 0,
+      i = b.minute || 0,
+      j = b.second || 0,
+      k = b.millisecond || 0;
+    this._milliseconds = +k + 1e3 * j + 6e4 * i + 36e5 * h, this._days = +g + 7 * f, this._months = +e + 3 * d + 12 * c, this._data = {}, this._locale = x(), this._bubble()
+  }
+
+  function Fa(a) {
+    return a instanceof Ea
+  }
+
+  function Ga(a, b) {
+    G(a, 0, 0, function() {
+      var a = this.utcOffset(),
+        c = "+";
+      return 0 > a && (a = -a, c = "-"), c + F(~~(a / 60), 2) + b + F(~~a % 60, 2)
+    })
+  }
+
+  function Ha(a) {
+    var b = (a || "").match(Yc) || [],
+      c = b[b.length - 1] || [],
+      d = (c + "").match(td) || ["-", 0, 0],
+      e = +(60 * d[1]) + p(d[2]);
+    return "+" === d[0] ? e : -e
+  }
+
+  function Ia(b, c) {
+    var e, f;
+    return c._isUTC ? (e = c.clone(), f = (o(b) || d(b) ? +b : +Aa(b)) - +e, e._d.setTime(+e._d + f), a.updateOffset(e, !1), e) : Aa(b).local();
+    return c._isUTC ? Aa(b).zone(c._offset || 0) : Aa(b).local()
+  }
+
+  function Ja(a) {
+    return 15 * -Math.round(a._d.getTimezoneOffset() / 15)
+  }
+
+  function Ka(b, c) {
+    var d, e = this._offset || 0;
+    return null != b ? ("string" == typeof b && (b = Ha(b)), Math.abs(b) < 16 && (b = 60 * b), !this._isUTC && c && (d = Ja(this)), this._offset = b, this._isUTC = !0, null != d && this.add(d, "m"), e !== b && (!c || this._changeInProgress ? $a(this, Va(b - e, "m"), 1, !1) : this._changeInProgress || (this._changeInProgress = !0, a.updateOffset(this, !0), this._changeInProgress = null)), this) : this._isUTC ? e : Ja(this)
+  }
+
+  function La(a, b) {
+    return null != a ? ("string" != typeof a && (a = -a), this.utcOffset(a, b), this) : -this.utcOffset()
+  }
+
+  function Ma(a) {
+    return this.utcOffset(0, a)
+  }
+
+  function Na(a) {
+    return this._isUTC && (this.utcOffset(0, a), this._isUTC = !1, a && this.subtract(Ja(this), "m")), this
+  }
+
+  function Oa() {
+    return this._tzm ? this.utcOffset(this._tzm) : "string" == typeof this._i && this.utcOffset(Ha(this._i)), this
+  }
+
+  function Pa(a) {
+    return a = a ? Aa(a).utcOffset() : 0, (this.utcOffset() - a) % 60 === 0
+  }
+
+  function Qa() {
+    return this.utcOffset() > this.clone().month(0).utcOffset() || this.utcOffset() > this.clone().month(5).utcOffset()
+  }
+
+  function Ra() {
+    if (this._a) {
+      var a = this._isUTC ? h(this._a) : Aa(this._a);
+      return this.isValid() && q(this._a, a.toArray()) > 0
+    }
+    return !1
+  }
+
+  function Sa() {
+    return !this._isUTC
+  }
+
+  function Ta() {
+    return this._isUTC
+  }
+
+  function Ua() {
+    return this._isUTC && 0 === this._offset
+  }
+
+  function Va(a, b) {
+    var c, d, e, g = a,
+      h = null;
+    return Fa(a) ? g = {
+      ms: a._milliseconds,
+      d: a._days,
+      M: a._months
+    } : "number" == typeof a ? (g = {}, b ? g[b] = a : g.milliseconds = a) : (h = ud.exec(a)) ? (c = "-" === h[1] ? -1 : 1, g = {
+      y: 0,
+      d: p(h[dd]) * c,
+      h: p(h[ed]) * c,
+      m: p(h[fd]) * c,
+      s: p(h[gd]) * c,
+      ms: p(h[hd]) * c
+    }) : (h = vd.exec(a)) ? (c = "-" === h[1] ? -1 : 1, g = {
+      y: Wa(h[2], c),
+      M: Wa(h[3], c),
+      d: Wa(h[4], c),
+      h: Wa(h[5], c),
+      m: Wa(h[6], c),
+      s: Wa(h[7], c),
+      w: Wa(h[8], c)
+    }) : null == g ? g = {} : "object" == typeof g && ("from" in g || "to" in g) && (e = Ya(Aa(g.from), Aa(g.to)), g = {}, g.ms = e.milliseconds, g.M = e.months), d = new Ea(g), Fa(a) && f(a, "_locale") && (d._locale = a._locale), d
+  }
+
+  function Wa(a, b) {
+    var c = a && parseFloat(a.replace(",", "."));
+    return (isNaN(c) ? 0 : c) * b
+  }
+
+  function Xa(a, b) {
+    var c = {
+      milliseconds: 0,
+      months: 0
+    };
+    return c.months = b.month() - a.month() + 12 * (b.year() - a.year()), a.clone().add(c.months, "M").isAfter(b) && --c.months, c.milliseconds = +b - +a.clone().add(c.months, "M"), c
+  }
+
+  function Ya(a, b) {
+    var c;
+    return b = Ia(b, a), a.isBefore(b) ? c = Xa(a, b) : (c = Xa(b, a), c.milliseconds = -c.milliseconds, c.months = -c.months), c
+  }
+
+  function Za(a, b) {
+    return function(c, d) {
+      var e, f;
+      return null === d || isNaN(+d) || (_(b, "moment()." + b + "(period, number) is deprecated. Please use moment()." + b + "(number, period)."), f = c, c = d, d = f), c = "string" == typeof c ? +c : c, e = Va(c, d), $a(this, e, a), this
+    }
+  }
+
+  function $a(b, c, d, e) {
+    var f = c._milliseconds,
+      g = c._days,
+      h = c._months;
+    e = null == e ? !0 : e, f && b._d.setTime(+b._d + f * d), g && D(b, "Date", C(b, "Date") + g * d), h && V(b, C(b, "Month") + h * d), e && a.updateOffset(b, g || h)
+  }
+
+  function _a(a) {
+    var b = a || Aa(),
+      c = Ia(b, this).startOf("day"),
+      d = this.diff(c, "days", !0),
+      e = -6 > d ? "sameElse" : -1 > d ? "lastWeek" : 0 > d ? "lastDay" : 1 > d ? "sameDay" : 2 > d ? "nextDay" : 7 > d ? "nextWeek" : "sameElse";
+    return this.format(this.localeData().calendar(e, this, Aa(b)))
+  }
+
+  function ab() {
+    return new n(this)
+  }
+
+  function bb(a, b) {
+    var c;
+    return b = z("undefined" != typeof b ? b : "millisecond"), "millisecond" === b ? (a = o(a) ? a : Aa(a), +this > +a) : (c = o(a) ? +a : +Aa(a), c < +this.clone().startOf(b))
+  }
+
+  function cb(a, b) {
+    var c;
+    return b = z("undefined" != typeof b ? b : "millisecond"), "millisecond" === b ? (a = o(a) ? a : Aa(a), +a > +this) : (c = o(a) ? +a : +Aa(a), +this.clone().endOf(b) < c)
+  }
+
+  function db(a, b, c) {
+    return this.isAfter(a, c) && this.isBefore(b, c)
+  }
+
+  function eb(a, b) {
+    var c;
+    return b = z(b || "millisecond"), "millisecond" === b ? (a = o(a) ? a : Aa(a), +this === +a) : (c = +Aa(a), +this.clone().startOf(b) <= c && c <= +this.clone().endOf(b))
+  }
+
+  function fb(a) {
+    return 0 > a ? Math.ceil(a) : Math.floor(a)
+  }
+
+  function gb(a, b, c) {
+    var d, e, f = Ia(a, this),
+      g = 6e4 * (f.utcOffset() - this.utcOffset());
+    return b = z(b), "year" === b || "month" === b || "quarter" === b ? (e = hb(this, f), "quarter" === b ? e /= 3 : "year" === b && (e /= 12)) : (d = this - f, e = "second" === b ? d / 1e3 : "minute" === b ? d / 6e4 : "hour" === b ? d / 36e5 : "day" === b ? (d - g) / 864e5 : "week" === b ? (d - g) / 6048e5 : d), c ? e : fb(e)
+  }
+
+  function hb(a, b) {
+    var c, d, e = 12 * (b.year() - a.year()) + (b.month() - a.month()),
+      f = a.clone().add(e, "months");
+    return 0 > b - f ? (c = a.clone().add(e - 1, "months"), d = (b - f) / (f - c)) : (c = a.clone().add(e + 1, "months"), d = (b - f) / (c - f)), -(e + d)
+  }
+
+  function ib() {
+    return this.clone().locale("en").format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ")
+  }
+
+  function jb() {
+    var a = this.clone().utc();
+    return 0 < a.year() && a.year() <= 9999 ? "function" == typeof Date.prototype.toISOString ? this.toDate().toISOString() : J(a, "YYYY-MM-DD[T]HH:mm:ss.SSS[Z]") : J(a, "YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]")
+  }
+
+  function kb(b) {
+    var c = J(this, b || a.defaultFormat);
+    return this.localeData().postformat(c)
+  }
+
+  function lb(a, b) {
+    return this.isValid() ? Va({
+      to: this,
+      from: a
+    }).locale(this.locale()).humanize(!b) : this.localeData().invalidDate()
+  }
+
+  function mb(a) {
+    return this.from(Aa(), a)
+  }
+
+  function nb(a, b) {
+    return this.isValid() ? Va({
+      from: this,
+      to: a
+    }).locale(this.locale()).humanize(!b) : this.localeData().invalidDate()
+  }
+
+  function ob(a) {
+    return this.to(Aa(), a)
+  }
+
+  function pb(a) {
+    var b;
+    return void 0 === a ? this._locale._abbr : (b = x(a), null != b && (this._locale = b), this)
+  }
+
+  function qb() {
+    return this._locale
+  }
+
+  function rb(a) {
+    switch (a = z(a)) {
+      case "year":
+        this.month(0);
+      case "quarter":
+      case "month":
+        this.date(1);
+      case "week":
+      case "isoWeek":
+      case "day":
+        this.hours(0);
+      case "hour":
+        this.minutes(0);
+      case "minute":
+        this.seconds(0);
+      case "second":
+        this.milliseconds(0)
+    }
+    return "week" === a && this.weekday(0), "isoWeek" === a && this.isoWeekday(1), "quarter" === a && this.month(3 * Math.floor(this.month() / 3)), this
+  }
+
+  function sb(a) {
+    return a = z(a), void 0 === a || "millisecond" === a ? this : this.startOf(a).add(1, "isoWeek" === a ? "week" : a).subtract(1, "ms")
+  }
+
+  function tb() {
+    return +this._d - 6e4 * (this._offset || 0)
+  }
+
+  function ub() {
+    return Math.floor(+this / 1e3)
+  }
+
+  function vb() {
+    return this._offset ? new Date(+this) : this._d
+  }
+
+  function wb() {
+    var a = this;
+    return [a.year(), a.month(), a.date(), a.hour(), a.minute(), a.second(), a.millisecond()]
+  }
+
+  function xb() {
+    return k(this)
+  }
+
+  function yb() {
+    return g({}, j(this))
+  }
+
+  function zb() {
+    return j(this).overflow
+  }
+
+  function Ab(a, b) {
+    G(0, [a, a.length], 0, b)
+  }
+
+  function Bb(a, b, c) {
+    return ha(Aa([a, 11, 31 + b - c]), b, c).week
+  }
+
+  function Cb(a) {
+    var b = ha(this, this.localeData()._week.dow, this.localeData()._week.doy).year;
+    return null == a ? b : this.add(a - b, "y")
+  }
+
+  function Db(a) {
+    var b = ha(this, 1, 4).year;
+    return null == a ? b : this.add(a - b, "y")
+  }
+
+  function Eb() {
+    return Bb(this.year(), 1, 4)
+  }
+
+  function Fb() {
+    var a = this.localeData()._week;
+    return Bb(this.year(), a.dow, a.doy)
+  }
+
+  function Gb(a) {
+    return null == a ? Math.ceil((this.month() + 1) / 3) : this.month(3 * (a - 1) + this.month() % 3)
+  }
+
+  function Hb(a, b) {
+    if ("string" == typeof a)
+      if (isNaN(a)) {
+        if (a = b.weekdaysParse(a), "number" != typeof a) return null
+      } else a = parseInt(a, 10);
+    return a
+  }
+
+  function Ib(a) {
+    return this._weekdays[a.day()]
+  }
+
+  function Jb(a) {
+    return this._weekdaysShort[a.day()]
+  }
+
+  function Kb(a) {
+    return this._weekdaysMin[a.day()]
+  }
+
+  function Lb(a) {
+    var b, c, d;
+    for (this._weekdaysParse || (this._weekdaysParse = []), b = 0; 7 > b; b++)
+      if (this._weekdaysParse[b] || (c = Aa([2e3, 1]).day(b), d = "^" + this.weekdays(c, "") + "|^" + this.weekdaysShort(c, "") + "|^" + this.weekdaysMin(c, ""), this._weekdaysParse[b] = new RegExp(d.replace(".", ""), "i")), this._weekdaysParse[b].test(a)) return b
+  }
+
+  function Mb(a) {
+    var b = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
+    return null != a ? (a = Hb(a, this.localeData()), this.add(a - b, "d")) : b
+  }
+
+  function Nb(a) {
+    var b = (this.day() + 7 - this.localeData()._week.dow) % 7;
+    return null == a ? b : this.add(a - b, "d")
+  }
+
+  function Ob(a) {
+    return null == a ? this.day() || 7 : this.day(this.day() % 7 ? a : a - 7)
+  }
+
+  function Pb(a, b) {
+    G(a, 0, 0, function() {
+      return this.localeData().meridiem(this.hours(), this.minutes(), b)
+    })
+  }
+
+  function Qb(a, b) {
+    return b._meridiemParse
+  }
+
+  function Rb(a) {
+    return "p" === (a + "").toLowerCase().charAt(0)
+  }
+
+  function Sb(a, b, c) {
+    return a > 11 ? c ? "pm" : "PM" : c ? "am" : "AM"
+  }
+
+  function Tb(a) {
+    G(0, [a, 3], 0, "millisecond")
+  }
+
+  function Ub() {
+    return this._isUTC ? "UTC" : ""
+  }
+
+  function Vb() {
+    return this._isUTC ? "Coordinated Universal Time" : ""
+  }
+
+  function Wb(a) {
+    return Aa(1e3 * a)
+  }
+
+  function Xb() {
+    return Aa.apply(null, arguments).parseZone()
+  }
+
+  function Yb(a, b, c) {
+    var d = this._calendar[a];
+    return "function" == typeof d ? d.call(b, c) : d
+  }
+
+  function Zb(a) {
+    var b = this._longDateFormat[a];
+    return !b && this._longDateFormat[a.toUpperCase()] && (b = this._longDateFormat[a.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function(a) {
+      return a.slice(1)
+    }), this._longDateFormat[a] = b), b
+  }
+
+  function $b() {
+    return this._invalidDate
+  }
+
+  function _b(a) {
+    return this._ordinal.replace("%d", a)
+  }
+
+  function ac(a) {
+    return a
+  }
+
+  function bc(a, b, c, d) {
+    var e = this._relativeTime[c];
+    return "function" == typeof e ? e(a, b, c, d) : e.replace(/%d/i, a)
+  }
+
+  function cc(a, b) {
+    var c = this._relativeTime[a > 0 ? "future" : "past"];
+    return "function" == typeof c ? c(b) : c.replace(/%s/i, b)
+  }
+
+  function dc(a) {
+    var b, c;
+    for (c in a) b = a[c], "function" == typeof b ? this[c] = b : this["_" + c] = b;
+    this._ordinalParseLenient = new RegExp(this._ordinalParse.source + "|" + /\d{1,2}/.source)
+  }
+
+  function ec(a, b, c, d) {
+    var e = x(),
+      f = h().set(d, b);
+    return e[c](f, a)
+  }
+
+  function fc(a, b, c, d, e) {
+    if ("number" == typeof a && (b = a, a = void 0), a = a || "", null != b) return ec(a, b, c, e);
+    var f, g = [];
+    for (f = 0; d > f; f++) g[f] = ec(a, f, c, e);
+    return g
+  }
+
+  function gc(a, b) {
+    return fc(a, b, "months", 12, "month")
+  }
+
+  function hc(a, b) {
+    return fc(a, b, "monthsShort", 12, "month")
+  }
+
+  function ic(a, b) {
+    return fc(a, b, "weekdays", 7, "day")
+  }
+
+  function jc(a, b) {
+    return fc(a, b, "weekdaysShort", 7, "day")
+  }
+
+  function kc(a, b) {
+    return fc(a, b, "weekdaysMin", 7, "day")
+  }
+
+  function lc() {
+    var a = this._data;
+    return this._milliseconds = Rd(this._milliseconds), this._days = Rd(this._days), this._months = Rd(this._months), a.milliseconds = Rd(a.milliseconds), a.seconds = Rd(a.seconds), a.minutes = Rd(a.minutes), a.hours = Rd(a.hours), a.months = Rd(a.months), a.years = Rd(a.years), this
+  }
+
+  function mc(a, b, c, d) {
+    var e = Va(b, c);
+    return a._milliseconds += d * e._milliseconds, a._days += d * e._days, a._months += d * e._months, a._bubble()
+  }
+
+  function nc(a, b) {
+    return mc(this, a, b, 1)
+  }
+
+  function oc(a, b) {
+    return mc(this, a, b, -1)
+  }
+
+  function pc() {
+    var a, b, c, d = this._milliseconds,
+      e = this._days,
+      f = this._months,
+      g = this._data,
+      h = 0;
+    return g.milliseconds = d % 1e3, a = fb(d / 1e3), g.seconds = a % 60, b = fb(a / 60), g.minutes = b % 60, c = fb(b / 60), g.hours = c % 24, e += fb(c / 24), h = fb(qc(e)), e -= fb(rc(h)), f += fb(e / 30), e %= 30, h += fb(f / 12), f %= 12, g.days = e, g.months = f, g.years = h, this
+  }
+
+  function qc(a) {
+    return 400 * a / 146097
+  }
+
+  function rc(a) {
+    return 146097 * a / 400
+  }
+
+  function sc(a) {
+    var b, c, d = this._milliseconds;
+    if (a = z(a), "month" === a || "year" === a) return b = this._days + d / 864e5, c = this._months + 12 * qc(b), "month" === a ? c : c / 12;
+    switch (b = this._days + Math.round(rc(this._months / 12)), a) {
+      case "week":
+        return b / 7 + d / 6048e5;
+      case "day":
+        return b + d / 864e5;
+      case "hour":
+        return 24 * b + d / 36e5;
+      case "minute":
+        return 1440 * b + d / 6e4;
+      case "second":
+        return 86400 * b + d / 1e3;
+      case "millisecond":
+        return Math.floor(864e5 * b) + d;
+      default:
+        throw new Error("Unknown unit " + a)
+    }
+  }
+
+  function tc() {
+    return this._milliseconds + 864e5 * this._days + this._months % 12 * 2592e6 + 31536e6 * p(this._months / 12)
+  }
+
+  function uc(a) {
+    return function() {
+      return this.as(a)
+    }
+  }
+
+  function vc(a) {
+    return a = z(a), this[a + "s"]()
+  }
+
+  function wc(a) {
+    return function() {
+      return this._data[a]
+    }
+  }
+
+  function xc() {
+    return fb(this.days() / 7)
+  }
+
+  function yc(a, b, c, d, e) {
+    return e.relativeTime(b || 1, !!c, a, d)
+  }
+
+  function zc(a, b, c) {
+    var d = Va(a).abs(),
+      e = fe(d.as("s")),
+      f = fe(d.as("m")),
+      g = fe(d.as("h")),
+      h = fe(d.as("d")),
+      i = fe(d.as("M")),
+      j = fe(d.as("y")),
+      k = e < ge.s && ["s", e] || 1 === f && ["m"] || f < ge.m && ["mm", f] || 1 === g && ["h"] || g < ge.h && ["hh", g] || 1 === h && ["d"] || h < ge.d && ["dd", h] || 1 === i && ["M"] || i < ge.M && ["MM", i] || 1 === j && ["y"] || ["yy", j];
+    return k[2] = b, k[3] = +a > 0, k[4] = c, yc.apply(null, k)
+  }
+
+  function Ac(a, b) {
+    return void 0 === ge[a] ? !1 : void 0 === b ? ge[a] : (ge[a] = b, !0)
+  }
+
+  function Bc(a) {
+    var b = this.localeData(),
+      c = zc(this, !a, b);
+    return a && (c = b.pastFuture(+this, c)), b.postformat(c)
+  }
+
+  function Cc() {
+    var a = he(this.years()),
+      b = he(this.months()),
+      c = he(this.days()),
+      d = he(this.hours()),
+      e = he(this.minutes()),
+      f = he(this.seconds() + this.milliseconds() / 1e3),
+      g = this.asSeconds();
+    return g ? (0 > g ? "-" : "") + "P" + (a ? a + "Y" : "") + (b ? b + "M" : "") + (c ? c + "D" : "") + (d || e || f ? "T" : "") + (d ? d + "H" : "") + (e ? e + "M" : "") + (f ? f + "S" : "") : "P0D"
+  }
+  var Dc, Ec, Fc = a.momentProperties = [],
+    Gc = !1,
+    Hc = {},
+    Ic = {},
+    Jc = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Q|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,4}|x|X|zz?|ZZ?|.)/g,
+    Kc = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g,
+    Lc = {},
+    Mc = {},
+    Nc = /\d/,
+    Oc = /\d\d/,
+    Pc = /\d{3}/,
+    Qc = /\d{4}/,
+    Rc = /[+-]?\d{6}/,
+    Sc = /\d\d?/,
+    Tc = /\d{1,3}/,
+    Uc = /\d{1,4}/,
+    Vc = /[+-]?\d{1,6}/,
+    Wc = /\d+/,
+    Xc = /[+-]?\d+/,
+    Yc = /Z|[+-]\d\d:?\d\d/gi,
+    Zc = /[+-]?\d+(\.\d{1,3})?/,
+    $c = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i,
+    _c = {},
+    ad = {},
+    bd = 0,
+    cd = 1,
+    dd = 2,
+    ed = 3,
+    fd = 4,
+    gd = 5,
+    hd = 6;
+  G("M", ["MM", 2], "Mo", function() {
+    return this.month() + 1
+  }), G("MMM", 0, 0, function(a) {
+    return this.localeData().monthsShort(this, a)
+  }), G("MMMM", 0, 0, function(a) {
+    return this.localeData().months(this, a)
+  }), y("month", "M"), L("M", Sc), L("MM", Sc, Oc), L("MMM", $c), L("MMMM", $c), O(["M", "MM"], function(a, b) {
+    b[cd] = p(a) - 1
+  }), O(["MMM", "MMMM"], function(a, b, c, d) {
+    var e = c._locale.monthsParse(a, d, c._strict);
+    null != e ? b[cd] = e : j(c).invalidMonth = a
+  });
+  var id = "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+    jd = "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
+    kd = {};
+  a.suppressDeprecationWarnings = !1;
+  var ld = /^\s*(?:[+-]\d{6}|\d{4})-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+    md = [
+      ["YYYYYY-MM-DD", /[+-]\d{6}-\d{2}-\d{2}/],
+      ["YYYY-MM-DD", /\d{4}-\d{2}-\d{2}/],
+      ["GGGG-[W]WW-E", /\d{4}-W\d{2}-\d/],
+      ["GGGG-[W]WW", /\d{4}-W\d{2}/],
+      ["YYYY-DDD", /\d{4}-\d{3}/]
+    ],
+    nd = [
+      ["HH:mm:ss.SSSS", /(T| )\d\d:\d\d:\d\d\.\d+/],
+      ["HH:mm:ss", /(T| )\d\d:\d\d:\d\d/],
+      ["HH:mm", /(T| )\d\d:\d\d/],
+      ["HH", /(T| )\d\d/]
+    ],
+    od = /^\/?Date\((\-?\d+)/i;
+  a.createFromInputFallback = $("moment construction falls back to js Date. This is discouraged and will be removed in upcoming major release. Please refer to https://github.com/moment/moment/issues/1407 for more info.", function(a) {
+    a._d = new Date(a._i + (a._useUTC ? " UTC" : ""))
+  }), G(0, ["YY", 2], 0, function() {
+    return this.year() % 100
+  }), G(0, ["YYYY", 4], 0, "year"), G(0, ["YYYYY", 5], 0, "year"), G(0, ["YYYYYY", 6, !0], 0, "year"), y("year", "y"), L("Y", Xc), L("YY", Sc, Oc), L("YYYY", Uc, Qc), L("YYYYY", Vc, Rc), L("YYYYYY", Vc, Rc), O(["YYYY", "YYYYY", "YYYYYY"], bd), O("YY", function(b, c) {
+    c[bd] = a.parseTwoDigitYear(b)
+  }), a.parseTwoDigitYear = function(a) {
+    return p(a) + (p(a) > 68 ? 1900 : 2e3)
+  };
+  var pd = B("FullYear", !1);
+  G("w", ["ww", 2], "wo", "week"), G("W", ["WW", 2], "Wo", "isoWeek"), y("week", "w"), y("isoWeek", "W"), L("w", Sc), L("ww", Sc, Oc), L("W", Sc), L("WW", Sc, Oc), P(["w", "ww", "W", "WW"], function(a, b, c, d) {
+    b[d.substr(0, 1)] = p(a)
+  });
+  var qd = {
+    dow: 0,
+    doy: 6
+  };
+  G("DDD", ["DDDD", 3], "DDDo", "dayOfYear"), y("dayOfYear", "DDD"), L("DDD", Tc), L("DDDD", Pc), O(["DDD", "DDDD"], function(a, b, c) {
+    c._dayOfYear = p(a)
+  }), a.ISO_8601 = function() {};
+  var rd = $("moment().min is deprecated, use moment.min instead. https://github.com/moment/moment/issues/1548", function() {
+      var a = Aa.apply(null, arguments);
+      return this > a ? this : a
+    }),
+    sd = $("moment().max is deprecated, use moment.max instead. https://github.com/moment/moment/issues/1548", function() {
+      var a = Aa.apply(null, arguments);
+      return a > this ? this : a
+    });
+  Ga("Z", ":"), Ga("ZZ", ""), L("Z", Yc), L("ZZ", Yc), O(["Z", "ZZ"], function(a, b, c) {
+    c._useUTC = !0, c._tzm = Ha(a)
+  });
+  var td = /([\+\-]|\d\d)/gi;
+  a.updateOffset = function() {};
+  var ud = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/,
+    vd = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/;
+  Va.fn = Ea.prototype;
+  var wd = Za(1, "add"),
+    xd = Za(-1, "subtract");
+  a.defaultFormat = "YYYY-MM-DDTHH:mm:ssZ";
+  var yd = $("moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.", function(a) {
+    return void 0 === a ? this.localeData() : this.locale(a)
+  });
+  G(0, ["gg", 2], 0, function() {
+    return this.weekYear() % 100
+  }), G(0, ["GG", 2], 0, function() {
+    return this.isoWeekYear() % 100
+  }), Ab("gggg", "weekYear"), Ab("ggggg", "weekYear"), Ab("GGGG", "isoWeekYear"), Ab("GGGGG", "isoWeekYear"), y("weekYear", "gg"), y("isoWeekYear", "GG"), L("G", Xc), L("g", Xc), L("GG", Sc, Oc), L("gg", Sc, Oc), L("GGGG", Uc, Qc), L("gggg", Uc, Qc), L("GGGGG", Vc, Rc), L("ggggg", Vc, Rc), P(["gggg", "ggggg", "GGGG", "GGGGG"], function(a, b, c, d) {
+    b[d.substr(0, 2)] = p(a)
+  }), P(["gg", "GG"], function(b, c, d, e) {
+    c[e] = a.parseTwoDigitYear(b)
+  }), G("Q", 0, 0, "quarter"), y("quarter", "Q"), L("Q", Nc), O("Q", function(a, b) {
+    b[cd] = 3 * (p(a) - 1)
+  }), G("D", ["DD", 2], "Do", "date"), y("date", "D"), L("D", Sc), L("DD", Sc, Oc), L("Do", function(a, b) {
+    return a ? b._ordinalParse : b._ordinalParseLenient
+  }), O(["D", "DD"], dd), O("Do", function(a, b) {
+    b[dd] = p(a.match(Sc)[0], 10)
+  });
+  var zd = B("Date", !0);
+  G("d", 0, "do", "day"), G("dd", 0, 0, function(a) {
+    return this.localeData().weekdaysMin(this, a)
+  }), G("ddd", 0, 0, function(a) {
+    return this.localeData().weekdaysShort(this, a)
+  }), G("dddd", 0, 0, function(a) {
+    return this.localeData().weekdays(this, a)
+  }), G("e", 0, 0, "weekday"), G("E", 0, 0, "isoWeekday"), y("day", "d"), y("weekday", "e"), y("isoWeekday", "E"), L("d", Sc), L("e", Sc), L("E", Sc), L("dd", $c), L("ddd", $c), L("dddd", $c), P(["dd", "ddd", "dddd"], function(a, b, c) {
+    var d = c._locale.weekdaysParse(a);
+    null != d ? b.d = d : j(c).invalidWeekday = a
+  }), P(["d", "e", "E"], function(a, b, c, d) {
+    b[d] = p(a)
+  });
+  var Ad = "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
+    Bd = "Sun_Mon_Tue_Wed_Thu_Fri_Sat".split("_"),
+    Cd = "Su_Mo_Tu_We_Th_Fr_Sa".split("_");
+  G("H", ["HH", 2], 0, "hour"), G("h", ["hh", 2], 0, function() {
+    return this.hours() % 12 || 12
+  }), Pb("a", !0), Pb("A", !1), y("hour", "h"), L("a", Qb), L("A", Qb), L("H", Sc), L("h", Sc), L("HH", Sc, Oc), L("hh", Sc, Oc), O(["H", "HH"], ed), O(["a", "A"], function(a, b, c) {
+    c._isPm = c._locale.isPM(a), c._meridiem = a
+  }), O(["h", "hh"], function(a, b, c) {
+    b[ed] = p(a), j(c).bigHour = !0
+  });
+  var Dd = /[ap]\.?m?\.?/i,
+    Ed = B("Hours", !0);
+  G("m", ["mm", 2], 0, "minute"), y("minute", "m"), L("m", Sc), L("mm", Sc, Oc), O(["m", "mm"], fd);
+  var Fd = B("Minutes", !1);
+  G("s", ["ss", 2], 0, "second"), y("second", "s"), L("s", Sc), L("ss", Sc, Oc), O(["s", "ss"], gd);
+  var Gd = B("Seconds", !1);
+  G("S", 0, 0, function() {
+    return ~~(this.millisecond() / 100)
+  }), G(0, ["SS", 2], 0, function() {
+    return ~~(this.millisecond() / 10)
+  }), Tb("SSS"), Tb("SSSS"), y("millisecond", "ms"), L("S", Tc, Nc), L("SS", Tc, Oc), L("SSS", Tc, Pc), L("SSSS", Wc), O(["S", "SS", "SSS", "SSSS"], function(a, b) {
+    b[hd] = p(1e3 * ("0." + a))
+  });
+  var Hd = B("Milliseconds", !1);
+  G("z", 0, 0, "zoneAbbr"), G("zz", 0, 0, "zoneName");
+  var Id = n.prototype;
+  Id.add = wd, Id.calendar = _a, Id.clone = ab, Id.diff = gb, Id.endOf = sb, Id.format = kb, Id.from = lb, Id.fromNow = mb, Id.to = nb, Id.toNow = ob, Id.get = E, Id.invalidAt = zb, Id.isAfter = bb, Id.isBefore = cb, Id.isBetween = db, Id.isSame = eb, Id.isValid = xb, Id.lang = yd, Id.locale = pb, Id.localeData = qb, Id.max = sd, Id.min = rd, Id.parsingFlags = yb, Id.set = E, Id.startOf = rb, Id.subtract = xd, Id.toArray = wb, Id.toDate = vb, Id.toISOString = jb, Id.toJSON = jb, Id.toString = ib, Id.unix = ub, Id.valueOf = tb, Id.year = pd, Id.isLeapYear = ga, Id.weekYear = Cb, Id.isoWeekYear = Db, Id.quarter = Id.quarters = Gb, Id.month = W, Id.daysInMonth = X, Id.week = Id.weeks = la, Id.isoWeek = Id.isoWeeks = ma, Id.weeksInYear = Fb, Id.isoWeeksInYear = Eb, Id.date = zd, Id.day = Id.days = Mb, Id.weekday = Nb, Id.isoWeekday = Ob, Id.dayOfYear = oa, Id.hour = Id.hours = Ed, Id.minute = Id.minutes = Fd, Id.second = Id.seconds = Gd, Id.millisecond = Id.milliseconds = Hd, Id.utcOffset = Ka, Id.utc = Ma, Id.local = Na, Id.parseZone = Oa, Id.hasAlignedHourOffset = Pa, Id.isDST = Qa, Id.isDSTShifted = Ra, Id.isLocal = Sa, Id.isUtcOffset = Ta, Id.isUtc = Ua, Id.isUTC = Ua, Id.zoneAbbr = Ub, Id.zoneName = Vb, Id.dates = $("dates accessor is deprecated. Use date instead.", zd), Id.months = $("months accessor is deprecated. Use month instead", W), Id.years = $("years accessor is deprecated. Use year instead", pd), Id.zone = $("moment().zone is deprecated, use moment().utcOffset instead. https://github.com/moment/moment/issues/1779", La);
+  var Jd = Id,
+    Kd = {
+      sameDay: "[Today at] LT",
+      nextDay: "[Tomorrow at] LT",
+      nextWeek: "dddd [at] LT",
+      lastDay: "[Yesterday at] LT",
+      lastWeek: "[Last] dddd [at] LT",
+      sameElse: "L"
+    },
+    Ld = {
+      LTS: "h:mm:ss A",
+      LT: "h:mm A",
+      L: "MM/DD/YYYY",
+      LL: "MMMM D, YYYY",
+      LLL: "MMMM D, YYYY LT",
+      LLLL: "dddd, MMMM D, YYYY LT"
+    },
+    Md = "Invalid date",
+    Nd = "%d",
+    Od = /\d{1,2}/,
+    Pd = {
+      future: "in %s",
+      past: "%s ago",
+      s: "a few seconds",
+      m: "a minute",
+      mm: "%d minutes",
+      h: "an hour",
+      hh: "%d hours",
+      d: "a day",
+      dd: "%d days",
+      M: "a month",
+      MM: "%d months",
+      y: "a year",
+      yy: "%d years"
+    },
+    Qd = r.prototype;
+  Qd._calendar = Kd, Qd.calendar = Yb, Qd._longDateFormat = Ld, Qd.longDateFormat = Zb, Qd._invalidDate = Md, Qd.invalidDate = $b, Qd._ordinal = Nd, Qd.ordinal = _b, Qd._ordinalParse = Od, Qd.preparse = ac, Qd.postformat = ac, Qd._relativeTime = Pd, Qd.relativeTime = bc, Qd.pastFuture = cc, Qd.set = dc, Qd.months = S, Qd._months = id, Qd.monthsShort = T, Qd._monthsShort = jd, Qd.monthsParse = U, Qd.week = ia, Qd._week = qd, Qd.firstDayOfYear = ka, Qd.firstDayOfWeek = ja, Qd.weekdays = Ib, Qd._weekdays = Ad, Qd.weekdaysMin = Kb, Qd._weekdaysMin = Cd, Qd.weekdaysShort = Jb, Qd._weekdaysShort = Bd, Qd.weekdaysParse = Lb, Qd.isPM = Rb, Qd._meridiemParse = Dd, Qd.meridiem = Sb, v("en", {
+    ordinalParse: /\d{1,2}(th|st|nd|rd)/,
+    ordinal: function(a) {
+      var b = a % 10,
+        c = 1 === p(a % 100 / 10) ? "th" : 1 === b ? "st" : 2 === b ? "nd" : 3 === b ? "rd" : "th";
+      return a + c
+    }
+  }), a.lang = $("moment.lang is deprecated. Use moment.locale instead.", v), a.langData = $("moment.langData is deprecated. Use moment.localeData instead.", x);
+  var Rd = Math.abs,
+    Sd = uc("ms"),
+    Td = uc("s"),
+    Ud = uc("m"),
+    Vd = uc("h"),
+    Wd = uc("d"),
+    Xd = uc("w"),
+    Yd = uc("M"),
+    Zd = uc("y"),
+    $d = wc("milliseconds"),
+    _d = wc("seconds"),
+    ae = wc("minutes"),
+    be = wc("hours"),
+    ce = wc("days"),
+    de = wc("months"),
+    ee = wc("years"),
+    fe = Math.round,
+    ge = {
+      s: 45,
+      m: 45,
+      h: 22,
+      d: 26,
+      M: 11
+    },
+    he = Math.abs,
+    ie = Ea.prototype;
+  ie.abs = lc, ie.add = nc, ie.subtract = oc, ie.as = sc, ie.asMilliseconds = Sd, ie.asSeconds = Td, ie.asMinutes = Ud, ie.asHours = Vd, ie.asDays = Wd, ie.asWeeks = Xd, ie.asMonths = Yd, ie.asYears = Zd, ie.valueOf = tc, ie._bubble = pc, ie.get = vc, ie.milliseconds = $d, ie.seconds = _d, ie.minutes = ae, ie.hours = be, ie.days = ce, ie.weeks = xc, ie.months = de, ie.years = ee, ie.humanize = Bc, ie.toISOString = Cc, ie.toString = Cc, ie.toJSON = Cc, ie.locale = pb, ie.localeData = qb, ie.toIsoString = $("toIsoString() is deprecated. Please use toISOString() instead (notice the capitals)", Cc), ie.lang = yd, G("X", 0, 0, "unix"), G("x", 0, 0, "valueOf"), L("x", Xc), L("X", Zc), O("X", function(a, b, c) {
+    c._d = new Date(1e3 * parseFloat(a, 10))
+  }), O("x", function(a, b, c) {
+    c._d = new Date(p(a))
+  }), a.version = "2.10.3", b(Aa), a.fn = Jd, a.min = Ca, a.max = Da, a.utc = h, a.unix = Wb, a.months = gc, a.isDate = d, a.locale = v, a.invalid = l, a.duration = Va, a.isMoment = o, a.weekdays = ic, a.parseZone = Xb, a.localeData = x, a.isDuration = Fa, a.monthsShort = hc, a.weekdaysMin = kc, a.defineLocale = w, a.weekdaysShort = jc, a.normalizeUnits = z, a.relativeTimeThreshold = Ac;
+  var je = a;
+  return je
+});
+/*! RESOURCE: /scripts/app.snTestRunner/thirdparty/html2canvas.min.js */
+/*
+  html2canvas 0.5.0-beta3 <http://html2canvas.hertzen.com>
+  Copyright (c) 2016 Niklas von Hertzen
+
+  Released under  License
+*/
+! function(e) {
+  if ("object" == typeof exports && "undefined" != typeof module) module.exports = e();
+  else if ("function" == typeof define && define.amd) define([], e);
+  else {
+    var n;
+    "undefined" != typeof window ? n = window : "undefined" != typeof global ? n = global : "undefined" != typeof self && (n = self), n.html2canvas = e()
+  }
 }(function() {
-  return function(e, t, r, a) {
-    function n(e) {
-      for (var t = -1, r = e ? e.length : 0, a = []; ++t < r;) {
-        var n = e[t];
-        n && a.push(n)
+  var e;
+  return function n(e, f, o) {
+    function d(t, l) {
+      if (!f[t]) {
+        if (!e[t]) {
+          var s = "function" == typeof require && require;
+          if (!l && s) return s(t, !0);
+          if (i) return i(t, !0);
+          var u = new Error("Cannot find module '" + t + "'");
+          throw u.code = "MODULE_NOT_FOUND", u
+        }
+        var a = f[t] = {
+          exports: {}
+        };
+        e[t][0].call(a.exports, function(n) {
+          var f = e[t][1][n];
+          return d(f ? f : n)
+        }, a, a.exports, n, e, f, o)
       }
-      return a
+      return f[t].exports
     }
+    for (var i = "function" == typeof require && require, t = 0; t < o.length; t++) d(o[t]);
+    return d
+  }({
+    1: [function(n, f, o) {
+      (function(n) {
+        ! function(d) {
+          function i(e) {
+            throw RangeError(I[e])
+          }
 
-    function o(e) {
-      return g.isWrapped(e) ? e = [].slice.call(e) : g.isNode(e) && (e = [e]), e
-    }
+          function t(e, n) {
+            for (var f = e.length; f--;) e[f] = n(e[f]);
+            return e
+          }
 
-    function i(e) {
-      var t = $.data(e, "velocity");
-      return null === t ? a : t
-    }
+          function l(e, n) {
+            return t(e.split(H), n).join(".")
+          }
 
-    function s(e) {
-      return function(t) {
-        return Math.round(t * e) * (1 / e)
+          function s(e) {
+            for (var n, f, o = [], d = 0, i = e.length; i > d;) n = e.charCodeAt(d++), n >= 55296 && 56319 >= n && i > d ? (f = e.charCodeAt(d++), 56320 == (64512 & f) ? o.push(((1023 & n) << 10) + (1023 & f) + 65536) : (o.push(n), d--)) : o.push(n);
+            return o
+          }
+
+          function u(e) {
+            return t(e, function(e) {
+              var n = "";
+              return e > 65535 && (e -= 65536, n += L(e >>> 10 & 1023 | 55296), e = 56320 | 1023 & e), n += L(e)
+            }).join("")
+          }
+
+          function a(e) {
+            return 10 > e - 48 ? e - 22 : 26 > e - 65 ? e - 65 : 26 > e - 97 ? e - 97 : k
+          }
+
+          function p(e, n) {
+            return e + 22 + 75 * (26 > e) - ((0 != n) << 5)
+          }
+
+          function c(e, n, f) {
+            var o = 0;
+            for (e = f ? K(e / B) : e >> 1, e += K(e / n); e > J * z >> 1; o += k) e = K(e / J);
+            return K(o + (J + 1) * e / (e + A))
+          }
+
+          function y(e) {
+            var n, f, o, d, t, l, s, p, y, m, r = [],
+              v = e.length,
+              w = 0,
+              b = D,
+              g = C;
+            for (f = e.lastIndexOf(E), 0 > f && (f = 0), o = 0; f > o; ++o) e.charCodeAt(o) >= 128 && i("not-basic"), r.push(e.charCodeAt(o));
+            for (d = f > 0 ? f + 1 : 0; v > d;) {
+              for (t = w, l = 1, s = k; d >= v && i("invalid-input"), p = a(e.charCodeAt(d++)), (p >= k || p > K((j - w) / l)) && i("overflow"), w += p * l, y = g >= s ? q : s >= g + z ? z : s - g, !(y > p); s += k) m = k - y, l > K(j / m) && i("overflow"), l *= m;
+              n = r.length + 1, g = c(w - t, n, 0 == t), K(w / n) > j - b && i("overflow"), b += K(w / n), w %= n, r.splice(w++, 0, b)
+            }
+            return u(r)
+          }
+
+          function m(e) {
+            var n, f, o, d, t, l, u, a, y, m, r, v, w, b, g, h = [];
+            for (e = s(e), v = e.length, n = D, f = 0, t = C, l = 0; v > l; ++l) r = e[l], 128 > r && h.push(L(r));
+            for (o = d = h.length, d && h.push(E); v > o;) {
+              for (u = j, l = 0; v > l; ++l) r = e[l], r >= n && u > r && (u = r);
+              for (w = o + 1, u - n > K((j - f) / w) && i("overflow"), f += (u - n) * w, n = u, l = 0; v > l; ++l)
+                if (r = e[l], n > r && ++f > j && i("overflow"), r == n) {
+                  for (a = f, y = k; m = t >= y ? q : y >= t + z ? z : y - t, !(m > a); y += k) g = a - m, b = k - m, h.push(L(p(m + g % b, 0))), a = K(g / b);
+                  h.push(L(p(a, 0))), t = c(f, w, o == d), f = 0, ++o
+                }++f, ++n
+            }
+            return h.join("")
+          }
+
+          function r(e) {
+            return l(e, function(e) {
+              return F.test(e) ? y(e.slice(4).toLowerCase()) : e
+            })
+          }
+
+          function v(e) {
+            return l(e, function(e) {
+              return G.test(e) ? "xn--" + m(e) : e
+            })
+          }
+          var w = "object" == typeof o && o,
+            b = "object" == typeof f && f && f.exports == w && f,
+            g = "object" == typeof n && n;
+          (g.global === g || g.window === g) && (d = g);
+          var h, x, j = 2147483647,
+            k = 36,
+            q = 1,
+            z = 26,
+            A = 38,
+            B = 700,
+            C = 72,
+            D = 128,
+            E = "-",
+            F = /^xn--/,
+            G = /[^ -~]/,
+            H = /\x2E|\u3002|\uFF0E|\uFF61/g,
+            I = {
+              overflow: "Overflow: input needs wider integers to process",
+              "not-basic": "Illegal input >= 0x80 (not a basic code point)",
+              "invalid-input": "Invalid input"
+            },
+            J = k - q,
+            K = Math.floor,
+            L = String.fromCharCode;
+          if (h = {
+              version: "1.2.4",
+              ucs2: {
+                decode: s,
+                encode: u
+              },
+              decode: y,
+              encode: m,
+              toASCII: v,
+              toUnicode: r
+            }, "function" == typeof e && "object" == typeof e.amd && e.amd) e("punycode", function() {
+            return h
+          });
+          else if (w && !w.nodeType)
+            if (b) b.exports = h;
+            else
+              for (x in h) h.hasOwnProperty(x) && (w[x] = h[x]);
+          else d.punycode = h
+        }(this)
+      }).call(this, "undefined" != typeof global ? global : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {})
+    }, {}],
+    2: [function(e, n) {
+      function f(e, n, f) {
+        !e.defaultView || n === e.defaultView.pageXOffset && f === e.defaultView.pageYOffset || e.defaultView.scrollTo(n, f)
       }
-    }
 
-    function l(e, r, a, n) {
-      function o(e, t) {
-        return 1 - 3 * t + 3 * e
+      function o(e, n) {
+        try {
+          n && (n.width = e.width, n.height = e.height, n.getContext("2d").putImageData(e.getContext("2d").getImageData(0, 0, e.width, e.height), 0, 0))
+        } catch (f) {
+          t("Unable to copy canvas content from", e, f)
+        }
       }
 
-      function i(e, t) {
-        return 3 * t - 6 * e
+      function d(e, n) {
+        for (var f = 3 === e.nodeType ? document.createTextNode(e.nodeValue) : e.cloneNode(!1), i = e.firstChild; i;)(n === !0 || 1 !== i.nodeType || "SCRIPT" !== i.nodeName) && f.appendChild(d(i, n)), i = i.nextSibling;
+        return 1 === e.nodeType && (f._scrollTop = e.scrollTop, f._scrollLeft = e.scrollLeft, "CANVAS" === e.nodeName ? o(e, f) : ("TEXTAREA" === e.nodeName || "SELECT" === e.nodeName) && (f.value = e.value)), f
+      }
+
+      function i(e) {
+        if (1 === e.nodeType) {
+          e.scrollTop = e._scrollTop, e.scrollLeft = e._scrollLeft;
+          for (var n = e.firstChild; n;) i(n), n = n.nextSibling
+        }
+      }
+      var t = e("./log");
+      n.exports = function(e, n, o, t, l, s, u) {
+        var a = d(e.documentElement, l.javascriptEnabled),
+          p = n.createElement("iframe");
+        return p.className = "html2canvas-container", p.style.visibility = "hidden", p.style.position = "fixed", p.style.left = "-10000px", p.style.top = "0px", p.style.border = "0", p.width = o, p.height = t, p.scrolling = "no", n.body.appendChild(p), new Promise(function(n) {
+          var o = p.contentWindow.document;
+          p.contentWindow.onload = p.onload = function() {
+            var e = setInterval(function() {
+              o.body.childNodes.length > 0 && (i(o.documentElement), clearInterval(e), "view" === l.type && (p.contentWindow.scrollTo(s, u), !/(iPad|iPhone|iPod)/g.test(navigator.userAgent) || p.contentWindow.scrollY === u && p.contentWindow.scrollX === s || (o.documentElement.style.top = -u + "px", o.documentElement.style.left = -s + "px", o.documentElement.style.position = "absolute")), n(p))
+            }, 50)
+          }, o.open(), o.write("<!DOCTYPE html><html></html>"), f(e, s, u), o.replaceChild(o.adoptNode(a), o.documentElement), o.close()
+        })
+      }
+    }, {
+      "./log": 13
+    }],
+    3: [function(e, n) {
+      function f(e) {
+        this.r = 0, this.g = 0, this.b = 0, this.a = null;
+        this.fromArray(e) || this.namedColor(e) || this.rgb(e) || this.rgba(e) || this.hex6(e) || this.hex3(e)
+      }
+      f.prototype.darken = function(e) {
+        var n = 1 - e;
+        return new f([Math.round(this.r * n), Math.round(this.g * n), Math.round(this.b * n), this.a])
+      }, f.prototype.isTransparent = function() {
+        return 0 === this.a
+      }, f.prototype.isBlack = function() {
+        return 0 === this.r && 0 === this.g && 0 === this.b
+      }, f.prototype.fromArray = function(e) {
+        return Array.isArray(e) && (this.r = Math.min(e[0], 255), this.g = Math.min(e[1], 255), this.b = Math.min(e[2], 255), e.length > 3 && (this.a = e[3])), Array.isArray(e)
+      };
+      var o = /^#([a-f0-9]{3})$/i;
+      f.prototype.hex3 = function(e) {
+        var n = null;
+        return null !== (n = e.match(o)) && (this.r = parseInt(n[1][0] + n[1][0], 16), this.g = parseInt(n[1][1] + n[1][1], 16), this.b = parseInt(n[1][2] + n[1][2], 16)), null !== n
+      };
+      var d = /^#([a-f0-9]{6})$/i;
+      f.prototype.hex6 = function(e) {
+        var n = null;
+        return null !== (n = e.match(d)) && (this.r = parseInt(n[1].substring(0, 2), 16), this.g = parseInt(n[1].substring(2, 4), 16), this.b = parseInt(n[1].substring(4, 6), 16)), null !== n
+      };
+      var i = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+      f.prototype.rgb = function(e) {
+        var n = null;
+        return null !== (n = e.match(i)) && (this.r = Number(n[1]), this.g = Number(n[2]), this.b = Number(n[3])), null !== n
+      };
+      var t = /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d?\.?\d+)\s*\)$/;
+      f.prototype.rgba = function(e) {
+        var n = null;
+        return null !== (n = e.match(t)) && (this.r = Number(n[1]), this.g = Number(n[2]), this.b = Number(n[3]), this.a = Number(n[4])), null !== n
+      }, f.prototype.toString = function() {
+        return null !== this.a && 1 !== this.a ? "rgba(" + [this.r, this.g, this.b, this.a].join(",") + ")" : "rgb(" + [this.r, this.g, this.b].join(",") + ")"
+      }, f.prototype.namedColor = function(e) {
+        e = e.toLowerCase();
+        var n = l[e];
+        if (n) this.r = n[0], this.g = n[1], this.b = n[2];
+        else if ("transparent" === e) return this.r = this.g = this.b = this.a = 0, !0;
+        return !!n
+      }, f.prototype.isColor = !0;
+      var l = {
+        aliceblue: [240, 248, 255],
+        antiquewhite: [250, 235, 215],
+        aqua: [0, 255, 255],
+        aquamarine: [127, 255, 212],
+        azure: [240, 255, 255],
+        beige: [245, 245, 220],
+        bisque: [255, 228, 196],
+        black: [0, 0, 0],
+        blanchedalmond: [255, 235, 205],
+        blue: [0, 0, 255],
+        blueviolet: [138, 43, 226],
+        brown: [165, 42, 42],
+        burlywood: [222, 184, 135],
+        cadetblue: [95, 158, 160],
+        chartreuse: [127, 255, 0],
+        chocolate: [210, 105, 30],
+        coral: [255, 127, 80],
+        cornflowerblue: [100, 149, 237],
+        cornsilk: [255, 248, 220],
+        crimson: [220, 20, 60],
+        cyan: [0, 255, 255],
+        darkblue: [0, 0, 139],
+        darkcyan: [0, 139, 139],
+        darkgoldenrod: [184, 134, 11],
+        darkgray: [169, 169, 169],
+        darkgreen: [0, 100, 0],
+        darkgrey: [169, 169, 169],
+        darkkhaki: [189, 183, 107],
+        darkmagenta: [139, 0, 139],
+        darkolivegreen: [85, 107, 47],
+        darkorange: [255, 140, 0],
+        darkorchid: [153, 50, 204],
+        darkred: [139, 0, 0],
+        darksalmon: [233, 150, 122],
+        darkseagreen: [143, 188, 143],
+        darkslateblue: [72, 61, 139],
+        darkslategray: [47, 79, 79],
+        darkslategrey: [47, 79, 79],
+        darkturquoise: [0, 206, 209],
+        darkviolet: [148, 0, 211],
+        deeppink: [255, 20, 147],
+        deepskyblue: [0, 191, 255],
+        dimgray: [105, 105, 105],
+        dimgrey: [105, 105, 105],
+        dodgerblue: [30, 144, 255],
+        firebrick: [178, 34, 34],
+        floralwhite: [255, 250, 240],
+        forestgreen: [34, 139, 34],
+        fuchsia: [255, 0, 255],
+        gainsboro: [220, 220, 220],
+        ghostwhite: [248, 248, 255],
+        gold: [255, 215, 0],
+        goldenrod: [218, 165, 32],
+        gray: [128, 128, 128],
+        green: [0, 128, 0],
+        greenyellow: [173, 255, 47],
+        grey: [128, 128, 128],
+        honeydew: [240, 255, 240],
+        hotpink: [255, 105, 180],
+        indianred: [205, 92, 92],
+        indigo: [75, 0, 130],
+        ivory: [255, 255, 240],
+        khaki: [240, 230, 140],
+        lavender: [230, 230, 250],
+        lavenderblush: [255, 240, 245],
+        lawngreen: [124, 252, 0],
+        lemonchiffon: [255, 250, 205],
+        lightblue: [173, 216, 230],
+        lightcoral: [240, 128, 128],
+        lightcyan: [224, 255, 255],
+        lightgoldenrodyellow: [250, 250, 210],
+        lightgray: [211, 211, 211],
+        lightgreen: [144, 238, 144],
+        lightgrey: [211, 211, 211],
+        lightpink: [255, 182, 193],
+        lightsalmon: [255, 160, 122],
+        lightseagreen: [32, 178, 170],
+        lightskyblue: [135, 206, 250],
+        lightslategray: [119, 136, 153],
+        lightslategrey: [119, 136, 153],
+        lightsteelblue: [176, 196, 222],
+        lightyellow: [255, 255, 224],
+        lime: [0, 255, 0],
+        limegreen: [50, 205, 50],
+        linen: [250, 240, 230],
+        magenta: [255, 0, 255],
+        maroon: [128, 0, 0],
+        mediumaquamarine: [102, 205, 170],
+        mediumblue: [0, 0, 205],
+        mediumorchid: [186, 85, 211],
+        mediumpurple: [147, 112, 219],
+        mediumseagreen: [60, 179, 113],
+        mediumslateblue: [123, 104, 238],
+        mediumspringgreen: [0, 250, 154],
+        mediumturquoise: [72, 209, 204],
+        mediumvioletred: [199, 21, 133],
+        midnightblue: [25, 25, 112],
+        mintcream: [245, 255, 250],
+        mistyrose: [255, 228, 225],
+        moccasin: [255, 228, 181],
+        navajowhite: [255, 222, 173],
+        navy: [0, 0, 128],
+        oldlace: [253, 245, 230],
+        olive: [128, 128, 0],
+        olivedrab: [107, 142, 35],
+        orange: [255, 165, 0],
+        orangered: [255, 69, 0],
+        orchid: [218, 112, 214],
+        palegoldenrod: [238, 232, 170],
+        palegreen: [152, 251, 152],
+        paleturquoise: [175, 238, 238],
+        palevioletred: [219, 112, 147],
+        papayawhip: [255, 239, 213],
+        peachpuff: [255, 218, 185],
+        peru: [205, 133, 63],
+        pink: [255, 192, 203],
+        plum: [221, 160, 221],
+        powderblue: [176, 224, 230],
+        purple: [128, 0, 128],
+        rebeccapurple: [102, 51, 153],
+        red: [255, 0, 0],
+        rosybrown: [188, 143, 143],
+        royalblue: [65, 105, 225],
+        saddlebrown: [139, 69, 19],
+        salmon: [250, 128, 114],
+        sandybrown: [244, 164, 96],
+        seagreen: [46, 139, 87],
+        seashell: [255, 245, 238],
+        sienna: [160, 82, 45],
+        silver: [192, 192, 192],
+        skyblue: [135, 206, 235],
+        slateblue: [106, 90, 205],
+        slategray: [112, 128, 144],
+        slategrey: [112, 128, 144],
+        snow: [255, 250, 250],
+        springgreen: [0, 255, 127],
+        steelblue: [70, 130, 180],
+        tan: [210, 180, 140],
+        teal: [0, 128, 128],
+        thistle: [216, 191, 216],
+        tomato: [255, 99, 71],
+        turquoise: [64, 224, 208],
+        violet: [238, 130, 238],
+        wheat: [245, 222, 179],
+        white: [255, 255, 255],
+        whitesmoke: [245, 245, 245],
+        yellow: [255, 255, 0],
+        yellowgreen: [154, 205, 50]
+      };
+      n.exports = f
+    }, {}],
+    4: [function(n, f) {
+      function o(e, n) {
+        var f = j++;
+        if (n = n || {}, n.logging && (v.options.logging = !0, v.options.start = Date.now()), n.async = "undefined" == typeof n.async ? !0 : n.async, n.allowTaint = "undefined" == typeof n.allowTaint ? !1 : n.allowTaint, n.removeContainer = "undefined" == typeof n.removeContainer ? !0 : n.removeContainer, n.javascriptEnabled = "undefined" == typeof n.javascriptEnabled ? !1 : n.javascriptEnabled, n.imageTimeout = "undefined" == typeof n.imageTimeout ? 1e4 : n.imageTimeout, n.renderer = "function" == typeof n.renderer ? n.renderer : c, n.strict = !!n.strict, "string" == typeof e) {
+          if ("string" != typeof n.proxy) return Promise.reject("Proxy must be used when rendering url");
+          var o = null != n.width ? n.width : window.innerWidth,
+            t = null != n.height ? n.height : window.innerHeight;
+          return g(a(e), n.proxy, document, o, t, n).then(function(e) {
+            return i(e.contentWindow.document.documentElement, e, n, o, t)
+          })
+        }
+        var l = (void 0 === e ? [document.documentElement] : e.length ? e : [e])[0];
+        return l.setAttribute(x + f, f), d(l.ownerDocument, n, l.ownerDocument.defaultView.innerWidth, l.ownerDocument.defaultView.innerHeight, f).then(function(e) {
+          return "function" == typeof n.onrendered && (v("options.onrendered is deprecated, html2canvas returns a Promise containing the canvas"), n.onrendered(e)), e
+        })
+      }
+
+      function d(e, n, f, o, d) {
+        return b(e, e, f, o, n, e.defaultView.pageXOffset, e.defaultView.pageYOffset).then(function(t) {
+          v("Document cloned");
+          var l = x + d,
+            s = "[" + l + "='" + d + "']";
+          e.querySelector(s).removeAttribute(l);
+          var u = t.contentWindow,
+            a = u.document.querySelector(s),
+            p = Promise.resolve("function" == typeof n.onclone ? n.onclone(u.document) : !0);
+          return p.then(function() {
+            return i(a, t, n, f, o)
+          })
+        })
+      }
+
+      function i(e, n, f, o, d) {
+        var i = n.contentWindow,
+          a = new p(i.document),
+          c = new y(f, a),
+          r = h(e),
+          w = "view" === f.type ? o : s(i.document),
+          b = "view" === f.type ? d : u(i.document),
+          g = new f.renderer(w, b, c, f, document),
+          x = new m(e, g, a, c, f);
+        return x.ready.then(function() {
+          v("Finished rendering");
+          var o;
+          return o = "view" === f.type ? l(g.canvas, {
+            width: g.canvas.width,
+            height: g.canvas.height,
+            top: 0,
+            left: 0,
+            x: 0,
+            y: 0
+          }) : e === i.document.body || e === i.document.documentElement || null != f.canvas ? g.canvas : l(g.canvas, {
+            width: null != f.width ? f.width : r.width,
+            height: null != f.height ? f.height : r.height,
+            top: r.top,
+            left: r.left,
+            x: 0,
+            y: 0
+          }), t(n, f), o
+        })
+      }
+
+      function t(e, n) {
+        n.removeContainer && (e.parentNode.removeChild(e), v("Cleaned up container"))
+      }
+
+      function l(e, n) {
+        var f = document.createElement("canvas"),
+          o = Math.min(e.width - 1, Math.max(0, n.left)),
+          d = Math.min(e.width, Math.max(1, n.left + n.width)),
+          i = Math.min(e.height - 1, Math.max(0, n.top)),
+          t = Math.min(e.height, Math.max(1, n.top + n.height));
+        f.width = n.width, f.height = n.height;
+        var l = d - o,
+          s = t - i;
+        return v("Cropping canvas at:", "left:", n.left, "top:", n.top, "width:", l, "height:", s), v("Resulting crop with width", n.width, "and height", n.height, "with x", o, "and y", i), f.getContext("2d").drawImage(e, o, i, l, s, n.x, n.y, l, s), f
       }
 
       function s(e) {
-        return 3 * e
+        return Math.max(Math.max(e.body.scrollWidth, e.documentElement.scrollWidth), Math.max(e.body.offsetWidth, e.documentElement.offsetWidth), Math.max(e.body.clientWidth, e.documentElement.clientWidth))
       }
 
-      function l(e, t, r) {
-        return ((o(t, r) * e + i(t, r)) * e + s(t)) * e
+      function u(e) {
+        return Math.max(Math.max(e.body.scrollHeight, e.documentElement.scrollHeight), Math.max(e.body.offsetHeight, e.documentElement.offsetHeight), Math.max(e.body.clientHeight, e.documentElement.clientHeight))
       }
 
-      function u(e, t, r) {
-        return 3 * o(t, r) * e * e + 2 * i(t, r) * e + s(t)
+      function a(e) {
+        var n = document.createElement("a");
+        return n.href = e, n.href = n.href, n
       }
-
-      function c(t, r) {
-        for (var n = 0; m > n; ++n) {
-          var o = u(r, e, a);
-          if (0 === o) return r;
-          var i = l(r, e, a) - t;
-          r -= i / o
-        }
-        return r
-      }
-
-      function p() {
-        for (var t = 0; b > t; ++t) w[t] = l(t * x, e, a)
-      }
-
-      function f(t, r, n) {
-        var o, i, s = 0;
-        do i = r + (n - r) / 2, o = l(i, e, a) - t, o > 0 ? n = i : r = i; while (Math.abs(o) > h && ++s < v);
-        return i
-      }
-
-      function d(t) {
-        for (var r = 0, n = 1, o = b - 1; n != o && w[n] <= t; ++n) r += x;
-        --n;
-        var i = (t - w[n]) / (w[n + 1] - w[n]),
-          s = r + i * x,
-          l = u(s, e, a);
-        return l >= y ? c(t, s) : 0 == l ? s : f(t, r, r + x)
-      }
-
-      function g() {
-        V = !0, (e != r || a != n) && p()
-      }
-
-      var m = 4,
-        y = .001,
-        h = 1e-7,
-        v = 10,
-        b = 11,
-        x = 1 / (b - 1),
-        S = "Float32Array" in t;
-      if (4 !== arguments.length) return !1;
-      for (var P = 0; 4 > P; ++P)
-        if ("number" != typeof arguments[P] || isNaN(arguments[P]) || !isFinite(arguments[P])) return !1;
-      e = Math.min(e, 1), a = Math.min(a, 1), e = Math.max(e, 0), a = Math.max(a, 0);
-      var w = S ? new Float32Array(b) : new Array(b),
-        V = !1,
-        C = function(t) {
-          return V || g(), e === r && a === n ? t : 0 === t ? 0 : 1 === t ? 1 : l(d(t), r, n)
-        };
-      C.getControlPoints = function() {
-        return [{
-          x: e,
-          y: r
-        }, {
-          x: a,
-          y: n
-        }]
-      };
-      var T = "generateBezier(" + [e, r, a, n] + ")";
-      return C.toString = function() {
-        return T
-      }, C
-    }
-
-    function u(e, t) {
-      var r = e;
-      return g.isString(e) ? v.Easings[e] || (r = !1) : r = g.isArray(e) && 1 === e.length ? s.apply(null, e) : g.isArray(e) && 2 === e.length ? b.apply(null, e.concat([t])) : g.isArray(e) && 4 === e.length ? l.apply(null, e) : !1, r === !1 && (r = v.Easings[v.defaults.easing] ? v.defaults.easing : h), r
-    }
-
-    function c(e) {
-      if (e) {
-        var t = (new Date).getTime(),
-          r = v.State.calls.length;
-        r > 1e4 && (v.State.calls = n(v.State.calls));
-        for (var o = 0; r > o; o++)
-          if (v.State.calls[o]) {
-            var s = v.State.calls[o],
-              l = s[0],
-              u = s[2],
-              f = s[3],
-              d = !!f,
-              m = null;
-            f || (f = v.State.calls[o][3] = t - 16);
-            for (var y = Math.min((t - f) / u.duration, 1), h = 0, b = l.length; b > h; h++) {
-              var S = l[h],
-                w = S.element;
-              if (i(w)) {
-                var V = !1;
-                if (u.display !== a && null !== u.display && "none" !== u.display) {
-                  if ("flex" === u.display) {
-                    var C = ["-webkit-box", "-moz-box", "-ms-flexbox", "-webkit-flex"];
-                    $.each(C, function(e, t) {
-                      x.setPropertyValue(w, "display", t)
-                    })
-                  }
-                  x.setPropertyValue(w, "display", u.display)
-                }
-                u.visibility !== a && "hidden" !== u.visibility && x.setPropertyValue(w, "visibility", u.visibility);
-                for (var T in S)
-                  if ("element" !== T) {
-                    var k = S[T],
-                      A, F = g.isString(k.easing) ? v.Easings[k.easing] : k.easing;
-                    if (1 === y) A = k.endValue;
-                    else {
-                      var E = k.endValue - k.startValue;
-                      if (A = k.startValue + E * F(y, u, E), !d && A === k.currentValue) continue
-                    }
-                    if (k.currentValue = A, "tween" === T) m = A;
-                    else {
-                      if (x.Hooks.registered[T]) {
-                        var j = x.Hooks.getRoot(T),
-                          H = i(w).rootPropertyValueCache[j];
-                        H && (k.rootPropertyValue = H)
-                      }
-                      var N = x.setPropertyValue(w, T, k.currentValue + (0 === parseFloat(A) ? "" : k.unitType), k.rootPropertyValue, k.scrollData);
-                      x.Hooks.registered[T] && (i(w).rootPropertyValueCache[j] = x.Normalizations.registered[j] ? x.Normalizations.registered[j]("extract", null, N[1]) : N[1]), "transform" === N[0] && (V = !0)
-                    }
-                  }
-                u.mobileHA && i(w).transformCache.translate3d === a && (i(w).transformCache.translate3d = "(0px, 0px, 0px)", V = !0), V && x.flushTransformCache(w)
-              }
-            }
-            u.display !== a && "none" !== u.display && (v.State.calls[o][2].display = !1), u.visibility !== a && "hidden" !== u.visibility && (v.State.calls[o][2].visibility = !1), u.progress && u.progress.call(s[1], s[1], y, Math.max(0, f + u.duration - t), f, m), 1 === y && p(o)
-          }
-      }
-      v.State.isTicking && P(c)
-    }
-
-    function p(e, t) {
-      if (!v.State.calls[e]) return !1;
-      for (var r = v.State.calls[e][0], n = v.State.calls[e][1], o = v.State.calls[e][2], s = v.State.calls[e][4], l = !1, u = 0, c = r.length; c > u; u++) {
-        var p = r[u].element;
-        if (t || o.loop || ("none" === o.display && x.setPropertyValue(p, "display", o.display), "hidden" === o.visibility && x.setPropertyValue(p, "visibility", o.visibility)), o.loop !== !0 && ($.queue(p)[1] === a || !/\.velocityQueueEntryFlag/i.test($.queue(p)[1])) && i(p)) {
-          i(p).isAnimating = !1, i(p).rootPropertyValueCache = {};
-          var f = !1;
-          $.each(x.Lists.transforms3D, function(e, t) {
-            var r = /^scale/.test(t) ? 1 : 0,
-              n = i(p).transformCache[t];
-            i(p).transformCache[t] !== a && new RegExp("^\\(" + r + "[^.]").test(n) && (f = !0, delete i(p).transformCache[t])
-          }), o.mobileHA && (f = !0, delete i(p).transformCache.translate3d), f && x.flushTransformCache(p), x.Values.removeClass(p, "velocity-animating")
-        }
-        if (!t && o.complete && !o.loop && u === c - 1) try {
-          o.complete.call(n, n)
-        } catch (d) {
-          setTimeout(function() {
-            throw d
-          }, 1)
-        }
-        s && o.loop !== !0 && s(n), i(p) && o.loop === !0 && !t && ($.each(i(p).tweensContainer, function(e, t) {
-          /^rotate/.test(e) && 360 === parseFloat(t.endValue) && (t.endValue = 0, t.startValue = 360), /^backgroundPosition/.test(e) && 100 === parseFloat(t.endValue) && "%" === t.unitType && (t.endValue = 0, t.startValue = 100)
-        }), v(p, "reverse", {
-          loop: !0,
-          delay: o.delay
-        })), o.queue !== !1 && $.dequeue(p, o.queue)
-      }
-      v.State.calls[e] = !1;
-      for (var g = 0, m = v.State.calls.length; m > g; g++)
-        if (v.State.calls[g] !== !1) {
-          l = !0;
-          break
-        }
-      l === !1 && (v.State.isTicking = !1, delete v.State.calls, v.State.calls = [])
-    }
-
-    var f = function() {
-        if (r.documentMode) return r.documentMode;
-        for (var e = 7; e > 4; e--) {
-          var t = r.createElement("div");
-          if (t.innerHTML = "<!--[if IE " + e + "]><span></span><![endif]-->", t.getElementsByTagName("span").length) return t = null, e
-        }
-        return a
-      }(),
-      d = function() {
-        var e = 0;
-        return t.webkitRequestAnimationFrame || t.mozRequestAnimationFrame || function(t) {
-          var r = (new Date).getTime(),
-            a;
-          return a = Math.max(0, 16 - (r - e)), e = r + a, setTimeout(function() {
-            t(r + a)
-          }, a)
-        }
-      }(),
-      g = {
-        isString: function(e) {
-          return "string" == typeof e
-        },
-        isArray: Array.isArray || function(e) {
-          return "[object Array]" === Object.prototype.toString.call(e)
-        },
-        isFunction: function(e) {
-          return "[object Function]" === Object.prototype.toString.call(e)
-        },
-        isNode: function(e) {
-          return e && e.nodeType
-        },
-        isNodeList: function(e) {
-          return "object" == typeof e && /^\[object (HTMLCollection|NodeList|Object)\]$/.test(Object.prototype.toString.call(e)) && e.length !== a && (0 === e.length || "object" == typeof e[0] && e[0].nodeType > 0)
-        },
-        isWrapped: function(e) {
-          return e && (e.jquery || t.Zepto && t.Zepto.zepto.isZ(e))
-        },
-        isSVG: function(e) {
-          return t.SVGElement && e instanceof t.SVGElement
-        },
-        isEmptyObject: function(e) {
-          for (var t in e) return !1;
-          return !0
-        }
-      },
-      $, m = !1;
-    if (e.fn && e.fn.jquery ? ($ = e, m = !0) : $ = t.Velocity.Utilities, 8 >= f && !m) throw new Error("Velocity: IE8 and below require jQuery to be loaded before Velocity.");
-    if (7 >= f) return void(jQuery.fn.velocity = jQuery.fn.animate);
-    var y = 400,
-      h = "swing",
-      v = {
-        State: {
-          isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-          isAndroid: /Android/i.test(navigator.userAgent),
-          isGingerbread: /Android 2\.3\.[3-7]/i.test(navigator.userAgent),
-          isChrome: t.chrome,
-          isFirefox: /Firefox/i.test(navigator.userAgent),
-          prefixElement: r.createElement("div"),
-          prefixMatches: {},
-          scrollAnchor: null,
-          scrollPropertyLeft: null,
-          scrollPropertyTop: null,
-          isTicking: !1,
-          calls: []
-        },
-        CSS: {},
-        Utilities: $,
-        Redirects: {},
-        Easings: {},
-        Promise: t.Promise,
-        defaults: {
-          queue: "",
-          duration: y,
-          easing: h,
-          begin: a,
-          complete: a,
-          progress: a,
-          display: a,
-          visibility: a,
-          loop: !1,
-          delay: !1,
-          mobileHA: !0,
-          _cacheValues: !0
-        },
-        init: function(e) {
-          $.data(e, "velocity", {
-            isSVG: g.isSVG(e),
-            isAnimating: !1,
-            computedStyle: null,
-            tweensContainer: null,
-            rootPropertyValueCache: {},
-            transformCache: {}
+      var p = n("./support"),
+        c = n("./renderers/canvas"),
+        y = n("./imageloader"),
+        m = n("./nodeparser"),
+        r = n("./nodecontainer"),
+        v = n("./log"),
+        w = n("./utils"),
+        b = n("./clone"),
+        g = n("./proxy").loadUrlDocument,
+        h = w.getBounds,
+        x = "data-html2canvas-node",
+        j = 0;
+      o.CanvasRenderer = c, o.NodeContainer = r, o.log = v, o.utils = w;
+      var k = "undefined" == typeof document || "function" != typeof Object.create || "function" != typeof document.createElement("canvas").getContext ? function() {
+        return Promise.reject("No canvas support")
+      } : o;
+      f.exports = k, "function" == typeof e && e.amd && e("html2canvas", [], function() {
+        return k
+      })
+    }, {
+      "./clone": 2,
+      "./imageloader": 11,
+      "./log": 13,
+      "./nodecontainer": 14,
+      "./nodeparser": 15,
+      "./proxy": 16,
+      "./renderers/canvas": 20,
+      "./support": 22,
+      "./utils": 26
+    }],
+    5: [function(e, n) {
+      function f(e) {
+        if (this.src = e, o("DummyImageContainer for", e), !this.promise || !this.image) {
+          o("Initiating DummyImageContainer"), f.prototype.image = new Image;
+          var n = this.image;
+          f.prototype.promise = new Promise(function(e, f) {
+            n.onload = e, n.onerror = f, n.src = d(), n.complete === !0 && e(n)
           })
-        },
-        hook: null,
-        mock: !1,
-        version: {
-          major: 1,
-          minor: 2,
-          patch: 2
-        },
-        debug: !1
+        }
+      }
+      var o = e("./log"),
+        d = e("./utils").smallImage;
+      n.exports = f
+    }, {
+      "./log": 13,
+      "./utils": 26
+    }],
+    6: [function(e, n) {
+      function f(e, n) {
+        var f, d, i = document.createElement("div"),
+          t = document.createElement("img"),
+          l = document.createElement("span"),
+          s = "Hidden Text";
+        i.style.visibility = "hidden", i.style.fontFamily = e, i.style.fontSize = n, i.style.margin = 0, i.style.padding = 0, document.body.appendChild(i), t.src = o(), t.width = 1, t.height = 1, t.style.margin = 0, t.style.padding = 0, t.style.verticalAlign = "baseline", l.style.fontFamily = e, l.style.fontSize = n, l.style.margin = 0, l.style.padding = 0, l.appendChild(document.createTextNode(s)), i.appendChild(l), i.appendChild(t), f = t.offsetTop - l.offsetTop + 1, i.removeChild(l), i.appendChild(document.createTextNode(s)), i.style.lineHeight = "normal", t.style.verticalAlign = "super", d = t.offsetTop - i.offsetTop + 1, document.body.removeChild(i), this.baseline = f, this.lineWidth = 1, this.middle = d
+      }
+      var o = e("./utils").smallImage;
+      n.exports = f
+    }, {
+      "./utils": 26
+    }],
+    7: [function(e, n) {
+      function f() {
+        this.data = {}
+      }
+      var o = e("./font");
+      f.prototype.getMetrics = function(e, n) {
+        return void 0 === this.data[e + "-" + n] && (this.data[e + "-" + n] = new o(e, n)), this.data[e + "-" + n]
+      }, n.exports = f
+    }, {
+      "./font": 6
+    }],
+    8: [function(e, n) {
+      function f(n, f, o) {
+        this.image = null, this.src = n;
+        var i = this,
+          t = d(n);
+        this.promise = (f ? new Promise(function(e) {
+          "about:blank" === n.contentWindow.document.URL || null == n.contentWindow.document.documentElement ? n.contentWindow.onload = n.onload = function() {
+            e(n)
+          } : e(n)
+        }) : this.proxyLoad(o.proxy, t, o)).then(function(n) {
+          var f = e("./core");
+          return f(n.contentWindow.document.documentElement, {
+            type: "view",
+            width: n.width,
+            height: n.height,
+            proxy: o.proxy,
+            javascriptEnabled: o.javascriptEnabled,
+            removeContainer: o.removeContainer,
+            allowTaint: o.allowTaint,
+            imageTimeout: o.imageTimeout / 2
+          })
+        }).then(function(e) {
+          return i.image = e
+        })
+      }
+      var o = e("./utils"),
+        d = o.getBounds,
+        i = e("./proxy").loadUrlDocument;
+      f.prototype.proxyLoad = function(e, n, f) {
+        var o = this.src;
+        return i(o.src, e, o.ownerDocument, n.width, n.height, f)
+      }, n.exports = f
+    }, {
+      "./core": 4,
+      "./proxy": 16,
+      "./utils": 26
+    }],
+    9: [function(e, n) {
+      function f(e) {
+        this.src = e.value, this.colorStops = [], this.type = null, this.x0 = .5, this.y0 = .5, this.x1 = .5, this.y1 = .5, this.promise = Promise.resolve(!0)
+      }
+      f.TYPES = {
+        LINEAR: 1,
+        RADIAL: 2
+      }, f.REGEXP_COLORSTOP = /^\s*(rgba?\(\s*\d{1,3},\s*\d{1,3},\s*\d{1,3}(?:,\s*[0-9\.]+)?\s*\)|[a-z]{3,20}|#[a-f0-9]{3,6})(?:\s+(\d{1,3}(?:\.\d+)?)(%|px)?)?(?:\s|$)/i, n.exports = f
+    }, {}],
+    10: [function(e, n) {
+      function f(e, n) {
+        this.src = e, this.image = new Image;
+        var f = this;
+        this.tainted = null, this.promise = new Promise(function(o, d) {
+          f.image.onload = o, f.image.onerror = d, n && (f.image.crossOrigin = "anonymous"), f.image.src = e, f.image.complete === !0 && o(f.image)
+        })
+      }
+      n.exports = f
+    }, {}],
+    11: [function(e, n) {
+      function f(e, n) {
+        this.link = null, this.options = e, this.support = n, this.origin = this.getOrigin(window.location.href)
+      }
+      var o = e("./log"),
+        d = e("./imagecontainer"),
+        i = e("./dummyimagecontainer"),
+        t = e("./proxyimagecontainer"),
+        l = e("./framecontainer"),
+        s = e("./svgcontainer"),
+        u = e("./svgnodecontainer"),
+        a = e("./lineargradientcontainer"),
+        p = e("./webkitgradientcontainer"),
+        c = e("./utils").bind;
+      f.prototype.findImages = function(e) {
+        var n = [];
+        return e.reduce(function(e, n) {
+          switch (n.node.nodeName) {
+            case "IMG":
+              return e.concat([{
+                args: [n.node.src],
+                method: "url"
+              }]);
+            case "svg":
+            case "IFRAME":
+              return e.concat([{
+                args: [n.node],
+                method: n.node.nodeName
+              }])
+          }
+          return e
+        }, []).forEach(this.addImage(n, this.loadImage), this), n
+      }, f.prototype.findBackgroundImage = function(e, n) {
+        return n.parseBackgroundImages().filter(this.hasImageBackground).forEach(this.addImage(e, this.loadImage), this), e
+      }, f.prototype.addImage = function(e, n) {
+        return function(f) {
+          f.args.forEach(function(d) {
+            this.imageExists(e, d) || (e.splice(0, 0, n.call(this, f)), o("Added image #" + e.length, "string" == typeof d ? d.substring(0, 100) : d))
+          }, this)
+        }
+      }, f.prototype.hasImageBackground = function(e) {
+        return "none" !== e.method
+      }, f.prototype.loadImage = function(e) {
+        if ("url" === e.method) {
+          var n = e.args[0];
+          return !this.isSVG(n) || this.support.svg || this.options.allowTaint ? n.match(/data:image\/.*;base64,/i) ? new d(n.replace(/url\(['"]{0,}|['"]{0,}\)$/gi, ""), !1) : this.isSameOrigin(n) || this.options.allowTaint === !0 || this.isSVG(n) ? new d(n, !1) : this.support.cors && !this.options.allowTaint && this.options.useCORS ? new d(n, !0) : this.options.proxy ? new t(n, this.options.proxy) : new i(n) : new s(n)
+        }
+        return "linear-gradient" === e.method ? new a(e) : "gradient" === e.method ? new p(e) : "svg" === e.method ? new u(e.args[0], this.support.svg) : "IFRAME" === e.method ? new l(e.args[0], this.isSameOrigin(e.args[0].src), this.options) : new i(e)
+      }, f.prototype.isSVG = function(e) {
+        return "svg" === e.substring(e.length - 3).toLowerCase() || s.prototype.isInline(e)
+      }, f.prototype.imageExists = function(e, n) {
+        return e.some(function(e) {
+          return e.src === n
+        })
+      }, f.prototype.isSameOrigin = function(e) {
+        return this.getOrigin(e) === this.origin
+      }, f.prototype.getOrigin = function(e) {
+        var n = this.link || (this.link = document.createElement("a"));
+        return n.href = e, n.href = n.href, n.protocol + n.hostname + n.port
+      }, f.prototype.getPromise = function(e) {
+        return this.timeout(e, this.options.imageTimeout)["catch"](function() {
+          var n = new i(e.src);
+          return n.promise.then(function(n) {
+            e.image = n
+          })
+        })
+      }, f.prototype.get = function(e) {
+        var n = null;
+        return this.images.some(function(f) {
+          return (n = f).src === e
+        }) ? n : null
+      }, f.prototype.fetch = function(e) {
+        return this.images = e.reduce(c(this.findBackgroundImage, this), this.findImages(e)), this.images.forEach(function(e, n) {
+          e.promise.then(function() {
+            o("Succesfully loaded image #" + (n + 1), e)
+          }, function(f) {
+            o("Failed loading image #" + (n + 1), e, f)
+          })
+        }), this.ready = Promise.all(this.images.map(this.getPromise, this)), o("Finished searching images"), this
+      }, f.prototype.timeout = function(e, n) {
+        var f, d = Promise.race([e.promise, new Promise(function(d, i) {
+          f = setTimeout(function() {
+            o("Timed out loading image", e), i(e)
+          }, n)
+        })]).then(function(e) {
+          return clearTimeout(f), e
+        });
+        return d["catch"](function() {
+          clearTimeout(f)
+        }), d
+      }, n.exports = f
+    }, {
+      "./dummyimagecontainer": 5,
+      "./framecontainer": 8,
+      "./imagecontainer": 10,
+      "./lineargradientcontainer": 12,
+      "./log": 13,
+      "./proxyimagecontainer": 17,
+      "./svgcontainer": 23,
+      "./svgnodecontainer": 24,
+      "./utils": 26,
+      "./webkitgradientcontainer": 27
+    }],
+    12: [function(e, n) {
+      function f(e) {
+        o.apply(this, arguments), this.type = o.TYPES.LINEAR;
+        var n = f.REGEXP_DIRECTION.test(e.args[0]) || !o.REGEXP_COLORSTOP.test(e.args[0]);
+        n ? e.args[0].split(/\s+/).reverse().forEach(function(e, n) {
+          switch (e) {
+            case "left":
+              this.x0 = 0, this.x1 = 1;
+              break;
+            case "top":
+              this.y0 = 0, this.y1 = 1;
+              break;
+            case "right":
+              this.x0 = 1, this.x1 = 0;
+              break;
+            case "bottom":
+              this.y0 = 1, this.y1 = 0;
+              break;
+            case "to":
+              var f = this.y0,
+                o = this.x0;
+              this.y0 = this.y1, this.x0 = this.x1, this.x1 = o, this.y1 = f;
+              break;
+            case "center":
+              break;
+            default:
+              var d = .01 * parseFloat(e, 10);
+              if (isNaN(d)) break;
+              0 === n ? (this.y0 = d, this.y1 = 1 - this.y0) : (this.x0 = d, this.x1 = 1 - this.x0)
+          }
+        }, this) : (this.y0 = 0, this.y1 = 1), this.colorStops = e.args.slice(n ? 1 : 0).map(function(e) {
+          var n = e.match(o.REGEXP_COLORSTOP),
+            f = +n[2],
+            i = 0 === f ? "%" : n[3];
+          return {
+            color: new d(n[1]),
+            stop: "%" === i ? f / 100 : null
+          }
+        }), null === this.colorStops[0].stop && (this.colorStops[0].stop = 0), null === this.colorStops[this.colorStops.length - 1].stop && (this.colorStops[this.colorStops.length - 1].stop = 1), this.colorStops.forEach(function(e, n) {
+          null === e.stop && this.colorStops.slice(n).some(function(f, o) {
+            return null !== f.stop ? (e.stop = (f.stop - this.colorStops[n - 1].stop) / (o + 1) + this.colorStops[n - 1].stop, !0) : !1
+          }, this)
+        }, this)
+      }
+      var o = e("./gradientcontainer"),
+        d = e("./color");
+      f.prototype = Object.create(o.prototype), f.REGEXP_DIRECTION = /^\s*(?:to|left|right|top|bottom|center|\d{1,3}(?:\.\d+)?%?)(?:\s|$)/i, n.exports = f
+    }, {
+      "./color": 3,
+      "./gradientcontainer": 9
+    }],
+    13: [function(e, n) {
+      var f = function() {
+        f.options.logging && window.console && window.console.log && Function.prototype.bind.call(window.console.log, window.console).apply(window.console, [Date.now() - f.options.start + "ms", "html2canvas:"].concat([].slice.call(arguments, 0)))
       };
-    t.pageYOffset !== a ? (v.State.scrollAnchor = t, v.State.scrollPropertyLeft = "pageXOffset", v.State.scrollPropertyTop = "pageYOffset") : (v.State.scrollAnchor = r.documentElement || r.body.parentNode || r.body, v.State.scrollPropertyLeft = "scrollLeft", v.State.scrollPropertyTop = "scrollTop");
-    var b = function() {
-      function e(e) {
-        return -e.tension * e.x - e.friction * e.v
+      f.options = {
+        logging: !1
+      }, n.exports = f
+    }, {}],
+    14: [function(e, n) {
+      function f(e, n) {
+        this.node = e, this.parent = n, this.stack = null, this.bounds = null, this.borders = null, this.clip = [], this.backgroundClip = [], this.offsetBounds = null, this.visible = null, this.computedStyles = null, this.colors = {}, this.styles = {}, this.backgroundImages = null, this.transformData = null, this.transformMatrix = null, this.isPseudoElement = !1, this.opacity = null
       }
 
-      function t(t, r, a) {
-        var n = {
-          x: t.x + a.dx * r,
-          v: t.v + a.dv * r,
-          tension: t.tension,
-          friction: t.friction
+      function o(e) {
+        var n = e.options[e.selectedIndex || 0];
+        return n ? n.text || "" : ""
+      }
+
+      function d(e) {
+        if (e && "matrix" === e[1]) return e[2].split(",").map(function(e) {
+          return parseFloat(e.trim())
+        });
+        if (e && "matrix3d" === e[1]) {
+          var n = e[2].split(",").map(function(e) {
+            return parseFloat(e.trim())
+          });
+          return [n[0], n[1], n[4], n[5], n[12], n[13]]
+        }
+      }
+
+      function i(e) {
+        return -1 !== e.toString().indexOf("%")
+      }
+
+      function t(e) {
+        return e.replace("px", "")
+      }
+
+      function l(e) {
+        return parseFloat(e)
+      }
+      var s = e("./color"),
+        u = e("./utils"),
+        a = u.getBounds,
+        p = u.parseBackgrounds,
+        c = u.offsetBounds;
+      f.prototype.cloneTo = function(e) {
+        e.visible = this.visible, e.borders = this.borders, e.bounds = this.bounds, e.clip = this.clip, e.backgroundClip = this.backgroundClip, e.computedStyles = this.computedStyles, e.styles = this.styles, e.backgroundImages = this.backgroundImages, e.opacity = this.opacity
+      }, f.prototype.getOpacity = function() {
+        return null === this.opacity ? this.opacity = this.cssFloat("opacity") : this.opacity
+      }, f.prototype.assignStack = function(e) {
+        this.stack = e, e.children.push(this)
+      }, f.prototype.isElementVisible = function() {
+        return this.node.nodeType === Node.TEXT_NODE ? this.parent.visible : "none" !== this.css("display") && "hidden" !== this.css("visibility") && !this.node.hasAttribute("data-html2canvas-ignore") && ("INPUT" !== this.node.nodeName || "hidden" !== this.node.getAttribute("type"))
+      }, f.prototype.css = function(e) {
+        return this.computedStyles || (this.computedStyles = this.isPseudoElement ? this.parent.computedStyle(this.before ? ":before" : ":after") : this.computedStyle(null)), this.styles[e] || (this.styles[e] = this.computedStyles[e])
+      }, f.prototype.prefixedCss = function(e) {
+        var n = ["webkit", "moz", "ms", "o"],
+          f = this.css(e);
+        return void 0 === f && n.some(function(n) {
+          return f = this.css(n + e.substr(0, 1).toUpperCase() + e.substr(1)), void 0 !== f
+        }, this), void 0 === f ? null : f
+      }, f.prototype.computedStyle = function(e) {
+        return this.node.ownerDocument.defaultView.getComputedStyle(this.node, e)
+      }, f.prototype.cssInt = function(e) {
+        var n = parseInt(this.css(e), 10);
+        return isNaN(n) ? 0 : n
+      }, f.prototype.color = function(e) {
+        return this.colors[e] || (this.colors[e] = new s(this.css(e)))
+      }, f.prototype.cssFloat = function(e) {
+        var n = parseFloat(this.css(e));
+        return isNaN(n) ? 0 : n
+      }, f.prototype.fontWeight = function() {
+        var e = this.css("fontWeight");
+        switch (parseInt(e, 10)) {
+          case 401:
+            e = "bold";
+            break;
+          case 400:
+            e = "normal"
+        }
+        return e
+      }, f.prototype.parseClip = function() {
+        var e = this.css("clip").match(this.CLIP);
+        return e ? {
+          top: parseInt(e[1], 10),
+          right: parseInt(e[2], 10),
+          bottom: parseInt(e[3], 10),
+          left: parseInt(e[4], 10)
+        } : null
+      }, f.prototype.parseBackgroundImages = function() {
+        return this.backgroundImages || (this.backgroundImages = p(this.css("backgroundImage")))
+      }, f.prototype.cssList = function(e, n) {
+        var f = (this.css(e) || "").split(",");
+        return f = f[n || 0] || f[0] || "auto", f = f.trim().split(" "), 1 === f.length && (f = [f[0], i(f[0]) ? "auto" : f[0]]), f
+      }, f.prototype.parseBackgroundSize = function(e, n, f) {
+        var o, d, t = this.cssList("backgroundSize", f);
+        if (i(t[0])) o = e.width * parseFloat(t[0]) / 100;
+        else {
+          if (/contain|cover/.test(t[0])) {
+            var l = e.width / e.height,
+              s = n.width / n.height;
+            return s > l ^ "contain" === t[0] ? {
+              width: e.height * s,
+              height: e.height
+            } : {
+              width: e.width,
+              height: e.width / s
+            }
+          }
+          o = parseInt(t[0], 10)
+        }
+        return d = "auto" === t[0] && "auto" === t[1] ? n.height : "auto" === t[1] ? o / n.width * n.height : i(t[1]) ? e.height * parseFloat(t[1]) / 100 : parseInt(t[1], 10), "auto" === t[0] && (o = d / n.height * n.width), {
+          width: o,
+          height: d
+        }
+      }, f.prototype.parseBackgroundPosition = function(e, n, f, o) {
+        var d, t, l = this.cssList("backgroundPosition", f);
+        return d = i(l[0]) ? (e.width - (o || n).width) * (parseFloat(l[0]) / 100) : parseInt(l[0], 10), t = "auto" === l[1] ? d / n.width * n.height : i(l[1]) ? (e.height - (o || n).height) * parseFloat(l[1]) / 100 : parseInt(l[1], 10), "auto" === l[0] && (d = t / n.height * n.width), {
+          left: d,
+          top: t
+        }
+      }, f.prototype.parseBackgroundRepeat = function(e) {
+        return this.cssList("backgroundRepeat", e)[0]
+      }, f.prototype.parseTextShadows = function() {
+        var e = this.css("textShadow"),
+          n = [];
+        if (e && "none" !== e)
+          for (var f = e.match(this.TEXT_SHADOW_PROPERTY), o = 0; f && o < f.length; o++) {
+            var d = f[o].match(this.TEXT_SHADOW_VALUES);
+            n.push({
+              color: new s(d[0]),
+              offsetX: d[1] ? parseFloat(d[1].replace("px", "")) : 0,
+              offsetY: d[2] ? parseFloat(d[2].replace("px", "")) : 0,
+              blur: d[3] ? d[3].replace("px", "") : 0
+            })
+          }
+        return n
+      }, f.prototype.parseTransform = function() {
+        if (!this.transformData)
+          if (this.hasTransform()) {
+            var e = this.parseBounds(),
+              n = this.prefixedCss("transformOrigin").split(" ").map(t).map(l);
+            n[0] += e.left, n[1] += e.top, this.transformData = {
+              origin: n,
+              matrix: this.parseTransformMatrix()
+            }
+          } else this.transformData = {
+            origin: [0, 0],
+            matrix: [1, 0, 0, 1, 0, 0]
+          };
+        return this.transformData
+      }, f.prototype.parseTransformMatrix = function() {
+        if (!this.transformMatrix) {
+          var e = this.prefixedCss("transform"),
+            n = e ? d(e.match(this.MATRIX_PROPERTY)) : null;
+          this.transformMatrix = n ? n : [1, 0, 0, 1, 0, 0]
+        }
+        return this.transformMatrix
+      }, f.prototype.parseBounds = function() {
+        return this.bounds || (this.bounds = this.hasTransform() ? c(this.node) : a(this.node))
+      }, f.prototype.hasTransform = function() {
+        return "1,0,0,1,0,0" !== this.parseTransformMatrix().join(",") || this.parent && this.parent.hasTransform()
+      }, f.prototype.getValue = function() {
+        var e = this.node.value || "";
+        return "SELECT" === this.node.tagName ? e = o(this.node) : "password" === this.node.type && (e = Array(e.length + 1).join("•")), 0 === e.length ? this.node.placeholder || "" : e
+      }, f.prototype.MATRIX_PROPERTY = /(matrix|matrix3d)\((.+)\)/, f.prototype.TEXT_SHADOW_PROPERTY = /((rgba|rgb)\([^\)]+\)(\s-?\d+px){0,})/g, f.prototype.TEXT_SHADOW_VALUES = /(-?\d+px)|(#.+)|(rgb\(.+\))|(rgba\(.+\))/g, f.prototype.CLIP = /^rect\((\d+)px,? (\d+)px,? (\d+)px,? (\d+)px\)$/, n.exports = f
+    }, {
+      "./color": 3,
+      "./utils": 26
+    }],
+    15: [function(e, n) {
+      function f(e, n, f, o, d) {
+        N("Starting NodeParser"), this.renderer = n, this.options = d, this.range = null, this.support = f, this.renderQueue = [], this.stack = new U(!0, 1, e.ownerDocument, null);
+        var i = new P(e, null);
+        if (d.background && n.rectangle(0, 0, n.width, n.height, new T(d.background)), e === e.ownerDocument.documentElement) {
+          var t = new P(i.color("backgroundColor").isTransparent() ? e.ownerDocument.body : e.ownerDocument.documentElement, null);
+          n.rectangle(0, 0, n.width, n.height, t.color("backgroundColor"))
+        }
+        i.visibile = i.isElementVisible(), this.createPseudoHideStyles(e.ownerDocument), this.disableAnimations(e.ownerDocument), this.nodes = I([i].concat(this.getChildren(i)).filter(function(e) {
+          return e.visible = e.isElementVisible()
+        }).map(this.getPseudoElements, this)), this.fontMetrics = new S, N("Fetched nodes, total:", this.nodes.length), N("Calculate overflow clips"), this.calculateOverflowClips(), N("Start fetching images"), this.images = o.fetch(this.nodes.filter(A)), this.ready = this.images.ready.then(W(function() {
+          return N("Images loaded, starting parsing"), N("Creating stacking contexts"), this.createStackingContexts(), N("Sorting stacking contexts"), this.sortStackingContexts(this.stack), this.parse(this.stack), N("Render queue created with " + this.renderQueue.length + " items"), new Promise(W(function(e) {
+            d.async ? "function" == typeof d.async ? d.async.call(this, this.renderQueue, e) : this.renderQueue.length > 0 ? (this.renderIndex = 0, this.asyncRenderer(this.renderQueue, e)) : e() : (this.renderQueue.forEach(this.paint, this), e())
+          }, this))
+        }, this))
+      }
+
+      function o(e) {
+        return e.parent && e.parent.clip.length
+      }
+
+      function d(e) {
+        return e.replace(/(\-[a-z])/g, function(e) {
+          return e.toUpperCase().replace("-", "")
+        })
+      }
+
+      function i() {}
+
+      function t(e, n, f, o) {
+        return e.map(function(d, i) {
+          if (d.width > 0) {
+            var t = n.left,
+              l = n.top,
+              s = n.width,
+              u = n.height - e[2].width;
+            switch (i) {
+              case 0:
+                u = e[0].width, d.args = a({
+                  c1: [t, l],
+                  c2: [t + s, l],
+                  c3: [t + s - e[1].width, l + u],
+                  c4: [t + e[3].width, l + u]
+                }, o[0], o[1], f.topLeftOuter, f.topLeftInner, f.topRightOuter, f.topRightInner);
+                break;
+              case 1:
+                t = n.left + n.width - e[1].width, s = e[1].width, d.args = a({
+                  c1: [t + s, l],
+                  c2: [t + s, l + u + e[2].width],
+                  c3: [t, l + u],
+                  c4: [t, l + e[0].width]
+                }, o[1], o[2], f.topRightOuter, f.topRightInner, f.bottomRightOuter, f.bottomRightInner);
+                break;
+              case 2:
+                l = l + n.height - e[2].width, u = e[2].width, d.args = a({
+                  c1: [t + s, l + u],
+                  c2: [t, l + u],
+                  c3: [t + e[3].width, l],
+                  c4: [t + s - e[3].width, l]
+                }, o[2], o[3], f.bottomRightOuter, f.bottomRightInner, f.bottomLeftOuter, f.bottomLeftInner);
+                break;
+              case 3:
+                s = e[3].width, d.args = a({
+                  c1: [t, l + u + e[2].width],
+                  c2: [t, l],
+                  c3: [t + s, l + e[0].width],
+                  c4: [t + s, l + u]
+                }, o[3], o[0], f.bottomLeftOuter, f.bottomLeftInner, f.topLeftOuter, f.topLeftInner)
+            }
+          }
+          return d
+        })
+      }
+
+      function l(e, n, f, o) {
+        var d = 4 * ((Math.sqrt(2) - 1) / 3),
+          i = f * d,
+          t = o * d,
+          l = e + f,
+          s = n + o;
+        return {
+          topLeft: u({
+            x: e,
+            y: s
+          }, {
+            x: e,
+            y: s - t
+          }, {
+            x: l - i,
+            y: n
+          }, {
+            x: l,
+            y: n
+          }),
+          topRight: u({
+            x: e,
+            y: n
+          }, {
+            x: e + i,
+            y: n
+          }, {
+            x: l,
+            y: s - t
+          }, {
+            x: l,
+            y: s
+          }),
+          bottomRight: u({
+            x: l,
+            y: n
+          }, {
+            x: l,
+            y: n + t
+          }, {
+            x: e + i,
+            y: s
+          }, {
+            x: e,
+            y: s
+          }),
+          bottomLeft: u({
+            x: l,
+            y: s
+          }, {
+            x: l - i,
+            y: s
+          }, {
+            x: e,
+            y: n + t
+          }, {
+            x: e,
+            y: n
+          })
+        }
+      }
+
+      function s(e, n, f) {
+        var o = e.left,
+          d = e.top,
+          i = e.width,
+          t = e.height,
+          s = n[0][0] < i / 2 ? n[0][0] : i / 2,
+          u = n[0][1] < t / 2 ? n[0][1] : t / 2,
+          a = n[1][0] < i / 2 ? n[1][0] : i / 2,
+          p = n[1][1] < t / 2 ? n[1][1] : t / 2,
+          c = n[2][0] < i / 2 ? n[2][0] : i / 2,
+          y = n[2][1] < t / 2 ? n[2][1] : t / 2,
+          m = n[3][0] < i / 2 ? n[3][0] : i / 2,
+          r = n[3][1] < t / 2 ? n[3][1] : t / 2,
+          v = i - a,
+          w = t - y,
+          b = i - c,
+          g = t - r;
+        return {
+          topLeftOuter: l(o, d, s, u).topLeft.subdivide(.5),
+          topLeftInner: l(o + f[3].width, d + f[0].width, Math.max(0, s - f[3].width), Math.max(0, u - f[0].width)).topLeft.subdivide(.5),
+          topRightOuter: l(o + v, d, a, p).topRight.subdivide(.5),
+          topRightInner: l(o + Math.min(v, i + f[3].width), d + f[0].width, v > i + f[3].width ? 0 : a - f[3].width, p - f[0].width).topRight.subdivide(.5),
+          bottomRightOuter: l(o + b, d + w, c, y).bottomRight.subdivide(.5),
+          bottomRightInner: l(o + Math.min(b, i - f[3].width), d + Math.min(w, t + f[0].width), Math.max(0, c - f[1].width), y - f[2].width).bottomRight.subdivide(.5),
+          bottomLeftOuter: l(o, d + g, m, r).bottomLeft.subdivide(.5),
+          bottomLeftInner: l(o + f[3].width, d + g, Math.max(0, m - f[3].width), r - f[2].width).bottomLeft.subdivide(.5)
+        }
+      }
+
+      function u(e, n, f, o) {
+        var d = function(e, n, f) {
+          return {
+            x: e.x + (n.x - e.x) * f,
+            y: e.y + (n.y - e.y) * f
+          }
         };
         return {
-          dx: n.v,
-          dv: e(n)
-        }
-      }
-
-      function r(r, a) {
-        var n = {
-            dx: r.v,
-            dv: e(r)
+          start: e,
+          startControl: n,
+          endControl: f,
+          end: o,
+          subdivide: function(i) {
+            var t = d(e, n, i),
+              l = d(n, f, i),
+              s = d(f, o, i),
+              a = d(t, l, i),
+              p = d(l, s, i),
+              c = d(a, p, i);
+            return [u(e, t, a, c), u(c, p, s, o)]
           },
-          o = t(r, .5 * a, n),
-          i = t(r, .5 * a, o),
-          s = t(r, a, i),
-          l = 1 / 6 * (n.dx + 2 * (o.dx + i.dx) + s.dx),
-          u = 1 / 6 * (n.dv + 2 * (o.dv + i.dv) + s.dv);
-        return r.x = r.x + l * a, r.v = r.v + u * a, r
-      }
-
-      return function a(e, t, n) {
-        var o = {
-            x: -1,
-            v: 0,
-            tension: null,
-            friction: null
+          curveTo: function(e) {
+            e.push(["bezierCurve", n.x, n.y, f.x, f.y, o.x, o.y])
           },
-          i = [0],
-          s = 0,
-          l = 1e-4,
-          u = .016,
-          c, p, f;
-        for (e = parseFloat(e) || 500, t = parseFloat(t) || 20, n = n || null, o.tension = e, o.friction = t, c = null !== n, c ? (s = a(e, t), p = s / n * u) : p = u;;)
-          if (f = r(f || o, p), i.push(1 + f.x), s += 16, !(Math.abs(f.x) > l && Math.abs(f.v) > l)) break;
-        return c ? function(e) {
-          return i[e * (i.length - 1) | 0]
-        } : s
-      }
-    }();
-    v.Easings = {
-      linear: function(e) {
-        return e
-      },
-      swing: function(e) {
-        return .5 - Math.cos(e * Math.PI) / 2
-      },
-      spring: function(e) {
-        return 1 - Math.cos(4.5 * e * Math.PI) * Math.exp(6 * -e)
-      }
-    }, $.each([
-      ["ease", [.25, .1, .25, 1]],
-      ["ease-in", [.42, 0, 1, 1]],
-      ["ease-out", [0, 0, .58, 1]],
-      ["ease-in-out", [.42, 0, .58, 1]],
-      ["easeInSine", [.47, 0, .745, .715]],
-      ["easeOutSine", [.39, .575, .565, 1]],
-      ["easeInOutSine", [.445, .05, .55, .95]],
-      ["easeInQuad", [.55, .085, .68, .53]],
-      ["easeOutQuad", [.25, .46, .45, .94]],
-      ["easeInOutQuad", [.455, .03, .515, .955]],
-      ["easeInCubic", [.55, .055, .675, .19]],
-      ["easeOutCubic", [.215, .61, .355, 1]],
-      ["easeInOutCubic", [.645, .045, .355, 1]],
-      ["easeInQuart", [.895, .03, .685, .22]],
-      ["easeOutQuart", [.165, .84, .44, 1]],
-      ["easeInOutQuart", [.77, 0, .175, 1]],
-      ["easeInQuint", [.755, .05, .855, .06]],
-      ["easeOutQuint", [.23, 1, .32, 1]],
-      ["easeInOutQuint", [.86, 0, .07, 1]],
-      ["easeInExpo", [.95, .05, .795, .035]],
-      ["easeOutExpo", [.19, 1, .22, 1]],
-      ["easeInOutExpo", [1, 0, 0, 1]],
-      ["easeInCirc", [.6, .04, .98, .335]],
-      ["easeOutCirc", [.075, .82, .165, 1]],
-      ["easeInOutCirc", [.785, .135, .15, .86]]
-    ], function(e, t) {
-      v.Easings[t[0]] = l.apply(null, t[1])
-    });
-    var x = v.CSS = {
-      RegEx: {
-        isHex: /^#([A-f\d]{3}){1,2}$/i,
-        valueUnwrap: /^[A-z]+\((.*)\)$/i,
-        wrappedValueAlreadyExtracted: /[0-9.]+ [0-9.]+ [0-9.]+( [0-9.]+)?/,
-        valueSplit: /([A-z]+\(.+\))|(([A-z0-9#-.]+?)(?=\s|$))/gi
-      },
-      Lists: {
-        colors: ["fill", "stroke", "stopColor", "color", "backgroundColor", "borderColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor", "outlineColor"],
-        transformsBase: ["translateX", "translateY", "scale", "scaleX", "scaleY", "skewX", "skewY", "rotateZ"],
-        transforms3D: ["transformPerspective", "translateZ", "scaleZ", "rotateX", "rotateY"]
-      },
-      Hooks: {
-        templates: {
-          textShadow: ["Color X Y Blur", "black 0px 0px 0px"],
-          boxShadow: ["Color X Y Blur Spread", "black 0px 0px 0px 0px"],
-          clip: ["Top Right Bottom Left", "0px 0px 0px 0px"],
-          backgroundPosition: ["X Y", "0% 0%"],
-          transformOrigin: ["X Y Z", "50% 50% 0px"],
-          perspectiveOrigin: ["X Y", "50% 50%"]
-        },
-        registered: {},
-        register: function() {
-          for (var e = 0; e < x.Lists.colors.length; e++) {
-            var t = "color" === x.Lists.colors[e] ? "0 0 0 1" : "255 255 255 1";
-            x.Hooks.templates[x.Lists.colors[e]] = ["Red Green Blue Alpha", t]
+          curveToReversed: function(o) {
+            o.push(["bezierCurve", f.x, f.y, n.x, n.y, e.x, e.y])
           }
-          var r, a, n;
-          if (f)
-            for (r in x.Hooks.templates) {
-              a = x.Hooks.templates[r], n = a[0].split(" ");
-              var o = a[1].match(x.RegEx.valueSplit);
-              "Color" === n[0] && (n.push(n.shift()), o.push(o.shift()), x.Hooks.templates[r] = [n.join(" "), o.join(" ")])
-            }
-          for (r in x.Hooks.templates) {
-            a = x.Hooks.templates[r], n = a[0].split(" ");
-            for (var e in n) {
-              var i = r + n[e],
-                s = e;
-              x.Hooks.registered[i] = [r, s]
-            }
-          }
-        },
-        getRoot: function(e) {
-          var t = x.Hooks.registered[e];
-          return t ? t[0] : e
-        },
-        cleanRootPropertyValue: function(e, t) {
-          return x.RegEx.valueUnwrap.test(t) && (t = t.match(x.RegEx.valueUnwrap)[1]), x.Values.isCSSNullValue(t) && (t = x.Hooks.templates[e][1]), t
-        },
-        extractValue: function(e, t) {
-          var r = x.Hooks.registered[e];
-          if (r) {
-            var a = r[0],
-              n = r[1];
-            return t = x.Hooks.cleanRootPropertyValue(a, t), t.toString().match(x.RegEx.valueSplit)[n]
-          }
-          return t
-        },
-        injectValue: function(e, t, r) {
-          var a = x.Hooks.registered[e];
-          if (a) {
-            var n = a[0],
-              o = a[1],
-              i, s;
-            return r = x.Hooks.cleanRootPropertyValue(n, r), i = r.toString().match(x.RegEx.valueSplit), i[o] = t, s = i.join(" ")
-          }
-          return r
         }
-      },
-      Normalizations: {
-        registered: {
-          clip: function(e, t, r) {
-            switch (e) {
-              case "name":
-                return "clip";
-              case "extract":
-                var a;
-                return x.RegEx.wrappedValueAlreadyExtracted.test(r) ? a = r : (a = r.toString().match(x.RegEx.valueUnwrap), a = a ? a[1].replace(/,(\s+)?/g, " ") : r), a;
-              case "inject":
-                return "rect(" + r + ")"
+      }
+
+      function a(e, n, f, o, d, i, t) {
+        var l = [];
+        return n[0] > 0 || n[1] > 0 ? (l.push(["line", o[1].start.x, o[1].start.y]), o[1].curveTo(l)) : l.push(["line", e.c1[0], e.c1[1]]), f[0] > 0 || f[1] > 0 ? (l.push(["line", i[0].start.x, i[0].start.y]), i[0].curveTo(l), l.push(["line", t[0].end.x, t[0].end.y]), t[0].curveToReversed(l)) : (l.push(["line", e.c2[0], e.c2[1]]), l.push(["line", e.c3[0], e.c3[1]])), n[0] > 0 || n[1] > 0 ? (l.push(["line", d[1].end.x, d[1].end.y]), d[1].curveToReversed(l)) : l.push(["line", e.c4[0], e.c4[1]]), l
+      }
+
+      function p(e, n, f, o, d, i, t) {
+        n[0] > 0 || n[1] > 0 ? (e.push(["line", o[0].start.x, o[0].start.y]), o[0].curveTo(e), o[1].curveTo(e)) : e.push(["line", i, t]), (f[0] > 0 || f[1] > 0) && e.push(["line", d[0].start.x, d[0].start.y])
+      }
+
+      function c(e) {
+        return e.cssInt("zIndex") < 0
+      }
+
+      function y(e) {
+        return e.cssInt("zIndex") > 0
+      }
+
+      function m(e) {
+        return 0 === e.cssInt("zIndex")
+      }
+
+      function r(e) {
+        return -1 !== ["inline", "inline-block", "inline-table"].indexOf(e.css("display"))
+      }
+
+      function v(e) {
+        return e instanceof U
+      }
+
+      function w(e) {
+        return e.node.data.trim().length > 0
+      }
+
+      function b(e) {
+        return /^(normal|none|0px)$/.test(e.parent.css("letterSpacing"))
+      }
+
+      function g(e) {
+        return ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map(function(n) {
+          var f = e.css("border" + n + "Radius"),
+            o = f.split(" ");
+          return o.length <= 1 && (o[1] = o[0]), o.map(F)
+        })
+      }
+
+      function h(e) {
+        return e.nodeType === Node.TEXT_NODE || e.nodeType === Node.ELEMENT_NODE
+      }
+
+      function x(e) {
+        var n = e.css("position"),
+          f = -1 !== ["absolute", "relative", "fixed"].indexOf(n) ? e.css("zIndex") : "auto";
+        return "auto" !== f
+      }
+
+      function j(e) {
+        return "static" !== e.css("position")
+      }
+
+      function k(e) {
+        return "none" !== e.css("float")
+      }
+
+      function q(e) {
+        return -1 !== ["inline-block", "inline-table"].indexOf(e.css("display"))
+      }
+
+      function z(e) {
+        var n = this;
+        return function() {
+          return !e.apply(n, arguments)
+        }
+      }
+
+      function A(e) {
+        return e.node.nodeType === Node.ELEMENT_NODE
+      }
+
+      function B(e) {
+        return e.isPseudoElement === !0
+      }
+
+      function C(e) {
+        return e.node.nodeType === Node.TEXT_NODE
+      }
+
+      function D(e) {
+        return function(n, f) {
+          return n.cssInt("zIndex") + e.indexOf(n) / e.length - (f.cssInt("zIndex") + e.indexOf(f) / e.length)
+        }
+      }
+
+      function E(e) {
+        return e.getOpacity() < 1
+      }
+
+      function F(e) {
+        return parseInt(e, 10)
+      }
+
+      function G(e) {
+        return e.width
+      }
+
+      function H(e) {
+        return e.node.nodeType !== Node.ELEMENT_NODE || -1 === ["SCRIPT", "HEAD", "TITLE", "OBJECT", "BR", "OPTION"].indexOf(e.node.nodeName)
+      }
+
+      function I(e) {
+        return [].concat.apply([], e)
+      }
+
+      function J(e) {
+        var n = e.substr(0, 1);
+        return n === e.substr(e.length - 1) && n.match(/'|"/) ? e.substr(1, e.length - 2) : e
+      }
+
+      function K(e) {
+        for (var n, f = [], o = 0, d = !1; e.length;) L(e[o]) === d ? (n = e.splice(0, o), n.length && f.push(O.ucs2.encode(n)), d = !d, o = 0) : o++, o >= e.length && (n = e.splice(0, o), n.length && f.push(O.ucs2.encode(n)));
+        return f
+      }
+
+      function L(e) {
+        return -1 !== [32, 13, 10, 9, 45].indexOf(e)
+      }
+
+      function M(e) {
+        return /[^\u0000-\u00ff]/.test(e)
+      }
+      var N = e("./log"),
+        O = e("punycode"),
+        P = e("./nodecontainer"),
+        Q = e("./textcontainer"),
+        R = e("./pseudoelementcontainer"),
+        S = e("./fontmetrics"),
+        T = e("./color"),
+        U = e("./stackingcontext"),
+        V = e("./utils"),
+        W = V.bind,
+        X = V.getBounds,
+        Y = V.parseBackgrounds,
+        Z = V.offsetBounds;
+      f.prototype.calculateOverflowClips = function() {
+        this.nodes.forEach(function(e) {
+          if (A(e)) {
+            B(e) && e.appendToDOM(), e.borders = this.parseBorders(e);
+            var n = "hidden" === e.css("overflow") ? [e.borders.clip] : [],
+              f = e.parseClip();
+            f && -1 !== ["absolute", "fixed"].indexOf(e.css("position")) && n.push([
+              ["rect", e.bounds.left + f.left, e.bounds.top + f.top, f.right - f.left, f.bottom - f.top]
+            ]), e.clip = o(e) ? e.parent.clip.concat(n) : n, e.backgroundClip = "hidden" !== e.css("overflow") ? e.clip.concat([e.borders.clip]) : e.clip, B(e) && e.cleanDOM()
+          } else C(e) && (e.clip = o(e) ? e.parent.clip : []);
+          B(e) || (e.bounds = null)
+        }, this)
+      }, f.prototype.asyncRenderer = function(e, n, f) {
+        f = f || Date.now(), this.paint(e[this.renderIndex++]), e.length === this.renderIndex ? n() : f + 20 > Date.now() ? this.asyncRenderer(e, n, f) : setTimeout(W(function() {
+          this.asyncRenderer(e, n)
+        }, this), 0)
+      }, f.prototype.createPseudoHideStyles = function(e) {
+        this.createStyles(e, "." + R.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + ':before { content: "" !important; display: none !important; }.' + R.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER + ':after { content: "" !important; display: none !important; }')
+      }, f.prototype.disableAnimations = function(e) {
+        this.createStyles(e, "* { -webkit-animation: none !important; -moz-animation: none !important; -o-animation: none !important; animation: none !important; -webkit-transition: none !important; -moz-transition: none !important; -o-transition: none !important; transition: none !important;}")
+      }, f.prototype.createStyles = function(e, n) {
+        var f = e.createElement("style");
+        f.innerHTML = n, e.body.appendChild(f)
+      }, f.prototype.getPseudoElements = function(e) {
+        var n = [
+          [e]
+        ];
+        if (e.node.nodeType === Node.ELEMENT_NODE) {
+          var f = this.getPseudoElement(e, ":before"),
+            o = this.getPseudoElement(e, ":after");
+          f && n.push(f), o && n.push(o)
+        }
+        return I(n)
+      }, f.prototype.getPseudoElement = function(e, n) {
+        var f = e.computedStyle(n);
+        if (!f || !f.content || "none" === f.content || "-moz-alt-content" === f.content || "none" === f.display) return null;
+        for (var o = J(f.content), i = "url" === o.substr(0, 3), t = document.createElement(i ? "img" : "html2canvaspseudoelement"), l = new R(t, e, n), s = f.length - 1; s >= 0; s--) {
+          var u = d(f.item(s));
+          t.style[u] = f[u]
+        }
+        if (t.className = R.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + " " + R.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER, i) return t.src = Y(o)[0].args[0], [l];
+        var a = document.createTextNode(o);
+        return t.appendChild(a), [l, new Q(a, l)]
+      }, f.prototype.getChildren = function(e) {
+        return I([].filter.call(e.node.childNodes, h).map(function(n) {
+          var f = [n.nodeType === Node.TEXT_NODE ? new Q(n, e) : new P(n, e)].filter(H);
+          return n.nodeType === Node.ELEMENT_NODE && f.length && "TEXTAREA" !== n.tagName ? f[0].isElementVisible() ? f.concat(this.getChildren(f[0])) : [] : f
+        }, this))
+      }, f.prototype.newStackingContext = function(e, n) {
+        var f = new U(n, e.getOpacity(), e.node, e.parent);
+        e.cloneTo(f);
+        var o = n ? f.getParentStack(this) : f.parent.stack;
+        o.contexts.push(f), e.stack = f
+      }, f.prototype.createStackingContexts = function() {
+        this.nodes.forEach(function(e) {
+          A(e) && (this.isRootElement(e) || E(e) || x(e) || this.isBodyWithTransparentRoot(e) || e.hasTransform()) ? this.newStackingContext(e, !0) : A(e) && (j(e) && m(e) || q(e) || k(e)) ? this.newStackingContext(e, !1) : e.assignStack(e.parent.stack)
+        }, this)
+      }, f.prototype.isBodyWithTransparentRoot = function(e) {
+        return "BODY" === e.node.nodeName && e.parent.color("backgroundColor").isTransparent()
+      }, f.prototype.isRootElement = function(e) {
+        return null === e.parent
+      }, f.prototype.sortStackingContexts = function(e) {
+        e.contexts.sort(D(e.contexts.slice(0))), e.contexts.forEach(this.sortStackingContexts, this)
+      }, f.prototype.parseTextBounds = function(e) {
+        return function(n, f, o) {
+          if ("none" !== e.parent.css("textDecoration").substr(0, 4) || 0 !== n.trim().length) {
+            if (this.support.rangeBounds && !e.parent.hasTransform()) {
+              var d = o.slice(0, f).join("").length;
+              return this.getRangeBounds(e.node, d, n.length)
             }
+            if (e.node && "string" == typeof e.node.data) {
+              var i = e.node.splitText(n.length),
+                t = this.getWrapperBounds(e.node, e.parent.hasTransform());
+              return e.node = i, t
+            }
+          } else(!this.support.rangeBounds || e.parent.hasTransform()) && (e.node = e.node.splitText(n.length));
+          return {}
+        }
+      }, f.prototype.getWrapperBounds = function(e, n) {
+        var f = e.ownerDocument.createElement("html2canvaswrapper"),
+          o = e.parentNode,
+          d = e.cloneNode(!0);
+        f.appendChild(e.cloneNode(!0)), o.replaceChild(f, e);
+        var i = n ? Z(f) : X(f);
+        return o.replaceChild(d, f), i
+      }, f.prototype.getRangeBounds = function(e, n, f) {
+        var o = this.range || (this.range = e.ownerDocument.createRange());
+        return o.setStart(e, n), o.setEnd(e, n + f), o.getBoundingClientRect()
+      }, f.prototype.parse = function(e) {
+        var n = e.contexts.filter(c),
+          f = e.children.filter(A),
+          o = f.filter(z(k)),
+          d = o.filter(z(j)).filter(z(r)),
+          t = f.filter(z(j)).filter(k),
+          l = o.filter(z(j)).filter(r),
+          s = e.contexts.concat(o.filter(j)).filter(m),
+          u = e.children.filter(C).filter(w),
+          a = e.contexts.filter(y);
+        n.concat(d).concat(t).concat(l).concat(s).concat(u).concat(a).forEach(function(e) {
+          this.renderQueue.push(e), v(e) && (this.parse(e), this.renderQueue.push(new i))
+        }, this)
+      }, f.prototype.paint = function(e) {
+        try {
+          e instanceof i ? this.renderer.ctx.restore() : C(e) ? (B(e.parent) && e.parent.appendToDOM(), this.paintText(e), B(e.parent) && e.parent.cleanDOM()) : this.paintNode(e)
+        } catch (n) {
+          if (N(n), this.options.strict) throw n
+        }
+      }, f.prototype.paintNode = function(e) {
+        v(e) && (this.renderer.setOpacity(e.opacity), this.renderer.ctx.save(), e.hasTransform() && this.renderer.setTransform(e.parseTransform())), "INPUT" === e.node.nodeName && "checkbox" === e.node.type ? this.paintCheckbox(e) : "INPUT" === e.node.nodeName && "radio" === e.node.type ? this.paintRadio(e) : this.paintElement(e)
+      }, f.prototype.paintElement = function(e) {
+        var n = e.parseBounds();
+        this.renderer.clip(e.backgroundClip, function() {
+          this.renderer.renderBackground(e, n, e.borders.borders.map(G))
+        }, this), this.renderer.clip(e.clip, function() {
+          this.renderer.renderBorders(e.borders.borders)
+        }, this), this.renderer.clip(e.backgroundClip, function() {
+          switch (e.node.nodeName) {
+            case "svg":
+            case "IFRAME":
+              var f = this.images.get(e.node);
+              f ? this.renderer.renderImage(e, n, e.borders, f) : N("Error loading <" + e.node.nodeName + ">", e.node);
+              break;
+            case "IMG":
+              var o = this.images.get(e.node.src);
+              o ? this.renderer.renderImage(e, n, e.borders, o) : N("Error loading <img>", e.node.src);
+              break;
+            case "CANVAS":
+              this.renderer.renderImage(e, n, e.borders, {
+                image: e.node
+              });
+              break;
+            case "SELECT":
+            case "INPUT":
+            case "TEXTAREA":
+              this.paintFormValue(e)
+          }
+        }, this)
+      }, f.prototype.paintCheckbox = function(e) {
+        var n = e.parseBounds(),
+          f = Math.min(n.width, n.height),
+          o = {
+            width: f - 1,
+            height: f - 1,
+            top: n.top,
+            left: n.left
           },
-          blur: function(e, t, r) {
-            switch (e) {
-              case "name":
-                return v.State.isFirefox ? "filter" : "-webkit-filter";
-              case "extract":
-                var a = parseFloat(r);
-                if (!a && 0 !== a) {
-                  var n = r.toString().match(/blur\(([0-9]+[A-z]+)\)/i);
-                  a = n ? n[1] : 0
-                }
-                return a;
-              case "inject":
-                return parseFloat(r) ? "blur(" + r + ")" : "none"
+          d = [3, 3],
+          i = [d, d, d, d],
+          l = [1, 1, 1, 1].map(function(e) {
+            return {
+              color: new T("#A5A5A5"),
+              width: e
             }
-          },
-          opacity: function(e, t, r) {
-            if (8 >= f) switch (e) {
-              case "name":
-                return "filter";
-              case "extract":
-                var a = r.toString().match(/alpha\(opacity=(.*)\)/i);
-                return r = a ? a[1] / 100 : 1;
-              case "inject":
-                return t.style.zoom = 1, parseFloat(r) >= 1 ? "" : "alpha(opacity=" + parseInt(100 * parseFloat(r), 10) + ")"
-            } else switch (e) {
-              case "name":
-                return "opacity";
-              case "extract":
-                return r;
-              case "inject":
-                return r
+          }),
+          u = s(o, i, l);
+        this.renderer.clip(e.backgroundClip, function() {
+          this.renderer.rectangle(o.left + 1, o.top + 1, o.width - 2, o.height - 2, new T("#DEDEDE")), this.renderer.renderBorders(t(l, o, u, i)), e.node.checked && (this.renderer.font(new T("#424242"), "normal", "normal", "bold", f - 3 + "px", "arial"), this.renderer.text("✔", o.left + f / 6, o.top + f - 1))
+        }, this)
+      }, f.prototype.paintRadio = function(e) {
+        var n = e.parseBounds(),
+          f = Math.min(n.width, n.height) - 2;
+        this.renderer.clip(e.backgroundClip, function() {
+          this.renderer.circleStroke(n.left + 1, n.top + 1, f, new T("#DEDEDE"), 1, new T("#A5A5A5")), e.node.checked && this.renderer.circle(Math.ceil(n.left + f / 4) + 1, Math.ceil(n.top + f / 4) + 1, Math.floor(f / 2), new T("#424242"))
+        }, this)
+      }, f.prototype.paintFormValue = function(e) {
+        var n = e.getValue();
+        if (n.length > 0) {
+          var f = e.node.ownerDocument,
+            o = f.createElement("html2canvaswrapper"),
+            d = ["lineHeight", "textAlign", "fontFamily", "fontWeight", "fontSize", "color", "paddingLeft", "paddingTop", "paddingRight", "paddingBottom", "width", "height", "borderLeftStyle", "borderTopStyle", "borderLeftWidth", "borderTopWidth", "boxSizing", "whiteSpace", "wordWrap"];
+          d.forEach(function(n) {
+            try {
+              o.style[n] = e.css(n)
+            } catch (f) {
+              N("html2canvas: Parse: Exception caught in renderFormValue: " + f.message)
             }
-          }
-        },
-        register: function() {
-          9 >= f || v.State.isGingerbread || (x.Lists.transformsBase = x.Lists.transformsBase.concat(x.Lists.transforms3D));
-          for (var e = 0; e < x.Lists.transformsBase.length; e++) ! function() {
-            var t = x.Lists.transformsBase[e];
-            x.Normalizations.registered[t] = function(e, r, n) {
-              switch (e) {
-                case "name":
-                  return "transform";
-                case "extract":
-                  return i(r) === a || i(r).transformCache[t] === a ? /^scale/i.test(t) ? 1 : 0 : i(r).transformCache[t].replace(/[()]/g, "");
-                case "inject":
-                  var o = !1;
-                  switch (t.substr(0, t.length - 1)) {
-                    case "translate":
-                      o = !/(%|px|em|rem|vw|vh|\d)$/i.test(n);
-                      break;
-                    case "scal":
-                    case "scale":
-                      v.State.isAndroid && i(r).transformCache[t] === a && 1 > n && (n = 1), o = !/(\d)$/i.test(n);
-                      break;
-                    case "skew":
-                      o = !/(deg|\d)$/i.test(n);
-                      break;
-                    case "rotate":
-                      o = !/(deg|\d)$/i.test(n)
-                  }
-                  return o || (i(r).transformCache[t] = "(" + n + ")"), i(r).transformCache[t]
-              }
-            }
-          }();
-          for (var e = 0; e < x.Lists.colors.length; e++) ! function() {
-            var t = x.Lists.colors[e];
-            x.Normalizations.registered[t] = function(e, r, n) {
-              switch (e) {
-                case "name":
-                  return t;
-                case "extract":
-                  var o;
-                  if (x.RegEx.wrappedValueAlreadyExtracted.test(n)) o = n;
-                  else {
-                    var i, s = {
-                      black: "rgb(0, 0, 0)",
-                      blue: "rgb(0, 0, 255)",
-                      gray: "rgb(128, 128, 128)",
-                      green: "rgb(0, 128, 0)",
-                      red: "rgb(255, 0, 0)",
-                      white: "rgb(255, 255, 255)"
-                    };
-                    /^[A-z]+$/i.test(n) ? i = s[n] !== a ? s[n] : s.black : x.RegEx.isHex.test(n) ? i = "rgb(" + x.Values.hexToRgb(n).join(" ") + ")" : /^rgba?\(/i.test(n) || (i = s.black), o = (i || n).toString().match(x.RegEx.valueUnwrap)[1].replace(/,(\s+)?/g, " ")
-                  }
-                  return 8 >= f || 3 !== o.split(" ").length || (o += " 1"), o;
-                case "inject":
-                  return 8 >= f ? 4 === n.split(" ").length && (n = n.split(/\s+/).slice(0, 3).join(" ")) : 3 === n.split(" ").length && (n += " 1"), (8 >= f ? "rgb" : "rgba") + "(" + n.replace(/\s+/g, ",").replace(/\.(\d)+(?=,)/g, "") + ")"
-              }
-            }
-          }()
-        }
-      },
-      Names: {
-        camelCase: function(e) {
-          return e.replace(/-(\w)/g, function(e, t) {
-            return t.toUpperCase()
-          })
-        },
-        SVGAttribute: function(e) {
-          var t = "width|height|x|y|cx|cy|r|rx|ry|x1|x2|y1|y2";
-          return (f || v.State.isAndroid && !v.State.isChrome) && (t += "|transform"), new RegExp("^(" + t + ")$", "i").test(e)
-        },
-        prefixCheck: function(e) {
-          if (v.State.prefixMatches[e]) return [v.State.prefixMatches[e], !0];
-          for (var t = ["", "Webkit", "Moz", "ms", "O"], r = 0, a = t.length; a > r; r++) {
-            var n;
-            if (n = 0 === r ? e : t[r] + e.replace(/^\w/, function(e) {
-                return e.toUpperCase()
-              }), g.isString(v.State.prefixElement.style[n])) return v.State.prefixMatches[e] = n, [n, !0]
-          }
-          return [e, !1]
-        }
-      },
-      Values: {
-        hexToRgb: function(e) {
-          var t = /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
-            r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i,
-            a;
-          return e = e.replace(t, function(e, t, r, a) {
-            return t + t + r + r + a + a
-          }), a = r.exec(e), a ? [parseInt(a[1], 16), parseInt(a[2], 16), parseInt(a[3], 16)] : [0, 0, 0]
-        },
-        isCSSNullValue: function(e) {
-          return 0 == e || /^(none|auto|transparent|(rgba\(0, ?0, ?0, ?0\)))$/i.test(e)
-        },
-        getUnitType: function(e) {
-          return /^(rotate|skew)/i.test(e) ? "deg" : /(^(scale|scaleX|scaleY|scaleZ|alpha|flexGrow|flexHeight|zIndex|fontWeight)$)|((opacity|red|green|blue|alpha)$)/i.test(e) ? "" : "px"
-        },
-        getDisplayType: function(e) {
-          var t = e && e.tagName.toString().toLowerCase();
-          return /^(b|big|i|small|tt|abbr|acronym|cite|code|dfn|em|kbd|strong|samp|var|a|bdo|br|img|map|object|q|script|span|sub|sup|button|input|label|select|textarea)$/i.test(t) ? "inline" : /^(li)$/i.test(t) ? "list-item" : /^(tr)$/i.test(t) ? "table-row" : /^(table)$/i.test(t) ? "table" : /^(tbody)$/i.test(t) ? "table-row-group" : "block"
-        },
-        addClass: function(e, t) {
-          e.classList ? e.classList.add(t) : e.className += (e.className.length ? " " : "") + t
-        },
-        removeClass: function(e, t) {
-          e.classList ? e.classList.remove(t) : e.className = e.className.toString().replace(new RegExp("(^|\\s)" + t.split(" ").join("|") + "(\\s|$)", "gi"), " ")
-        }
-      },
-      getPropertyValue: function(e, r, n, o) {
-        function s(e, r) {
-          function n() {
-            u && x.setPropertyValue(e, "display", "none")
-          }
-
-          var l = 0;
-          if (8 >= f) l = $.css(e, r);
-          else {
-            var u = !1;
-            if (/^(width|height)$/.test(r) && 0 === x.getPropertyValue(e, "display") && (u = !0, x.setPropertyValue(e, "display", x.Values.getDisplayType(e))), !o) {
-              if ("height" === r && "border-box" !== x.getPropertyValue(e, "boxSizing").toString().toLowerCase()) {
-                var c = e.offsetHeight - (parseFloat(x.getPropertyValue(e, "borderTopWidth")) || 0) - (parseFloat(x.getPropertyValue(e, "borderBottomWidth")) || 0) - (parseFloat(x.getPropertyValue(e, "paddingTop")) || 0) - (parseFloat(x.getPropertyValue(e, "paddingBottom")) || 0);
-                return n(), c
-              }
-              if ("width" === r && "border-box" !== x.getPropertyValue(e, "boxSizing").toString().toLowerCase()) {
-                var p = e.offsetWidth - (parseFloat(x.getPropertyValue(e, "borderLeftWidth")) || 0) - (parseFloat(x.getPropertyValue(e, "borderRightWidth")) || 0) - (parseFloat(x.getPropertyValue(e, "paddingLeft")) || 0) - (parseFloat(x.getPropertyValue(e, "paddingRight")) || 0);
-                return n(), p
-              }
-            }
-            var d;
-            d = i(e) === a ? t.getComputedStyle(e, null) : i(e).computedStyle ? i(e).computedStyle : i(e).computedStyle = t.getComputedStyle(e, null), "borderColor" === r && (r = "borderTopColor"), l = 9 === f && "filter" === r ? d.getPropertyValue(r) : d[r], ("" === l || null === l) && (l = e.style[r]), n()
-          }
-          if ("auto" === l && /^(top|right|bottom|left)$/i.test(r)) {
-            var g = s(e, "position");
-            ("fixed" === g || "absolute" === g && /top|left/i.test(r)) && (l = $(e).position()[r] + "px")
-          }
-          return l
-        }
-
-        var l;
-        if (x.Hooks.registered[r]) {
-          var u = r,
-            c = x.Hooks.getRoot(u);
-          n === a && (n = x.getPropertyValue(e, x.Names.prefixCheck(c)[0])), x.Normalizations.registered[c] && (n = x.Normalizations.registered[c]("extract", e, n)), l = x.Hooks.extractValue(u, n)
-        } else if (x.Normalizations.registered[r]) {
-          var p, d;
-          p = x.Normalizations.registered[r]("name", e), "transform" !== p && (d = s(e, x.Names.prefixCheck(p)[0]), x.Values.isCSSNullValue(d) && x.Hooks.templates[r] && (d = x.Hooks.templates[r][1])), l = x.Normalizations.registered[r]("extract", e, d)
-        }
-        if (!/^[\d-]/.test(l))
-          if (i(e) && i(e).isSVG && x.Names.SVGAttribute(r))
-            if (/^(height|width)$/i.test(r)) try {
-              l = e.getBBox()[r]
-            } catch (g) {
-              l = 0
-            } else l = e.getAttribute(r);
-            else l = s(e, x.Names.prefixCheck(r)[0]);
-        return x.Values.isCSSNullValue(l) && (l = 0), v.debug >= 2 && console.log("Get " + r + ": " + l), l
-      },
-      setPropertyValue: function(e, r, a, n, o) {
-        var s = r;
-        if ("scroll" === r) o.container ? o.container["scroll" + o.direction] = a : "Left" === o.direction ? t.scrollTo(a, o.alternateValue) : t.scrollTo(o.alternateValue, a);
-        else if (x.Normalizations.registered[r] && "transform" === x.Normalizations.registered[r]("name", e)) x.Normalizations.registered[r]("inject", e, a), s = "transform", a = i(e).transformCache[r];
-        else {
-          if (x.Hooks.registered[r]) {
-            var l = r,
-              u = x.Hooks.getRoot(r);
-            n = n || x.getPropertyValue(e, u), a = x.Hooks.injectValue(l, a, n), r = u
-          }
-          if (x.Normalizations.registered[r] && (a = x.Normalizations.registered[r]("inject", e, a), r = x.Normalizations.registered[r]("name", e)), s = x.Names.prefixCheck(r)[0], 8 >= f) try {
-            e.style[s] = a
-          } catch (c) {
-            v.debug && console.log("Browser does not support [" + a + "] for [" + s + "]")
-          } else i(e) && i(e).isSVG && x.Names.SVGAttribute(r) ? e.setAttribute(r, a) : e.style[s] = a;
-          v.debug >= 2 && console.log("Set " + r + " (" + s + "): " + a)
-        }
-        return [s, a]
-      },
-      flushTransformCache: function(e) {
-        function t(t) {
-          return parseFloat(x.getPropertyValue(e, t))
-        }
-
-        var r = "";
-        if ((f || v.State.isAndroid && !v.State.isChrome) && i(e).isSVG) {
-          var a = {
-            translate: [t("translateX"), t("translateY")],
-            skewX: [t("skewX")],
-            skewY: [t("skewY")],
-            scale: 1 !== t("scale") ? [t("scale"), t("scale")] : [t("scaleX"), t("scaleY")],
-            rotate: [t("rotateZ"), 0, 0]
-          };
-          $.each(i(e).transformCache, function(e) {
-            /^translate/i.test(e) ? e = "translate" : /^scale/i.test(e) ? e = "scale" : /^rotate/i.test(e) && (e = "rotate"), a[e] && (r += e + "(" + a[e].join(" ") + ") ", delete a[e])
-          })
-        } else {
-          var n, o;
-          $.each(i(e).transformCache, function(t) {
-            return n = i(e).transformCache[t], "transformPerspective" === t ? (o = n, !0) : (9 === f && "rotateZ" === t && (t = "rotate"), void(r += t + n + " "))
-          }), o && (r = "perspective" + o + " " + r)
-        }
-        x.setPropertyValue(e, "transform", r)
-      }
-    };
-    x.Hooks.register(), x.Normalizations.register(), v.hook = function(e, t, r) {
-      var n = a;
-      return e = o(e), $.each(e, function(e, o) {
-        if (i(o) === a && v.init(o), r === a) n === a && (n = v.CSS.getPropertyValue(o, t));
-        else {
-          var s = v.CSS.setPropertyValue(o, t, r);
-          "transform" === s[0] && v.CSS.flushTransformCache(o), n = s
-        }
-      }), n
-    };
-    var S = function() {
-      function e() {
-        return l ? T.promise || null : f
-      }
-
-      function n() {
-        function e(e) {
-          function p(e, t) {
-            var r = a,
-              i = a,
-              s = a;
-            return g.isArray(e) ? (r = e[0], !g.isArray(e[1]) && /^[\d-]/.test(e[1]) || g.isFunction(e[1]) || x.RegEx.isHex.test(e[1]) ? s = e[1] : (g.isString(e[1]) && !x.RegEx.isHex.test(e[1]) || g.isArray(e[1])) && (i = t ? e[1] : u(e[1], o.duration), e[2] !== a && (s = e[2]))) : r = e, t || (i = i || o.easing), g.isFunction(r) && (r = r.call(n, w, P)), g.isFunction(s) && (s = s.call(n, w, P)), [r || 0, i, s]
-          }
-
-          function f(e, t) {
-            var r, a;
-            return a = (t || "0").toString().toLowerCase().replace(/[%A-z]+$/, function(e) {
-              return r = e, ""
-            }), r || (r = x.Values.getUnitType(e)), [a, r]
-          }
-
-          function d() {
-            var e = {
-                myParent: n.parentNode || r.body,
-                position: x.getPropertyValue(n, "position"),
-                fontSize: x.getPropertyValue(n, "fontSize")
-              },
-              a = e.position === N.lastPosition && e.myParent === N.lastParent,
-              o = e.fontSize === N.lastFontSize;
-            N.lastParent = e.myParent, N.lastPosition = e.position, N.lastFontSize = e.fontSize;
-            var s = 100,
-              l = {};
-            if (o && a) l.emToPx = N.lastEmToPx, l.percentToPxWidth = N.lastPercentToPxWidth, l.percentToPxHeight = N.lastPercentToPxHeight;
-            else {
-              var u = i(n).isSVG ? r.createElementNS("http://www.w3.org/2000/svg", "rect") : r.createElement("div");
-              v.init(u), e.myParent.appendChild(u), $.each(["overflow", "overflowX", "overflowY"], function(e, t) {
-                v.CSS.setPropertyValue(u, t, "hidden")
-              }), v.CSS.setPropertyValue(u, "position", e.position), v.CSS.setPropertyValue(u, "fontSize", e.fontSize), v.CSS.setPropertyValue(u, "boxSizing", "content-box"), $.each(["minWidth", "maxWidth", "width", "minHeight", "maxHeight", "height"], function(e, t) {
-                v.CSS.setPropertyValue(u, t, s + "%")
-              }), v.CSS.setPropertyValue(u, "paddingLeft", s + "em"), l.percentToPxWidth = N.lastPercentToPxWidth = (parseFloat(x.getPropertyValue(u, "width", null, !0)) || 1) / s, l.percentToPxHeight = N.lastPercentToPxHeight = (parseFloat(x.getPropertyValue(u, "height", null, !0)) || 1) / s, l.emToPx = N.lastEmToPx = (parseFloat(x.getPropertyValue(u, "paddingLeft")) || 1) / s, e.myParent.removeChild(u)
-            }
-            return null === N.remToPx && (N.remToPx = parseFloat(x.getPropertyValue(r.body, "fontSize")) || 16), null === N.vwToPx && (N.vwToPx = parseFloat(t.innerWidth) / 100, N.vhToPx = parseFloat(t.innerHeight) / 100), l.remToPx = N.remToPx, l.vwToPx = N.vwToPx, l.vhToPx = N.vhToPx, v.debug >= 1 && console.log("Unit ratios: " + JSON.stringify(l), n), l
-          }
-
-          if (o.begin && 0 === w) try {
-            o.begin.call(m, m)
-          } catch (y) {
-            setTimeout(function() {
-              throw y
-            }, 1)
-          }
-          if ("scroll" === k) {
-            var S = /^x$/i.test(o.axis) ? "Left" : "Top",
-              V = parseFloat(o.offset) || 0,
-              C, A, F;
-            o.container ? g.isWrapped(o.container) || g.isNode(o.container) ? (o.container = o.container[0] || o.container, C = o.container["scroll" + S], F = C + $(n).position()[S.toLowerCase()] + V) : o.container = null : (C = v.State.scrollAnchor[v.State["scrollProperty" + S]], A = v.State.scrollAnchor[v.State["scrollProperty" + ("Left" === S ? "Top" : "Left")]], F = $(n).offset()[S.toLowerCase()] + V), s = {
-              scroll: {
-                rootPropertyValue: !1,
-                startValue: C,
-                currentValue: C,
-                endValue: F,
-                unitType: "",
-                easing: o.easing,
-                scrollData: {
-                  container: o.container,
-                  direction: S,
-                  alternateValue: A
-                }
-              },
-              element: n
-            }, v.debug && console.log("tweensContainer (scroll): ", s.scroll, n)
-          } else if ("reverse" === k) {
-            if (!i(n).tweensContainer) return void $.dequeue(n, o.queue);
-            "none" === i(n).opts.display && (i(n).opts.display = "auto"), "hidden" === i(n).opts.visibility && (i(n).opts.visibility = "visible"), i(n).opts.loop = !1, i(n).opts.begin = null, i(n).opts.complete = null, b.easing || delete o.easing, b.duration || delete o.duration, o = $.extend({}, i(n).opts, o);
-            var E = $.extend(!0, {}, i(n).tweensContainer);
-            for (var j in E)
-              if ("element" !== j) {
-                var H = E[j].startValue;
-                E[j].startValue = E[j].currentValue = E[j].endValue, E[j].endValue = H, g.isEmptyObject(b) || (E[j].easing = o.easing), v.debug && console.log("reverse tweensContainer (" + j + "): " + JSON.stringify(E[j]), n)
-              }
-            s = E
-          } else if ("start" === k) {
-            var E;
-            i(n).tweensContainer && i(n).isAnimating === !0 && (E = i(n).tweensContainer), $.each(h, function(e, t) {
-              if (RegExp("^" + x.Lists.colors.join("$|^") + "$").test(e)) {
-                var r = p(t, !0),
-                  n = r[0],
-                  o = r[1],
-                  i = r[2];
-                if (x.RegEx.isHex.test(n)) {
-                  for (var s = ["Red", "Green", "Blue"], l = x.Values.hexToRgb(n), u = i ? x.Values.hexToRgb(i) : a, c = 0; c < s.length; c++) {
-                    var f = [l[c]];
-                    o && f.push(o), u !== a && f.push(u[c]), h[e + s[c]] = f
-                  }
-                  delete h[e]
-                }
-              }
-            });
-            for (var R in h) {
-              var O = p(h[R]),
-                z = O[0],
-                q = O[1],
-                M = O[2];
-              R = x.Names.camelCase(R);
-              var I = x.Hooks.getRoot(R),
-                B = !1;
-              if (i(n).isSVG || "tween" === I || x.Names.prefixCheck(I)[1] !== !1 || x.Normalizations.registered[I] !== a) {
-                (o.display !== a && null !== o.display && "none" !== o.display || o.visibility !== a && "hidden" !== o.visibility) && /opacity|filter/.test(R) && !M && 0 !== z && (M = 0), o._cacheValues && E && E[R] ? (M === a && (M = E[R].endValue + E[R].unitType), B = i(n).rootPropertyValueCache[I]) : x.Hooks.registered[R] ? M === a ? (B = x.getPropertyValue(n, I), M = x.getPropertyValue(n, R, B)) : B = x.Hooks.templates[I][1] : M === a && (M = x.getPropertyValue(n, R));
-                var W, G, D, X = !1;
-                if (W = f(R, M), M = W[0], D = W[1], W = f(R, z), z = W[0].replace(/^([+-\/*])=/, function(e, t) {
-                    return X = t, ""
-                  }), G = W[1], M = parseFloat(M) || 0, z = parseFloat(z) || 0, "%" === G && (/^(fontSize|lineHeight)$/.test(R) ? (z /= 100, G = "em") : /^scale/.test(R) ? (z /= 100, G = "") : /(Red|Green|Blue)$/i.test(R) && (z = z / 100 * 255, G = "")), /[\/*]/.test(X)) G = D;
-                else if (D !== G && 0 !== M)
-                  if (0 === z) G = D;
-                  else {
-                    l = l || d();
-                    var Y = /margin|padding|left|right|width|text|word|letter/i.test(R) || /X$/.test(R) || "x" === R ? "x" : "y";
-                    switch (D) {
-                      case "%":
-                        M *= "x" === Y ? l.percentToPxWidth : l.percentToPxHeight;
-                        break;
-                      case "px":
-                        break;
-                      default:
-                        M *= l[D + "ToPx"]
-                    }
-                    switch (G) {
-                      case "%":
-                        M *= 1 / ("x" === Y ? l.percentToPxWidth : l.percentToPxHeight);
-                        break;
-                      case "px":
-                        break;
-                      default:
-                        M *= 1 / l[G + "ToPx"]
-                    }
-                  }
-                switch (X) {
-                  case "+":
-                    z = M + z;
-                    break;
-                  case "-":
-                    z = M - z;
-                    break;
-                  case "*":
-                    z = M * z;
-                    break;
-                  case "/":
-                    z = M / z
-                }
-                s[R] = {
-                  rootPropertyValue: B,
-                  startValue: M,
-                  currentValue: M,
-                  endValue: z,
-                  unitType: G,
-                  easing: q
-                }, v.debug && console.log("tweensContainer (" + R + "): " + JSON.stringify(s[R]), n)
-              } else v.debug && console.log("Skipping [" + I + "] due to a lack of browser support.")
-            }
-            s.element = n
-          }
-          s.element && (x.Values.addClass(n, "velocity-animating"), L.push(s), "" === o.queue && (i(n).tweensContainer = s, i(n).opts = o), i(n).isAnimating = !0, w === P - 1 ? (v.State.calls.push([L, m, o, null, T.resolver]), v.State.isTicking === !1 && (v.State.isTicking = !0, c())) : w++)
-        }
-
-        var n = this,
-          o = $.extend({}, v.defaults, b),
-          s = {},
-          l;
-        switch (i(n) === a && v.init(n), parseFloat(o.delay) && o.queue !== !1 && $.queue(n, o.queue, function(e) {
-          v.velocityQueueEntryFlag = !0, i(n).delayTimer = {
-            setTimeout: setTimeout(e, parseFloat(o.delay)),
-            next: e
-          }
-        }), o.duration.toString().toLowerCase()) {
-          case "fast":
-            o.duration = 200;
-            break;
-          case "normal":
-            o.duration = y;
-            break;
-          case "slow":
-            o.duration = 600;
-            break;
-          default:
-            o.duration = parseFloat(o.duration) || 1
-        }
-        v.mock !== !1 && (v.mock === !0 ? o.duration = o.delay = 1 : (o.duration *= parseFloat(v.mock) || 1, o.delay *= parseFloat(v.mock) || 1)), o.easing = u(o.easing, o.duration), o.begin && !g.isFunction(o.begin) && (o.begin = null), o.progress && !g.isFunction(o.progress) && (o.progress = null), o.complete && !g.isFunction(o.complete) && (o.complete = null), o.display !== a && null !== o.display && (o.display = o.display.toString().toLowerCase(), "auto" === o.display && (o.display = v.CSS.Values.getDisplayType(n))), o.visibility !== a && null !== o.visibility && (o.visibility = o.visibility.toString().toLowerCase()), o.mobileHA = o.mobileHA && v.State.isMobile && !v.State.isGingerbread, o.queue === !1 ? o.delay ? setTimeout(e, o.delay) : e() : $.queue(n, o.queue, function(t, r) {
-          return r === !0 ? (T.promise && T.resolver(m), !0) : (v.velocityQueueEntryFlag = !0, void e(t))
-        }), "" !== o.queue && "fx" !== o.queue || "inprogress" === $.queue(n)[0] || $.dequeue(n)
-      }
-
-      var s = arguments[0] && (arguments[0].p || $.isPlainObject(arguments[0].properties) && !arguments[0].properties.names || g.isString(arguments[0].properties)),
-        l, f, d, m, h, b;
-      if (g.isWrapped(this) ? (l = !1, d = 0, m = this, f = this) : (l = !0, d = 1, m = s ? arguments[0].elements || arguments[0].e : arguments[0]), m = o(m)) {
-        s ? (h = arguments[0].properties || arguments[0].p, b = arguments[0].options || arguments[0].o) : (h = arguments[d], b = arguments[d + 1]);
-        var P = m.length,
-          w = 0;
-        if (!/^(stop|finish)$/i.test(h) && !$.isPlainObject(b)) {
-          var V = d + 1;
-          b = {};
-          for (var C = V; C < arguments.length; C++) g.isArray(arguments[C]) || !/^(fast|normal|slow)$/i.test(arguments[C]) && !/^\d/.test(arguments[C]) ? g.isString(arguments[C]) || g.isArray(arguments[C]) ? b.easing = arguments[C] : g.isFunction(arguments[C]) && (b.complete = arguments[C]) : b.duration = arguments[C]
-        }
-        var T = {
-          promise: null,
-          resolver: null,
-          rejecter: null
-        };
-        l && v.Promise && (T.promise = new v.Promise(function(e, t) {
-          T.resolver = e, T.rejecter = t
-        }));
-        var k;
-        switch (h) {
-          case "scroll":
-            k = "scroll";
-            break;
-          case "reverse":
-            k = "reverse";
-            break;
-          case "finish":
-          case "stop":
-            $.each(m, function(e, t) {
-              i(t) && i(t).delayTimer && (clearTimeout(i(t).delayTimer.setTimeout), i(t).delayTimer.next && i(t).delayTimer.next(), delete i(t).delayTimer)
-            });
-            var A = [];
-            return $.each(v.State.calls, function(e, t) {
-              t && $.each(t[1], function(r, n) {
-                var o = b === a ? "" : b;
-                return o === !0 || t[2].queue === o || b === a && t[2].queue === !1 ? void $.each(m, function(r, a) {
-                  a === n && ((b === !0 || g.isString(b)) && ($.each($.queue(a, g.isString(b) ? b : ""), function(e, t) {
-                    g.isFunction(t) && t(null, !0)
-                  }), $.queue(a, g.isString(b) ? b : "", [])), "stop" === h ? (i(a) && i(a).tweensContainer && o !== !1 && $.each(i(a).tweensContainer, function(e, t) {
-                    t.endValue = t.currentValue
-                  }), A.push(e)) : "finish" === h && (t[2].duration = 1))
-                }) : !0
-              })
-            }), "stop" === h && ($.each(A, function(e, t) {
-              p(t, !0)
-            }), T.promise && T.resolver(m)), e();
-          default:
-            if (!$.isPlainObject(h) || g.isEmptyObject(h)) {
-              if (g.isString(h) && v.Redirects[h]) {
-                var F = $.extend({}, b),
-                  E = F.duration,
-                  j = F.delay || 0;
-                return F.backwards === !0 && (m = $.extend(!0, [], m).reverse()), $.each(m, function(e, t) {
-                  parseFloat(F.stagger) ? F.delay = j + parseFloat(F.stagger) * e : g.isFunction(F.stagger) && (F.delay = j + F.stagger.call(t, e, P)), F.drag && (F.duration = parseFloat(E) || (/^(callout|transition)/.test(h) ? 1e3 : y), F.duration = Math.max(F.duration * (F.backwards ? 1 - e / P : (e + 1) / P), .75 * F.duration, 200)), v.Redirects[h].call(t, t, F || {}, e, P, m, T.promise ? T : a)
-                }), e()
-              }
-              var H = "Velocity: First argument (" + h + ") was not a property map, a known action, or a registered redirect. Aborting.";
-              return T.promise ? T.rejecter(new Error(H)) : console.log(H), e()
-            }
-            k = "start"
-        }
-        var N = {
-            lastParent: null,
-            lastPosition: null,
-            lastFontSize: null,
-            lastPercentToPxWidth: null,
-            lastPercentToPxHeight: null,
-            lastEmToPx: null,
-            remToPx: null,
-            vwToPx: null,
-            vhToPx: null
-          },
-          L = [];
-        $.each(m, function(e, t) {
-          g.isNode(t) && n.call(t)
-        });
-        var F = $.extend({}, v.defaults, b),
-          R;
-        if (F.loop = parseInt(F.loop), R = 2 * F.loop - 1, F.loop)
-          for (var O = 0; R > O; O++) {
-            var z = {
-              delay: F.delay,
-              progress: F.progress
-            };
-            O === R - 1 && (z.display = F.display, z.visibility = F.visibility, z.complete = F.complete), S(m, "reverse", z)
-          }
-        return e()
-      }
-    };
-    v = $.extend(S, v), v.animate = S;
-    var P = t.requestAnimationFrame || d;
-    return v.State.isMobile || r.hidden === a || r.addEventListener("visibilitychange", function() {
-      r.hidden ? (P = function(e) {
-        return setTimeout(function() {
-          e(!0)
-        }, 16)
-      }, c()) : P = t.requestAnimationFrame || d
-    }), e.Velocity = v, e !== t && (e.fn.velocity = S, e.fn.velocity.defaults = v.defaults), $.each(["Down", "Up"], function(e, t) {
-      v.Redirects["slide" + t] = function(e, r, n, o, i, s) {
-        var l = $.extend({}, r),
-          u = l.begin,
-          c = l.complete,
-          p = {
-            height: "",
-            marginTop: "",
-            marginBottom: "",
-            paddingTop: "",
-            paddingBottom: ""
-          },
-          f = {};
-        l.display === a && (l.display = "Down" === t ? "inline" === v.CSS.Values.getDisplayType(e) ? "inline-block" : "block" : "none"), l.begin = function() {
-          u && u.call(i, i);
-          for (var r in p) {
-            f[r] = e.style[r];
-            var a = v.CSS.getPropertyValue(e, r);
-            p[r] = "Down" === t ? [a, 0] : [0, a]
-          }
-          f.overflow = e.style.overflow, e.style.overflow = "hidden"
-        }, l.complete = function() {
-          for (var t in f) e.style[t] = f[t];
-          c && c.call(i, i), s && s.resolver(i)
-        }, v(e, p, l)
-      }
-    }), $.each(["In", "Out"], function(e, t) {
-      v.Redirects["fade" + t] = function(e, r, n, o, i, s) {
-        var l = $.extend({}, r),
-          u = {
-            opacity: "In" === t ? 1 : 0
-          },
-          c = l.complete;
-        l.complete = n !== o - 1 ? l.begin = null : function() {
-          c && c.call(i, i), s && s.resolver(i)
-        }, l.display === a && (l.display = "In" === t ? "auto" : "none"), v(this, u, l)
-      }
-    }), v
-  }(window.jQuery || window.Zepto || window, window, document)
-});
-/*! RESOURCE: /scripts/thirdparty/velocity/velocity.ui.js */
-;
-(function(factory) {
-  if (typeof require === "function" && typeof exports === "object") {
-    module.exports = factory();
-  } else if (typeof define === "function" && define.amd) {
-    define(["velocity"], factory);
-  } else {
-    factory();
-  }
-}(function() {
-  return function(global, window, document, undefined) {
-    if (!global.Velocity || !global.Velocity.Utilities) {
-      window.console && console.log("Velocity UI Pack: Velocity must be loaded first. Aborting.");
-      return;
-    } else {
-      var Velocity = global.Velocity,
-        $ = Velocity.Utilities;
-    }
-    var velocityVersion = Velocity.version,
-      requiredVersion = {
-        major: 1,
-        minor: 1,
-        patch: 0
-      };
-
-    function greaterSemver(primary, secondary) {
-      var versionInts = [];
-      if (!primary || !secondary) {
-        return false;
-      }
-      $.each([primary, secondary], function(i, versionObject) {
-        var versionIntsComponents = [];
-        $.each(versionObject, function(component, value) {
-          while (value.toString().length < 5) {
-            value = "0" + value;
-          }
-          versionIntsComponents.push(value);
-        });
-        versionInts.push(versionIntsComponents.join(""))
-      });
-      return (parseFloat(versionInts[0]) > parseFloat(versionInts[1]));
-    }
-    if (greaterSemver(requiredVersion, velocityVersion)) {
-      var abortError = "Velocity UI Pack: You need to update Velocity (jquery.velocity.js) to a newer version. Visit http://github.com/julianshapiro/velocity.";
-      alert(abortError);
-      throw new Error(abortError);
-    }
-    Velocity.RegisterEffect = Velocity.RegisterUI = function(effectName, properties) {
-      function animateParentHeight(elements, direction, totalDuration, stagger) {
-        var totalHeightDelta = 0,
-          parentNode;
-        $.each(elements.nodeType ? [elements] : elements, function(i, element) {
-          if (stagger) {
-            totalDuration += i * stagger;
-          }
-          parentNode = element.parentNode;
-          $.each(["height", "paddingTop", "paddingBottom", "marginTop", "marginBottom"], function(i, property) {
-            totalHeightDelta += parseFloat(Velocity.CSS.getPropertyValue(element, property));
           });
-        });
-        Velocity.animate(
-          parentNode, {
-            height: (direction === "In" ? "+" : "-") + "=" + totalHeightDelta
-          }, {
-            queue: false,
-            easing: "ease-in-out",
-            duration: totalDuration * (direction === "In" ? 0.6 : 1)
-          }
-        );
-      }
-      Velocity.Redirects[effectName] = function(element, redirectOptions, elementsIndex, elementsSize, elements, promiseData) {
-        var finalElement = (elementsIndex === elementsSize - 1);
-        if (typeof properties.defaultDuration === "function") {
-          properties.defaultDuration = properties.defaultDuration.call(elements, elements);
-        } else {
-          properties.defaultDuration = parseFloat(properties.defaultDuration);
+          var i = e.parseBounds();
+          o.style.position = "fixed", o.style.left = i.left + "px", o.style.top = i.top + "px", o.textContent = n, f.body.appendChild(o), this.paintText(new Q(o.firstChild, e)), f.body.removeChild(o)
         }
-        for (var callIndex = 0; callIndex < properties.calls.length; callIndex++) {
-          var call = properties.calls[callIndex],
-            propertyMap = call[0],
-            redirectDuration = (redirectOptions.duration || properties.defaultDuration || 1000),
-            durationPercentage = call[1],
-            callOptions = call[2] || {},
-            opts = {};
-          opts.duration = redirectDuration * (durationPercentage || 1);
-          opts.queue = redirectOptions.queue || "";
-          opts.easing = callOptions.easing || "ease";
-          opts.delay = parseFloat(callOptions.delay) || 0;
-          opts._cacheValues = callOptions._cacheValues || true;
-          if (callIndex === 0) {
-            opts.delay += (parseFloat(redirectOptions.delay) || 0);
-            if (elementsIndex === 0) {
-              opts.begin = function() {
-                redirectOptions.begin && redirectOptions.begin.call(elements, elements);
-                var direction = effectName.match(/(In|Out)$/);
-                if ((direction && direction[0] === "In") && propertyMap.opacity !== undefined) {
-                  $.each(elements.nodeType ? [elements] : elements, function(i, element) {
-                    Velocity.CSS.setPropertyValue(element, "opacity", 0);
-                  });
-                }
-                if (redirectOptions.animateParentHeight && direction) {
-                  animateParentHeight(elements, direction[0], redirectDuration + opts.delay, redirectOptions.stagger);
-                }
-              }
-            }
-            if (redirectOptions.display !== null) {
-              if (redirectOptions.display !== undefined && redirectOptions.display !== "none") {
-                opts.display = redirectOptions.display;
-              } else if (/In$/.test(effectName)) {
-                var defaultDisplay = Velocity.CSS.Values.getDisplayType(element);
-                opts.display = (defaultDisplay === "inline") ? "inline-block" : defaultDisplay;
-              }
-            }
-            if (redirectOptions.visibility && redirectOptions.visibility !== "hidden") {
-              opts.visibility = redirectOptions.visibility;
-            }
-          }
-          if (callIndex === properties.calls.length - 1) {
-            function injectFinalCallbacks() {
-              if ((redirectOptions.display === undefined || redirectOptions.display === "none") && /Out$/.test(effectName)) {
-                $.each(elements.nodeType ? [elements] : elements, function(i, element) {
-                  Velocity.CSS.setPropertyValue(element, "display", "none");
-                });
-              }
-              redirectOptions.complete && redirectOptions.complete.call(elements, elements);
-              if (promiseData) {
-                promiseData.resolver(elements || element);
-              }
-            }
-            opts.complete = function() {
-              if (properties.reset) {
-                for (var resetProperty in properties.reset) {
-                  var resetValue = properties.reset[resetProperty];
-                  if (Velocity.CSS.Hooks.registered[resetProperty] === undefined && (typeof resetValue === "string" || typeof resetValue === "number")) {
-                    properties.reset[resetProperty] = [properties.reset[resetProperty], properties.reset[resetProperty]];
-                  }
-                }
-                var resetOptions = {
-                  duration: 0,
-                  queue: false
-                };
-                if (finalElement) {
-                  resetOptions.complete = injectFinalCallbacks;
-                }
-                Velocity.animate(element, properties.reset, resetOptions);
-              } else if (finalElement) {
-                injectFinalCallbacks();
-              }
-            };
-            if (redirectOptions.visibility === "hidden") {
-              opts.visibility = redirectOptions.visibility;
-            }
-          }
-          Velocity.animate(element, propertyMap, opts);
+      }, f.prototype.paintText = function(e) {
+        e.applyTextTransform();
+        var n = O.ucs2.decode(e.node.data),
+          f = this.options.letterRendering && !b(e) || M(e.node.data) ? n.map(function(e) {
+            return O.ucs2.encode([e])
+          }) : K(n),
+          o = e.parent.fontWeight(),
+          d = e.parent.css("fontSize"),
+          i = e.parent.css("fontFamily"),
+          t = e.parent.parseTextShadows();
+        this.renderer.font(e.parent.color("color"), e.parent.css("fontStyle"), e.parent.css("fontVariant"), o, d, i), t.length ? this.renderer.fontShadow(t[0].color, t[0].offsetX, t[0].offsetY, t[0].blur) : this.renderer.clearShadow(), this.renderer.clip(e.parent.clip, function() {
+          f.map(this.parseTextBounds(e), this).forEach(function(n, o) {
+            n && (this.renderer.text(f[o], n.left, n.bottom), this.renderTextDecoration(e.parent, n, this.fontMetrics.getMetrics(i, d)))
+          }, this)
+        }, this)
+      }, f.prototype.renderTextDecoration = function(e, n, f) {
+        switch (e.css("textDecoration").split(" ")[0]) {
+          case "underline":
+            this.renderer.rectangle(n.left, Math.round(n.top + f.baseline + f.lineWidth), n.width, 1, e.color("color"));
+            break;
+          case "overline":
+            this.renderer.rectangle(n.left, Math.round(n.top), n.width, 1, e.color("color"));
+            break;
+          case "line-through":
+            this.renderer.rectangle(n.left, Math.ceil(n.top + f.middle + f.lineWidth), n.width, 1, e.color("color"))
         }
       };
-      return Velocity;
-    };
-    Velocity.RegisterEffect.packagedEffects = {
-      "callout.bounce": {
-        defaultDuration: 550,
-        calls: [
-          [{
-            translateY: -30
-          }, 0.25],
-          [{
-            translateY: 0
-          }, 0.125],
-          [{
-            translateY: -15
-          }, 0.125],
-          [{
-            translateY: 0
-          }, 0.25]
+      var $ = {
+        inset: [
+          ["darken", .6],
+          ["darken", .1],
+          ["darken", .1],
+          ["darken", .6]
         ]
-      },
-      "callout.shake": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            translateX: -11
-          }, 0.125],
-          [{
-            translateX: 11
-          }, 0.125],
-          [{
-            translateX: -11
-          }, 0.125],
-          [{
-            translateX: 11
-          }, 0.125],
-          [{
-            translateX: -11
-          }, 0.125],
-          [{
-            translateX: 11
-          }, 0.125],
-          [{
-            translateX: -11
-          }, 0.125],
-          [{
-            translateX: 0
-          }, 0.125]
-        ]
-      },
-      "callout.flash": {
-        defaultDuration: 1100,
-        calls: [
-          [{
-            opacity: [0, "easeInOutQuad", 1]
-          }, 0.25],
-          [{
-            opacity: [1, "easeInOutQuad"]
-          }, 0.25],
-          [{
-            opacity: [0, "easeInOutQuad"]
-          }, 0.25],
-          [{
-            opacity: [1, "easeInOutQuad"]
-          }, 0.25]
-        ]
-      },
-      "callout.pulse": {
-        defaultDuration: 825,
-        calls: [
-          [{
-            scaleX: 1.1,
-            scaleY: 1.1
-          }, 0.50, {
-            easing: "easeInExpo"
-          }],
-          [{
-            scaleX: 1,
-            scaleY: 1
-          }, 0.50]
-        ]
-      },
-      "callout.swing": {
-        defaultDuration: 950,
-        calls: [
-          [{
-            rotateZ: 15
-          }, 0.20],
-          [{
-            rotateZ: -10
-          }, 0.20],
-          [{
-            rotateZ: 5
-          }, 0.20],
-          [{
-            rotateZ: -5
-          }, 0.20],
-          [{
-            rotateZ: 0
-          }, 0.20]
-        ]
-      },
-      "callout.tada": {
-        defaultDuration: 1000,
-        calls: [
-          [{
-            scaleX: 0.9,
-            scaleY: 0.9,
-            rotateZ: -3
-          }, 0.10],
-          [{
-            scaleX: 1.1,
-            scaleY: 1.1,
-            rotateZ: 3
-          }, 0.10],
-          [{
-            scaleX: 1.1,
-            scaleY: 1.1,
-            rotateZ: -3
-          }, 0.10],
-          ["reverse", 0.125],
-          ["reverse", 0.125],
-          ["reverse", 0.125],
-          ["reverse", 0.125],
-          ["reverse", 0.125],
-          [{
-            scaleX: 1,
-            scaleY: 1,
-            rotateZ: 0
-          }, 0.20]
-        ]
-      },
-      "transition.fadeIn": {
-        defaultDuration: 500,
-        calls: [
-          [{
-            opacity: [1, 0]
-          }]
-        ]
-      },
-      "transition.fadeOut": {
-        defaultDuration: 500,
-        calls: [
-          [{
-            opacity: [0, 1]
-          }]
-        ]
-      },
-      "transition.flipXIn": {
-        defaultDuration: 700,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [800, 800],
-            rotateY: [0, -55]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0
-        }
-      },
-      "transition.flipXOut": {
-        defaultDuration: 700,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [800, 800],
-            rotateY: 55
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          rotateY: 0
-        }
-      },
-      "transition.flipYIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [800, 800],
-            rotateX: [0, -45]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0
-        }
-      },
-      "transition.flipYOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [800, 800],
-            rotateX: 25
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          rotateX: 0
-        }
-      },
-      "transition.flipBounceXIn": {
-        defaultDuration: 900,
-        calls: [
-          [{
-            opacity: [0.725, 0],
-            transformPerspective: [400, 400],
-            rotateY: [-10, 90]
-          }, 0.50],
-          [{
-            opacity: 0.80,
-            rotateY: 10
-          }, 0.25],
-          [{
-            opacity: 1,
-            rotateY: 0
-          }, 0.25]
-        ],
-        reset: {
-          transformPerspective: 0
-        }
-      },
-      "transition.flipBounceXOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [0.9, 1],
-            transformPerspective: [400, 400],
-            rotateY: -10
-          }, 0.50],
-          [{
-            opacity: 0,
-            rotateY: 90
-          }, 0.50]
-        ],
-        reset: {
-          transformPerspective: 0,
-          rotateY: 0
-        }
-      },
-      "transition.flipBounceYIn": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [0.725, 0],
-            transformPerspective: [400, 400],
-            rotateX: [-10, 90]
-          }, 0.50],
-          [{
-            opacity: 0.80,
-            rotateX: 10
-          }, 0.25],
-          [{
-            opacity: 1,
-            rotateX: 0
-          }, 0.25]
-        ],
-        reset: {
-          transformPerspective: 0
-        }
-      },
-      "transition.flipBounceYOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [0.9, 1],
-            transformPerspective: [400, 400],
-            rotateX: -15
-          }, 0.50],
-          [{
-            opacity: 0,
-            rotateX: 90
-          }, 0.50]
-        ],
-        reset: {
-          transformPerspective: 0,
-          rotateX: 0
-        }
-      },
-      "transition.swoopIn": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformOriginX: ["100%", "50%"],
-            transformOriginY: ["100%", "100%"],
-            scaleX: [1, 0],
-            scaleY: [1, 0],
-            translateX: [0, -700],
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          transformOriginX: "50%",
-          transformOriginY: "50%"
-        }
-      },
-      "transition.swoopOut": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformOriginX: ["50%", "100%"],
-            transformOriginY: ["100%", "100%"],
-            scaleX: 0,
-            scaleY: 0,
-            translateX: -700,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          transformOriginX: "50%",
-          transformOriginY: "50%",
-          scaleX: 1,
-          scaleY: 1,
-          translateX: 0
-        }
-      },
-      "transition.whirlIn": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: [1, 0],
-            scaleY: [1, 0],
-            rotateY: [0, 160]
-          }, 1, {
-            easing: "easeInOutSine"
-          }]
-        ]
-      },
-      "transition.whirlOut": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [0, "easeInOutQuint", 1],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: 0,
-            scaleY: 0,
-            rotateY: 160
-          }, 1, {
-            easing: "swing"
-          }]
-        ],
-        reset: {
-          scaleX: 1,
-          scaleY: 1,
-          rotateY: 0
-        }
-      },
-      "transition.shrinkIn": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: [1, 1.5],
-            scaleY: [1, 1.5],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.shrinkOut": {
-        defaultDuration: 600,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: 1.3,
-            scaleY: 1.3,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          scaleX: 1,
-          scaleY: 1
-        }
-      },
-      "transition.expandIn": {
-        defaultDuration: 700,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: [1, 0.625],
-            scaleY: [1, 0.625],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.expandOut": {
-        defaultDuration: 700,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformOriginX: ["50%", "50%"],
-            transformOriginY: ["50%", "50%"],
-            scaleX: 0.5,
-            scaleY: 0.5,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          scaleX: 1,
-          scaleY: 1
-        }
-      },
-      "transition.bounceIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            scaleX: [1.05, 0.3],
-            scaleY: [1.05, 0.3]
-          }, 0.40],
-          [{
-            scaleX: 0.9,
-            scaleY: 0.9,
-            translateZ: 0
-          }, 0.20],
-          [{
-            scaleX: 1,
-            scaleY: 1
-          }, 0.50]
-        ]
-      },
-      "transition.bounceOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            scaleX: 0.95,
-            scaleY: 0.95
-          }, 0.35],
-          [{
-            scaleX: 1.1,
-            scaleY: 1.1,
-            translateZ: 0
-          }, 0.35],
-          [{
-            opacity: [0, 1],
-            scaleX: 0.3,
-            scaleY: 0.3
-          }, 0.30]
-        ],
-        reset: {
-          scaleX: 1,
-          scaleY: 1
-        }
-      },
-      "transition.bounceUpIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [-30, 1000]
-          }, 0.60, {
-            easing: "easeOutCirc"
-          }],
-          [{
-            translateY: 10
-          }, 0.20],
-          [{
-            translateY: 0
-          }, 0.20]
-        ]
-      },
-      "transition.bounceUpOut": {
-        defaultDuration: 1000,
-        calls: [
-          [{
-            translateY: 20
-          }, 0.20],
-          [{
-            opacity: [0, "easeInCirc", 1],
-            translateY: -1000
-          }, 0.80]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.bounceDownIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [30, -1000]
-          }, 0.60, {
-            easing: "easeOutCirc"
-          }],
-          [{
-            translateY: -10
-          }, 0.20],
-          [{
-            translateY: 0
-          }, 0.20]
-        ]
-      },
-      "transition.bounceDownOut": {
-        defaultDuration: 1000,
-        calls: [
-          [{
-            translateY: -20
-          }, 0.20],
-          [{
-            opacity: [0, "easeInCirc", 1],
-            translateY: 1000
-          }, 0.80]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.bounceLeftIn": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [30, -1250]
-          }, 0.60, {
-            easing: "easeOutCirc"
-          }],
-          [{
-            translateX: -10
-          }, 0.20],
-          [{
-            translateX: 0
-          }, 0.20]
-        ]
-      },
-      "transition.bounceLeftOut": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            translateX: 30
-          }, 0.20],
-          [{
-            opacity: [0, "easeInCirc", 1],
-            translateX: -1250
-          }, 0.80]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.bounceRightIn": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [-30, 1250]
-          }, 0.60, {
-            easing: "easeOutCirc"
-          }],
-          [{
-            translateX: 10
-          }, 0.20],
-          [{
-            translateX: 0
-          }, 0.20]
-        ]
-      },
-      "transition.bounceRightOut": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            translateX: -30
-          }, 0.20],
-          [{
-            opacity: [0, "easeInCirc", 1],
-            translateX: 1250
-          }, 0.80]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.slideUpIn": {
-        defaultDuration: 900,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [0, 20],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideUpOut": {
-        defaultDuration: 900,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateY: -20,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.slideDownIn": {
-        defaultDuration: 900,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [0, -20],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideDownOut": {
-        defaultDuration: 900,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateY: 20,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.slideLeftIn": {
-        defaultDuration: 1000,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [0, -20],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideLeftOut": {
-        defaultDuration: 1050,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateX: -20,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.slideRightIn": {
-        defaultDuration: 1000,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [0, 20],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideRightOut": {
-        defaultDuration: 1050,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateX: 20,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.slideUpBigIn": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [0, 75],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideUpBigOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateY: -75,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.slideDownBigIn": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateY: [0, -75],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideDownBigOut": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateY: 75,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateY: 0
-        }
-      },
-      "transition.slideLeftBigIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [0, -75],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideLeftBigOut": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateX: -75,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.slideRightBigIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            translateX: [0, 75],
-            translateZ: 0
-          }]
-        ]
-      },
-      "transition.slideRightBigOut": {
-        defaultDuration: 750,
-        calls: [
-          [{
-            opacity: [0, 1],
-            translateX: 75,
-            translateZ: 0
-          }]
-        ],
-        reset: {
-          translateX: 0
-        }
-      },
-      "transition.perspectiveUpIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [800, 800],
-            transformOriginX: [0, 0],
-            transformOriginY: ["100%", "100%"],
-            rotateX: [0, -180]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%"
-        }
-      },
-      "transition.perspectiveUpOut": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [800, 800],
-            transformOriginX: [0, 0],
-            transformOriginY: ["100%", "100%"],
-            rotateX: -180
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%",
-          rotateX: 0
-        }
-      },
-      "transition.perspectiveDownIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [800, 800],
-            transformOriginX: [0, 0],
-            transformOriginY: [0, 0],
-            rotateX: [0, 180]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%"
-        }
-      },
-      "transition.perspectiveDownOut": {
-        defaultDuration: 850,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [800, 800],
-            transformOriginX: [0, 0],
-            transformOriginY: [0, 0],
-            rotateX: 180
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%",
-          rotateX: 0
-        }
-      },
-      "transition.perspectiveLeftIn": {
-        defaultDuration: 950,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [2000, 2000],
-            transformOriginX: [0, 0],
-            transformOriginY: [0, 0],
-            rotateY: [0, -180]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%"
-        }
-      },
-      "transition.perspectiveLeftOut": {
-        defaultDuration: 950,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [2000, 2000],
-            transformOriginX: [0, 0],
-            transformOriginY: [0, 0],
-            rotateY: -180
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%",
-          rotateY: 0
-        }
-      },
-      "transition.perspectiveRightIn": {
-        defaultDuration: 950,
-        calls: [
-          [{
-            opacity: [1, 0],
-            transformPerspective: [2000, 2000],
-            transformOriginX: ["100%", "100%"],
-            transformOriginY: [0, 0],
-            rotateY: [0, 180]
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%"
-        }
-      },
-      "transition.perspectiveRightOut": {
-        defaultDuration: 950,
-        calls: [
-          [{
-            opacity: [0, 1],
-            transformPerspective: [2000, 2000],
-            transformOriginX: ["100%", "100%"],
-            transformOriginY: [0, 0],
-            rotateY: 180
-          }]
-        ],
-        reset: {
-          transformPerspective: 0,
-          transformOriginX: "50%",
-          transformOriginY: "50%",
-          rotateY: 0
-        }
-      },
-      "snTransition.listStreamSlideIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0.5],
-            translateY: [0, -225]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      },
-      "snTransition.recordStreamSlideIn": {
-        defaultDuration: 800,
-        calls: [
-          [{
-            opacity: [1, 0.5],
-            translateY: [0, -82]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      },
-      "snTransition.slideOut": {
-        defaultDuration: 600,
-        calls: [
-          [{
-            opacity: [1, 0.5],
-            translateX: [-400, 0]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      },
-      "snTransition.slideIn": {
-        defaultDuration: 600,
-        calls: [
-          [{
-            opacity: [1, 1],
-            translateX: [0, -400]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      },
-      "snTransition.streamSlideLeft": {
-        defaultDuration: 600,
-        calls: [
-          [{
-            opacity: [1, 0.5],
-            translateX: [0, 400]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      },
-      "snTransition.streamSlideRight": {
-        defaultDuration: 600,
-        calls: [
-          [{
-            opacity: [1, 0.5],
-            translateX: [400, 0]
-          }, 1.0, {
-            easing: "easeOutQuart"
-          }],
-        ]
-      }
-    };
-    for (var effectName in Velocity.RegisterEffect.packagedEffects) {
-      Velocity.RegisterEffect(effectName, Velocity.RegisterEffect.packagedEffects[effectName]);
-    }
-    Velocity.RunSequence = function(originalSequence) {
-      var sequence = $.extend(true, [], originalSequence);
-      if (sequence.length > 1) {
-        $.each(sequence.reverse(), function(i, currentCall) {
-          var nextCall = sequence[i + 1];
-          if (nextCall) {
-            var currentCallOptions = currentCall.o || currentCall.options,
-              nextCallOptions = nextCall.o || nextCall.options;
-            var timing = (currentCallOptions && currentCallOptions.sequenceQueue === false) ? "begin" : "complete",
-              callbackOriginal = nextCallOptions && nextCallOptions[timing],
-              options = {};
-            options[timing] = function() {
-              var nextCallElements = nextCall.e || nextCall.elements;
-              var elements = nextCallElements.nodeType ? [nextCallElements] : nextCallElements;
-              callbackOriginal && callbackOriginal.call(elements, elements);
-              Velocity(currentCall);
+      };
+      f.prototype.parseBorders = function(e) {
+        var n = e.parseBounds(),
+          f = g(e),
+          o = ["Top", "Right", "Bottom", "Left"].map(function(n, f) {
+            var o = e.css("border" + n + "Style"),
+              d = e.color("border" + n + "Color");
+            "inset" === o && d.isBlack() && (d = new T([255, 255, 255, d.a]));
+            var i = $[o] ? $[o][f] : null;
+            return {
+              width: e.cssInt("border" + n + "Width"),
+              color: i ? d[i[0]](i[1]) : d,
+              args: null
             }
-            if (nextCall.o) {
-              nextCall.o = $.extend({}, nextCallOptions, options);
-            } else {
-              nextCall.options = $.extend({}, nextCallOptions, options);
+          }),
+          d = s(n, f, o);
+        return {
+          clip: this.parseBackgroundClip(e, d, o, f, n),
+          borders: t(o, n, d, f)
+        }
+      }, f.prototype.parseBackgroundClip = function(e, n, f, o, d) {
+        var i = e.css("backgroundClip"),
+          t = [];
+        switch (i) {
+          case "content-box":
+          case "padding-box":
+            p(t, o[0], o[1], n.topLeftInner, n.topRightInner, d.left + f[3].width, d.top + f[0].width), p(t, o[1], o[2], n.topRightInner, n.bottomRightInner, d.left + d.width - f[1].width, d.top + f[0].width), p(t, o[2], o[3], n.bottomRightInner, n.bottomLeftInner, d.left + d.width - f[1].width, d.top + d.height - f[2].width), p(t, o[3], o[0], n.bottomLeftInner, n.topLeftInner, d.left + f[3].width, d.top + d.height - f[2].width);
+            break;
+          default:
+            p(t, o[0], o[1], n.topLeftOuter, n.topRightOuter, d.left, d.top), p(t, o[1], o[2], n.topRightOuter, n.bottomRightOuter, d.left + d.width, d.top), p(t, o[2], o[3], n.bottomRightOuter, n.bottomLeftOuter, d.left + d.width, d.top + d.height), p(t, o[3], o[0], n.bottomLeftOuter, n.topLeftOuter, d.left, d.top + d.height)
+        }
+        return t
+      }, n.exports = f
+    }, {
+      "./color": 3,
+      "./fontmetrics": 7,
+      "./log": 13,
+      "./nodecontainer": 14,
+      "./pseudoelementcontainer": 18,
+      "./stackingcontext": 21,
+      "./textcontainer": 25,
+      "./utils": 26,
+      punycode: 1
+    }],
+    16: [function(e, n, f) {
+      function o(e, n, f) {
+        var o = "withCredentials" in new XMLHttpRequest;
+        if (!n) return Promise.reject("No proxy configured");
+        var d = t(o),
+          s = l(n, e, d);
+        return o ? a(s) : i(f, s, d).then(function(e) {
+          return m(e.content)
+        })
+      }
+
+      function d(e, n, f) {
+        var o = "crossOrigin" in new Image,
+          d = t(o),
+          s = l(n, e, d);
+        return o ? Promise.resolve(s) : i(f, s, d).then(function(e) {
+          return "data:" + e.type + ";base64," + e.content
+        })
+      }
+
+      function i(e, n, f) {
+        return new Promise(function(o, d) {
+          var i = e.createElement("script"),
+            t = function() {
+              delete window.html2canvas.proxy[f], e.body.removeChild(i)
+            };
+          window.html2canvas.proxy[f] = function(e) {
+            t(), o(e)
+          }, i.src = n, i.onerror = function(e) {
+            t(), d(e)
+          }, e.body.appendChild(i)
+        })
+      }
+
+      function t(e) {
+        return e ? "" : "html2canvas_" + Date.now() + "_" + ++r + "_" + Math.round(1e5 * Math.random())
+      }
+
+      function l(e, n, f) {
+        return e + "?url=" + encodeURIComponent(n) + (f.length ? "&callback=html2canvas.proxy." + f : "")
+      }
+
+      function s(e) {
+        return function(n) {
+          var f, o = new DOMParser;
+          try {
+            f = o.parseFromString(n, "text/html")
+          } catch (d) {
+            c("DOMParser not supported, falling back to createHTMLDocument"), f = document.implementation.createHTMLDocument("");
+            try {
+              f.open(), f.write(n), f.close()
+            } catch (i) {
+              c("createHTMLDocument write not supported, falling back to document.body.innerHTML"), f.body.innerHTML = n
             }
           }
-        });
-        sequence.reverse();
+          var t = f.querySelector("base");
+          if (!t || !t.href.host) {
+            var l = f.createElement("base");
+            l.href = e, f.head.insertBefore(l, f.head.firstChild)
+          }
+          return f
+        }
       }
-      Velocity(sequence[0]);
-    };
-  }((window.jQuery || window.Zepto || window), window, document);
-}));;
-/*! RESOURCE: /scripts/thirdparty/radio/radioGroup.js */
-var RadioGroup = function(domNode) {
-  this.domNode = domNode;
-  this.radioButtons = [];
-  this.firstRadioButton = null;
-  this.lastRadioButton = null;
-};
-RadioGroup.prototype.init = function() {
-  if (!this.domNode.getAttribute('role')) {
-    this.domNode.setAttribute('role', 'radiogroup');
-  }
-  var rbs = this.domNode.querySelectorAll('[role=radio]');
-  for (var i = 0; i < rbs.length; i++) {
-    var rb = new RadioButton(rbs[i], this);
-    rb.init();
-    this.radioButtons.push(rb);
-    if (!this.firstRadioButton) {
-      this.firstRadioButton = rb;
-    }
-    this.lastRadioButton = rb;
-  }
-  this.firstRadioButton.domNode.tabIndex = 0;
-};
-RadioGroup.prototype.setChecked = function(currentItem) {
-  for (var i = 0; i < this.radioButtons.length; i++) {
-    var rb = this.radioButtons[i];
-    rb.domNode.setAttribute('aria-checked', 'false');
-    rb.domNode.tabIndex = -1;
-  }
-  currentItem.domNode.setAttribute('aria-checked', 'true');
-  currentItem.domNode.click();
-  currentItem.domNode.tabIndex = 0;
-  currentItem.domNode.focus();
-};
-RadioGroup.prototype.setCheckedToPreviousItem = function(currentItem) {
-  var index;
-  if (currentItem === this.firstRadioButton) {
-    this.setChecked(this.lastRadioButton);
-  } else {
-    index = this.radioButtons.indexOf(currentItem);
-    this.setChecked(this.radioButtons[index - 1]);
-  }
-};
-RadioGroup.prototype.setCheckedToNextItem = function(currentItem) {
-  var index;
-  if (currentItem === this.lastRadioButton) {
-    this.setChecked(this.firstRadioButton);
-  } else {
-    index = this.radioButtons.indexOf(currentItem);
-    this.setChecked(this.radioButtons[index + 1]);
-  }
-};;
-/*! RESOURCE: /scripts/thirdparty/radio/radioButton.js */
-var RadioButton = function(domNode, groupObj) {
-  this.domNode = domNode;
-  this.radioGroup = groupObj;
-  this.keyCode = Object.freeze({
-    'RETURN': 13,
-    'SPACE': 32,
-    'END': 35,
-    'HOME': 36,
-    'LEFT': 37,
-    'UP': 38,
-    'RIGHT': 39,
-    'DOWN': 40
-  });
-};
-RadioButton.prototype.init = function() {
-  this.domNode.tabIndex = -1;
-  this.domNode.setAttribute('aria-checked', 'false');
-  this.domNode.addEventListener('keydown', this.handleKeydown.bind(this));
-  this.domNode.addEventListener('click', this.handleClick.bind(this));
-  this.domNode.addEventListener('focus', this.handleFocus.bind(this));
-  this.domNode.addEventListener('blur', this.handleBlur.bind(this));
-};
-RadioButton.prototype.handleKeydown = function(event) {
-  var tgt = event.currentTarget,
-    flag = false,
-    clickEvent;
-  switch (event.keyCode) {
-    case this.keyCode.SPACE:
-    case this.keyCode.RETURN:
-      this.radioGroup.setChecked(this);
-      flag = true;
-      break;
-    case this.keyCode.UP:
-      this.radioGroup.setCheckedToPreviousItem(this);
-      flag = true;
-      break;
-    case this.keyCode.DOWN:
-      this.radioGroup.setCheckedToNextItem(this);
-      flag = true;
-      break;
-    case this.keyCode.LEFT:
-      this.radioGroup.setCheckedToPreviousItem(this);
-      flag = true;
-      break;
-    case this.keyCode.RIGHT:
-      this.radioGroup.setCheckedToNextItem(this);
-      flag = true;
-      break;
-    default:
-      break;
-  }
-  if (flag) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-};
-RadioButton.prototype.handleClick = function(event) {
-  this.radioGroup.setChecked(this);
-};
-RadioButton.prototype.handleFocus = function(event) {
-  this.domNode.classList.add('focus');
-};
-RadioButton.prototype.handleBlur = function(event) {
-  this.domNode.classList.remove('focus');
-};;;
+
+      function u(e, n, f, d, i, t) {
+        return new o(e, n, window.document).then(s(e)).then(function(e) {
+          return y(e, f, d, i, t, 0, 0)
+        })
+      }
+      var a = e("./xhr"),
+        p = e("./utils"),
+        c = e("./log"),
+        y = e("./clone"),
+        m = p.decode64,
+        r = 0;
+      f.Proxy = o, f.ProxyURL = d, f.loadUrlDocument = u
+    }, {
+      "./clone": 2,
+      "./log": 13,
+      "./utils": 26,
+      "./xhr": 28
+    }],
+    17: [function(e, n) {
+      function f(e, n) {
+        var f = document.createElement("a");
+        f.href = e, e = f.href, this.src = e, this.image = new Image;
+        var d = this;
+        this.promise = new Promise(function(f, i) {
+          d.image.crossOrigin = "Anonymous", d.image.onload = f, d.image.onerror = i, new o(e, n, document).then(function(e) {
+            d.image.src = e
+          })["catch"](i)
+        })
+      }
+      var o = e("./proxy").ProxyURL;
+      n.exports = f
+    }, {
+      "./proxy": 16
+    }],
+    18: [function(e, n) {
+      function f(e, n, f) {
+        o.call(this, e, n), this.isPseudoElement = !0, this.before = ":before" === f
+      }
+      var o = e("./nodecontainer");
+      f.prototype.cloneTo = function(e) {
+        f.prototype.cloneTo.call(this, e), e.isPseudoElement = !0, e.before = this.before
+      }, f.prototype = Object.create(o.prototype), f.prototype.appendToDOM = function() {
+        this.before ? this.parent.node.insertBefore(this.node, this.parent.node.firstChild) : this.parent.node.appendChild(this.node), this.parent.node.className += " " + this.getHideClass()
+      }, f.prototype.cleanDOM = function() {
+        this.node.parentNode.removeChild(this.node), this.parent.node.className = this.parent.node.className.replace(this.getHideClass(), "")
+      }, f.prototype.getHideClass = function() {
+        return this["PSEUDO_HIDE_ELEMENT_CLASS_" + (this.before ? "BEFORE" : "AFTER")]
+      }, f.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE = "___html2canvas___pseudoelement_before", f.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER = "___html2canvas___pseudoelement_after", n.exports = f
+    }, {
+      "./nodecontainer": 14
+    }],
+    19: [function(e, n) {
+      function f(e, n, f, o, d) {
+        this.width = e, this.height = n, this.images = f, this.options = o, this.document = d
+      }
+      var o = e("./log");
+      f.prototype.renderImage = function(e, n, f, o) {
+        var d = e.cssInt("paddingLeft"),
+          i = e.cssInt("paddingTop"),
+          t = e.cssInt("paddingRight"),
+          l = e.cssInt("paddingBottom"),
+          s = f.borders,
+          u = n.width - (s[1].width + s[3].width + d + t),
+          a = n.height - (s[0].width + s[2].width + i + l);
+        this.drawImage(o, 0, 0, o.image.width || u, o.image.height || a, n.left + d + s[3].width, n.top + i + s[0].width, u, a)
+      }, f.prototype.renderBackground = function(e, n, f) {
+        n.height > 0 && n.width > 0 && (this.renderBackgroundColor(e, n), this.renderBackgroundImage(e, n, f))
+      }, f.prototype.renderBackgroundColor = function(e, n) {
+        var f = e.color("backgroundColor");
+        f.isTransparent() || this.rectangle(n.left, n.top, n.width, n.height, f)
+      }, f.prototype.renderBorders = function(e) {
+        e.forEach(this.renderBorder, this)
+      }, f.prototype.renderBorder = function(e) {
+        e.color.isTransparent() || null === e.args || this.drawShape(e.args, e.color)
+      }, f.prototype.renderBackgroundImage = function(e, n, f) {
+        var d = e.parseBackgroundImages();
+        d.reverse().forEach(function(d, i, t) {
+          switch (d.method) {
+            case "url":
+              var l = this.images.get(d.args[0]);
+              l ? this.renderBackgroundRepeating(e, n, l, t.length - (i + 1), f) : o("Error loading background-image", d.args[0]);
+              break;
+            case "linear-gradient":
+            case "gradient":
+              var s = this.images.get(d.value);
+              s ? this.renderBackgroundGradient(s, n, f) : o("Error loading background-image", d.args[0]);
+              break;
+            case "none":
+              break;
+            default:
+              o("Unknown background-image type", d.args[0])
+          }
+        }, this)
+      }, f.prototype.renderBackgroundRepeating = function(e, n, f, o, d) {
+        var i = e.parseBackgroundSize(n, f.image, o),
+          t = e.parseBackgroundPosition(n, f.image, o, i),
+          l = e.parseBackgroundRepeat(o);
+        switch (l) {
+          case "repeat-x":
+          case "repeat no-repeat":
+            this.backgroundRepeatShape(f, t, i, n, n.left + d[3], n.top + t.top + d[0], 99999, i.height, d);
+            break;
+          case "repeat-y":
+          case "no-repeat repeat":
+            this.backgroundRepeatShape(f, t, i, n, n.left + t.left + d[3], n.top + d[0], i.width, 99999, d);
+            break;
+          case "no-repeat":
+            this.backgroundRepeatShape(f, t, i, n, n.left + t.left + d[3], n.top + t.top + d[0], i.width, i.height, d);
+            break;
+          default:
+            this.renderBackgroundRepeat(f, t, i, {
+              top: n.top,
+              left: n.left
+            }, d[3], d[0])
+        }
+      }, n.exports = f
+    }, {
+      "./log": 13
+    }],
+    20: [function(e, n) {
+      function f(e, n) {
+        d.apply(this, arguments), this.canvas = this.options.canvas || this.document.createElement("canvas"), this.options.canvas || (this.canvas.width = e, this.canvas.height = n), this.ctx = this.canvas.getContext("2d"), this.taintCtx = this.document.createElement("canvas").getContext("2d"), this.ctx.textBaseline = "bottom", this.variables = {}, t("Initialized CanvasRenderer with size", e, "x", n)
+      }
+
+      function o(e) {
+        return e.length > 0
+      }
+      var d = e("../renderer"),
+        i = e("../lineargradientcontainer"),
+        t = e("../log");
+      f.prototype = Object.create(d.prototype), f.prototype.setFillStyle = function(e) {
+        return this.ctx.fillStyle = "object" == typeof e && e.isColor ? e.toString() : e, this.ctx
+      }, f.prototype.rectangle = function(e, n, f, o, d) {
+        this.setFillStyle(d).fillRect(e, n, f, o)
+      }, f.prototype.circle = function(e, n, f, o) {
+        this.setFillStyle(o), this.ctx.beginPath(), this.ctx.arc(e + f / 2, n + f / 2, f / 2, 0, 2 * Math.PI, !0), this.ctx.closePath(), this.ctx.fill()
+      }, f.prototype.circleStroke = function(e, n, f, o, d, i) {
+        this.circle(e, n, f, o), this.ctx.strokeStyle = i.toString(), this.ctx.stroke()
+      }, f.prototype.drawShape = function(e, n) {
+        this.shape(e), this.setFillStyle(n).fill()
+      }, f.prototype.taints = function(e) {
+        if (null === e.tainted) {
+          this.taintCtx.drawImage(e.image, 0, 0);
+          try {
+            this.taintCtx.getImageData(0, 0, 1, 1), e.tainted = !1
+          } catch (n) {
+            this.taintCtx = document.createElement("canvas").getContext("2d"), e.tainted = !0
+          }
+        }
+        return e.tainted
+      }, f.prototype.drawImage = function(e, n, f, o, d, i, t, l, s) {
+        (!this.taints(e) || this.options.allowTaint) && this.ctx.drawImage(e.image, n, f, o, d, i, t, l, s)
+      }, f.prototype.clip = function(e, n, f) {
+        this.ctx.save(), e.filter(o).forEach(function(e) {
+          this.shape(e).clip()
+        }, this), n.call(f), this.ctx.restore()
+      }, f.prototype.shape = function(e) {
+        return this.ctx.beginPath(), e.forEach(function(e, n) {
+          "rect" === e[0] ? this.ctx.rect.apply(this.ctx, e.slice(1)) : this.ctx[0 === n ? "moveTo" : e[0] + "To"].apply(this.ctx, e.slice(1))
+        }, this), this.ctx.closePath(), this.ctx
+      }, f.prototype.font = function(e, n, f, o, d, i) {
+        this.setFillStyle(e).font = [n, f, o, d, i].join(" ").split(",")[0]
+      }, f.prototype.fontShadow = function(e, n, f, o) {
+        this.setVariable("shadowColor", e.toString()).setVariable("shadowOffsetY", n).setVariable("shadowOffsetX", f).setVariable("shadowBlur", o)
+      }, f.prototype.clearShadow = function() {
+        this.setVariable("shadowColor", "rgba(0,0,0,0)")
+      }, f.prototype.setOpacity = function(e) {
+        this.ctx.globalAlpha = e
+      }, f.prototype.setTransform = function(e) {
+        this.ctx.translate(e.origin[0], e.origin[1]), this.ctx.transform.apply(this.ctx, e.matrix), this.ctx.translate(-e.origin[0], -e.origin[1])
+      }, f.prototype.setVariable = function(e, n) {
+        return this.variables[e] !== n && (this.variables[e] = this.ctx[e] = n), this
+      }, f.prototype.text = function(e, n, f) {
+        this.ctx.fillText(e, n, f)
+      }, f.prototype.backgroundRepeatShape = function(e, n, f, o, d, i, t, l, s) {
+        var u = [
+          ["line", Math.round(d), Math.round(i)],
+          ["line", Math.round(d + t), Math.round(i)],
+          ["line", Math.round(d + t), Math.round(l + i)],
+          ["line", Math.round(d), Math.round(l + i)]
+        ];
+        this.clip([u], function() {
+          this.renderBackgroundRepeat(e, n, f, o, s[3], s[0])
+        }, this)
+      }, f.prototype.renderBackgroundRepeat = function(e, n, f, o, d, i) {
+        var t = Math.round(o.left + n.left + d),
+          l = Math.round(o.top + n.top + i);
+        this.setFillStyle(this.ctx.createPattern(this.resizeImage(e, f), "repeat")), this.ctx.translate(t, l), this.ctx.fill(), this.ctx.translate(-t, -l)
+      }, f.prototype.renderBackgroundGradient = function(e, n) {
+        if (e instanceof i) {
+          var f = this.ctx.createLinearGradient(n.left + n.width * e.x0, n.top + n.height * e.y0, n.left + n.width * e.x1, n.top + n.height * e.y1);
+          e.colorStops.forEach(function(e) {
+            f.addColorStop(e.stop, e.color.toString())
+          }), this.rectangle(n.left, n.top, n.width, n.height, f)
+        }
+      }, f.prototype.resizeImage = function(e, n) {
+        var f = e.image;
+        if (f.width === n.width && f.height === n.height) return f;
+        var o, d = document.createElement("canvas");
+        return d.width = n.width, d.height = n.height, o = d.getContext("2d"), o.drawImage(f, 0, 0, f.width, f.height, 0, 0, n.width, n.height), d
+      }, n.exports = f
+    }, {
+      "../lineargradientcontainer": 12,
+      "../log": 13,
+      "../renderer": 19
+    }],
+    21: [function(e, n) {
+      function f(e, n, f, d) {
+        o.call(this, f, d), this.ownStacking = e, this.contexts = [], this.children = [], this.opacity = (this.parent ? this.parent.stack.opacity : 1) * n
+      }
+      var o = e("./nodecontainer");
+      f.prototype = Object.create(o.prototype), f.prototype.getParentStack = function(e) {
+        var n = this.parent ? this.parent.stack : null;
+        return n ? n.ownStacking ? n : n.getParentStack(e) : e.stack
+      }, n.exports = f
+    }, {
+      "./nodecontainer": 14
+    }],
+    22: [function(e, n) {
+      function f(e) {
+        this.rangeBounds = this.testRangeBounds(e), this.cors = this.testCORS(), this.svg = this.testSVG()
+      }
+      f.prototype.testRangeBounds = function(e) {
+        var n, f, o, d, i = !1;
+        return e.createRange && (n = e.createRange(), n.getBoundingClientRect && (f = e.createElement("boundtest"), f.style.height = "123px", f.style.display = "block", e.body.appendChild(f), n.selectNode(f), o = n.getBoundingClientRect(), d = o.height, 123 === d && (i = !0), e.body.removeChild(f))), i
+      }, f.prototype.testCORS = function() {
+        return "undefined" != typeof(new Image).crossOrigin
+      }, f.prototype.testSVG = function() {
+        var e = new Image,
+          n = document.createElement("canvas"),
+          f = n.getContext("2d");
+        e.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'></svg>";
+        try {
+          f.drawImage(e, 0, 0), n.toDataURL()
+        } catch (o) {
+          return !1
+        }
+        return !0
+      }, n.exports = f
+    }, {}],
+    23: [function(e, n) {
+      function f(e) {
+        this.src = e, this.image = null;
+        var n = this;
+        this.promise = this.hasFabric().then(function() {
+          return n.isInline(e) ? Promise.resolve(n.inlineFormatting(e)) : o(e)
+        }).then(function(e) {
+          return new Promise(function(f) {
+            window.html2canvas.svg.fabric.loadSVGFromString(e, n.createCanvas.call(n, f))
+          })
+        })
+      }
+      var o = e("./xhr"),
+        d = e("./utils").decode64;
+      f.prototype.hasFabric = function() {
+        return window.html2canvas.svg && window.html2canvas.svg.fabric ? Promise.resolve() : Promise.reject(new Error("html2canvas.svg.js is not loaded, cannot render svg"))
+      }, f.prototype.inlineFormatting = function(e) {
+        return /^data:image\/svg\+xml;base64,/.test(e) ? this.decode64(this.removeContentType(e)) : this.removeContentType(e)
+      }, f.prototype.removeContentType = function(e) {
+        return e.replace(/^data:image\/svg\+xml(;base64)?,/, "")
+      }, f.prototype.isInline = function(e) {
+        return /^data:image\/svg\+xml/i.test(e)
+      }, f.prototype.createCanvas = function(e) {
+        var n = this;
+        return function(f, o) {
+          var d = new window.html2canvas.svg.fabric.StaticCanvas("c");
+          n.image = d.lowerCanvasEl, d.setWidth(o.width).setHeight(o.height).add(window.html2canvas.svg.fabric.util.groupSVGElements(f, o)).renderAll(), e(d.lowerCanvasEl)
+        }
+      }, f.prototype.decode64 = function(e) {
+        return "function" == typeof window.atob ? window.atob(e) : d(e)
+      }, n.exports = f
+    }, {
+      "./utils": 26,
+      "./xhr": 28
+    }],
+    24: [function(e, n) {
+      function f(e, n) {
+        this.src = e, this.image = null;
+        var f = this;
+        this.promise = n ? new Promise(function(n, o) {
+          f.image = new Image, f.image.onload = n, f.image.onerror = o, f.image.src = "data:image/svg+xml," + (new XMLSerializer).serializeToString(e), f.image.complete === !0 && n(f.image)
+        }) : this.hasFabric().then(function() {
+          return new Promise(function(n) {
+            window.html2canvas.svg.fabric.parseSVGDocument(e, f.createCanvas.call(f, n))
+          })
+        })
+      }
+      var o = e("./svgcontainer");
+      f.prototype = Object.create(o.prototype), n.exports = f
+    }, {
+      "./svgcontainer": 23
+    }],
+    25: [function(e, n) {
+      function f(e, n) {
+        d.call(this, e, n)
+      }
+
+      function o(e, n, f) {
+        return e.length > 0 ? n + f.toUpperCase() : void 0
+      }
+      var d = e("./nodecontainer");
+      f.prototype = Object.create(d.prototype), f.prototype.applyTextTransform = function() {
+        this.node.data = this.transform(this.parent.css("textTransform"))
+      }, f.prototype.transform = function(e) {
+        var n = this.node.data;
+        switch (e) {
+          case "lowercase":
+            return n.toLowerCase();
+          case "capitalize":
+            return n.replace(/(^|\s|:|-|\(|\))([a-z])/g, o);
+          case "uppercase":
+            return n.toUpperCase();
+          default:
+            return n
+        }
+      }, n.exports = f
+    }, {
+      "./nodecontainer": 14
+    }],
+    26: [function(e, n, f) {
+      f.smallImage = function() {
+        return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      }, f.bind = function(e, n) {
+        return function() {
+          return e.apply(n, arguments)
+        }
+      }, f.decode64 = function(e) {
+        var n, f, o, d, i, t, l, s, u = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+          a = e.length,
+          p = "";
+        for (n = 0; a > n; n += 4) f = u.indexOf(e[n]), o = u.indexOf(e[n + 1]), d = u.indexOf(e[n + 2]), i = u.indexOf(e[n + 3]), t = f << 2 | o >> 4, l = (15 & o) << 4 | d >> 2, s = (3 & d) << 6 | i, p += 64 === d ? String.fromCharCode(t) : 64 === i || -1 === i ? String.fromCharCode(t, l) : String.fromCharCode(t, l, s);
+        return p
+      }, f.getBounds = function(e) {
+        if (e.getBoundingClientRect) {
+          var n = e.getBoundingClientRect(),
+            f = null == e.offsetWidth ? n.width : e.offsetWidth;
+          return {
+            top: n.top,
+            bottom: n.bottom || n.top + n.height,
+            right: n.left + f,
+            left: n.left,
+            width: f,
+            height: null == e.offsetHeight ? n.height : e.offsetHeight
+          }
+        }
+        return {}
+      }, f.offsetBounds = function(e) {
+        var n = e.offsetParent ? f.offsetBounds(e.offsetParent) : {
+          top: 0,
+          left: 0
+        };
+        return {
+          top: e.offsetTop + n.top,
+          bottom: e.offsetTop + e.offsetHeight + n.top,
+          right: e.offsetLeft + n.left + e.offsetWidth,
+          left: e.offsetLeft + n.left,
+          width: e.offsetWidth,
+          height: e.offsetHeight
+        }
+      }, f.parseBackgrounds = function(e) {
+        var n, f, o, d, i, t, l, s = " \r\n	",
+          u = [],
+          a = 0,
+          p = 0,
+          c = function() {
+            n && ('"' === f.substr(0, 1) && (f = f.substr(1, f.length - 2)), f && l.push(f), "-" === n.substr(0, 1) && (d = n.indexOf("-", 1) + 1) > 0 && (o = n.substr(0, d), n = n.substr(d)), u.push({
+              prefix: o,
+              method: n.toLowerCase(),
+              value: i,
+              args: l,
+              image: null
+            })), l = [], n = o = f = i = ""
+          };
+        return l = [], n = o = f = i = "", e.split("").forEach(function(e) {
+          if (!(0 === a && s.indexOf(e) > -1)) {
+            switch (e) {
+              case '"':
+                t ? t === e && (t = null) : t = e;
+                break;
+              case "(":
+                if (t) break;
+                if (0 === a) return a = 1, void(i += e);
+                p++;
+                break;
+              case ")":
+                if (t) break;
+                if (1 === a) {
+                  if (0 === p) return a = 0, i += e, void c();
+                  p--
+                }
+                break;
+              case ",":
+                if (t) break;
+                if (0 === a) return void c();
+                if (1 === a && 0 === p && !n.match(/^url$/i)) return l.push(f), f = "", void(i += e)
+            }
+            i += e, 0 === a ? n += e : f += e
+          }
+        }), c(), u
+      }
+    }, {}],
+    27: [function(e, n) {
+      function f(e) {
+        o.apply(this, arguments), this.type = "linear" === e.args[0] ? o.TYPES.LINEAR : o.TYPES.RADIAL
+      }
+      var o = e("./gradientcontainer");
+      f.prototype = Object.create(o.prototype), n.exports = f
+    }, {
+      "./gradientcontainer": 9
+    }],
+    28: [function(e, n) {
+      function f(e) {
+        return new Promise(function(n, f) {
+          var o = new XMLHttpRequest;
+          o.open("GET", e), o.onload = function() {
+            200 === o.status ? n(o.responseText) : f(new Error(o.statusText))
+          }, o.onerror = function() {
+            f(new Error("Network Error"))
+          }, o.send()
+        })
+      }
+      n.exports = f
+    }, {}]
+  }, {}, [4])(4)
+});;
