@@ -175,6 +175,314 @@ ScrumReleaseImportGroupDialog.prototype = {
     }
   }
 };
+/*! RESOURCE: N helper */
+var N = {};
+N.logs = true;
+N.l = function(msg, append) {
+  if (!this.logs) {
+    return;
+  }
+  var str = (append) ? append + ": " : this.type + ": ";
+  msg = str + msg;
+  if (!this.nil(window.console) && !this.nil(window.console.log)) {
+    console.log(msg);
+  }
+  try {
+    var path = window.self.location.pathname;
+    var src = path.substring(path.lastIndexOf('/') + 1);
+    if (window.self.opener && window != window.self.opener) {
+      if (window.self.opener.jslog) {
+        window.self.opener.jslog(msg, src);
+      }
+    } else if (parent && parent.jslog && jslog != parent.jslog) {
+      parent.jslog(msg, src);
+    }
+  } catch (e) {}
+};
+N.nil = function(given) {
+  try {
+    if (typeof given == 'undefined') {
+      return true;
+    } else if (given === null || given == '' || given == 0 || given == false) {
+      return true;
+    }
+  } catch (e) {
+    return true;
+  }
+  return false;
+};
+N.isNil = function(given) {
+  return this.nil(given);
+};
+N.notNil = function(given) {
+  return !this.nil(given);
+};
+N.isNotNil = function(given) {
+  return !this.nil(given);
+};
+N.getRefID = function(table, field, relField, callback) {
+  if (arguments.length < 3) {
+    this.l("Missing required inputs", "N.getRefID");
+    return false;
+  }
+  var fieldValue = g_form.getValue(field);
+  if (this.nil(fieldValue)) {
+    fieldValue = field + '';
+  }
+  if (arguments.length == 3) {
+    callback = relField;
+    N._ajax('getRefID', table, field, callback);
+  } else {
+    N._ajax('getRefID', table, field, relField, callback);
+  }
+};
+N.getDuration = function(startField, endField, warn) {
+  var startTimeField = startField;
+  var endTimeField = endField;
+  if (!g_form) {
+    return '';
+  }
+  var endTimeFieldLabel = g_form.getLabel(endTimeField).innerHTML.split(':').join('');
+  var startTimeFieldLabel = g_form.getLabel(startTimeField).innerHTML.split(':').join('');
+  var msg = 'The ' + endTimeFieldLabel + ' time  cannot be prior to the ' + startTimeFieldLabel + '.';
+  var endTime = g_form.getValue(endTimeField);
+  var endTimeObj = this.dff(endTime);
+  var startTime = g_form.getValue(startTimeField);
+  var startTimeObj = this.dff(startTime);
+  var diff = endTimeObj - startTimeObj;
+  var afterToday = (new Date() - startTimeObj) > 0;
+  if (diff <= 0) {
+    if (warn && ((endTime && !afterToday) || (startTime && endTime))) {
+      g_form.showErrorBox(endTimeField, msg);
+      g_form.setValue(endTimeField, '');
+    }
+    return '';
+  }
+  var dateDur = new Date(diff);
+  var days = dateDur.getUTCDate() - 1;
+  var hours = dateDur.getUTCHours();
+  var mins = dateDur.getUTCMinutes();
+  var secs = dateDur.getUTCSeconds();
+  return days + " " + this._two(hours) + ":" + this._two(mins) + ":" + this._two(secs);
+};
+N.isAfterToday = function(start) {
+  return this.isAfterDate(start);
+};
+N.isBeforeToday = function(start) {
+  return !this.isAfterDate(start);
+};
+N.isAfter = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfter called with no start");
+    return;
+  }
+  start = this.dff(start);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  if (start < end) {
+    return true;
+  }
+  return false;
+};
+N.isBefore = function(start, end) {
+  return !this.isAfter(start, end);
+};
+N.isAfterDate = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfterDate called with no start");
+    return;
+  }
+  start = this.dff(start, true);
+  var startMS = start.setHours(23, 59, 59, 999);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  return start < end;
+};
+N.isBeforeDate = function(start, end) {
+  if (this.nil(start)) {
+    this.l("N.isAfterDate called with no start");
+    return;
+  }
+  start = this.dff(start);
+  if (this.nil(end)) {
+    end = new Date().getTime();
+  } else {
+    end = this.dff(end);
+  }
+  var endMS = end.setHours(0, 0, 0, 0);
+  return start < end;
+};
+N.dff = function(d, obj) {
+  if (this.nil(d)) {
+    this.l("N.dff called with no input");
+    return;
+  }
+  if (this.nil(d.getTime)) {
+    if (/ /.test(d)) {
+      d = getDateFromFormat(d, g_user_date_time_format);
+    } else {
+      d = getDateFromFormat(d, g_user_date_format);
+    }
+  }
+  return (obj) ? new Date(d) : d + 0;
+};
+N.showSection = function(sectName, bool) {
+  var section = $$('span[tab_caption="' + sectName + '"]')[0].select('span[id*=section.]')[0];
+  var sectHead = this._getSectHead(sectName);
+  if (bool) {
+    sectHead.show();
+    section.show();
+  } else {
+    section.hide();
+    sectHead.hide();
+  }
+};
+N.showRelatedPopup = function(refFieldElID, title, table, column, value) {
+  var s = (refFieldElID == null) ? '' : refFieldElID.split('.');
+  var encQ;
+  title = (this.notNil(title)) ? title : "Related records";
+  table = (this.notNil(table)) ? table : $('sys_display.' + s.join('.')).readAttribute('data-table') + '';
+  if (this.notNil(column) && this.nil(value)) {
+    encQ = column + '';
+  }
+  column = (this.notNil(column)) ? column : s[1] + '';
+  value = (this.notNil(value)) ? value : g_form.getValue(s[1]);
+  var referenceField = s[1] + '';
+  var v = g_form.getValue(referenceField);
+  var w = new GlideDialogWindow('show_list');
+  w.setTitle(title);
+  w.setPreference('table', table + '_list');
+  if (this.notNil(encQ)) {
+    w.setPreference('sysparm_query', encQ);
+  } else {
+    w.setPreference('sysparm_query', "sys_id!=" + g_form.getUniqueValue() + "^" + column + "=" + value);
+  }
+  w.render();
+};
+N.selectRelatedList = function(title, scroll) {
+  var rlHeader = this._getRelatedListHeader(title);
+  if (rlHeader) {
+    rlHeader.click();
+    if (this.notNil(scroll)) {
+      g_form._scrollToElementTR(rlHeader.up("tr"));
+    }
+  } else {
+    this.l("Couldn't find Related List with title " + title, "N.SelectRelatedList");
+  }
+};
+N.saveOptions = function(fieldName) {
+  if (this.nil(g_scratchpad) || this.nil(g_scratchpad[fieldName])) {
+    return;
+  }
+  try {
+    var ctrl = $(g_form.getTableName() + '.' + fieldName);
+    var opts = ctrl.childElements();
+    var optArr = [];
+    for (var i = 0; i < opts.length; i++) {
+      optArr.push({
+        value: opts[i].value + '',
+        label: opts[i].innerHTML + ''
+      });
+    }
+    g_scratchpad[fieldName] = optArr;
+  } catch (e) {
+    this.l("N.saveOptions errored with: " + e, "N.saveOptions");
+  }
+};
+N.restoreOptions = function(fieldName) {
+  g_form.clearOptions(fieldName);
+  var optArr = g_scratchpad[fieldName];
+  try {
+    for (var i = 0; i < optArr.length; i++) {
+      g_form.addOption(fieldName, optArr[i].value, optArr[i].label);
+    }
+  } catch (e) {
+    jslog('restoreOptions did not have any options to restore');
+  }
+};
+N.getProperty = function(propName, defaultVal) {
+  var propVal = N._ajaxWait("getProperty", propName);
+  if (this.notNil(propVal)) {
+    return propVal;
+  }
+  if (this.notNil(defaultVal)) {
+    return defaultVal;
+  }
+  return '';
+};
+N.setStyle = function(fieldName, styleAttr, styleValue) {
+  var fldCtrl;
+  if (arguments.length < 2) {
+    return;
+  } else if (arguments.length == 2) {
+    styleValue = styleAttr + '';
+    styleAttr = 'width';
+  }
+  try {
+    fldCtrl = g_form.getControl(fieldName);
+  } catch (e) {
+    this.l("N.setStyle failed with: " + e);
+  }
+  if (this.notNil(fldCtrl)) {
+    if (this.notNil(fldCtrl.style)) {
+      fldCtrl.style[styleAttr] = styleValue + '';
+    }
+  }
+};
+N._getSectHead = function(sectName) {
+  var sectNameNBSP = sectName.replace(/ /g, "&nbsp;");
+  var tabs = $$('span.tab_caption_text');
+  for (var i = 0; i < tabs.length; i++) {
+    if (tabs[i].innerHTML == sectName || tabs[i].innerHTML == sectNameNBSP) {
+      return $(tabs[i]).up('h3');
+    }
+  }
+  return;
+};
+N._getRelatedListHeader = function(title) {
+  title = title.toString().toLowerCase();
+  var elArr = $$('span.tab_caption_text');
+  for (var i = 0; i < elArr.length; i++) {
+    var eln = elArr[i].innerHTML.toString().toLowerCase();
+    eln = eln.replace(/&nbsp;/gi, " ");
+    if (eln.indexOf(title) >= 0) {
+      return elArr[i];
+    }
+  }
+  return false;
+};
+N._ajaxWait = function(funcName) {
+  var ga = new GlideAjax('NAjax');
+  ga.addParam('sysparm_name', funcName);
+  for (var i = 1; i < arguments.length; i++) {
+    ga.addParam("sysparm_arg" + i, arguments[i]);
+  }
+  ga.getXMLWait();
+  var ans = ga.getAnswer();
+  if (this.nil(ans)) {
+    this.l("Response for NAjax call " + funcName + " is nil", "N._ajaxWait");
+    return null;
+  }
+  return ans;
+};
+N._ajax = function(funcName) {
+  var ga = new GlideAjax('NAjax');
+  ga.addParam('sysparm_name', funcName);
+  for (var i = 1; i < arguments.length - 1; i++) {
+    ga.addParam("sysparm_arg" + i, arguments[i]);
+  }
+  ga.getXMLAnswer(arguments[arguments.length - 1]);
+};
+N._two = function(x) {
+  return ((x > 9) ? "" : "0") + x;
+};
+N.type = "N Helper - UI Script";
 /*! RESOURCE: ConnectionUtils */
 var ConnectionUtils = {
   getSysConnection: function() {
@@ -227,184 +535,6 @@ var ConnectionUtils = {
     dialog.setPreference('onPromptComplete', onPromptComplete);
     dialog.render();
   },
-};
-/*! RESOURCE: PlannedTaskDateUtil */
-var PlannedTaskDateUtil = Class.create();
-PlannedTaskDateUtil.prototype = {
-  initialize: function(g_form, g_scratchpad) {
-    this.g_form = g_form;
-    this.g_scratchpad = g_scratchpad;
-    var tableName = g_form.getTableName();
-    this.dayField = "ni." + tableName + ".durationdur_day";
-    this.hourField = "ni." + tableName + ".durationdur_hour";
-    this.minuteField = "ni." + tableName + ".durationdur_min";
-    this.secondField = "ni." + tableName + ".durationdur_sec";
-    this.tableName = tableName;
-  },
-  _showErrorMessage: function(column, message) {
-    if (!message && !column) {
-      try {
-        this._gForm.showFieldMsg(column, message, 'error');
-      } catch (e) {}
-    }
-  },
-  setEndDate: function(answer) {
-    this.g_scratchpad.flag = true;
-    this.g_form.setValue('end_date', answer);
-  },
-  setDuration: function(answer) {
-    this.g_scratchpad.flag = true;
-    this.g_form.setValue('duration', answer);
-  },
-  getStartDate: function() {
-    return this.g_form.getValue('start_date');
-  },
-  getDays: function() {
-    var days = this.g_form.getValue(this.dayField);
-    return this._getIntValue(days);
-  },
-  getHours: function() {
-    var hours = this.g_form.getValue(this.hourField);
-    return this._getIntValue(hours);
-  },
-  getMinutes: function() {
-    var minutes = this.g_form.getValue(this.minuteField);
-    return this._getIntValue(minutes);
-  },
-  getSeconds: function() {
-    var seconds = this.g_form.getValue(this.secondField);
-    return this._getIntValue(seconds);
-  },
-  _getIntValue: function(value) {
-    var intValue = 0;
-    if (value && !isNaN(value))
-      intValue = parseInt(value);
-    return intValue;
-  },
-  setDurationHoursAndDays: function() {
-    var g_form = this.g_form;
-    var days = this.getDays();
-    var hours = this.getHours();
-    var minutes = this.getMinutes();
-    var seconds = this.getSeconds();
-    this.g_scratchpad.flag = false;
-    if (seconds >= 60) {
-      minutes += Math.floor(seconds / 60);
-      seconds = seconds % 60;
-    }
-    if (minutes >= 60) {
-      hours += Math.floor(minutes / 60);
-      minutes = minutes % 60;
-    }
-    if (hours >= 24) {
-      days += Math.floor(hours / 24);
-      hours = hours % 24;
-    }
-    if (hours < 9)
-      hours = "0" + hours;
-    if (minutes < 9)
-      minutes = "0" + minutes;
-    if (seconds < 9)
-      seconds = "0" + seconds;
-    g_form.setValue(this.dayField, days);
-    g_form.setValue(this.hourField, hours);
-    g_form.setValue(this.minuteField, minutes);
-    g_form.setValue(this.secondField, seconds);
-  },
-  validateDurationFields: function() {
-    var g_form = this.g_form;
-    var day = g_form.getValue(this.dayField);
-    var hour = g_form.getValue(this.hourField);
-    var minute = g_form.getValue(this.minuteField);
-    var second = g_form.getValue(this.secondField);
-    if (!day || day.trim() == '')
-      g_form.setValue(this.dayField, "00");
-    if (!hour || hour.trim() == '')
-      g_form.setValue(this.hourField, "00");
-    if (!minute || minute.trim() == '')
-      g_form.setValue(this.minuteField, "00");
-    if (!second || second.trim() == '')
-      g_form.setValue(this.secondField, "00");
-    var startDate = g_form.getValue("start_date");
-    if (g_form.getValue("duration") == '')
-      g_form.setValue("end_date", g_form.getValue("start_date"));
-  },
-  handleResponse: function(response, column) {
-    if (response && response.responseXML) {
-      var result = response.responseXML.getElementsByTagName("result");
-      if (result) {
-        result = result[0];
-        var status = result.getAttribute("status");
-        var answer = result.getAttribute("answer");
-        if (status == 'error') {
-          var message = result.getAttribute('message');
-          this._showErrorMessage(result.getAttribute("column"), message);
-        } else {
-          if (column == 'duration' || column == 'start_date')
-            this.setEndDate(answer);
-          else if (column == 'end_date')
-            this.setDuration(answer);
-        }
-      }
-    }
-  },
-  calculateDateTime: function(column) {
-    var self = this;
-    var ga = new GlideAjax('AjaxPlannedTaskDateUtil');
-    ga.addParam('sysparm_start_date', this.g_form.getValue('start_date'));
-    if (column == 'duration' || column == 'start_date') {
-      ga.addParam('sysparm_duration', this.g_form.getValue('duration'));
-      ga.addParam('sysparm_name', 'getEndDate');
-    } else if (column == 'end_date') {
-      ga.addParam('sysparm_end_date', this.g_form.getValue('end_date'));
-      ga.addParam('sysparm_name', 'getDuration');
-    }
-    ga.getXML(function(response) {
-      self.handleResponse(response, column);
-    });
-  },
-  calculateEndDateFromDuration: function(control, oldValue, newValue, isLoading, isTemplate) {
-    var g_form = this.g_form;
-    var g_scratchpad = this.g_scratchpad;
-    this.validateDurationFields();
-    if (isLoading || g_scratchpad.flag) {
-      g_scratchpad.flag = false;
-      return;
-    }
-    var startDate = this.getStartDate();
-    var startDateEmpty = !startDate || startDate.trim() === '';
-    if (newValue.indexOf("-") > -1 || startDateEmpty)
-      return;
-    this.setDurationHoursAndDays();
-    this.calculateDateTime('duration');
-  },
-  calculateEndDateFromStartDate: function(control, oldValue, newValue, isLoading, isTemplate) {
-    var g_form = this.g_form;
-    var g_scratchpad = this.g_scratchpad;
-    try {
-      g_form.hideFieldMsg('start_date');
-    } catch (e) {}
-    if (isLoading || g_scratchpad.flag) {
-      g_scratchpad.flag = false;
-      return;
-    }
-    if (newValue == '')
-      return;
-    this.calculateDateTime('start_date');
-  },
-  calculateDurationFromEndDate: function(control, oldValue, newValue, isLoading, isTemplate) {
-    var g_form = this.g_form;
-    var g_scratchpad = this.g_scratchpad;
-    var startDateColumn = 'start_date';
-    var startDate;
-    if (isLoading || g_scratchpad.flag) {
-      g_scratchpad.flag = false;
-      return;
-    }
-    startDate = g_form.getValue(startDateColumn);
-    this.calculateDateTime('end_date');
-  },
-  type: "PlannedTaskDateUtil"
 };
 /*! RESOURCE: Validate Client Script Functions */
 function validateFunctionDeclaration(fieldName, functionName) {
@@ -505,78 +635,22 @@ function removeNewlinesFromClientScript(code) {
   var pattern = /[\r\n]*/g;
   return code.replace(pattern, "");
 }
-/*! RESOURCE: getSCAttachmentCount */
-function getSCAttachmentCount() {
-  var length;
+/*! RESOURCE: Stop Impersonation button */
+addLoadEvent(addUnimpersonateButton);
+
+function addUnimpersonateButton() {
   try {
-    length = angular.element("#sc_cat_item").scope().attachments.length;
-  } catch (e) {
-    length = -1;
-  }
-  return length;
+    if ($('impersonating_toggle_id').value != '') {
+      $('impersonate_span').insert({
+        after: '<span id="unimpersonate_span"><img onclick="unimpersonateMe();" title="End impersonation" src="images/icons/stop.gifx" style="cursor:pointer;cursor:hand"></img></span>'
+      });
+    }
+  } catch (e) {}
 }
-/*! RESOURCE: ProjectTaskUtil */
-var ProjectTaskUtil = Class.create();
-ProjectTaskUtil.prototype = {
-  initialize: function() {},
-  type: 'ProjectTaskUtil'
-};
-ProjectTaskUtil.decodeOnLoadActualDatesState = function(response) {
-  var result = (response.responseXML.getElementsByTagName('result'))[0];
-  var status = result.getAttribute('status');
-  var workStartReadOnly = true;
-  var workEndReadOnly = true;
-  if (status == 'success') {
-    var state = result.getAttribute('state');
-    if (state == 'closed') {
-      workStartReadOnly = false;
-      workEndReadOnly = false;
-    } else if (state == 'started')
-      workStartReadOnly = false;
-  }
-  return {
-    workStartReadOnly: workStartReadOnly,
-    workEndReadOnly: workEndReadOnly
-  };
-};
-ProjectTaskUtil.decodeOnChangeActualDatesState = function(response) {
-  var result = (response.responseXML.getElementsByTagName('result'))[0];
-  var state = JSON.parse(result.getAttribute('state'));
-  return {
-    workStartState: ProjectTaskUtil._decodeActualStartDateState(state.work_start_state),
-    workEndState: ProjectTaskUtil._decodeActualEndDateState(state.work_end_state)
-  };
-};
-ProjectTaskUtil._decodeActualStartDateState = function(result) {
-  var workStartState = {
-    date: '',
-    readOnly: true
-  };
-  var status = result.work_start_status;
-  if (status == 'success') {
-    var state = result.work_start_state;
-    if (state == 'already_started' || state == 'about_to_start') {
-      workStartState.readOnly = false;
-      workStartState.date = result.work_start;
-    }
-  }
-  return workStartState;
-};
-ProjectTaskUtil._decodeActualEndDateState = function(result) {
-  var workEndState = {
-    date: '',
-    readOnly: true
-  };
-  var status = result.work_end_status;
-  if (status == 'success') {
-    var state = result.work_end_state;
-    if (state == 'already_closed' || state == 'about_to_close') {
-      workEndState.readOnly = false;
-      workEndState.date = result.work_end;
-    }
-  }
-  return workEndState;
-};
+
+function unimpersonateMe() {
+  top.location.href = 'ui_page_process.do?sys_id=b071b5dc0a0a0a7900846d21db8e4db6&sys_user=' + $('impersonating_toggle_id').value;
+}
 /*! RESOURCE: ScrumTaskDialog */
 var ScrumTaskDialog = Class.create(GlideDialogWindow, {
   initialize: function() {
@@ -1132,6 +1206,16 @@ function validateStartEndDate(startDateField, endDateField, processErrorMsg) {
     return false;
   }
   return true;
+}
+/*! RESOURCE: CatalogAttachmentCheck */
+function getSCAttachmentCount() {
+  var length;
+  try {
+    length = angular.element("#sc_cat_item").scope().attachments.length;
+  } catch (e) {
+    length = -1;
+  }
+  return length;
 }
 /*! RESOURCE: AddTeamMembers */
 var AddTeamMembers = Class.create(GlideDialogWindow, {
@@ -1706,657 +1790,6 @@ ScrumCloneReleaseTeamDialog.prototype = {
       return false;
     }
   }
-};
-/*! RESOURCE: KCSFunctions */
-addLoadEvent(loadStars);
-
-function solutionForIncident(x, sys_id) {
-  var gf = self.parent.window;
-  var lastSaved = self.parent.window.document.getElementById("onLoad_sys_updated_on").value;
-  var f = x.form;
-  var sysID;
-  if (sys_id == '') {
-    sysID = f.sys_id.value;
-  } else {
-    sysID = sys_id;
-  }
-  var rel = new RelationType();
-  rel.findType('task', 'kb_knowledge');
-  var id = self.parent.window.document.getElementById("sys_uniqueValue");
-  rel.setRelatedInfo(id.value, 'task', 'kb_knowledge');
-  rel.addSelected(rel, sysID);
-  var knowledge = new GlideRecord('kb_knowledge');
-  knowledge.addQuery('sys_id', sys_id);
-  knowledge.query();
-  if (knowledge.next()) {
-    var knowledge_number = knowledge.number;
-  }
-  var incident = new GlideRecord('incident');
-  incident.addQuery('sys_id', id.value);
-  incident.query();
-  if (incident.next()) {
-    gf.g_form.setValue('u_kb_solution', sys_id);
-    gf.g_form.save();
-  }
-  return true;
-}
-
-function unsolutionForIncident(kcs_id) {
-  var gf = self.parent.window;
-  var incident_sys_id = gf.g_form.getValue('sys_uniqueValue');
-  var relation = new GlideRecord('task_rel_kb');
-  relation.addQuery('parent.sys_id', incident_sys_id);
-  relation.addQuery('child.sys_id', kcs_id);
-  relation.query();
-  if (relation.next()) {
-    relation.deleteRecord();
-    setTimeout(incident_remove_kb_solution(incident_sys_id, gf), 3000);
-  }
-}
-
-function incident_remove_kb_solution(incident_sys_id, gf) {
-  var incident = new GlideRecord('incident');
-  incident.addQuery('sys_id', incident_sys_id);
-  incident.query();
-  if (incident.next()) {
-    gf.g_form.setValue('u_kb_solution', '');
-    gf.g_form.save();
-  }
-  return true;
-}
-
-function getKcSRelation(x) {
-  var gf = self.parent.window;
-  var relation = new GlideRecord('task_rel_kb');
-  relation.addQuery('parent.sys_id', gf.g_form.getValue('sys_uniqueValue'));
-  relation.query();
-  while (relation.next()) {
-    var relation_sys_id = relation.child;
-    $(".kb-fixed").each(function() {
-      $(this).addClass("kb-fixed-readonly-button");
-      $(this).prop('disabled', true);
-      var generated_kcs = $(this).attr('rel');
-      if (relation_sys_id == generated_kcs) {
-        $(this).addClass("kb-fixed-selected-button");
-        $(this).removeClass("kb-fixed-readonly-button");
-        $(this).prop('disabled', false);
-      }
-    });
-  }
-}
-
-function printError() {
-  self.opener.g_form.addErrorMessage(gel('error_msg').value);
-}
-
-function loadStars() {
-  var vote = document.getElementById('vote');
-  if (vote) {
-    star1 = new Image();
-    star1.src = "images/icons/kb_star_off.gifx";
-    star2 = new Image();
-    star2.src = "images/icons/kb_star_on.gifx";
-    starFull = new Image();
-    starFull.src = "images/icons/kb_star_full.gifx";
-    starHalf = new Image();
-    starHalf.src = "images/icons/kb_star_half.gifx";
-  }
-}
-
-function postUsed(id, used) {
-  var view = document.getElementById("view_id");
-  var query = document.getElementById("sysparm_search");
-  openFeedback();
-  if (id) {
-    var ajax = new GlideAjax("KnowledgeAjax");
-    ajax.addParam("sysparm_type", "kbGetText");
-    ajax.addParam("sysparm_search", escape(query.value));
-    ajax.addParam("article_id", id);
-    ajax.addParam("used", used);
-    if (view)
-      ajax.addParam("view_id", view.value);
-    ajax.getXML(doNothing);
-  }
-  if (isNaN(used)) {
-    var e;
-    if (used == 'yes') {
-      hideObject(gel('noarticlerating'));
-      e = document.getElementById('yesarticlerating');
-      if (e) {
-        e.setAttribute("onclick", "");
-        e.setAttribute("class", "kb_link_disable");
-        e.setAttribute("className", "kb_link_disable");
-      }
-    } else if (used == 'no') {
-      hideObject(gel('yesarticlerating'));
-      show("kb_create_incident_link");
-      e = document.getElementById('noarticlerating');
-      if (e) {
-        e.setAttribute("onclick", "");
-        e.setAttribute("class", "kb_link_disable");
-        e.setAttribute("className", "kb_link_disable");
-      }
-    } else hideObject(gel('articlerating'));
-    showObject(gel('articleratingsubmitted'));
-  }
-}
-var answer = new GwtMessage().getMessages(["Not rated", "Rated", "Rating", "by you", "average", "user rating", "user ratings"]);
-
-function setStar(x) {
-  a = x + "";
-  set = true;
-  gel('vote').innerHTML = answer["Rated"] + " " + x + "/5 " + answer["by you"];
-  gel('rated_value').value = x;
-  var id = gel('sys_id').value;
-  postUsed(id, x);
-}
-
-function toggleArticleFlag(e) {
-  var msg = document.getElementById("commentsdiv_flagmsg");
-  var inputdiv = document.getElementById("commentsdiv");
-  var donemsg = document.getElementById("commentsdiv_done");
-  var input = document.getElementById("article_comments");
-  if (e.checked) {
-    showObject(msg);
-    hideObject(donemsg);
-    openFeedback();
-  } else
-    hideObject(msg);
-}
-
-function openFeedback() {
-  var cmtdivdone = document.getElementById('commentsdiv_done');
-  if (cmtdivdone.style.display != "block") {
-    var commentsdiv = document.getElementById('commentsdiv');
-    showObject(commentsdiv);
-    document.getElementById('commentsimg').src = "images/filter_reveal.gifx";
-    document.getElementById('commentsimg').alt = "Collapse";
-    window.scrollBy(0, 9999999);
-    var e = document.getElementById('article_comments');
-    if (e)
-      e.focus();
-    window.scrollBy(0, -20);
-  }
-}
-var set = false;
-var v = 0;
-var a;
-
-function highlight(x) {
-  for (i = 1; i < 6; i++) {
-    if (i < x * 1 + 1)
-      document.getElementById(i).src = star2.src;
-    else
-      document.getElementById(i).src = star1.src;
-  }
-  document.getElementById('vote').innerHTML = answer["Rating"] + ": " + x + "/5";
-}
-
-function losehighlight() {
-  var vote = gel('vote');
-  var num = gel("num_ratings").value * 1;
-  var rating = gel("rating_value").value * 1;
-  if (set == false) {
-    for (i = 1; i < 6; i++) {
-      if (rating > i - 0.25)
-        document.getElementById(i).src = starFull.src;
-      else if (rating > i - 0.75)
-        document.getElementById(i).src = starHalf.src;
-      else
-        document.getElementById(i).src = star1.src;
-    }
-    if (rating == 0)
-      vote.innerHTML = answer["Not rated"];
-    else
-      vote.innerHTML = answer["Rated"] + " " + rating.toFixed(2);
-    if (num == 1)
-      vote.title = num + " " + answer["user rating"];
-    else
-      vote.title = num + " " + answer["user ratings"];
-  } else {
-    var rated = gel("rated_value").value * 1;
-    for (i = 1; i < 6; i++) {
-      if (i <= rated)
-        document.getElementById(i).src = star2.src;
-      else
-        document.getElementById(i).src = star1.src;
-    }
-    vote.innerHTML = answer["Rated"] + " " + rated + "/5 " + answer["by you"];
-    var totalScore = rating * num + rated;
-    var totalRatings = num * 1 + 1;
-    if (totalRatings == 1)
-      vote.title = (totalScore / totalRatings).toFixed(2) + " " + answer["average"] + ", " + totalRatings + " " + answer["user rating"];
-    else
-      vote.title = (totalScore / totalRatings).toFixed(2) + " " + answer["average"] + ", " + totalRatings + " " + answer["user ratings"];
-  }
-}
-
-function attachTaskKCS(x, target, taskID, table, version) {
-  var task;
-  if (taskID.length > 0) {
-    task = taskID;
-  } else {
-    return false;
-  }
-  var sysID;
-  if (version == '2') {
-    var f = x.form;
-    sysID = f.sys_id.value;
-    if (typeof sysID == "undefined") {
-      sysID = f.sys_id[0].value;
-    }
-  } else {
-    sysID = x.value;
-  }
-  var args = [];
-  args.push(sysID);
-  args.push(target);
-  args.push(table);
-  args.push(window.self.parent.window);
-  var ajax = new GlideAjax("KnowledgeAjax");
-  ajax.addParam("sysparm_type", "kbAttachArticle");
-  ajax.addParam("sysparm_value", sysID + "," + task);
-  ajax.getXML(kbReturnAttachKCS, "", args);
-  return false;
-}
-
-function kbReturnAttachKCS(AJAXResponse, args) {
-  var sourceID = args[0];
-  var targetFields = args[1];
-  var tableName = args[2];
-  var winRef = args[3];
-  var fieldName = 'short_description';
-  var items = AJAXResponse.responseXML.getElementsByTagName("item");
-  var value;
-  if (items.length > 0) {
-    var item = items[0];
-    var name = item.getAttribute("name");
-    value = item.getAttribute("value");
-  }
-  var names = [];
-  if (targetFields) {
-    var parts = targetFields.split(",");
-    for (var i = 0; i < parts.length; i++)
-      names.push(parts[i]);
-  }
-  names.push('comments');
-  names.push('description');
-  var target = null;
-  var targetName = null;
-  for (var i2 = 0; i2 < names.length; i2++) {
-    targetName = names[i2];
-    target = winRef.document.getElementById(tableName + "." + targetName);
-    if (target)
-      break;
-  }
-  if (target) {
-    var ed = winRef.g_form.getGlideUIElement(targetName);
-    if (ed && ed.type == 'reference') {
-      winRef.g_form.setValue(targetName, sourceID);
-    } else {
-      var newValue = "";
-      if (target.value == "")
-        newValue = value;
-      else
-        newValue = target.value + "\n" + value;
-      winRef.g_form.setValue(targetName, newValue);
-    }
-  }
-}
-
-function kbFeedback2(name) {
-  var comments = ($(name) ? $(name).value : "");
-  if (comments == "") {
-    showObject(gel('commentsdiv_empty'));
-    return false;
-  }
-  var sys_id = ($('sys_id') ? $('sys_id').value : "");
-  var flag = document.getElementById("article_flag");
-  var view_id = document.getElementById("view_id");
-  var query = document.getElementById("sysparm_search");
-  var ajax = new GlideAjax("KnowledgeAjax");
-  ajax.addParam("sysparm_type", "kbWriteComment");
-  ajax.addParam("sysparm_search", escape(query.value));
-  ajax.addParam("sysparm_id", sys_id);
-  if (flag)
-    ajax.addParam("sysparm_flag", flag.checked);
-  ajax.addParam("sysparm_feedback", escape(comments));
-  ajax.addParam("view_id", view_id.value);
-  ajax.getXML(kbFeedbackDone);
-  var commentLinkDiv = $("comment_link_div");
-  if (commentLinkDiv)
-    commentLinkDiv.hide();
-  return false;
-}
-addLoadEvent(KBArticleReferenceLink);
-
-function KBArticleReferenceLink() {
-  $$('a[href^="#KBREF_"]').each(function(item) {
-    item.on("click", function(event) {
-      var lk = event.target;
-      if (lk.next() && lk.next().hasClassName("kbarticlecontent")) {
-        lk.next().remove();
-      } else {
-        var kbid = lk.href.substring(item.href.lastIndexOf("#KBREF_") + 7);
-        var kcah = new GlideAjax('KnowledgeCustomAjaxHelpers');
-        kcah.addParam('sysparm_name', 'getKBText');
-        kcah.addParam('sysparm_kb_number', kbid);
-        kcah.getXML(setKBArticleReferenceLinkText, null, lk);
-      }
-    });
-  });
-}
-
-function setKBArticleReferenceLinkText(response, elem) {
-  var answer = response.responseXML.documentElement.getAttribute("answer");
-  var content = document.createElement("p");
-  content.setAttribute("class", "kbarticlecontent");
-  content.style.border = "1px solid black";
-  content.style.padding = "10px";
-  content.innerHTML = answer;
-  elem.insert({
-    after: content
-  });
-}
-/*! RESOURCE: PmClientDateAndDurationHandler */
-var PmClientDateAndDurationHandler = Class.create();
-PmClientDateAndDurationHandler.prototype = {
-  initialize: function(_gForm) {
-    this._gForm = _gForm;
-    this.invokeForScheduleDateFormat = false;
-  },
-  showErrorMessage: function(column, message) {
-    jslog("Into PmClientDateAndDurationHandler.showErrorMessage -> " + column);
-    if (!column) {
-      this._gForm.addErrorMessage("Enter a valid date");
-    } else {
-      try {
-        if (!message)
-          this._gForm.showFieldMsg(column, 'Enter a valid date', 'error');
-        else
-          this._gForm.showFieldMsg(column, message, 'error');
-      } catch (e) {
-        jslog("PmClientDateAndDurationHandler.showErrorMessage: " + colum + " is not available on the form");
-      }
-    }
-  },
-  isValidClientDate: function(column) {
-    jslog("Into PmClientDateAndDurationHandler.isValidClientDate -> " + column);
-    var dateValue = this._gForm.getValue(column);
-    if (dateValue == null || dateValue == '') {
-      this.showErrorMessage(column);
-      return false;
-    }
-    var date = new Date(dateValue);
-    if (date != 'Invalid Date' && String(date.getFullYear()).length != 4) {
-      this.showErrorMessage(column);
-      return false;
-    }
-    return true;
-  },
-  isValidServerDate: function(column, dateValue, callback) {
-    jslog("Into PmClientDateAndDurationHandler.isValidServerDate -> " + column + " - " + dateValue);
-    this.callback = callback;
-    var ga = new GlideAjax('AjaxProjectTaskUtil');
-    ga.addParam('sysparm_name', 'validateDisplayDate');
-    ga.addParam('sysparm_column', column);
-    ga.addParam('sysparm_date', dateValue);
-    ga.getXMLAnswer(this.validateResponse);
-    return false;
-  },
-  validateResponse: function(serverResponse) {
-    jslog("Into validateResponse.validateResponse -> " + serverResponse);
-    if (serverResponse && serverResponse.responseXML) {
-      var result = serverResponse.responseXML.getElementByTagName("result");
-      var status = result.getAttribute("status");
-      var column = result.getAttribute("column");
-      if (status == 'error') {
-        this.showErrorMessage(column);
-      } else {
-        jslog("Into validateResponse.validateResponse -> Calling Callback PmClientDateAndDurationHandler");
-        this.callback();
-      }
-    }
-  },
-  setStateonActualDateChange: function() {
-    var ga = new GlideAjax('AjaxProjectTaskUtil');
-    ga.addParam('sysparm_name', 'getStateForActualDates');
-    ga.addParam('sysparm_sys_id', this._gForm.getUniqueValue());
-    ga.addParam('sysparm_work_start_date', this._gForm.hasField('work_start') ? this._gForm.getValue('work_start') : g_scratchpad.actualStartDate);
-    ga.addParam('sysparm_work_end_date', this._gForm.hasField('work_end') ? this._gForm.getValue('work_end') : g_scratchpad.actualEndDate);
-    ga.addParam('sysparm_state', this._gForm.hasField('state') ? this._gForm.getValue('state') : g_scratchpad.state);
-    ga.getXML(this.callbackForStateUpdate.bind(this));
-  },
-  setStateonPercentChange: function() {
-    var ga = new GlideAjax('AjaxProjectTaskUtil');
-    ga.addParam('sysparm_name', 'getStateForPercentComplete');
-    ga.addParam('sysparm_sys_id', this._gForm.getUniqueValue());
-    ga.addParam('sysparm_percent', this._gForm.hasField('percent_complete') ? this._gForm.getValue('percent_complete') : g_scratchpad.percentComplete);
-    ga.addParam('sysparm_state', this._gForm.hasField('state') ? this._gForm.getValue('state') : g_scratchpad.state);
-    ga.getXML(this.callbackForStateUpdate.bind(this));
-  },
-  callbackForStateUpdate: function(response) {
-    var result = response.responseXML.getElementsByTagName("result");
-    result = result[0];
-    if (this._gForm.hasField('state')) {
-      if (this._gForm.getValue('state') != result.getAttribute("state"))
-        this._gForm.setValue('state', result.getAttribute("state"));
-    } else {
-      if (g_scratchpad.state != result.getAttribute("state")) {
-        g_scratchpad.state = result.getAttribute("state");
-        this.setActualDateonStateChange();
-      }
-    }
-    this._gForm.setReadOnly('percent_complete', (result.getAttribute("isStateInactive") == 'true') ? true : false);
-  },
-  setActualDateonStateChange: function() {
-    var ga = new GlideAjax('AjaxProjectTaskUtil');
-    ga.addParam('sysparm_name', 'getActualDates');
-    ga.addParam('sysparm_sys_id', this._gForm.getUniqueValue());
-    ga.addParam('sysparm_start_date', this._gForm.hasField('start_date') ? this._gForm.getValue('start_date') : g_scratchpad.plannedStartDate);
-    ga.addParam('sysparm_end_date', this._gForm.hasField('end_date') ? this._gForm.getValue('end_date') : g_scratchpad.plannedEndDate);
-    ga.addParam('sysparm_work_start_date', this._gForm.hasField('work_start') ? this._gForm.getValue('work_start') : g_scratchpad.actualStartDate);
-    ga.addParam('sysparm_work_end_date', this._gForm.hasField('work_end') ? this._gForm.getValue('work_end') : g_scratchpad.actualEndDate);
-    ga.addParam('sysparm_duration', this._gForm.hasField('duration') ? this._gForm.getValue('duration') : g_scratchpad.plannedDuration);
-    ga.addParam('sysparm_work_duration', this._gForm.hasField('work_duration') ? this._gForm.getValue('work_duration') : g_scratchpad.actualDuration);
-    ga.addParam('sysparm_outside_Schedule', this._gForm.hasField('allow_dates_outside_schedule') ? this._gForm.getValue('allow_dates_outside_schedule') : g_scratchpad.allowDatesOutsideSchedule);
-    ga.addParam('sysparm_state', this._gForm.hasField('state') ? this._gForm.getValue('state') : g_scratchpad.state);
-    ga.addParam('sysparm_percent', this._gForm.hasField('percent_complete') ? this._gForm.getValue('percent_complete') : g_scratchpad.percentComplete);
-    ga.getXML(this.callbackForStateChange.bind(this));
-  },
-  callbackForStateChange: function(response) {
-    var result = response.responseXML.getElementsByTagName("result");
-    result = result[0];
-    if (result.getAttribute("status") == 'success') {
-      this.setActualStartDate(result.getAttribute("work_start"));
-      this.setActualEndDate(result.getAttribute("work_end"));
-      this.setActualDuration(result.getAttribute("work_duration"));
-      this.setPercentComplete(result.getAttribute("percent_complete"));
-      this._gForm.setReadOnly('percent_complete', (result.getAttribute("isStateInactive") == 'true') ? true : false);
-    } else
-      this.showErrorMessage('state', result.getAttribute('message'));
-  },
-  setDurationOnActualEndDateChange: function() {
-    var startDate = this._gForm.hasField('work_start') ? this._gForm.getValue('work_start') : g_scratchpad.actualStartDate;
-    var endDate = this._gForm.hasField('work_end') ? this._gForm.getValue('work_end') : g_scratchpad.actualEndDate;
-    if ((startDate == null || startDate == '') && (endDate == null || endDate == ''))
-      this.setActualDuration('');
-    else if ((startDate == null || startDate == '') || (endDate == null || endDate == ''))
-      return;
-    else {
-      var ga = new GlideAjax('AjaxProjectTaskUtil');
-      ga.addParam('sysparm_name', 'getDuration');
-      ga.addParam('sysparm_start_date', startDate);
-      ga.addParam('sysparm_end_date', endDate);
-      ga.addParam('sysparm_is_off_schedule', this._gForm.hasField('allow_dates_outside_schedule') ? this._gForm.getValue('allow_dates_outside_schedule') : g_scratchpad.allowDatesOutsideSchedule);
-      ga.addParam('sysparm_sys_id', g_scratchpad.projectTaskSysId);
-      ga.getXML(this.callbackForActualEndDateChange.bind(this));
-    }
-  },
-  callbackForActualEndDateChange: function(response) {
-    jslog("Into handleResponse -> " + response);
-    if (response && response.responseXML) {
-      var result = response.responseXML.getElementsByTagName("result");
-      if (result) {
-        result = result[0];
-        var status = result.getAttribute("status");
-        var answer = result.getAttribute("answer");
-        var message = result.getAttribute('message');
-        if (status == 'error') {
-          jslog("Into handleResponse -> Response is INVALID");
-          this.showErrorMessage('work_end', message);
-        } else {
-          jslog("Into handleResponse -> Response is valid");
-          this.setActualDuration(answer);
-        }
-      }
-    }
-  },
-  setEndDateOnStartDateChange: function() {
-    if (g_form.getValue('work_start') == '' && g_form.getValue('work_end') == '')
-      this.setActualDuration('');
-    else if (g_form.getValue('work_start') != '') {
-      var startDate = this._gForm.hasField('work_start') ? this._gForm.getValue('work_start') : g_scratchpad.actualStartDate;
-      var duration = this._gForm.hasField('work_duration') ? this._gForm.getValue('work_duration') : g_scratchpad.actualDuration;
-      if (duration === '')
-        return;
-      else {
-        jslog("Into calculateEndDate -> " + startDate);
-        var ga = new GlideAjax('AjaxProjectTaskUtil');
-        ga.addParam('sysparm_start_date', startDate);
-        ga.addParam('sysparm_name', 'getEndDate');
-        ga.addParam('sysparm_duration', duration);
-        ga.addParam('sysparm_sys_id', g_scratchpad.projectTaskSysId);
-        ga.addParam('sysparm_allow_dates_outside_schedule', this._gForm.hasField('allow_dates_outside_schedule') ? this._gForm.getValue('allow_dates_outside_schedule') : g_scratchpad.allowDatesOutsideSchedule);
-        ga.addParam('sysparm_state', this._gForm.hasField('state') ? this._gForm.getValue('state') : g_scratchpad.state);
-        ga.getXML(this.callbackForSettingActualEndDate.bind(this));
-      }
-    }
-  },
-  callbackForSettingActualEndDate: function(response) {
-    jslog("Into handleResponse -> " + response);
-    if (response && response.responseXML) {
-      var result = response.responseXML.getElementsByTagName("result");
-      if (result) {
-        result = result[0];
-        var status = result.getAttribute("status");
-        var column = result.getAttribute("column");
-        var answer = result.getAttribute("answer");
-        var stateInactiveFlag = result.getAttribute("stateInactiveFlag");
-        if (status == 'error') {
-          jslog("Into handleResponse -> Response is INVALID");
-          this.showErrorMessage(column);
-        } else {
-          jslog("Into handleResponse -> Response is valid");
-          if (stateInactiveFlag == 'true' ||
-            (this.invokeForScheduleDateFormat && this.isLaterThanActualStart(answer)))
-            this.setActualEndDate(answer);
-        }
-      }
-    }
-  },
-  setActualStartDate: function(startDate) {
-    if (this._gForm.hasField('work_start')) {
-      if (this._gForm.getValue('work_start') != startDate) {
-        g_scratchpad.actual_field_flag = true;
-        this._gForm.setValue('work_start', startDate);
-        g_scratchpad.actual_field_flag = false;
-      }
-    } else
-      g_scratchpad.actualStartDate = startDate;
-  },
-  setActualEndDate: function(endDate) {
-    if (this._gForm.hasField('work_end')) {
-      if (this._gForm.getValue('work_end') != endDate) {
-        g_scratchpad.actual_field_flag = true;
-        this._gForm.setValue('work_end', endDate);
-        g_scratchpad.actual_field_flag = false;
-      }
-    } else
-      g_scratchpad.actualEndDate = endDate;
-  },
-  setActualDuration: function(workDuration) {
-    if (this._gForm.hasField('work_duration')) {
-      if (this._gForm.getValue('work_duration') != workDuration) {
-        g_scratchpad.actual_field_flag = true;
-        this._gForm.setValue('work_duration', workDuration);
-        g_scratchpad.actual_field_flag = false;
-      }
-    } else
-      g_scratchpad.actualDuration = workDuration;
-  },
-  setPercentComplete: function(percentComplete) {
-    if (this._gForm.hasField('percent_complete')) {
-      if (this._gForm.getValue('percent_complete') != percentComplete) {
-        g_scratchpad.actual_field_flag = true;
-        this._gForm.setValue('percent_complete', percentComplete);
-        g_scratchpad.actual_field_flag = false;
-      }
-    } else
-      g_scratchpad.percentComplete = percentComplete;
-  },
-  handleActualStartDateChange: function() {
-    var offset = (new Date()).getTimezoneOffset();
-    if (this._gForm.hasField('work_start') &&
-      (g_scratchpad.projectScheduleFormat == 'date' || g_scratchpad.timeComponentFromPlanned == 'true')) {
-      this.replaceTimeComponentFromSourceToTarget(this._gForm.getUniqueValue(),
-        'start_date', 'work_start', this._gForm.getValue('start_date'), this._gForm.getValue('work_start'));
-    }
-  },
-  handleActualEndDateChange: function() {
-    var offset = (new Date()).getTimezoneOffset();
-    if (this._gForm.hasField('work_end') && (g_scratchpad.projectScheduleFormat == 'date' || g_scratchpad.timeComponentFromPlanned == 'true')) {
-      this.replaceTimeComponentFromSourceToTarget(this._gForm.getUniqueValue(),
-        'end_date', 'work_end', this._gForm.getValue('end_date'), this._gForm.getValue('work_end'));
-    }
-  },
-  replaceTimeComponentFromSourceToTarget: function(taskId, sourceField, targetField, sourceValue, targetValue) {
-    this.invokeForScheduleDateFormat = true;
-    if (this._gForm.hasField(targetField) && targetValue) {
-      jslog("Into replaceTimeComponentFromSourceToTarget -> " + taskId + " | " + targetField);
-      var ga = new GlideAjax('AjaxProjectTaskUtil');
-      ga.addParam('sysparm_name', 'correctTimeAsPerPlanned');
-      ga.addParam('sysparm_sys_id', taskId);
-      ga.addParam('sysparm_source_field', sourceField);
-      ga.addParam('sysparm_target_field', targetField);
-      ga.addParam('sysparm_source_value', sourceValue);
-      ga.addParam('sysparm_target_value', targetValue);
-      if (targetField == 'work_start')
-        ga.getXML(this.callbackForSettingActualStartDate.bind(this));
-      else if (targetField == 'work_end')
-        ga.getXML(this.callbackForSettingActualEndDate.bind(this));
-    }
-  },
-  callbackForSettingActualStartDate: function(response) {
-    jslog("Into callbackForSettingActualStartDate - handleResponse -> " + response);
-    if (response && response.responseXML) {
-      var result = response.responseXML.getElementsByTagName("result");
-      if (result) {
-        result = result[0];
-        var status = result.getAttribute("status");
-        var answer = result.getAttribute("answer");
-        var message = result.getAttribute('message');
-        if (status == 'error') {
-          jslog("Into handleResponse -> Response is INVALID");
-          this.showErrorMessage('work_end', message);
-        } else {
-          jslog("Into handleResponse -> Response is valid");
-          this.setActualStartDate(answer);
-        }
-      }
-    }
-  },
-  isLaterThanActualStart: function(newWorkEnd) {
-    jslog("Into isLaterThanActualStart - newWorkEnd -> " + newWorkEnd);
-    if (this._gForm.hasField('work_start')) {
-      var workStart = new Date(getDateFromFormat(this._gForm.getValue('work_start'), g_user_date_time_format));
-      var workEnd = new Date(getDateFromFormat(newWorkEnd, g_user_date_time_format));
-      if (workEnd.getTime() >= workStart.getTime())
-        return true;
-      return false;
-    }
-  },
-  type: 'PmClientDateAndDurationHandler'
 };
 /*! RESOURCE: /scripts/lib/jquery/jquery_clean.js */
 (function() {

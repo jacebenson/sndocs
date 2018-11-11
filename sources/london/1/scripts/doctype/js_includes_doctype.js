@@ -36055,676 +36055,6 @@ var SNCredStoreFormUtil = {
     }
   }
 };;
-/*! RESOURCE: scripts/OpticsInspector.js */
-var OpticsInspector = Class
-  .create({
-    CATEGORIES: {
-      "sys_script": "BUSINESS RULE",
-      "sys_script_client": "CLIENT SCRIPT",
-      "data_lookup": "DATA LOOKUP",
-      "sys_data_policy2": "DATA POLICY",
-      "ui_policy": "UI POLICY",
-      "wf_context": "WORKFLOW",
-      "request_action": "REQUEST ACTION",
-      "script_engine": "SCRIPT ENGINE",
-      "wf_activity": "WORKFLOW ACTIVITY",
-      "acl": "ACL",
-      "sys_ui_action": "UI ACTION",
-      "reference_qual": "REFERENCE QUALIFIER QUERY",
-      "container_action": "CONTAINER ACTION"
-    },
-    initialize: function() {
-      this.opticsContextStack = new Array();
-      this.tableName = null;
-      this.fieldName = null;
-      this.enabled = false;
-    },
-    pushOpticsContext: function(category, name, sys_id, sourceTable) {
-      if (category == 'sys_script_client')
-        name = "\"" + name + "\"";
-      var context = {
-        "category": category,
-        "name": name,
-        "sys_id": sys_id,
-        "startTime": new Date(),
-        actions: [],
-        type: 'context',
-        "sourceTable": sourceTable || category
-      };
-      if ((typeof g_form !== 'undefined') && g_form.actionStack)
-        g_form.actionStack.push(context);
-      if (this.isInspecting() && category !== 'container_action')
-        this.opticsContextStack.push(context);
-    },
-    popOpticsContext: function() {
-      var context;
-      if ((typeof g_form !== 'undefined') && g_form.actionStack) {
-        context = g_form.actionStack.pop();
-        if (g_form._pushAction)
-          g_form._pushAction(context);
-      }
-      if (this.isInspecting() && this.opticsContextStack.length > 0 && (context && context.category !== 'container_action'))
-        return this.opticsContextStack.pop();
-      return null;
-    },
-    isInspecting: function(tableName, fieldName) {
-      if (this.tableName == null && this.fieldName == null)
-        return false;
-      if (arguments.length == 0)
-        return (this.tableName && this.tableName.length > 0 &&
-          this.fieldName && this.fieldName.length > 0);
-      if (arguments.length == 2)
-        return tableName == this.tableName &&
-          fieldName == this.fieldName;
-      return false;
-    },
-    getTableName: function() {
-      return (this.tableName && this.tableName.length > 0) ? this.tableName :
-        '';
-    },
-    getFieldName: function() {
-      return (this.fieldName && this.fieldName.length > 0) ? this.fieldName :
-        '';
-    },
-    hideWatchIcons: function() {
-      if (isDoctype()) {
-        $$(".icon-debug.watch_icon").each(function(element) {
-          $(element).hide()
-        });
-      } else {
-        $$("img.watch_icon").each(function(element) {
-          $(element).hide()
-        });
-      }
-    },
-    addWatchIcon: function(watchField) {
-      if (!watchField) {
-        return;
-      }
-      var td = $('label.' + watchField);
-      if (!td) {
-        var fieldParts = watchField.split(".");
-        if ((fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0)) {
-          td = $('label_' + fieldParts[1]);
-          if (td && td.tagName !== 'TD') {
-            var tds = td.getElementsByTagName("TD");
-            if (tds && tds.length > 0) {
-              td = tds[0];
-            }
-          }
-          if (!td) {
-            td = $('ni.' + fieldParts[1] + '_label');
-          }
-        }
-      }
-      var icon;
-      if (td) {
-        if (isDoctype()) {
-          var label = td.select('label');
-          if (label.length > 0) {
-            label = label[0];
-          } else {
-            label = td.select('legend');
-            if (label.length > 0) {
-              label = label[0];
-            } else if (td.nodeName == "LABEL") {
-              label = td;
-            }
-          }
-          icon = '<span class="label-icon icon-debug watch_icon" id="' +
-            watchField +
-            '.watch_icon"' +
-            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
-            ' src="images/debug.gifx" ' +
-            ' alt="Field is being watched"' +
-            ' title="Field is being watched"></span>';
-          if (label) {
-            $(label).insert(icon);
-          }
-        } else {
-          if (fieldParts.length === 2 &&
-            fieldParts[1].startsWith("IO:")) {
-            var legend = td.select('legend');
-            if (legend.length > 0) {
-              td = legend[0];
-            }
-          }
-          icon = '<img class="watch_icon" id="' +
-            watchField +
-            '.watch_icon"' +
-            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
-            ' src="images/debug.gifx" ' +
-            ' alt="Field is being watched"' +
-            ' title="Field is being watched" />';
-          td.insert(icon);
-        }
-      }
-    },
-    clearWatchField: function(watchfield) {
-      this.opticsContextStack = new Array();
-      this.tableName = null;
-      this.fieldName = null;
-      this.hideWatchIcons();
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.updateFieldInfo)
-          wndw.updateFieldInfo(null);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-          var wndw = debuggerTools.getJsDebugWindow();
-          if (wndw.updateFieldInfo)
-            wndw.updateFieldInfo(null);
-        }
-      }
-    },
-    setWatchField: function(watchField) {
-      if (!watchField)
-        return;
-      var fieldParts = watchField.split(".");
-      if (!(fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0))
-        return;
-      this.tableName = fieldParts[0];
-      this.fieldName = fieldParts[1];
-      this.hideWatchIcons();
-      var icon = $(watchField + ".watch_icon");
-      if (icon) {
-        icon.show();
-      } else {
-        this.addWatchIcon(watchField);
-      }
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.updateFieldInfo)
-          wndw.updateFieldInfo(watchField);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-          var wndw = debuggerTools.getJsDebugWindow();
-          if (wndw.updateFieldInfo)
-            wndw.updateFieldInfo(watchField);
-        }
-      }
-    },
-    showWatchField: function(watchField) {
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools) {
-        if (!debuggerTools.isDebugPanelVisible())
-          debuggerTools.showFieldWatcher();
-        setWatchField(watchField);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools) {
-          if (!debuggerTools.isDebugPanelVisible())
-            debuggerTools.showFieldWatcher();
-          setWatchField(watchField);
-        }
-      }
-    },
-    processClientMessage: function(notification) {
-      var opticsContext = this.opticsContextStack[this.opticsContextStack.length - 1];
-      if (!opticsContext) {
-        jslog("No optics context found");
-        return;
-      }
-      var info = {
-        type: 'CLIENT ',
-        message: notification.message,
-        message_type: "static",
-        category: opticsContext.category,
-        name: opticsContext.name,
-        level: this.opticsContextStack.length,
-        time: getFormattedTime(new Date()),
-        call_trace: this._getCallTrace(this.opticsContextStack),
-        sys_id: opticsContext["sys_id"],
-        sourceTable: opticsContext["sourceTable"]
-      };
-      if (notification["oldvalue"] && notification["newvalue"]) {
-        info.message_type = "change";
-        info.oldvalue = notification["oldvalue"];
-        info.newvalue = notification["newvalue"];
-      }
-      this.process(info);
-    },
-    processServerMessages: function() {
-      var spans = $$('span[data-type="optics_debug"]');
-      for (var i = 0; i < spans.length; i++) {
-        var notification = new GlideUINotification({
-          xml: spans[i]
-        });
-        this.processServerMessage(notification);
-        spans[i].setAttribute("data-attr-processed", "true");
-      }
-    },
-    processServerMessage: function(notification) {
-      if (notification.getAttribute('processed') == "true")
-        return;
-      var info = {
-        type: 'SERVER',
-        category: notification.getAttribute('category'),
-        name: notification.getAttribute('name'),
-        message: notification.getAttribute('message'),
-        message_type: notification.getAttribute('message_type'),
-        oldvalue: notification.getAttribute('oldvalue'),
-        newvalue: notification.getAttribute('newvalue'),
-        level: notification.getAttribute('level'),
-        time: notification.getAttribute('time'),
-        sys_id: notification.getAttribute('sys_id'),
-        sourceTable: notification.getAttribute('sourceTable'),
-        call_trace: this._getCallTrace(eval(notification
-          .getAttribute('call_trace')))
-      };
-      this.process(info);
-    },
-    process: function(notification) {
-      var msg = '<div class="debug_line ' + notification['category'] + '">' + this._getMessage(notification) + '</div>';
-      this._log(msg);
-    },
-    addLine: function() {
-      this._log('<hr class="logs-divider"/>');
-    },
-    openScriptWindow: function(tablename, sysid) {
-      if (tablename && sysid) {
-        if (tablename == "request_action")
-          tablename = "sys_ui_action";
-        var url = "/" + tablename + ".do?sys_id=" + sysid;
-        window.open(url, "tablewindow");
-      }
-    },
-    _log: function(msg) {
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.insertJsDebugMsg)
-          wndw.insertJsDebugMsg(msg);
-      } else {
-        if (parent && parent.parent) {
-          debuggerTools = parent.parent.debuggerTools;
-          if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-            var wndw = debuggerTools.getJsDebugWindow();
-            if (wndw.insertJsDebugMsg)
-              wndw.insertJsDebugMsg(msg);
-          }
-        }
-      }
-    },
-    _getCallTrace: function(contextStack) {
-      var trace = '';
-      var arrows = '<span class="rtl-arrow"> &larr;</span><span class="lrt-arrow">&rarr; </span>';
-      var space = arrows;
-      for (i = 0, maxi = contextStack.length; i < maxi; i++) {
-        var context = contextStack[i];
-        if (i > 0)
-          space = arrows + space;
-        if (context['name'] && context['name'].length > 0)
-          trace += '<div>' + space +
-          this._getCategoryName(context['category']) +
-          '&nbsp;-&nbsp;' + context['name'] + '</div>';
-        else
-          trace += '<div>' + space +
-          this._getCategoryName(context['category']) +
-          '</div>';
-      }
-      if (trace && trace.length > 0)
-        trace = '<div class="call_trace">' + trace + '</div>';
-      return trace;
-    },
-    _getMessage: function(notification) {
-      var notif_type = notification['type'];
-      var legend_title = (notif_type.indexOf('CLIENT') > -1) ? 'Client-side activity' :
-        'Server-side activity';
-      var msg = '<span class="expand-button" onclick="toggleCallTrace(this);">&nbsp;</span>';
-      msg += '<img class="infoIcon" height="16"  width="16" border="0" src="images/info-icon.png" title="' +
-        legend_title + '" alt="' + legend_title + '">';
-      msg += '<span class="log-time ' + notif_type + '">' +
-        notification['time'] + '</span>';
-      msg += '<span class="log-category">' +
-        this.CATEGORIES[notification['category']];
-      if (notification['name'] && notification['name'].length > 0) {
-        if (notification["sys_id"])
-          msg += '&nbsp;-&nbsp;<a data-tablename="' +
-          notification['sourceTable'] +
-          '" data-sys_id="' +
-          notification['sys_id'] +
-          '" onclick="javascript:openScriptWindow(this);">' +
-          notification['name'] + '</a></span>';
-        else
-          msg += '&nbsp;-&nbsp;' + notification['name'] +
-          '</span>';
-      } else
-        msg += '</span>';
-      msg += '<span class="log-value">';
-      if ("request_action" === notification['category']) {
-        msg += 'Value received from client is: <span class="value" title="Value">' +
-          notification['message'] + '</span>';
-      } else if (notification["message_type"] == "change") {
-        msg += '<span>' +
-          notification["oldvalue"] +
-          '</span><span class="rtl-arrow"> &larr; </span><span class="lrt-arrow"> &rarr; </span><span>' +
-          notification["newvalue"] + '</span>';
-      } else {
-        msg += notification['message'];
-      }
-      msg += '</span>';
-      msg += notification['call_trace'];
-      return msg;
-    },
-    _getCategoryName: function(category) {
-      var name = this.CATEGORIES[category];
-      if (name === 'undefined' || name === null)
-        name = category;
-      return name;
-    },
-    _getLevelStr: function(level) {
-      if (level == 'undefined' || level == null || level <= 0)
-        level = 1;
-      var levelStr = '';
-      for (i = 0; i < level; i++)
-        levelStr += '-';
-      return levelStr + '>';
-    },
-    toString: function() {
-      return 'OpticsInspector';
-    }
-  });
-var g_optics_inspect_handler = new OpticsInspector();
-OpticsInspector.WATCH_EVENT = 'glide:ui_notification.optics_debug';
-OpticsInspector.WATCH_EVENT_UI = 'glide:ui_notification.optics_debug_ui';
-OpticsInspector.WATCH_FIELD = 'glide_optics_inspect_watchfield';
-OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_watchfield';
-OpticsInspector.UPDATE_WATCH_FIELD = 'glide_optics_inspect_update_watchfield';
-OpticsInspector.CLEAR_WATCH_FIELD = 'glide_optics_inspect_clear_watchfield';
-OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_show_watchfield';
-OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
-OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
-OpticsInspector.PUT_CS_CONTEXT = 'glide_optics_inspect_put_cs_context';
-OpticsInspector.POP_CS_CONTEXT = 'glide_optics_inspect_pop_cs_context';
-OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
-OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
-OpticsInspector.LOG_MESSAGE = 'glide_optics_inspect_log_message';
-OpticsInspector.WINDOW_OPEN = 'glide_optics_inspect_window_open';
-
-function getClientScriptContextName(name, type) {
-  var csname = null;
-  if (type === "submit")
-    csname = g_event_handlers_onSubmit[name];
-  else if (type === "load")
-    csname = g_event_handlers_onLoad[name];
-  else if (type === "change")
-    csname = g_event_handlers_onChange[name];
-  return csname;
-}
-CustomEvent.observe(OpticsInspector.PUT_CONTEXT, function(category, name, sys_id, sourceTable) {
-  g_optics_inspect_handler.pushOpticsContext(category, name, sys_id, sourceTable);
-});
-CustomEvent.observe(OpticsInspector.POP_CONTEXT, function() {
-  g_optics_inspect_handler.popOpticsContext();
-});
-CustomEvent.observe(OpticsInspector.PUT_CS_CONTEXT, function(name, type) {
-  var csname = getClientScriptContextName(name, type);
-  if (csname)
-    g_optics_inspect_handler.pushOpticsContext("sys_script_client", csname,
-      g_event_handler_ids[name]);
-});
-CustomEvent.observe(OpticsInspector.POP_CS_CONTEXT, function(name, type) {
-  var csname = getClientScriptContextName(name, type);
-  if (csname)
-    g_optics_inspect_handler.popOpticsContext();
-});
-CustomEvent.observe(OpticsInspector.LOG_MESSAGE, function(notification) {
-  if (g_optics_inspect_handler.isInspecting(notification["table"],
-      notification["field"])) {
-    g_optics_inspect_handler.processClientMessage(notification);
-  }
-});
-CustomEvent.observe(OpticsInspector.WATCH_EVENT_UI, function(notification) {
-  g_optics_inspect_handler.process(notification);
-});
-CustomEvent.observe(OpticsInspector.WATCH_EVENT, function(notification) {
-  g_optics_inspect_handler.processServerMessage(notification);
-});
-CustomEvent.observe(OpticsInspector.WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.setWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.SHOW_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.showWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.CLEAR_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.clearWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.setWatchField(watchfield);
-  if (window.name !== "jsdebugger") {
-    g_optics_inspect_handler.addLine();
-    g_optics_inspect_handler.processServerMessages();
-  }
-});;
-/*! RESOURCE: scripts/classes/GlideMenu.js */
-var GlideMenu = Class.create();
-GlideMenu.prototype = {
-  initialize: function(idSuffix, type) {
-    this.suffix = idSuffix;
-    this.type = type;
-    this.clear();
-  },
-  destroy: function() {
-    this.clear();
-  },
-  clear: function() {
-    this.menuItems = [];
-    this.variables = {};
-    this.onShowScripts = [];
-  },
-  isEmpty: function() {
-    var e = gel('context.' + this.type + "." + this.suffix);
-    if (e) {
-      var script = e.innerHTML;
-      if (window.execScript)
-        window.execScript(script);
-      else
-        eval.call(window, script);
-      Element.remove(e);
-    }
-    for (var i = 0; i < this.menuItems.length; i++) {
-      if (this.menuItems[i].parentId == '')
-        return false;
-    }
-    return true;
-  },
-  load: function() {},
-  add: function(sysId, id, parentId, label, type, action, order, img, trackSelected) {
-    var item = {};
-    item.sysId = sysId;
-    item.id = id;
-    item.parentId = parentId;
-    item.label = label;
-    item.type = type;
-    item.action = action || "";
-    item.order = order;
-    item.image = img;
-    item.trackSelected = (trackSelected == "true");
-    this._add(item);
-  },
-  addItem: function(id, parentId, label, type, action, order, img, trackSelected, onShowScript) {
-    var item = {};
-    item.id = id;
-    item.parentId = parentId;
-    item.label = label;
-    item.type = type;
-    item.action = action;
-    item.order = order;
-    item.image = img;
-    item.trackSelected = (trackSelected == "true");
-    item.onShowScript = onShowScript;
-    this._add(item);
-  },
-  _add: function(item) {
-    if (!item.order)
-      item.order = 0;
-    this.menuItems.push(item);
-  },
-  increaseItemsOrder: function(increase) {
-    for (var i = 0; i < this.menuItems.length; i++)
-      this.menuItems[i].order += increase;
-  },
-  addAction: function(label, action, order) {
-    this.addItem("", "", label, "action", action, order);
-  },
-  showContextMenu: function(evt, id, variables) {
-    this.variables = variables;
-    id += this.suffix;
-    if (!getMenuByName(id))
-      this._createMenu(id);
-    var cm = getMenuByName(id);
-    if (cm.context.isEmpty())
-      return;
-    this._loadVariables(variables);
-    for (var i = 0; i < this.onShowScripts.length; i++) {
-      var onShow = this.onShowScripts[i];
-      g_menu = getMenuByName(onShow.menuId);
-      if (!g_menu)
-        continue;
-      g_menu = g_menu.context;
-      if (!g_menu)
-        continue;
-      g_item = g_menu.getItem(onShow.itemId);
-      if (!g_item)
-        continue;
-      this._runOnShowScript(onShow.script, onShow.itemId);
-    }
-    this._clearVariables(variables);
-    g_menu = null;
-    g_item = null;
-    return contextShow(evt, id, 0, 0, 0, 0);
-  },
-  _createMenu: function(id) {
-    var cm = new GwtContextMenu(id);
-    cm.clear();
-    this._sort();
-    this._buildMenu("", cm);
-  },
-  _sort: function() {
-    this.menuItems = this.menuItems.sort(function(a, b) {
-      var aOrder = parseInt("0" + a.order, 10);
-      var bOrder = parseInt("0" + b.order, 10);
-      if ((aOrder) < (bOrder)) {
-        return -1;
-      }
-      if ((aOrder) > (bOrder)) {
-        return 1;
-      }
-      return 0;
-    });
-  },
-  _buildMenu: function(parentId, cm) {
-    var lastType;
-    var itemsAfterLine = 0;
-    for (var i = 0; i < this.menuItems.length; i++) {
-      var item = this.menuItems[i];
-      if (parentId != item.parentId)
-        continue;
-      if (lastType == "line" && item.type == "line")
-        continue;
-      if (lastType == "line" && itemsAfterLine > 0) {
-        this._addLine(cm);
-        itemsAfterLine = 0;
-      }
-      lastType = item.type;
-      if (lastType == "line")
-        continue;
-      if (this._addMenuItem(cm, item))
-        itemsAfterLine++;
-    }
-  },
-  _addLine: function(cm) {
-    cm.addLine();
-  },
-  _addMenuItem: function(cm, item) {
-    var added = true;
-    var mi;
-    if (item.type == "action") {
-      if (!this._getAction(item))
-        mi = cm.addLabel(item.label);
-      else
-        mi = cm.addFunc(item.label, this._runMenuAction.bind(this, item), item.id);
-    } else if (item.type == "label") {
-      mi = cm.addLabel(item.label);
-    } else if (item.type == "menu") {
-      var sm = new GwtContextMenu(item.id + '_' + this.suffix);
-      if (item.trackSelected)
-        sm.setTrackSelected(true);
-      this._buildMenu(item.id, sm);
-      if (sm.isEmpty())
-        added = false;
-      else
-        mi = cm.addMenu(item.label, sm, item.id);
-    }
-    if (mi && item.image)
-      cm.setImage(mi, item.image);
-    if (added && this._getOnShowScript(item)) {
-      var o = {};
-      o.menuId = cm.id;
-      o.itemId = item.id;
-      o.script = this._getOnShowScript(item);
-      this.onShowScripts.push(o);
-    }
-    return added;
-  },
-  _getAction: function(item) {
-    var action = '';
-    if (item.action)
-      action = item.action;
-    if (item.sysId)
-      action += '\n' + GlideMenu.scripts[item.sysId];
-    return action;
-  },
-  _getOnShowScript: function(item) {
-    if (item.sysId)
-      return GlideMenu.onScripts[item.sysId];
-    return item.onShowScript;
-  },
-  _runMenuAction: function(item) {
-    this._loadVariables(this.variables);
-    try {
-      eval(this._getAction(item));
-    } catch (ex) {
-      jslog("Error running context menu '" + item.label + "': " + ex);
-    }
-    this._clearVariables(this.variables);
-  },
-  _runOnShowScript: function(script, itemId) {
-    try {
-      eval(script);
-    } catch (ex) {
-      jslog("Error running onShow script for item '" + itemId + "': " + ex);
-    }
-  },
-  _loadVariables: function(variables) {
-    for (var n in variables) {
-      var s = n + '=variables["' + n + '"]';
-      eval(s);
-    }
-  },
-  _clearVariables: function(variables) {
-    for (var n in variables) {
-      var s = n + '=null;';
-      eval(s);
-    }
-  },
-  type: 'GlideMenu'
-};
-GlideMenu.scripts = {};
-GlideMenu.onScripts = {};
-GlideMenu.addScripts = function(o) {
-  if (o == null)
-    return;
-  for (var s in o.scripts)
-    GlideMenu.scripts[s] = o.scripts[s];
-  for (var s in o.onScripts)
-    GlideMenu.onScripts[s] = o.onScripts[s];
-};
 /*! RESOURCE: scripts/TestClient.js */
 function popTestClient(test_definition, test_subject) {
   var test_execution;
@@ -36963,6 +36293,230 @@ TestClient.prototype = {
   },
   type: 'TestClient'
 };;
+/*! RESOURCE: scripts/classes/GlideMenu.js */
+var GlideMenu = Class.create();
+GlideMenu.prototype = {
+  initialize: function(idSuffix, type) {
+    this.suffix = idSuffix;
+    this.type = type;
+    this.clear();
+  },
+  destroy: function() {
+    this.clear();
+  },
+  clear: function() {
+    this.menuItems = [];
+    this.variables = {};
+    this.onShowScripts = [];
+  },
+  isEmpty: function() {
+    var e = gel('context.' + this.type + "." + this.suffix);
+    if (e) {
+      var script = e.innerHTML;
+      if (window.execScript)
+        window.execScript(script);
+      else
+        eval.call(window, script);
+      Element.remove(e);
+    }
+    for (var i = 0; i < this.menuItems.length; i++) {
+      if (this.menuItems[i].parentId == '')
+        return false;
+    }
+    return true;
+  },
+  load: function() {},
+  add: function(sysId, id, parentId, label, type, action, order, img, trackSelected) {
+    var item = {};
+    item.sysId = sysId;
+    item.id = id;
+    item.parentId = parentId;
+    item.label = label;
+    item.type = type;
+    item.action = action || "";
+    item.order = order;
+    item.image = img;
+    item.trackSelected = (trackSelected == "true");
+    this._add(item);
+  },
+  addItem: function(id, parentId, label, type, action, order, img, trackSelected, onShowScript) {
+    var item = {};
+    item.id = id;
+    item.parentId = parentId;
+    item.label = label;
+    item.type = type;
+    item.action = action;
+    item.order = order;
+    item.image = img;
+    item.trackSelected = (trackSelected == "true");
+    item.onShowScript = onShowScript;
+    this._add(item);
+  },
+  _add: function(item) {
+    if (!item.order)
+      item.order = 0;
+    this.menuItems.push(item);
+  },
+  increaseItemsOrder: function(increase) {
+    for (var i = 0; i < this.menuItems.length; i++)
+      this.menuItems[i].order += increase;
+  },
+  addAction: function(label, action, order) {
+    this.addItem("", "", label, "action", action, order);
+  },
+  showContextMenu: function(evt, id, variables) {
+    this.variables = variables;
+    id += this.suffix;
+    if (!getMenuByName(id))
+      this._createMenu(id);
+    var cm = getMenuByName(id);
+    if (cm.context.isEmpty())
+      return;
+    this._loadVariables(variables);
+    for (var i = 0; i < this.onShowScripts.length; i++) {
+      var onShow = this.onShowScripts[i];
+      g_menu = getMenuByName(onShow.menuId);
+      if (!g_menu)
+        continue;
+      g_menu = g_menu.context;
+      if (!g_menu)
+        continue;
+      g_item = g_menu.getItem(onShow.itemId);
+      if (!g_item)
+        continue;
+      this._runOnShowScript(onShow.script, onShow.itemId);
+    }
+    this._clearVariables(variables);
+    g_menu = null;
+    g_item = null;
+    return contextShow(evt, id, 0, 0, 0, 0);
+  },
+  _createMenu: function(id) {
+    var cm = new GwtContextMenu(id);
+    cm.clear();
+    this._sort();
+    this._buildMenu("", cm);
+  },
+  _sort: function() {
+    this.menuItems = this.menuItems.sort(function(a, b) {
+      var aOrder = parseInt("0" + a.order, 10);
+      var bOrder = parseInt("0" + b.order, 10);
+      if ((aOrder) < (bOrder)) {
+        return -1;
+      }
+      if ((aOrder) > (bOrder)) {
+        return 1;
+      }
+      return 0;
+    });
+  },
+  _buildMenu: function(parentId, cm) {
+    var lastType;
+    var itemsAfterLine = 0;
+    for (var i = 0; i < this.menuItems.length; i++) {
+      var item = this.menuItems[i];
+      if (parentId != item.parentId)
+        continue;
+      if (lastType == "line" && item.type == "line")
+        continue;
+      if (lastType == "line" && itemsAfterLine > 0) {
+        this._addLine(cm);
+        itemsAfterLine = 0;
+      }
+      lastType = item.type;
+      if (lastType == "line")
+        continue;
+      if (this._addMenuItem(cm, item))
+        itemsAfterLine++;
+    }
+  },
+  _addLine: function(cm) {
+    cm.addLine();
+  },
+  _addMenuItem: function(cm, item) {
+    var added = true;
+    var mi;
+    if (item.type == "action") {
+      if (!this._getAction(item))
+        mi = cm.addLabel(item.label);
+      else
+        mi = cm.addFunc(item.label, this._runMenuAction.bind(this, item), item.id);
+    } else if (item.type == "label") {
+      mi = cm.addLabel(item.label);
+    } else if (item.type == "menu") {
+      var sm = new GwtContextMenu(item.id + '_' + this.suffix);
+      if (item.trackSelected)
+        sm.setTrackSelected(true);
+      this._buildMenu(item.id, sm);
+      if (sm.isEmpty())
+        added = false;
+      else
+        mi = cm.addMenu(item.label, sm, item.id);
+    }
+    if (mi && item.image)
+      cm.setImage(mi, item.image);
+    if (added && this._getOnShowScript(item)) {
+      var o = {};
+      o.menuId = cm.id;
+      o.itemId = item.id;
+      o.script = this._getOnShowScript(item);
+      this.onShowScripts.push(o);
+    }
+    return added;
+  },
+  _getAction: function(item) {
+    var action = '';
+    if (item.action)
+      action = item.action;
+    if (item.sysId)
+      action += '\n' + GlideMenu.scripts[item.sysId];
+    return action;
+  },
+  _getOnShowScript: function(item) {
+    if (item.sysId)
+      return GlideMenu.onScripts[item.sysId];
+    return item.onShowScript;
+  },
+  _runMenuAction: function(item) {
+    this._loadVariables(this.variables);
+    try {
+      eval(this._getAction(item));
+    } catch (ex) {
+      jslog("Error running context menu '" + item.label + "': " + ex);
+    }
+    this._clearVariables(this.variables);
+  },
+  _runOnShowScript: function(script, itemId) {
+    try {
+      eval(script);
+    } catch (ex) {
+      jslog("Error running onShow script for item '" + itemId + "': " + ex);
+    }
+  },
+  _loadVariables: function(variables) {
+    for (var n in variables) {
+      var s = n + '=variables["' + n + '"]';
+      eval(s);
+    }
+  },
+  _clearVariables: function(variables) {
+    for (var n in variables) {
+      var s = n + '=null;';
+      eval(s);
+    }
+  },
+  type: 'GlideMenu'
+};
+GlideMenu.scripts = {};
+GlideMenu.onScripts = {};
+GlideMenu.addScripts = function(o) {
+  if (o == null)
+    return;
+  for (var s in o.scripts)
+    GlideMenu.scripts[s] = o.scripts[s];
+  for (var s in o.onScripts)
+    GlideMenu.onScripts[s] = o.onScripts[s];
+};
 /*! RESOURCE: scripts/spell.js */
 var TAG_DIV = "div";
 var TAG_SPAN = "span";
@@ -37517,6 +37071,452 @@ var AJAXTextSearchCompleter = Class.create(AJAXTableCompleter, {
     if (this.searchContainer)
       width = $(this.searchContainer).getWidth() - adjust;
     return width;
+  }
+});;
+/*! RESOURCE: scripts/OpticsInspector.js */
+var OpticsInspector = Class
+  .create({
+    CATEGORIES: {
+      "sys_script": "BUSINESS RULE",
+      "sys_script_client": "CLIENT SCRIPT",
+      "data_lookup": "DATA LOOKUP",
+      "sys_data_policy2": "DATA POLICY",
+      "ui_policy": "UI POLICY",
+      "wf_context": "WORKFLOW",
+      "request_action": "REQUEST ACTION",
+      "script_engine": "SCRIPT ENGINE",
+      "wf_activity": "WORKFLOW ACTIVITY",
+      "acl": "ACL",
+      "sys_ui_action": "UI ACTION",
+      "reference_qual": "REFERENCE QUALIFIER QUERY",
+      "container_action": "CONTAINER ACTION"
+    },
+    initialize: function() {
+      this.opticsContextStack = new Array();
+      this.tableName = null;
+      this.fieldName = null;
+      this.enabled = false;
+    },
+    pushOpticsContext: function(category, name, sys_id, sourceTable) {
+      if (category == 'sys_script_client')
+        name = "\"" + name + "\"";
+      var context = {
+        "category": category,
+        "name": name,
+        "sys_id": sys_id,
+        "startTime": new Date(),
+        actions: [],
+        type: 'context',
+        "sourceTable": sourceTable || category
+      };
+      if ((typeof g_form !== 'undefined') && g_form.actionStack)
+        g_form.actionStack.push(context);
+      if (this.isInspecting() && category !== 'container_action')
+        this.opticsContextStack.push(context);
+    },
+    popOpticsContext: function() {
+      var context;
+      if ((typeof g_form !== 'undefined') && g_form.actionStack) {
+        context = g_form.actionStack.pop();
+        if (g_form._pushAction)
+          g_form._pushAction(context);
+      }
+      if (this.isInspecting() && this.opticsContextStack.length > 0 && (context && context.category !== 'container_action'))
+        return this.opticsContextStack.pop();
+      return null;
+    },
+    isInspecting: function(tableName, fieldName) {
+      if (this.tableName == null && this.fieldName == null)
+        return false;
+      if (arguments.length == 0)
+        return (this.tableName && this.tableName.length > 0 &&
+          this.fieldName && this.fieldName.length > 0);
+      if (arguments.length == 2)
+        return tableName == this.tableName &&
+          fieldName == this.fieldName;
+      return false;
+    },
+    getTableName: function() {
+      return (this.tableName && this.tableName.length > 0) ? this.tableName :
+        '';
+    },
+    getFieldName: function() {
+      return (this.fieldName && this.fieldName.length > 0) ? this.fieldName :
+        '';
+    },
+    hideWatchIcons: function() {
+      if (isDoctype()) {
+        $$(".icon-debug.watch_icon").each(function(element) {
+          $(element).hide()
+        });
+      } else {
+        $$("img.watch_icon").each(function(element) {
+          $(element).hide()
+        });
+      }
+    },
+    addWatchIcon: function(watchField) {
+      if (!watchField) {
+        return;
+      }
+      var td = $('label.' + watchField);
+      if (!td) {
+        var fieldParts = watchField.split(".");
+        if ((fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0)) {
+          td = $('label_' + fieldParts[1]);
+          if (td && td.tagName !== 'TD') {
+            var tds = td.getElementsByTagName("TD");
+            if (tds && tds.length > 0) {
+              td = tds[0];
+            }
+          }
+          if (!td) {
+            td = $('ni.' + fieldParts[1] + '_label');
+          }
+        }
+      }
+      var icon;
+      if (td) {
+        if (isDoctype()) {
+          var label = td.select('label');
+          if (label.length > 0) {
+            label = label[0];
+          } else {
+            label = td.select('legend');
+            if (label.length > 0) {
+              label = label[0];
+            } else if (td.nodeName == "LABEL") {
+              label = td;
+            }
+          }
+          icon = '<span class="label-icon icon-debug watch_icon" id="' +
+            watchField +
+            '.watch_icon"' +
+            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
+            ' src="images/debug.gifx" ' +
+            ' alt="Field is being watched"' +
+            ' title="Field is being watched"></span>';
+          if (label) {
+            $(label).insert(icon);
+          }
+        } else {
+          if (fieldParts.length === 2 &&
+            fieldParts[1].startsWith("IO:")) {
+            var legend = td.select('legend');
+            if (legend.length > 0) {
+              td = legend[0];
+            }
+          }
+          icon = '<img class="watch_icon" id="' +
+            watchField +
+            '.watch_icon"' +
+            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
+            ' src="images/debug.gifx" ' +
+            ' alt="Field is being watched"' +
+            ' title="Field is being watched" />';
+          td.insert(icon);
+        }
+      }
+    },
+    clearWatchField: function(watchfield) {
+      this.opticsContextStack = new Array();
+      this.tableName = null;
+      this.fieldName = null;
+      this.hideWatchIcons();
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.updateFieldInfo)
+          wndw.updateFieldInfo(null);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+          var wndw = debuggerTools.getJsDebugWindow();
+          if (wndw.updateFieldInfo)
+            wndw.updateFieldInfo(null);
+        }
+      }
+    },
+    setWatchField: function(watchField) {
+      if (!watchField)
+        return;
+      var fieldParts = watchField.split(".");
+      if (!(fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0))
+        return;
+      this.tableName = fieldParts[0];
+      this.fieldName = fieldParts[1];
+      this.hideWatchIcons();
+      var icon = $(watchField + ".watch_icon");
+      if (icon) {
+        icon.show();
+      } else {
+        this.addWatchIcon(watchField);
+      }
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.updateFieldInfo)
+          wndw.updateFieldInfo(watchField);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+          var wndw = debuggerTools.getJsDebugWindow();
+          if (wndw.updateFieldInfo)
+            wndw.updateFieldInfo(watchField);
+        }
+      }
+    },
+    showWatchField: function(watchField) {
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools) {
+        if (!debuggerTools.isDebugPanelVisible())
+          debuggerTools.showFieldWatcher();
+        setWatchField(watchField);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools) {
+          if (!debuggerTools.isDebugPanelVisible())
+            debuggerTools.showFieldWatcher();
+          setWatchField(watchField);
+        }
+      }
+    },
+    processClientMessage: function(notification) {
+      var opticsContext = this.opticsContextStack[this.opticsContextStack.length - 1];
+      if (!opticsContext) {
+        jslog("No optics context found");
+        return;
+      }
+      var info = {
+        type: 'CLIENT ',
+        message: notification.message,
+        message_type: "static",
+        category: opticsContext.category,
+        name: opticsContext.name,
+        level: this.opticsContextStack.length,
+        time: getFormattedTime(new Date()),
+        call_trace: this._getCallTrace(this.opticsContextStack),
+        sys_id: opticsContext["sys_id"],
+        sourceTable: opticsContext["sourceTable"]
+      };
+      if (notification["oldvalue"] && notification["newvalue"]) {
+        info.message_type = "change";
+        info.oldvalue = notification["oldvalue"];
+        info.newvalue = notification["newvalue"];
+      }
+      this.process(info);
+    },
+    processServerMessages: function() {
+      var spans = $$('span[data-type="optics_debug"]');
+      for (var i = 0; i < spans.length; i++) {
+        var notification = new GlideUINotification({
+          xml: spans[i]
+        });
+        this.processServerMessage(notification);
+        spans[i].setAttribute("data-attr-processed", "true");
+      }
+    },
+    processServerMessage: function(notification) {
+      if (notification.getAttribute('processed') == "true")
+        return;
+      var info = {
+        type: 'SERVER',
+        category: notification.getAttribute('category'),
+        name: notification.getAttribute('name'),
+        message: notification.getAttribute('message'),
+        message_type: notification.getAttribute('message_type'),
+        oldvalue: notification.getAttribute('oldvalue'),
+        newvalue: notification.getAttribute('newvalue'),
+        level: notification.getAttribute('level'),
+        time: notification.getAttribute('time'),
+        sys_id: notification.getAttribute('sys_id'),
+        sourceTable: notification.getAttribute('sourceTable'),
+        call_trace: this._getCallTrace(eval(notification
+          .getAttribute('call_trace')))
+      };
+      this.process(info);
+    },
+    process: function(notification) {
+      var msg = '<div class="debug_line ' + notification['category'] + '">' + this._getMessage(notification) + '</div>';
+      this._log(msg);
+    },
+    addLine: function() {
+      this._log('<hr class="logs-divider"/>');
+    },
+    openScriptWindow: function(tablename, sysid) {
+      if (tablename && sysid) {
+        if (tablename == "request_action")
+          tablename = "sys_ui_action";
+        var url = "/" + tablename + ".do?sys_id=" + sysid;
+        window.open(url, "tablewindow");
+      }
+    },
+    _log: function(msg) {
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.insertJsDebugMsg)
+          wndw.insertJsDebugMsg(msg);
+      } else {
+        if (parent && parent.parent) {
+          debuggerTools = parent.parent.debuggerTools;
+          if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+            var wndw = debuggerTools.getJsDebugWindow();
+            if (wndw.insertJsDebugMsg)
+              wndw.insertJsDebugMsg(msg);
+          }
+        }
+      }
+    },
+    _getCallTrace: function(contextStack) {
+      var trace = '';
+      var arrows = '<span class="rtl-arrow"> &larr;</span><span class="lrt-arrow">&rarr; </span>';
+      var space = arrows;
+      for (i = 0, maxi = contextStack.length; i < maxi; i++) {
+        var context = contextStack[i];
+        if (i > 0)
+          space = arrows + space;
+        if (context['name'] && context['name'].length > 0)
+          trace += '<div>' + space +
+          this._getCategoryName(context['category']) +
+          '&nbsp;-&nbsp;' + context['name'] + '</div>';
+        else
+          trace += '<div>' + space +
+          this._getCategoryName(context['category']) +
+          '</div>';
+      }
+      if (trace && trace.length > 0)
+        trace = '<div class="call_trace">' + trace + '</div>';
+      return trace;
+    },
+    _getMessage: function(notification) {
+      var notif_type = notification['type'];
+      var legend_title = (notif_type.indexOf('CLIENT') > -1) ? 'Client-side activity' :
+        'Server-side activity';
+      var msg = '<span class="expand-button" onclick="toggleCallTrace(this);">&nbsp;</span>';
+      msg += '<img class="infoIcon" height="16"  width="16" border="0" src="images/info-icon.png" title="' +
+        legend_title + '" alt="' + legend_title + '">';
+      msg += '<span class="log-time ' + notif_type + '">' +
+        notification['time'] + '</span>';
+      msg += '<span class="log-category">' +
+        this.CATEGORIES[notification['category']];
+      if (notification['name'] && notification['name'].length > 0) {
+        if (notification["sys_id"])
+          msg += '&nbsp;-&nbsp;<a data-tablename="' +
+          notification['sourceTable'] +
+          '" data-sys_id="' +
+          notification['sys_id'] +
+          '" onclick="javascript:openScriptWindow(this);">' +
+          notification['name'] + '</a></span>';
+        else
+          msg += '&nbsp;-&nbsp;' + notification['name'] +
+          '</span>';
+      } else
+        msg += '</span>';
+      msg += '<span class="log-value">';
+      if ("request_action" === notification['category']) {
+        msg += 'Value received from client is: <span class="value" title="Value">' +
+          notification['message'] + '</span>';
+      } else if (notification["message_type"] == "change") {
+        msg += '<span>' +
+          notification["oldvalue"] +
+          '</span><span class="rtl-arrow"> &larr; </span><span class="lrt-arrow"> &rarr; </span><span>' +
+          notification["newvalue"] + '</span>';
+      } else {
+        msg += notification['message'];
+      }
+      msg += '</span>';
+      msg += notification['call_trace'];
+      return msg;
+    },
+    _getCategoryName: function(category) {
+      var name = this.CATEGORIES[category];
+      if (name === 'undefined' || name === null)
+        name = category;
+      return name;
+    },
+    _getLevelStr: function(level) {
+      if (level == 'undefined' || level == null || level <= 0)
+        level = 1;
+      var levelStr = '';
+      for (i = 0; i < level; i++)
+        levelStr += '-';
+      return levelStr + '>';
+    },
+    toString: function() {
+      return 'OpticsInspector';
+    }
+  });
+var g_optics_inspect_handler = new OpticsInspector();
+OpticsInspector.WATCH_EVENT = 'glide:ui_notification.optics_debug';
+OpticsInspector.WATCH_EVENT_UI = 'glide:ui_notification.optics_debug_ui';
+OpticsInspector.WATCH_FIELD = 'glide_optics_inspect_watchfield';
+OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_watchfield';
+OpticsInspector.UPDATE_WATCH_FIELD = 'glide_optics_inspect_update_watchfield';
+OpticsInspector.CLEAR_WATCH_FIELD = 'glide_optics_inspect_clear_watchfield';
+OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_show_watchfield';
+OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
+OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
+OpticsInspector.PUT_CS_CONTEXT = 'glide_optics_inspect_put_cs_context';
+OpticsInspector.POP_CS_CONTEXT = 'glide_optics_inspect_pop_cs_context';
+OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
+OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
+OpticsInspector.LOG_MESSAGE = 'glide_optics_inspect_log_message';
+OpticsInspector.WINDOW_OPEN = 'glide_optics_inspect_window_open';
+
+function getClientScriptContextName(name, type) {
+  var csname = null;
+  if (type === "submit")
+    csname = g_event_handlers_onSubmit[name];
+  else if (type === "load")
+    csname = g_event_handlers_onLoad[name];
+  else if (type === "change")
+    csname = g_event_handlers_onChange[name];
+  return csname;
+}
+CustomEvent.observe(OpticsInspector.PUT_CONTEXT, function(category, name, sys_id, sourceTable) {
+  g_optics_inspect_handler.pushOpticsContext(category, name, sys_id, sourceTable);
+});
+CustomEvent.observe(OpticsInspector.POP_CONTEXT, function() {
+  g_optics_inspect_handler.popOpticsContext();
+});
+CustomEvent.observe(OpticsInspector.PUT_CS_CONTEXT, function(name, type) {
+  var csname = getClientScriptContextName(name, type);
+  if (csname)
+    g_optics_inspect_handler.pushOpticsContext("sys_script_client", csname,
+      g_event_handler_ids[name]);
+});
+CustomEvent.observe(OpticsInspector.POP_CS_CONTEXT, function(name, type) {
+  var csname = getClientScriptContextName(name, type);
+  if (csname)
+    g_optics_inspect_handler.popOpticsContext();
+});
+CustomEvent.observe(OpticsInspector.LOG_MESSAGE, function(notification) {
+  if (g_optics_inspect_handler.isInspecting(notification["table"],
+      notification["field"])) {
+    g_optics_inspect_handler.processClientMessage(notification);
+  }
+});
+CustomEvent.observe(OpticsInspector.WATCH_EVENT_UI, function(notification) {
+  g_optics_inspect_handler.process(notification);
+});
+CustomEvent.observe(OpticsInspector.WATCH_EVENT, function(notification) {
+  g_optics_inspect_handler.processServerMessage(notification);
+});
+CustomEvent.observe(OpticsInspector.WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.setWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.SHOW_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.showWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.CLEAR_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.clearWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.setWatchField(watchfield);
+  if (window.name !== "jsdebugger") {
+    g_optics_inspect_handler.addLine();
+    g_optics_inspect_handler.processServerMessages();
   }
 });;
 /*! RESOURCE: /scripts/jquery-ui-1.9.2.custom.js */

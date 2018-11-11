@@ -12500,74 +12500,2049 @@ angular.module('sn.connect.resource').service('resourcePersister', function(
 });;
 /*! RESOURCE: /scripts/app.ng_chat/resource/service.supportTabHandler.js */
 angular.module('sn.connect.resource').service('supportTabHandler', function() {
-      'use strict';
-      var tabs = {};
-      var watches = {};
-      var globalWatches = [];
+  'use strict';
+  var tabs = {};
+  var watches = {};
+  var globalWatches = [];
 
-      function addTab(channelID, tab) {
-        if (!channelID || !tab)
-          return false;
-        tabs[channelID] = tabs[channelID] || [];
-        if (ngObjectIndexOf(tabs[channelID], tab) !== -1)
-          return tab;
-        tabs[channelID].push(tab);
-        callWatches(channelID, tab);
-        return tab;
+  function addTab(channelID, tab) {
+    if (!channelID || !tab)
+      return false;
+    tabs[channelID] = tabs[channelID] || [];
+    if (ngObjectIndexOf(tabs[channelID], tab) !== -1)
+      return tab;
+    tabs[channelID].push(tab);
+    callWatches(channelID, tab);
+    return tab;
+  }
+
+  function removeTab(channelID, tab) {
+    if (!channelID || !tab || !tabs[channelID])
+      return false;
+    var loc = ngObjectIndexOf(tabs[channelID], tab);
+    if (loc !== -1) {
+      var removedTab = tabs[channelID].splice(loc, 1)[0];
+      callWatches(channelID, removedTab);
+      return removedTab;
+    }
+    return false;
+  }
+
+  function removeChannel(channelID) {
+    if (!channelID || !tabs[channelID])
+      return false;
+    tabs[channelID] = [];
+    callWatches(channelID, []);
+    return true;
+  }
+
+  function getTabs(channelID, sort) {
+    if (!tabs[channelID])
+      return [];
+    return sort ? tabs[channelID].sort(function(a, b) {
+      return a.$order - b.$order;
+    }) : tabs[channelID];
+  }
+
+  function ngObjectIndexOf(arr, obj) {
+    for (var i = 0, len = arr.length; i < len; i++)
+      if (angular.equals(arr[i], obj))
+        return i;
+    return -1;
+  }
+
+  function watch(func, channelID) {
+    if (channelID) {
+      watches[channelID] = watches[channelID] || [];
+      watches[channelID].push(func)
+    } else {
+      globalWatches.push(func);
+    }
+    return func;
+  }
+
+  function unwatch(func, channelID) {
+    var i, len;
+    if (channelID && watches[channelID]) {
+      for (i = 0, len = watches[channelID].length; i < len; i++) {
+        var watchLoc = watches[channelID].indexOf(func);
+        if (watchLoc !== -1)
+          watches[channelID].splice(watchLoc, 1);
       }
+    } else {
+      for (i = 0, len = globalWatches.length; i < len; i++) {
+        var globalWatchLoc = globalWatches.indexOf(func);
+        if (globalWatchLoc !== -1)
+          globalWatches.splice(globalWatchLoc, 1);
+      }
+    }
+  }
 
-      function removeTab(channelID, tab) {
-        if (!channelID || !tab || !tabs[channelID])
-          return false;
-        var loc = ngObjectIndexOf(tabs[channelID], tab);
-        if (loc !== -1) {
-          var removedTab = tabs[channelID].splice(loc, 1)[0];
-          callWatches(channelID, removedTab);
-          return removedTab;
+  function callWatches(channelID, response) {
+    var i, len;
+    if (channelID && watches[channelID] && watches[channelID].length) {
+      for (i = 0, len = watches[channelID].length; i < len; i++)
+        watches[channelID][i](response);
+    }
+    for (i = 0, len = globalWatches.length; i < len; i++)
+      globalWatches[i](response);
+  }
+  return {
+    add: addTab,
+    remove: removeTab,
+    get: getTabs,
+    removeChannel: removeChannel,
+    watch: watch,
+    unwatch: unwatch
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideMemberList.js */
+angular.module('sn.connect.resource').directive('snAsideMemberList', function(
+  getTemplateUrl, $timeout, activeConversation) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideMemberList.xml'),
+    link: function(scope, element) {
+      scope.$on("sn.aside.open", function() {
+        $timeout(function() {
+          if (element.is(":visible"))
+            scope.$emit("sn.aside.controls.active", "members");
+        }, 0, false);
+      });
+      scope.changeMode = function(evt, mode) {
+        if (!scope.conversation.amMember || evt.keyCode === 9)
+          return;
+        scope.mode = mode;
+        if (mode == 'add') {
+          $timeout(function() {
+            element.find('.form-control-search.tt-input').focus();
+          }, 200);
         }
-        return false;
-      }
-
-      function removeChannel(channelID) {
-        if (!channelID || !tabs[channelID])
+      };
+    },
+    controller: function($scope, conversations, liveProfileID, supportAddMembers) {
+      $scope.mode = 'view';
+      $scope.$emit("sn.aside.controls.active", "members");
+      $scope.viewProfile = function(evt, member) {
+        if (evt.keyCode === 9)
+          return;
+        $scope.$emit("sn.aside.open", {
+          templateUrl: getTemplateUrl("snAsideMemberList_profile.xml"),
+          isChild: true,
+          scope: {
+            profile: member,
+            showDirectMessage: !$scope.conversation.isDirectMessage && !$scope.conversation.isHelpDesk
+          }
+        });
+      };
+      $scope.isAddUserButtonVisible = function() {
+        if ($scope.mode !== 'view')
           return false;
-        tabs[channelID] = [];
-        callWatches(channelID, []);
-        return true;
+        return isButtonVisible(function() {
+          return true;
+        });
+      };
+      $scope.isLeaveButtonVisible = function() {
+        var queueEntryCheckFn = function(queueEntry) {
+          return !queueEntry.isAssignedToMe;
+        };
+        return isButtonVisible(queueEntryCheckFn);
+      };
+      $scope.isRemoveUserButtonVisible = function(userID) {
+        var queueEntryCheckFn = function(queueEntry) {
+          return queueEntry.openedBy !== userID &&
+            queueEntry.assignedTo !== userID;
+        };
+        return isButtonVisible(queueEntryCheckFn);
+      };
+
+      function isButtonVisible(queueEntryCheckFn) {
+        var conversation = $scope.conversation;
+        if (!conversation.isHelpDesk)
+          return conversation.isGroup;
+        var queueEntry = conversation.queueEntry;
+        return supportAddMembers &&
+          queueEntryCheckFn(queueEntry) &&
+          queueEntry.isActive;
+      }
+      $scope.user = false;
+      $scope.findUser = function() {
+        for (var i = 0; i < $scope.conversation.members.length; i++) {
+          if ($scope.conversation.members[i].sysID === liveProfileID) {
+            $scope.user = $scope.conversation.members[i];
+            return;
+          }
+        }
+        $scope.user = false;
+      };
+      $scope.findUser();
+      $scope.$watch('conversation.sysID', function() {
+        $scope.findUser();
+      });
+      $scope.addMember = function(memberID) {
+        conversations.addUser($scope.conversation.sysID, memberID);
+        $scope.mode = 'view';
+        if (!$scope.user)
+          $scope.findUser();
+      };
+      $scope.showRemoveMember = function() {
+        return $scope.conversation.amMember && $scope.conversation.isGroup;
+      };
+      $scope.removeMember = function($event, memberID) {
+        if ($event && $event.keyCode === 9)
+          return;
+        $event.stopPropagation();
+        conversations.removeUser($scope.conversation.sysID, memberID);
+        if (memberID === liveProfileID) {
+          activeConversation.clear($scope.conversation);
+          $scope.user = null;
+        }
+      };
+      $scope.showAddMembers = function() {
+        return !$scope.conversation.isHelpDesk && $scope.conversation.isGroup && $scope.mode == 'view'
+      };
+      $scope.showUser = function() {
+        return user && $scope.memberFilterText && user.name.indexOf($scope.memberFilterText) > -1;
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideInfo.js */
+angular.module('sn.connect.resource').directive('snAsideInfo', function(getTemplateUrl, $timeout) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideInfo.xml'),
+    link: function(scope, element) {
+      scope.$on("sn.aside.open", function() {
+        $timeout(function() {
+          if (element.is(":visible"))
+            scope.$emit("sn.aside.controls.active", "info");
+        }, 0, false);
+      });
+    },
+    controller: function($scope) {
+      $scope.$emit("sn.aside.controls.active", "info");
+      $scope.isFieldVisible = function(field) {
+        return field.displayValue && field.type !== 'journal_input' && field.type !== 'journal_list';
+      };
+      $scope.historyBack = function(evt) {
+        if (evt && evt.keyCode === 9)
+          return;
+        $scope.$emit("sn.aside.historyBack");
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideInfoItem.js */
+angular.module('sn.connect.resource').directive('snAsideInfoItem', function(getTemplateUrl) {
+  'use strict';
+  var iconMap = {
+    record: "icon-article-document",
+    link: "icon-link",
+    connect: "icon-collaboration",
+    uipage: "icon-document",
+    search: "icon-search",
+    list: "icon-list",
+    chart: "icon-poll",
+    update: "icon-form",
+    image: "icon-image",
+    video: "icon-video",
+    unauthorized: "icon-locked sn-highlight_negative",
+    error: "icon-alert-triangle",
+    pending: "icon-loading"
+  };
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideInfoItem.xml'),
+    scope: {
+      isLink: "=",
+      title: "@",
+      description: "@",
+      link: "="
+    },
+    controller: function($scope) {
+      $scope.isExternalIcon = function() {
+        return !$scope.link.isPending && $scope.link.external;
+      };
+      $scope.getExternalIcon = function() {
+        return "https://www.google.com/s2/favicons?domain=" + $scope.link.url.toLowerCase();
+      };
+      $scope.getIcon = function() {
+        if ($scope.link.isUnauthorized)
+          return iconMap.unauthorized;
+        if ($scope.link.isError)
+          return iconMap.error;
+        if ($scope.link.isPending)
+          return iconMap.pending;
+        return iconMap[$scope.link.type] || iconMap.link;
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideInfoViewAllItem.js */
+angular.module('sn.connect.resource').directive('snAsideInfoViewAllItem', function(getTemplateUrl) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideInfoViewAllItem.xml'),
+    scope: {
+      title: "@",
+      templateUrl: "@",
+      minCount: "@",
+      links: "="
+    },
+    controller: function($scope) {
+      $scope.isShowing = function() {
+        return $scope.links.length > $scope.minCount;
+      };
+      $scope.openView = function(evt) {
+        if (evt.keyCode === 9)
+          return;
+        $scope.$emit("sn.aside.open", {
+          templateUrl: getTemplateUrl($scope.templateUrl),
+          isChild: true,
+          scope: $scope.$parent
+        });
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideAttachments.js */
+angular.module('sn.connect.resource').directive('snAsideAttachments', function(getTemplateUrl, $timeout) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideAttachments.xml'),
+    link: function(scope, element) {
+      scope.$on("sn.aside.open", function() {
+        $timeout(function() {
+          if (element.is(":visible"))
+            scope.$emit("sn.aside.controls.active", "attachments");
+        }, 0, false);
+      });
+    },
+    controller: function($scope, $rootScope, resourcePersister) {
+      $scope.$emit("sn.aside.controls.active", "attachments");
+      $scope.$watch("conversation.sysID", rawifyAttachments);
+      $scope.$watchCollection("conversation.resources.attachments", rawifyAttachments);
+
+      function rawifyAttachments() {
+        $scope.attachments = $scope.conversation.resources.attachments.map(function(attachment) {
+          return attachment.rawData;
+        });
+      }
+      rawifyAttachments();
+      $scope.attachFiles = function(evt) {
+        if (evt.keyCode === 9)
+          return;
+        if ($scope.conversation.amMember)
+          $rootScope.$broadcast("connect.attachment_dialog.open", $scope.conversation.sysID);
+      };
+      $scope.isAddButtonShowing = function() {
+        return !$scope.conversation.isHelpDesk || !$scope.conversation.queueEntry.isClosedByAgent;
+      }
+      $scope.scrollConfig = {
+        onScrollUp: function() {
+          console.info("Up!");
+        },
+        onScrollDown: function() {
+          console.info("Down!");
+          $scope.conversation.resources.retrieved = false;
+          resourcePersister.get($scope.conversation.sysID);
+        },
+        onScrollMissing: function() {
+          console.info("Missing!");
+        }
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideNotifications.js */
+angular.module('sn.connect.resource').directive('snAsideNotifications', function(getTemplateUrl, $timeout) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideNotifications.xml'),
+    link: function(scope, element) {
+      scope.$on("sn.aside.open", function() {
+        $timeout(function() {
+          if (element.is(":visible"))
+            scope.$emit("sn.aside.controls.active", "notifications");
+        }, 0, false);
+      });
+    },
+    controller: function($scope, notificationPreferences) {
+      $scope.$emit("sn.aside.controls.active", "notifications");
+      $scope.showSystemMessage = function() {
+        return !$scope.conversation.isDirectMessage &&
+          notificationPreferences.globalPreferences.mobile &&
+          $scope.conversation.preferences.mobile === "all";
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideNotificationItem.js */
+angular.module('sn.connect.resource').directive('snAsideNotificationItem', function(getTemplateUrl) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideNotificationItem.xml'),
+    scope: {
+      conversation: "=",
+      section: "@",
+      disableText: "@",
+      disableLinkText: "@",
+      description: "@",
+      type: '@'
+    },
+    controller: function($scope, notificationPreferences) {
+      $scope.globalPreferences = notificationPreferences.globalPreferences;
+      $scope.enable = function(event) {
+        if (event.keyCode === 9)
+          return;
+        $scope.globalPreferences[$scope.type] = true;
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/resource/directive.snAsideFrame.js */
+angular.module('sn.connect.resource').directive('snAsideFrame', function(getTemplateUrl, $timeout) {
+  'use strict';
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snAsideFrame.xml'),
+    link: function(scope, element, attrs) {
+      scope.title = attrs.title;
+      scope.url = attrs.url + (attrs.url.indexOf('?') < 0 ? '?' : '&') + "sysparm_clear_stack=true";
+      scope.name = attrs.name;
+      scope.$on("sn.aside.open", function() {
+        $timeout(function() {
+          if (element.is(":visible"))
+            scope.$emit("sn.aside.controls.active", scope.name);
+        }, 0, false);
+      });
+    },
+    controller: function($scope) {
+      $timeout(function() {
+        $scope.$emit('sn.aside.controls.active', $scope.name);
+      }, 0, false);
+      $scope.close = function(evt) {
+        if (evt.keyCode === 9)
+          return;
+        $scope.$emit("sn.aside.close");
+      }
+    }
+  }
+});;;
+/*! RESOURCE: /scripts/app.ng_chat/queue/js_includes_connect_queue.js */
+/*! RESOURCE: /scripts/app.ng_chat/queue/_module.js */
+angular.module("sn.connect.queue", ["sn.connect.profile", "sn.connect.conversation"]);;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snQueueList.js */
+angular.module('sn.connect.queue').directive('snQueueList', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snQueueList.xml'),
+    replace: true,
+    scope: {},
+    controller: function($scope, $filter, queues, conversations, supportConversationLimit) {
+      $scope.agents = queues.agents;
+      $scope.hasQueues = queues.hasQueues;
+      $scope.isLimitReached = function() {
+        if (supportConversationLimit === -1)
+          return false;
+        var supportConversations = $filter('conversation')(conversations.all, true, true)
+          .filter(function(conversation) {
+            var queueEntry = conversation.queueEntry;
+            return queueEntry.isAssignedToMe && !queueEntry.isPermanentlyClosed;
+          });
+        return supportConversationLimit <= supportConversations.length;
+      };
+      $scope.$on('dialog.queue-error.show', function(evt, data) {
+        $scope.queueErrorData = data;
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snQueueItem.js */
+angular.module('sn.connect.queue').directive('snQueueItem', function(getTemplateUrl, $timeout, i18n) {
+  'use strict';
+  var acceptButtonLabel = "Accept Ticket From {0}";
+  i18n.getMessages([acceptButtonLabel], function(translations) {
+    acceptButtonLabel = translations[acceptButtonLabel];
+  });
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snQueueItem.xml'),
+    replace: true,
+    scope: {
+      queue: '=',
+      canAnswer: '='
+    },
+    link: function(scope, element) {
+      var flashCoolDown = 1000;
+      var onCoolDown = false;
+      var queueItem = element.find('.queue-item');
+      scope.flashQueue = function() {
+        if (onCoolDown)
+          return;
+        onCoolDown = true;
+        queueItem.addClass("highlight-flash");
+        $timeout(function() {
+          queueItem.removeClass("highlight-flash");
+        }, 250);
+        $timeout(function() {
+          onCoolDown = false;
+        }, flashCoolDown);
+      }
+    },
+    controller: function($scope, $rootScope, queueEntries, queueNotifier, conversations, activeConversation) {
+      $scope.isEmpty = function() {
+        return $scope.queue.waitingCount == 0;
+      };
+      $scope.getAcceptAriaLabel = function() {
+        return i18n.format(acceptButtonLabel, $scope.queue.name);
+      };
+      $scope.answer = function() {
+        if ($scope.isEmpty())
+          return;
+        if (!$scope.canAnswer)
+          return;
+        queueEntries.requestNext($scope.queue.id).then(function(queueEntry) {
+          conversations.get(queueEntry.conversationID).then(function(conversation) {
+            activeConversation.conversation = conversation;
+          });
+        }, function(response) {
+          if (response.status !== 404 || !response.data || !response.data.result || !response.data.result.error)
+            return;
+          $rootScope.$broadcast('dialog.queue-error.show', {
+            queue: $scope.queue,
+            message: response.data.result.error
+          });
+        })
+      };
+      $scope.$watch('queue.waitingCount', function() {
+        $scope.flashQueue();
+        queueNotifier.notify($scope.queue);
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snNonAgentClose.js */
+angular.module('sn.connect.queue').directive('snNonAgentClose', function(
+  getTemplateUrl, conversations, activeConversation) {
+  'use strict';
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: getTemplateUrl('snNonAgentClose.xml'),
+    scope: {},
+    controller: function($scope) {
+      $scope.$on('connect.non_agent_conversation.close_prompt', function(event, conversation) {
+        $scope.conversation = conversation;
+        $scope.$broadcast('dialog.queue-non-agent-modal.show');
+      });
+      $scope.close = function() {
+        conversations.closeSupport($scope.conversation.sysID, true);
+        activeConversation.clear($scope.conversation);
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snQueueEntryClose.js */
+angular.module('sn.connect.queue').directive('snQueueEntryClose', function(
+  getTemplateUrl, conversations, activeConversation) {
+  'use strict';
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: getTemplateUrl('snQueueEntryClose.xml'),
+    scope: {},
+    controller: function($scope) {
+      var hideConversation = true;
+      $scope.$on('connect.support_conversation.close_prompt', function(event, conversation, shouldHide) {
+        $scope.conversation = conversation;
+        hideConversation = shouldHide;
+        $scope.$broadcast('dialog.queue-entry-close-modal.show');
+      });
+      $scope.close = function() {
+        conversations.closeSupport($scope.conversation.sysID, hideConversation);
+        if (hideConversation)
+          activeConversation.clear($scope.conversation);
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snQueueEntryTransfer.js */
+angular.module('sn.connect.queue').directive('snQueueEntryTransfer', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: getTemplateUrl('snQueueEntryTransfer.xml'),
+    scope: {},
+    controller: function($scope, queues, queueEntries, userID, supportConversationLimit) {
+      $scope.queues = [];
+
+      function reset() {
+        $scope.queue = {};
+        $scope.agents = [];
+      }
+      $scope.$on('connect.support.conversation.transfer', function(event, conversation) {
+        reset();
+        $scope.conversation = conversation;
+        $scope.queues.length = 0;
+        queueEntries.requestByConversation(conversation.sysID).then(function(queueEntry) {
+          queues.getQueue(queueEntry.queueID).then(function(queue) {
+            $scope.queue = queue;
+          });
+          queues.getAgents(queueEntry.queueID).then(function(agents) {
+            $scope.agents = agents.filter(function(agent) {
+              return (agent.userID !== queueEntry.openedBy) &&
+                (agent.userID !== userID);
+            }).sort(function(a, b) {
+              return a.name.localeCompare(b.name);
+            });
+          });
+          queues.refresh().then(function() {
+            angular.forEach(queues.all, function(value, key) {
+              if (key !== queueEntry.queueID)
+                $scope.queues.push(value)
+            });
+          });
+          $scope.$broadcast('dialog.transfer-modal.show');
+        });
+      });
+      $scope.close = reset;
+      $scope.startsWith = function(actual, expected) {
+        return actual.toLowerCase().indexOf(expected.toLowerCase()) > -1;
+      };
+      $scope.canTransferToAgent = function(agent) {
+        if (supportConversationLimit === -1)
+          return true;
+        if (!agent.supportConversationCount)
+          return true;
+        return agent.supportConversationCount < supportConversationLimit;
+      };
+      $scope.transferToAgent = function(agent) {
+        queueEntries.transfer($scope.conversation.sysID, agent.userID);
+        $scope.$broadcast('dialog.transfer-modal.close');
+        reset();
+      };
+      $scope.transferToQueue = function(queue) {
+        $scope.transferQueue = queue;
+        $scope.$broadcast('dialog.transfer-modal.close');
+        reset();
+        $scope.$broadcast('dialog.queue-transfer-confirm.show');
+      };
+      $scope.transferQueueOk = function() {
+        queueEntries.escalate($scope.conversation, $scope.transferQueue.id);
+      };
+      $scope.cancelTransfer = function() {
+        queueEntries.cancel($scope.conversation.sysID);
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/directive.snQueueEntryTransferAccepted.js */
+angular.module('sn.connect.queue').directive('snQueueEntryTransferAccepted', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: getTemplateUrl('snQueueEntryTransferAccepted.xml'),
+    scope: {},
+    controller: function($scope, $rootScope, $timeout, $filter, activeConversation, conversations, queueEntries,
+      profiles) {
+      var transferOrder = [];
+      $scope.$watchCollection(function() {
+        return $filter('transferAccepted')(conversations.all).map(function(conversation) {
+          return conversation.sysID;
+        });
+      }, function(newCollection) {
+        transferOrder = newCollection.sort(function(sysID1, sysID2) {
+          return sortIndex(sysID1) - sortIndex(sysID2);
+        });
+        if (transferOrder.length > 0)
+          show();
+        else
+          hide();
+      });
+
+      function sortIndex(sysID) {
+        var index = transferOrder.indexOf(sysID);
+        return (index < 0) ? 1000 : index;
+      }
+      $scope.leave = closeModal(true);
+      $scope.stay = closeModal(false);
+
+      function closeModal(removeConversation) {
+        return function() {
+          var conversation = conversations.indexed[currentSysID];
+          queueEntries.complete(currentSysID);
+          conversation.queueEntry.clearTransferState();
+          if (removeConversation) {
+            conversations.closeSupport(conversation.sysID, true);
+            activeConversation.clear(conversation);
+          }
+          hide();
+        }
+      }
+      var currentSysID;
+
+      function show() {
+        var sysID = transferOrder[0];
+        if (currentSysID === sysID)
+          return;
+        currentSysID = sysID;
+        var conversation = conversations.indexed[currentSysID];
+        var queueEntry = conversation.queueEntry;
+        delete $scope.profileForSession;
+        delete $scope.transferToProfile;
+        profiles.getAsync('sys_user.' + queueEntry.openedBy).then(function(profile) {
+          $scope.profileForSession = profile;
+          profiles.getAsync('sys_user.' + queueEntry.transferTo).then(function(profile) {
+            $scope.transferToProfile = profile;
+            $scope.$broadcast('dialog.transfer-accepted-modal.show');
+            activeConversation.conversation = conversation;
+          });
+        });
       }
 
-      function getTabs(channelID, sort) {
-        if (!tabs[channelID])
-          return [];
-        return sort ? tabs[channelID].sort(function(a, b) {
-          return a.$order - b.$order;
-        }) : tabs[channelID];
+      function hide() {
+        $scope.$broadcast('dialog.transfer-accepted-modal.close');
+        if (currentSysID === transferOrder[0])
+          transferOrder.shift();
+        currentSysID = undefined;
+        if (transferOrder.length === 0)
+          return;
+        $timeout(function() {
+          show();
+        }, 400);
       }
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/factory.queue.js */
+angular.module('sn.connect.queue').factory('queueFactory', function() {
+  'use strict';
+  return {
+    fromObject: function(data) {
+      return {
+        get id() {
+          return data.sys_id;
+        },
+        get name() {
+          return data.name;
+        },
+        get question() {
+          return data.question;
+        },
+        get waitTime() {
+          return data.average_wait_time.replace(/ Minute(s?)/g, "m").replace(/ Hour(s?)/g, "h").replace(/ Second(s?)/g, "s");
+        },
+        get waitTimeLong() {
+          return data.average_wait_time;
+        },
+        get waitingCount() {
+          return data.waiting_count;
+        },
+        get available() {
+          return angular.isUndefined(data.not_available);
+        },
+        get unavailableMessage() {
+          return data.not_available;
+        },
+        get escalateTo() {
+          return data.escalate_to;
+        },
+        get isAgentsQueue() {
+          return data.is_agent_for;
+        },
+        __rawData: data
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/factory.queueEntry.js */
+angular.module('sn.connect.queue').factory('queueEntryFactory', function(profiles, userID, queues) {
+  'use strict';
+  var WAITING = 1;
+  var WORK_IN_PROGRESS = 2;
+  var CLOSED_COMPLETE = 3;
+  var CLOSED_ESCALATED = 4;
+  var CLOSED_BY_CLIENT = 7;
+  var CLOSED_ABANDONED = 8;
+  var TRANSFER_PENDING = 'pending';
+  var TRANSFER_CANCELLED = 'cancelled';
+  var TRANSFER_ACCEPTED = 'accepted';
+  var TRANSFER_REJECTED = 'rejected';
+  return {
+    fromObject: function(data) {
+      return {
+        equals: function(rawQueueEntry) {
+          return angular.equals(data, rawQueueEntry);
+        },
+        get averageWaitTime() {
+          return data.average_wait_time;
+        },
+        get sysID() {
+          return data.sys_id;
+        },
+        get queueID() {
+          return data.queue;
+        },
+        get queue() {
+          return queues.all[data.queue];
+        },
+        get conversationID() {
+          return data.group;
+        },
+        get assignedTo() {
+          return data.assigned_to;
+        },
+        get isAssignedToMe() {
+          return this.assignedTo === userID;
+        },
+        get number() {
+          return data.number;
+        },
+        get position() {
+          return data.position;
+        },
+        get profile() {
+          return profiles.get(data.sys_id);
+        },
+        get shortDescription() {
+          return data.short_description;
+        },
+        get state() {
+          return data.state;
+        },
+        set state(value) {
+          data.state = value;
+        },
+        get waitTime() {
+          return data.wait_time;
+        },
+        get workStart() {
+          return data.work_start;
+        },
+        get workEnd() {
+          return data.work_end;
+        },
+        get isTransferStateChanged() {
+          return data.transfer_change;
+        },
+        clearTransferState: function() {
+          data.transfer_state = undefined;
+        },
+        get hasTransfer() {
+          return !!data.transfer_state;
+        },
+        get isTransferPending() {
+          return data.transfer_state === TRANSFER_PENDING;
+        },
+        get isTransferCancelled() {
+          return data.transfer_state === TRANSFER_CANCELLED;
+        },
+        get isTransferAccepted() {
+          return data.transfer_state === TRANSFER_ACCEPTED;
+        },
+        get isTransferRejected() {
+          return data.transfer_state === TRANSFER_REJECTED;
+        },
+        get openedBy() {
+          return data.opened_by;
+        },
+        get isOpenedByMe() {
+          return this.openedBy === userID;
+        },
+        get transferTo() {
+          return data.transfer_to;
+        },
+        get isTransferringToMe() {
+          return this.transferTo === userID;
+        },
+        get isTransferringFromMe() {
+          return data.transfer_from === userID;
+        },
+        get transferShouldClose() {
+          if (this.isAssignedToMe)
+            return false;
+          return data.transfer_should_close;
+        },
+        get transferUpdatedOn() {
+          return new Date(data.transfer_updated_on);
+        },
+        get updatedOn() {
+          return new Date(data.sys_updated_on);
+        },
+        get isActive() {
+          return this.isWaiting || this.isAccepted || (!this.isOpenedByMe && this.isClosedByClient);
+        },
+        get isPermanentlyClosed() {
+          return this.isClosedByAgent || this.isEscalated;
+        },
+        get isWaiting() {
+          return this.state === WAITING;
+        },
+        get isAccepted() {
+          return this.state === WORK_IN_PROGRESS;
+        },
+        get isEscalated() {
+          return this.state === CLOSED_ESCALATED;
+        },
+        get isAbandoned() {
+          return this.state === CLOSED_ABANDONED;
+        },
+        get isClosedByAgent() {
+          return this.state === CLOSED_COMPLETE;
+        },
+        get isClosedByClient() {
+          return this.state === CLOSED_BY_CLIENT;
+        },
+        escalate: function() {
+          this.state = CLOSED_ESCALATED;
+        }
+      };
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/service.queues.js */
+angular.module('sn.connect.queue').service('queues', function(
+  $q, amb, snHttp, queueFactory, profiles, supportAddMembers, supportEnabled, inSupportClient, isLoggedIn, alertOnQueueEnter, audioNotifier) {
+  'use strict';
+  var AMB_CHANNEL = '/connect/support/queues';
+  var REST_API_PATH = isLoggedIn ? "/api/now/connect/support/queues" : "/api/now/connect/support/anonymous/queues";
+  var queues = {};
+  var agentsQueues = {};
+  var ambChannel;
 
-      function ngObjectIndexOf(arr, obj) {
-        for (var i = 0, len = arr.length; i < len; i++)
-          if (angular.equals(arr[i], obj))
-            return i;
-        return -1;
+  function refresh() {
+    return snHttp.get(REST_API_PATH).then(function(response) {
+      queues = {};
+      ambUnsubscribe();
+      if (response.data) {
+        addRawQueues(response.data.result);
+        ambSubscribe();
       }
+      return queues;
+    });
+  }
 
-      function watch(func, channelID) {
-        if (channelID) {
-          watches[channelID] = watches[channelID] || [];
-          watches[channelID].push(func)
+  function ambSubscribe() {
+    if (!ambChannel) {
+      ambChannel = amb.getChannel(AMB_CHANNEL).subscribe(function(response) {
+        var queue = addRawQueue(response.data);
+        addEscalationQueue(queue);
+        return queue;
+      });
+      amb.connect();
+    }
+    return ambChannel;
+  }
+
+  function ambUnsubscribe() {
+    if (ambChannel) {
+      ambChannel.unsubscribe();
+      ambChannel = void(0);
+    }
+  }
+
+  function addRawQueues(rawQueuesData) {
+    angular.forEach(rawQueuesData, function(queueData) {
+      addRawQueue(queueData);
+    });
+    angular.forEach(queues, function(queue) {
+      addEscalationQueue(queue);
+    });
+    return queues;
+  }
+
+  function addRawQueue(rawQueueData) {
+    if (!rawQueueData)
+      return;
+    if (queues[rawQueueData.sys_id]) {
+      var existingItem = queues[rawQueueData.sys_id];
+      rawQueueData = angular.extend({}, existingItem.__rawData, rawQueueData);
+    }
+    var queue = queueFactory.fromObject(rawQueueData);
+    if (queue.isAgentsQueue) {
+      if (shouldAlertOnQueueEnter(queue)) {
+        audioNotifier.notify({
+          timestamp: Date.now()
+        });
+      }
+      agentsQueues[queue.id] = queue;
+    }
+    return queues[queue.id] = queue;
+  }
+
+  function shouldAlertOnQueueEnter(queue) {
+    var staleQueue = agentsQueues[queue.id];
+    if (!staleQueue) {
+      return false;
+    }
+    return alertOnQueueEnter && queue.waitingCount > staleQueue.waitingCount;
+  }
+
+  function addEscalationQueue(queue) {
+    if (!queue.escalateTo)
+      return;
+    requestQueue(queue.escalateTo).then(function(escalationQueue) {
+      queue.escalationQueue = escalationQueue;
+    });
+  }
+
+  function requestHttpQueue(queueID) {
+    return snHttp.get(REST_API_PATH + '/' + queueID).then(function(response) {
+      var queue = addRawQueue(response.data.result);
+      addEscalationQueue(queue);
+      return queue;
+    });
+  }
+
+  function requestQueue(queueID) {
+    if (!queueID)
+      return $q.when();
+    if (queues[queueID])
+      return $q.when(queues[queueID]);
+    return requestHttpQueue(queueID);
+  }
+  if ((supportAddMembers || supportEnabled) && !inSupportClient)
+    refresh();
+  return {
+    get all() {
+      return queues;
+    },
+    get agents() {
+      return agentsQueues;
+    },
+    hasQueues: function() {
+      return Object.keys(agentsQueues).length > 0;
+    },
+    refresh: refresh,
+    getAgents: function(queueID) {
+      return snHttp.get(REST_API_PATH + '/' + queueID + '/agents').then(function(response) {
+        return response.data.result.map(profiles.fromObject);
+      });
+    },
+    getQueue: requestQueue,
+    getAllWaitingCount: function() {
+      var waitingCount = 0;
+      angular.forEach(agentsQueues, function(queue) {
+        waitingCount = waitingCount + queue.waitingCount;
+      });
+      return waitingCount;
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/service.queueNotifier.js */
+angular.module('sn.connect.queue').service('queueNotifier', function($window, snNotifier, i18n, userPreferences, queues) {
+  'use strict';
+  var LOCAL_STORAGE_KEY = 'sn.connect.queueNotifier.lastUpdatedOn';
+  var queueWaitingCountUpdated;
+  i18n.getMessages([
+    'A new customer has joined your support queue'
+  ], function(results) {
+    queueWaitingCountUpdated = results['A new customer has joined your support queue'];
+  });
+  var lastWaitingCounts = {};
+  angular.forEach(queues.all, function(queue) {
+    updateWaitingCounts(queue);
+  });
+  angular.element($window).on('storage', function(e) {
+    if (e.originalEvent.key !== LOCAL_STORAGE_KEY)
+      return;
+    var lastWaitingCountsJson = $window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (lastWaitingCountsJson) {
+      lastWaitingCounts = angular.fromJson(lastWaitingCountsJson);
+    }
+  });
+
+  function updateWaitingCounts(queue) {
+    lastWaitingCounts[queue.id] = queue.waitingCount;
+    $window.localStorage.setItem(LOCAL_STORAGE_KEY, angular.toJson(lastWaitingCounts));
+  }
+  return {
+    notify: function(queue) {
+      userPreferences.getPreference('connect.notifications.desktop').then(function(value) {
+        if (value === 'false')
+          return;
+        if (queue.waitingCount <= lastWaitingCounts[queue.id]) {
+          updateWaitingCounts(queue);
+          return;
+        }
+        updateWaitingCounts(queue);
+        snNotifier().notify(queueWaitingCountUpdated);
+      });
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/service.queueEntries.js */
+angular.module('sn.connect.queue').service('queueEntries', function(
+  $q, $rootScope, snHttp, amb, queueEntryFactory, queues, inSupportClient, isLoggedIn, snNotification, i18n, supportEnabled) {
+  'use strict';
+  var QUEUE_AMB = '/connect/support/queues';
+  var GROUP_AMB = '/connect/support/group/';
+  var queueEntries = {};
+  var ambWatchers = {};
+  var watchedQueues = [];
+  var ambChannel;
+  var messageUnknownError = "Unable to complete your request: An unknown error occurred";
+  i18n.getMessages([messageUnknownError],
+    function(results) {
+      messageUnknownError = results[messageUnknownError];
+    });
+
+  function requestFiltered(filter) {
+    var url = '/api/now/connect/support/sessions';
+    if (filter) {
+      url += '?';
+      for (var item in filter)
+        if (filter.hasOwnProperty(item))
+          url += item + "=" + encodeURIComponent(filter[item]) + "&";
+      url = url.slice(0, -1);
+    }
+    return snHttp.get(url).then(function(response) {
+      if (!response.data.result)
+        return;
+      angular.forEach(response.data.result, function(rawQueueEntry) {
+        addRawQueueEntry(rawQueueEntry);
+      });
+    });
+  }
+
+  function ambSubscribe() {
+    if (!ambChannel) {
+      ambChannel = amb.getChannel(QUEUE_AMB).subscribe(function(response) {
+        var queueID = response.data.sys_id;
+        if (watchedQueues.indexOf(queueID) !== -1) {
+          requestFiltered({
+            'closed': !inSupportClient,
+            'queue_id': queueID
+          });
+        }
+      });
+    }
+  }
+
+  function addRawQueueEntry(rawQueueEntry) {
+    if (inSupportClient || supportEnabled) {
+      ambSubscribe();
+    }
+    var oldQueueEntry = queueEntries[rawQueueEntry.sys_id];
+    if (oldQueueEntry && oldQueueEntry.equals(rawQueueEntry))
+      return oldQueueEntry;
+    var queueEntry = queueEntryFactory.fromObject(rawQueueEntry);
+    if (!watchedQueues[queueEntry.queueID]) {
+      watchedQueues.push(queueEntry.queueID);
+    }
+    queueEntries[queueEntry.conversationID] = queueEntries[queueEntry.sysID] = queueEntry;
+    if (ambWatchers[queueEntry.conversationID]) {
+      if (queueEntry.isPermanentlyClosed)
+        removeAMBWatch(queueEntry.conversationID);
+    } else if (!queueEntry.isPermanentlyClosed && (queueEntry.isOpenedByMe === inSupportClient)) {
+      ambWatchers[queueEntry.conversationID] = amb.getChannel(GROUP_AMB + queueEntry.conversationID)
+        .subscribe(function(response) {
+          addRawQueueEntry(response.data);
+        });
+    }
+    $rootScope.$broadcast("connect.queueEntry.updated", queueEntry, oldQueueEntry);
+    return queueEntry;
+  }
+
+  function removeAMBWatch(conversationID) {
+    if (ambWatchers[conversationID]) {
+      ambWatchers[conversationID].unsubscribe();
+      delete ambWatchers[conversationID];
+    }
+  }
+
+  function remove(id) {
+    var queueEntry = queueEntries[id];
+    if (!queueEntry)
+      return;
+    delete queueEntries[queueEntry.conversationID];
+    delete queueEntries[queueEntry.sysID];
+    removeAMBWatch(queueEntry.conversationID);
+  }
+
+  function postAction(conversationID, action, data) {
+    data = data || {};
+    if (!conversationID)
+      throw 'conversationID cannot be undefined';
+    var sessionsApiUri = isLoggedIn ? '/api/now/connect/support/sessions/' : '/api/now/connect/support/anonymous/sessions/';
+    return snHttp.post(sessionsApiUri + conversationID + action, data).then(function(response) {
+      return addRawQueueEntry(response.data.result);
+    });
+  }
+
+  function requestByConversation(conversationID) {
+    if (!conversationID)
+      throw 'conversationID cannot be undefined';
+    var queueEntry = queueEntries[conversationID];
+    if (queueEntry)
+      return $q.when(queueEntry);
+    return requestFiltered({
+      'group_id': conversationID
+    }).then(function() {
+      return queueEntries[conversationID];
+    });
+  }
+
+  function requestNext(queueID) {
+    return snHttp.post('/api/now/connect/support/queues/' + queueID + '/accept', {}).then(function(response) {
+      return addRawQueueEntry(response.data.result);
+    });
+  }
+  amb.connect();
+  return {
+    addRaw: addRawQueueEntry,
+    get: function(id) {
+      return queueEntries[id];
+    },
+    requestByConversation: requestByConversation,
+    create: function(queueID, message, fromRecord) {
+      if (!queueID)
+        throw 'queue ID cannot be undefined';
+      if (!message)
+        throw 'message cannot be undefined';
+      var url = isLoggedIn ? '/api/now/connect/support/queues/' + queueID + '/sessions' :
+        '/api/now/connect/support/anonymous/queues/' + queueID + '/sessions';
+      var data = {
+        message: message
+      };
+      if (fromRecord && fromRecord.table && fromRecord.sysId) {
+        data.from_table = fromRecord.table;
+        data.from_sysid = fromRecord.sysId;
+      }
+      return snHttp.post(url, data).then(function(response) {
+        return addRawQueueEntry(response.data.result);
+      }, function(response) {
+        if (response.status === 403 || response.status === 503) {
+          snNotification.show("error", response.data.result);
         } else {
-          globalWatches.push(func);
+          snNotification.show("error", messageUnknownError);
         }
-        return func;
+        return $q.reject(response)
+      });
+    },
+    remove: remove,
+    close: function(conversationID, agentLeave) {
+      return postAction(conversationID, '/close', {
+        agent_leave: !!agentLeave
+      });
+    },
+    leave: function(conversationID) {
+      return postAction(conversationID, '/leave');
+    },
+    rejoin: function(conversationID) {
+      return postAction(conversationID, '/rejoin');
+    },
+    escalate: function(conversation, queueID) {
+      queueID = queueID || conversation.queueEntry.queue.escalateTo;
+      if (!queueID)
+        throw "queueID must be set";
+      conversation.queueEntry.escalate();
+      return postAction(conversation.sysID, '/escalate/' + queueID);
+    },
+    transfer: function(conversationID, agentID) {
+      if (!agentID)
+        throw 'agentID cannot be undefined';
+      return postAction(conversationID, '/transfer/' + agentID);
+    },
+    accept: function(conversationID) {
+      return postAction(conversationID, '/transfer/accept');
+    },
+    reject: function(conversationID) {
+      var complete = this.complete;
+      return postAction(conversationID, '/transfer/reject').then(function() {
+        return complete(conversationID);
+      });
+    },
+    cancel: function(conversationID) {
+      var complete = this.complete;
+      return postAction(conversationID, '/transfer/cancel').then(function() {
+        return complete(conversationID);
+      });
+    },
+    complete: function(conversationID) {
+      return postAction(conversationID, '/transfer/complete');
+    },
+    requestNext: requestNext
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/service.queueEntryNotifier.js */
+angular.module('sn.connect.queue').service('queueEntryNotifier', function(
+  $window, snNotifier, i18n, profiles, userPreferences, activeConversation, snNotification, inFrameSet) {
+  'use strict';
+  var A_TAG = '<a href="/$c.do#/support" target="_self">{0}</a>';
+  var LOCAL_STORAGE_KEY = 'sn.connect.queueEntryNotifier.lastUpdatedOn';
+  var NOTIFICATION_TEMPLATE = ['You have an incoming case transfer from {0}.',
+    'To view the conversation, accept or decline the request,'
+  ].join(' ');
+  var transferPendingText,
+    transferAcceptedText,
+    transferRejectedText,
+    transferCancelledText,
+    transferPendingNotificationText;
+  i18n.getMessages([
+    'Incoming chat transfer',
+    'Accepted {0}',
+    'Rejected {0}',
+    'Cancelled transfer {0}',
+    'click here',
+    NOTIFICATION_TEMPLATE
+  ], function(results) {
+    transferPendingText = results['Incoming chat transfer'];
+    transferAcceptedText = results['Accepted {0}'];
+    transferRejectedText = results['Rejected {0}'];
+    transferCancelledText = results['Cancelled transfer {0}'];
+    transferPendingNotificationText = results[NOTIFICATION_TEMPLATE] + " " + A_TAG.replace(/(\{0})/g, results['click here']);
+  });
+  var lastUpdatedOn;
+  angular.element($window).on('storage', function(e) {
+    if (e.originalEvent.key !== LOCAL_STORAGE_KEY)
+      return;
+    lastUpdatedOn = $window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (lastUpdatedOn) {
+      lastUpdatedOn = new Date(lastUpdatedOn)
+    }
+  });
+  return {
+    notify: function(conversation) {
+      var queueEntry = conversation.queueEntry;
+      if (!inFrameSet && !activeConversation.isSupport && queueEntry.isTransferringToMe) {
+        profiles.getAsync('sys_user.' + queueEntry.assignedTo).then(function(profile) {
+          snNotification.show('info', i18n.format(transferPendingNotificationText, profile.name))
+            .then(function(element) {
+              element.on('click', function() {
+                snNotification.hide(element);
+                activeConversation.conversation = conversation;
+              });
+            });
+        });
       }
+      userPreferences.getPreference('connect.notifications.desktop').then(function(value) {
+        if (value === 'false')
+          return;
+        if (!queueEntry.isTransferStateChanged)
+          return;
+        if (queueEntry.transferUpdatedOn <= lastUpdatedOn)
+          return;
+        var body, userID;
+        if (queueEntry.isTransferringToMe) {
+          if (queueEntry.isTransferPending) {
+            userID = queueEntry.assignedTo;
+            body = transferPendingText + "\n" + queueEntry.number + " - " + queueEntry.shortDescription;
+          }
+          if (queueEntry.isTransferCancelled) {
+            userID = queueEntry.assignedTo;
+            body = transferCancelledText.replace(/\{0\}/, queueEntry.number);
+          }
+        } else if (queueEntry.isTransferringFromMe) {
+          if (queueEntry.isTransferAccepted) {
+            userID = queueEntry.assignedTo;
+            body = transferAcceptedText.replace(/\{0\}/, queueEntry.number);
+          }
+          if (queueEntry.isTransferRejected) {
+            userID = queueEntry.transferTo;
+            body = transferRejectedText.replace(/\{0\}/, queueEntry.number);
+          }
+        }
+        if (!body)
+          return;
+        $window.localStorage.setItem(LOCAL_STORAGE_KEY, queueEntry.transferUpdatedOn);
+        profiles.getAsync('sys_user.' + userID).then(function(profile) {
+          snNotifier().notify(profile.name, {
+            body: body,
+            onClick: function() {
+              activeConversation.conversation = conversation;
+            }
+          });
+        });
+      });
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/queue/filter.transferAccepted.js */
+angular.module('sn.connect.queue').filter('transferAccepted', function() {
+  'use strict';
+  return function(input) {
+    return input.filter(function(conversation) {
+      var queueEntry = conversation.queueEntry;
+      return queueEntry && queueEntry.isTransferringFromMe && queueEntry.isTransferAccepted;
+    });
+  }
+});;;
+/*! RESOURCE: /scripts/app.ng_chat/search/directive.liveSearch.js */
+angular.module('sn.connect').directive('liveSearch', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('liveSearch.xml'),
+    replace: true,
+    scope: {
+      type: '@',
+      limit: '@',
+      placeholder: '@',
+      expandDirection: '@',
+      onSelect: '&'
+    },
+    link: function(scope) {
+      scope.forwardOnSelect = function(id) {
+        scope.onSelect({
+          id: id
+        });
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/app.ng_chat/search/directive.liveSearchControl.js */
+angular.module('sn.connect').directive('liveSearchControl', function(
+  $compile, $timeout, getTemplateUrl, snHttp, userJID, $rootScope, i18n) {
+  'use strict';
+  var MINIMUM_TYPING_WAIT = 250;
+  var CACHE_TIME_LIMIT = 15 * 60 * 1000;
+  var liveSearchTranslatedStrings;
+  i18n.getMessages([
+    'People', 'No matching people',
+    'Groups', 'No matching groups',
+    'Messages', 'No matching messages'
+  ], function(result) {
+    liveSearchTranslatedStrings = result;
+  });
+  return {
+    restrict: 'E',
+    templateUrl: function(tElement, tAttrs) {
+      if (tAttrs.templateUrl)
+        return getTemplateUrl(tAttrs.templateUrl);
+      else
+        return getTemplateUrl('liveSearchControl.xml');
+    },
+    replace: true,
+    scope: {
+      type: '@',
+      limit: '@',
+      placeholder: '@',
+      expandDirection: '@',
+      onSelect: '&',
+      templateOverride: '=?',
+      ignoreBlur: '@',
+      onBlur: "&?",
+      ignoreList: "="
+    },
+    link: function(scope, element) {
+      scope.triggerCreateConversation = function() {
+        $rootScope.$broadcast("connect.show_create_conversation_screen");
+        $rootScope.$broadcast('connect.pane.close');
+        $rootScope.$broadcast("sn.aside.close", true);
+      };
+      var suggestionScopes = [];
+      var limit = scope.limit || 5;
+      var searchURL = '/api/now/connect/search/' + scope.type + '?keywords={query}&limit=' + limit;
+      if (!scope.onBlur)
+        scope.onBlur = function() {};
 
-      function unwatch(func, channelID) {
-        var i, len;
-        if (channelID && watches[channelID]) {
-          for (i = 0, len = watches[channelID].length; i < len; i++) {
-            var watchLoc = watches[channelID].indexOf(func);
-            if (watchLoc !== -1)
-              watches[channelID].splice(watchLoc, 1);
+      function Search(table) {
+        Search.promises = Search.promises || {};
+        var that = this;
+        this.table = table;
+        return function(query, sync, async) {
+          that.debounce(function() {
+            suggestionScopes.forEach(function(suggestionScope) {
+              suggestionScope.$destroy();
+            });
+            that.getPromise(query).then(function(response) {
+              if (response.data.result) {
+                angular.forEach(response.data.result, function(result) {
+                  if (that.table !== result.table)
+                    return;
+                  async (result.searchResults);
+                });
+              } else {
+                async ();
+              }
+              return response;
+            });
+          });
+        };
+      }
+      Search.prototype.debounce = function(func) {
+        $timeout.cancel(this.timeout);
+        this.timeout = $timeout(func, MINIMUM_TYPING_WAIT);
+      };
+      Search.prototype.removeStaleEntries = function() {
+        var now = new Date();
+        for (var key in Search.promises) {
+          if (!Search.promises.hasOwnProperty(key))
+            continue;
+          var elapsed = now - Search.promises[key].time;
+          if (elapsed > CACHE_TIME_LIMIT) {
+            delete Search.promises[key];
+          }
+        }
+      };
+      Search.prototype.getPromise = function(query) {
+        this.removeStaleEntries();
+        var url = searchURL.replace("{query}", query);
+        if (scope.ignoreList)
+          url += "&ignore=" + scope.ignoreList;
+        var data = Search.promises[url];
+        if (!data) {
+          data = Search.promises[url] = {
+            promise: snHttp.get(url),
+            time: new Date()
+          };
+        }
+        return data.promise;
+      };
+      var templates = {
+        sys_user: '<div class="sn-widget-list_v2"><div class="suggestion-user sn-widget-list-item"><div class="sn-widget-list-content sn-widget-list-content_static"><sn-avatar primary="::profile" class="avatar-small" nopopover="true"></sn-avatar></div><div class="sn-widget-list-content"><span class="name sn-widget-list-title">{{::profile.name}}</span><span class="suggestion-detail sn-widget-list-subtitle">{{::profile.email}}</span></div></div></div>',
+        live_message: '<div class="sn-widget-list_v2"><div class="suggestion-message sn-widget-list-item"><div class="sn-widget-list-content sn-widget-list-content_static"><sn-avatar primary="::profile" class="avatar-small" nopopover="true"></sn-avatar></div><div class="details sn-widget-list-content"><span class="body sn-widget-list-title">{{::suggestion.formattedBody}}</span><span class="name sn-widget-list-subtitle">{{::profile.name}}</span></div></div></div>',
+        live_group_profile: '<div class="sn-widget-list_v2"><div class="suggestion-group sn-widget-list-item"><div class="sn-widget-list-content sn-widget-list-content_static"><sn-avatar primary="::profile" members="::members" class="avatar-small" nopopover="true"></sn-avatar></div><div class="sn-widget-list-content"><span class="name sn-widget-list-title">{{::suggestion.name}}</span></div></div></div>'
+      };
+      if (scope.templateOverride)
+        angular.extend(templates, scope.templateOverride);
+      var buildInitials = function(name) {
+        if (!name)
+          return "--";
+        var initials = name.split(" ").map(function(word) {
+          return word.toUpperCase();
+        }).filter(function(word) {
+          return word.match(/^[A-Z]/);
+        }).map(function(word) {
+          return word.substring(0, 1);
+        }).join("");
+        return initials.substr(0, 3);
+      };
+      var isMember = function(member) {
+        return (member && member.jid === userJID);
+      };
+      var dataSet = function(table, displayKey, header, emptySuggestion) {
+        return {
+          name: table,
+          limit: scope.limit,
+          displayKey: displayKey,
+          source: new Search(table),
+          templates: {
+            header: '<div class="header sn-aside-group-title">' + header + '</div>',
+            empty: '<div class="empty-suggestion sn-wiget sn-widget-textblock sn-widget-textblock_center">' + emptySuggestion + '</div>',
+            suggestion: function(suggestion) {
+              var suggestionScope = scope.$new();
+              suggestionScopes.push(suggestionScope);
+              suggestionScope.suggestion = suggestion;
+              if (!isMember(suggestion.from) &&
+                !isMember(suggestion.to) &&
+                suggestion.to &&
+                suggestion.from) {
+                suggestionScope.profile = {
+                  avatar: suggestion.from.avatarID,
+                  initials: buildInitials(suggestion.from.name),
+                  name: 'From: ' + suggestion.from.name
+                };
+              } else if (isMember(suggestion.from) &&
+                suggestion.to &&
+                suggestion.to.name) {
+                suggestionScope.profile = {
+                  avatar: suggestion.from.avatarID,
+                  initials: buildInitials(suggestion.from.name),
+                  name: 'To: ' + suggestion.to.name
+                };
+              } else if (isMember(suggestion.to) &&
+                suggestion.from &&
+                suggestion.from.name) {
+                suggestionScope.profile = {
+                  avatar: suggestion.from.avatarID,
+                  initials: buildInitials(suggestion.from.name),
+                  name: 'From: ' + suggestion.from.name
+                };
+              } else {
+                suggestionScope.profile = {
+                  avatar: suggestion.avatarID,
+                  initials: buildInitials(suggestion.name),
+                  name: suggestion.name,
+                  email: suggestion.email
+                };
+              }
+              if (suggestion.members) {
+                suggestionScope.members = [];
+                angular.forEach(suggestion.members, function(member) {
+                  suggestionScope.members.push({
+                    avatar: member.avatarID,
+                    initials: buildInitials(suggestion.name),
+                    name: name
+                  });
+                });
+              }
+              if (suggestion.body) {
+                suggestion.formattedBody = suggestion.body.replace(/@\[[a-z0-9]{32}:([^\]]+?)\]/gi, "@$1");
+              }
+              return $compile(templates[table])(suggestionScope);
+            }
+          }
+        };
+      };
+      var selected = function(event, suggestion) {
+        var id = '';
+        if (suggestion.jid.indexOf('live_message') === 0) {
+          if (!isMember(suggestion.from) &&
+            !isMember(suggestion.to) &&
+            suggestion.to &&
+            suggestion.from) {
+            id = suggestion.to.jid;
+          } else if (isMember(suggestion.from) && suggestion.to) {
+            id = suggestion.to.jid;
+          } else if (isMember(suggestion.to) && suggestion.from) {
+            id = suggestion.from.jid;
           }
         } else {
-          for (i = 0, len = globalWatches.length; i < len; i++) {
+          id = suggestion.jid;
+        }
+        scope.onSelect({
+          id: id,
+          suggestion: suggestion
+        });
+        scope.$apply();
+        var target = angular.element(event.target);
+        target.typeahead('close');
+        target.typeahead('val', '');
+      };
+      var options = [{
+          autoselect: 'first',
+          hint: true,
+          highlight: false,
+          minLength: 2
+        },
+        dataSet('sys_user', 'name', liveSearchTranslatedStrings['People'], liveSearchTranslatedStrings['No matching people'])
+      ];
+      if (scope.type !== 'user') {
+        options.push(dataSet('live_message', 'body', liveSearchTranslatedStrings['Messages'], liveSearchTranslatedStrings['No matching messages']));
+        options.push(dataSet('live_group_profile', 'body', liveSearchTranslatedStrings['Groups'], liveSearchTranslatedStrings['No matching groups']));
+      }
+      $timeout(function() {
+        var input = element.find("input");
+        input.on("keydown", function(e) {
+          if (input.val() !== "")
+            return;
+          if (e.keyCode === 8)
+            scope.$emit("connect.search_control_key", "backspace");
+          else if (e.keyCode === 13)
+            scope.$emit("connect.search_control_key", "enter");
+          else if (e.keyCode === 27)
+            scope.$emit("connect.search_control_key", "escape");
+        });
+        input.typeahead.apply(input, options);
+        input.on('typeahead:selected', selected);
+        input.on('typeahead:autocomplete', selected);
+        input.on('keydown', function(e) {
+          if (e.keyCode === 13) {
+            var newEvent = angular.element.Event("keydown");
+            newEvent.keyCode = 9;
+            input.trigger(newEvent);
+          }
+        });
+        scope.$emit("live.search.control.ready", input);
+        if (scope.ignoreBlur) {
+          var api = input.data('ttTypeahead');
+          api.input.off("blurred");
+          api._onBlurred = function() {
+            this.isActivated = false;
+          };
+          api.input.onSync("blurred", api._onBlurred, api);
+        }
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/search/directive.liveSearchPopover.js */
+angular.module('sn.connect').directive('liveSearchPopover', function($timeout, $document, getTemplateUrl) {
+  'use strict';
+  var VK_ESC = 27;
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('liveSearchPopover.xml'),
+    replace: true,
+    scope: {
+      type: '@',
+      limit: '@',
+      buttonId: '@',
+      placeholder: '@',
+      expandDirection: '@',
+      onSelect: '&'
+    },
+    link: function(scope, element) {
+      element.detach();
+      var popoverButton;
+      var getPopoverButton = function() {
+        if (!popoverButton) {
+          popoverButton = $document.find("#" + scope.buttonId);
+          var toggleIgnore = function(event) {
+            popoverButton.ignoreBlurHide = (event.type === 'mousedown');
+          };
+          popoverButton.mousedown(toggleIgnore);
+          popoverButton.mouseup(toggleIgnore);
+        }
+        return popoverButton;
+      };
+      scope.onSelectHidePopover = function(id) {
+        scope.onSelect({
+          id: id
+        });
+        getPopoverButton().popover('hide');
+      };
+      scope.$on('live.search.control.ready', function(event, popoverInput) {
+        popoverInput.data('ttTypeahead').input.off('blurred');
+        var hidePopover = function() {
+          var popoverButton = getPopoverButton();
+          if (popoverButton.ignoreBlurHide) {
+            return;
+          }
+          popoverButton.popover('hide');
+        };
+        popoverInput.on('blur', hidePopover);
+        popoverInput.keyup(function(event) {
+          var code = event.keyCode || event.which;
+          if (code !== VK_ESC) {
+            return;
+          }
+          hidePopover();
+        });
+        getPopoverButton().on('shown.bs.popover', function() {
+          popoverInput.focus();
+        });
+        getPopoverButton().on('hidden.bs.popover', function() {
+          popoverInput.typeahead('val', '');
+        });
+      });
+      $timeout(function() {
+        getPopoverButton().popover({
+          container: 'body',
+          placement: scope.expandDirection || 'right',
+          html: true,
+          content: function() {
+            return angular.element('<div />').append(element);
+          },
+          template: '<div class="sn-live-search-popover popover" role="tooltip">' +
+            '<div class="arrow"></div>' +
+            '<h3 class="popover-title"></h3>' +
+            '<div class="popover-content"></div>' +
+            '</div>'
+        });
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng_chat/search/directive.snSearchButton.js */
+angular.module('sn.connect').directive('snSearchButton', function(getTemplateUrl) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snSearchButton.xml'),
+    replace: true,
+    scope: {
+      blockAside: '=',
+      conversation: '='
+    },
+    controller: function($scope) {
+      $scope.isActive = false;
+      var asideView = {
+        template: "<sn-aside-search></sn-aside-search>"
+      };
+      $scope.openAside = function() {
+        if (!$scope.buttons)
+          $scope.buttons = angular.element('#conversationAsideButtons');
+        if ($scope.blockAside || !$scope.conversation.sysID || $scope.conversation.isPending)
+          return;
+        if ($scope.isActive)
+          $scope.$emit("sn.aside.close");
+        else
+          $scope.$emit("sn.aside.open", asideView, false, $scope.buttons.width());
+      };
+      $scope.$on("sn.aside.controls.active", function(e, data) {
+        $scope.isActive = (data === "search");
+      });
+      $scope.$on("sn.aside.close", function() {
+        $scope.isActive = false;
+      });
+    }
+  };
+});;
+/*! RESOURCE: /scripts/doctype/CustomEventManager.js */
+var NOW = NOW || {};
+var CustomEventManager = (function(existingCustomEvent) {
+  "use strict";
+  var events = (existingCustomEvent && existingCustomEvent.events) || {};
+  var isFiringFlag = false;
+  var trace = false;
+  var suppressEvents = false;
+  var NOW_MSG = 'NOW.PostMessage';
+
+  function observe(eventName, fn) {
+    if (trace)
+      jslog("$CustomEventManager observing: " + eventName);
+    on(eventName, fn);
+  }
+
+  function on(name, func) {
+    if (!func || typeof func !== 'function')
+      return;
+    if (typeof name === 'undefined')
+      return;
+    if (!events[name])
+      events[name] = [];
+    events[name].push(func);
+  }
+
+  function un(name, func) {
+    if (!events[name])
+      return;
+    var idx = -1;
+    for (var i = 0; i < events[name].length; i++) {
+      if (events[name][i] === func) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx >= 0)
+      events[name].splice(idx, 1)
+  }
+
+  function unAll(name) {
+    if (events[name])
+      delete events[name];
+  }
+
+  function fire(eventName, args) {
+    if (trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    return fireEvent.apply(null, arguments);
+  }
+
+  function fireUp(eventName, args) {
+    var win = window;
+    while (win) {
+      try {
+        if (win.CustomEvent.fireEvent.apply(null, arguments) === false)
+          return;
+        win = win.parent === win ? null : win.parent;
+      } catch (e) {
+        return;
+      }
+    }
+  }
+
+  function fireEvent() {
+    if (suppressEvents)
+      return true;
+    var args = Array.prototype.slice.apply(arguments);
+    var name = args.shift();
+    var eventList = events[name];
+    if (!eventList)
+      return true;
+    var event = eventList.slice();
+    isFiringFlag = true;
+    for (var i = 0, l = event.length; i < l; i++) {
+      var ev = event[i];
+      if (!ev)
+        continue;
+      if (ev.apply(null, args) === false) {
+        isFiringFlag = false;
+        return false;
+      }
+    }
+    isFiringFlag = false;
+    return true;
+  }
+
+  function isFiring() {
+    return isFiringFlag;
+  }
+
+  function forward(name, element, func) {
+    on(name, func);
+    element.addEventListener(name, function(e) {
+      fireEvent(e.type, this, e);
+    }.bind(api));
+  }
+
+  function registerPostMessageEvent() {
+    if (NOW.registeredPostMessageEvent) {
+      return;
+    }
+    if (!window.postMessage) {
+      return;
+    }
+    window.addEventListener('message', function(event) {
+      var nowMessageJSON = event.data;
+      var nowMessage;
+      try {
+        nowMessage = JSON.parse(nowMessageJSON.toString());
+      } catch (e) {
+        return;
+      }
+      if (!nowMessage.type == NOW_MSG) {
+        return;
+      }
+      fire(nowMessage.eventName, nowMessage.args);
+    }, false);
+    NOW.registeredPostMessageEvent = true;
+  }
+
+  function doPostMessage(win, event, msg, targetOrigin) {
+    var nowMessage = {
+      type: NOW_MSG,
+      eventName: event,
+      args: msg
+    };
+    var nowMessageJSON;
+    if (!win || !win.postMessage) {
+      return
+    }
+    nowMessageJSON = JSON.stringify(nowMessage);
+    win.postMessage(nowMessageJSON, targetOrigin);
+  }
+
+  function fireTop(eventName, args) {
+    if (trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    fireEvent.apply(null, arguments);
+    var t = getTopWindow();
+    if (t !== null && window !== t)
+      t.CustomEvent.fire(eventName, args);
+  }
+
+  function fireAll(eventName, args) {
+    if (trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    var topWindow = getTopWindow();
+    notifyAllFrom(topWindow);
+
+    function notifyAllFrom(rootFrame) {
+      var childFrame;
+      rootFrame.CustomEvent.fireEvent(eventName, args);
+      for (var i = 0; i < rootFrame.length; i++) {
+        try {
+          childFrame = rootFrame[i];
+          if (!childFrame)
+            continue;
+          if (childFrame.CustomEvent && typeof childFrame.CustomEvent.fireEvent === "function") {
+            notifyAllFrom(childFrame);
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
+  function fireToWindow(targetWindow, eventName, args, usePostMessage, targetOrigin) {
+    if (trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + args.length);
+    if (usePostMessage) {
+      doPostMessage(targetWindow, eventName, args, targetOrigin);
+    } else {
+      targetWindow.CustomEvent.fireEvent(eventName, args);
+    }
+  }
+
+  function getTopWindow() {
+    var topWindow = window.self;
+    try {
+      while (topWindow.CustomEvent.fireEvent && topWindow !== topWindow.parent && topWindow.parent.CustomEvent.fireEvent) {
+        topWindow = topWindow.parent;
+      }
+    } catch (e) {}
+    return topWindow;
+  }
+
+  function isTopWindow() {
+    return getTopWindow() == window.self;
+  }
+
+  function jslog(msg, src, dateTime) {
+    try {
+      if (!src) {
+        var path = window.self.location.pathname;
+        src = path.substring(path.lastIndexOf('/') + 1);
+      }
+      if (window.self.opener && window != window.self.opener) {
+        if (window.self.opener.jslog) {
+          window.self.opener.jslog(msg, src, dateTime);
+        }
+      } else if (parent && parent.jslog && jslog != parent.jslog) {
+        parent.jslog(msg, src, dateTime);
+      } else {
+        if (window.console && window.console.log)
+          console.log(msg);
+      }
+    } catch (e) {}
+  }
+  var api = {
+    set trace(value) {
+      trace = !!value;
+    },
+    get trace() {
+      return trace;
+    },
+    set suppressEvents(value) {
+      suppressEvents = !!value;
+    },
+    get suppressEvents() {
+      return suppressEvents;
+    },
+    get events() {
+      return events;
+    },
+    set events(value) {
+      events = value;
+    },
+    on: on,
+    un: un,
+    unAll: unAll,
+    forward: forward,
+    isFiring: isFiring,
+    fireEvent: fireEvent,
+    observe: observe,
+    fire: fire,
+    fireTop: fireTop,
+    fireAll: fireAll,
+    fireToWindow: fireToWindow,
+    isTopWindow: isTopWindow,
+    fireUp: fireUp,
+    toString: function() {
+      return 'CustomEventManager';
+    }
+  };
+  registerPostMessageEvent();
+  return api;
+})(NOW.CustomEvent);
+NOW.CustomEvent = CustomEventManager;
+if (typeof CustomEvent !== "undefined") {
+  CustomEvent.observe = NOW.CustomEvent.observe.bind(NOW.CustomEvent);
+  CustomEvent.fire = NOW.CustomEvent.fire.bind(NOW.CustomEvent);
+  CustomEvent.fireUp = NOW.CustomEvent.fireUp.bind(NOW.CustomEvent);
+  CustomEvent.fireTop = NOW.CustomEvent.fireTop.bind(NOW.CustomEvent);
+  CustomEvent.fireAll = NOW.CustomEvent.fireAll.bind(NOW.CustomEvent);
+  CustomEvent.fireToWindow = NOW.CustomEvent.fireToWindow.bind(NOW.CustomEvent);
+  CustomEvent.on = NOW.CustomEvent.on.bind(NOW.CustomEvent);
+  CustomEvent.un = NOW.CustomEvent.un.bind(NOW.CustomEvent);
+  CustomEvent.unAll = NOW.CustomEvent.unAll.bind(NOW.CustomEvent);
+  CustomEvent.forward = NOW.CustomEvent.forward.bind(NOW.CustomEvent);
+  CustomEvent.isFiring = NOW.CustomEvent.isFiring.bind(NOW.CustomEvent);
+  CustomEvent.fireEvent = NOW.CustomEvent.fireEvent.bind(NOW.CustomEvent);
+  CustomEvent.events = NOW.CustomEvent.events;
+  CustomEvent.isTopWindow = NOW.CustomEvent.isTopWindow.bind(NOW.CustomEvent);
+} else {
+  window.CustomEvent = NOW.CustomEvent;
+};;
