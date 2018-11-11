@@ -1416,20 +1416,392 @@ GlideConditionRow.prototype = {
 };
 var GlideSortSection = Class.create();
 GlideSortSection.prototype = {
-    initialize: function(filter) {
-      this.filter = filter;
-      this.locateSection();
-    },
-    destroy: function() {
-      this.filter = null;
-      this.section = null;
-      this.rowTable = null;
-    },
-    locateSection: function() {
-        this.section = null;
-        this.rowTable = null;
-        var divRows = this.filter.sortElement.getElementsByTagName("tr");
-        for (var i = 0; i < divRows.length; i++) {
-          var rowTR = divRows[i];
-          if (rowTR.sortRow == 'true') {
-            this.section = rowT
+  initialize: function(filter) {
+    this.filter = filter;
+    this.locateSection();
+  },
+  destroy: function() {
+    this.filter = null;
+    this.section = null;
+    this.rowTable = null;
+  },
+  locateSection: function() {
+    this.section = null;
+    this.rowTable = null;
+    var divRows = this.filter.sortElement.getElementsByTagName("tr");
+    for (var i = 0; i < divRows.length; i++) {
+      var rowTR = divRows[i];
+      if (rowTR.sortRow == 'true') {
+        this.section = rowTR.rowObject;
+        this.rowTable = this.section.getFilterTable();
+        this.queryID = this.section.getQueryID();
+        break;
+      }
+    }
+    if (!this.section) {
+      section = new GlideFilterSection(this.filter);
+      section.setSort(true);
+      this.queryID = section._setup(true);
+      this.section = section;
+      this.rowTable = section.getFilterTable();
+      this.section.getRow().sortRow = 'true';
+    }
+  },
+  addField: function(field, oper) {
+    this.locateSection();
+    if (!oper)
+      oper = "ascending";
+    var condition = this.section.addSortCondition(false);
+    var row = condition.getRow();
+    row.sortSpec = true;
+    row = condition.getActionRow();
+    row.sortSpec = true;
+    var fSelect = addFields(this.getName(), field, true, this.filter.getIncludeExtended());
+    var tdName = row.tdField;
+    tdName.appendChild(fSelect);
+    updateFields(this.getName(), fSelect, oper, null, this.filter.getIncludeExtended(), this.filter);
+    condition.addLeftButtons();
+  },
+  getSection: function() {
+    return this.section;
+  },
+  getName: function() {
+    return this.filter.getName();
+  },
+  getID: function() {
+    return this.queryID;
+  },
+  removeRunButton: function() {
+    this.section.removeRunButton();
+  },
+  addRunButton: function() {
+    this.section.addRunButton();
+  },
+  z: null
+};
+var GlideEncodedQuery = Class.create();
+GlideEncodedQuery.prototype = {
+  initialize: function(name, query, callback) {
+    this.init();
+    this.callback = callback;
+    this.name = name;
+    this.encodedQuery = query;
+  },
+  init: function() {
+    this.orderBy = [];
+    this.groupBy = [];
+    this.terms = [];
+  },
+  parse: function() {
+    this.reset(this.name, this.encodedQuery);
+  },
+  destroy: function() {
+    for (var i = 0; i < this.orderBy.length; i++)
+      this.orderBy[i].destroy();
+    for (var i = 0; i < this.groupBy.length; i++)
+      this.groupBy[i].destroy();
+  },
+  reset: function(name, query) {
+    this.init();
+    this.tableName = name;
+    this.encodedQuery = query;
+    this.decode();
+  },
+  decode: function() {
+    this.getEncodedParts();
+  },
+  getEncodedParts: function() {
+    if (typeof g_filter_description != 'undefined' && this.tableName == g_filter_description.getName() &&
+      this.encodedQuery == g_filter_description.getFilter()) {
+      this.partsXML = loadXML(g_filter_description.getParsedQuery());
+      this.parseXML();
+      return;
+    }
+    var ajax = new GlideAjax('QueryParseAjax');
+    ajax.addParam('sysparm_chars', this.encodedQuery);
+    ajax.addParam('sysparm_name', this.tableName);
+    if (this.callback)
+      ajax.getXML(this.getEncodedPartsResponse.bind(this));
+    else {
+      this.partsXML = ajax.getXMLWait();
+      this.parseXML();
+    }
+  },
+  getEncodedPartsResponse: function(response) {
+    if (!response || !response.responseXML)
+      this.callback();
+    this.partsXML = response.responseXML;
+    this.parseXML();
+  },
+  parseXML: function() {
+    var items = this.partsXML.getElementsByTagName("item");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var qp = new GlideQueryPart(item);
+      if (qp.isGroupBy()) {
+        this.addGroupBy(qp.getValue())
+      } else if (qp.isOrderBy()) {
+        this.addOrderBy(qp.getValue(), qp.isAscending());
+      } else
+        this.terms[this.terms.length] = qp;
+    }
+    if (this.callback)
+      this.callback();
+  },
+  getXML: function() {
+    return this.partsXML;
+  },
+  addGroupBy: function(groupBy) {
+    this.groupBy[this.groupBy.length] = groupBy;
+  },
+  addOrderBy: function(orderBy, ascending) {
+    this.orderBy[this.orderBy.length] = new GlideSortSpec(orderBy, ascending);
+  },
+  getTerms: function() {
+    return this.terms;
+  },
+  getOrderBy: function() {
+    return this.orderBy;
+  },
+  getGroupBy: function() {
+    return this.groupBy;
+  },
+  z: null
+};
+var GlideQueryPart = Class.create();
+GlideQueryPart.prototype = {
+  initialize: function(item) {
+    this.item = item;
+    this.groupBy = false;
+    this.orderBy = false;
+    this.ascending = false;
+    this.Goto = item.getAttribute("goto");
+    this.EndQuery = item.getAttribute("endquery");
+    this.NewQuery = item.getAttribute("newquery");
+    this.OR = item.getAttribute("or");
+    this.displayValue = item.getAttribute("display_value");
+    this.valid = true;
+    this.extract();
+  },
+  destroy: function() {
+    this.item = null;
+  },
+  isOR: function() {
+    return this.OR == 'true';
+  },
+  isNewQuery: function() {
+    return this.NewQuery == 'true';
+  },
+  isGoTo: function() {
+    return this.Goto == 'true';
+  },
+  extract: function() {
+    if (this.EndQuery == 'true') {
+      this.valid = false;
+      return;
+    }
+    this.operator = this.item.getAttribute("operator");
+    this.value = this.item.getAttribute("value");
+    this.field = this.item.getAttribute("field");
+    if (this.operator == 'GROUPBY') {
+      this.groupBy = true;
+      return;
+    }
+    if (this.operator == 'ORDERBYDESC') {
+      this.orderBy = true;
+      this.ascending = false;
+      return;
+    }
+    if (this.operator == 'ORDERBY') {
+      this.orderBy = true;
+      this.ascending = true;
+      return;
+    }
+    for (i = 0; i < operators.length; i++) {
+      if (this.operator == operators[i])
+        break;
+    }
+    if (i == operators.length) {
+      this.valid = false;
+      return;
+    }
+    if (this.field.startsWith("variables.")) {
+      this.value = this.field.substring(10) + this.operator + this.value;
+      this.field = "variables";
+      this.operator = '=';
+    }
+    if (this.field.startsWith("sys_tags."))
+      this.field = "sys_tags";
+    if (this.operator == "HASVARIABLE" || this.operator == "HASITEMVARIABLE") {
+      this.operator = '=';
+      this.field = "variables";
+      this.value = this.value.substring(1);
+    }
+    if (this.operator == "HASQUESTION") {
+      this.operator = '=';
+      this.field = "variables";
+      this.value = this.value.substring(1);
+    }
+  },
+  getOperator: function() {
+    this.operator.title = "Operator";
+    return this.operator;
+  },
+  getField: function() {
+    this.field.title = "Field";
+    return this.field;
+  },
+  getValue: function() {
+    this.value.title = "Value";
+    return this.value;
+  },
+  isValid: function() {
+    return this.valid;
+  },
+  isGroupBy: function() {
+    return this.groupBy;
+  },
+  isOrderBy: function() {
+    return this.orderBy;
+  },
+  isAscending: function() {
+    return this.ascending;
+  },
+  z: null
+};
+var GlideSortSpec = Class.create();
+GlideSortSpec.prototype = {
+  initialize: function(name, ascending) {
+    this.field = name;
+    this.ascending = ascending;
+  },
+  getName: function() {
+    return this.field;
+  },
+  isAscending: function() {
+    return this.ascending;
+  },
+  z: null
+};
+
+function newSubRow(elBut, name) {
+  var fDiv = getThing(name, 'gcond_filters');
+  if (fDiv && !checkFilterSize(fDiv.filterObject))
+    return;
+  var butTD = elBut.parentNode;
+  var butTR = butTD.parentNode;
+  var butTable = butTR.parentNode;
+  butTable.conditionObject.addNewSubCondition();
+  _frameChanged();
+}
+
+function findInArray(a, searchID) {
+  for (var i = 0; i < a.length; i++) {
+    var condition = a[i];
+    if (condition.getID() == searchID)
+      return i;
+  }
+  return null;
+}
+
+function celQuery(name, parent, queryID) {
+  var e = cel(name);
+  if (parent)
+    parent.appendChild(e);
+  e.queryID = queryID;
+  return e;
+}
+
+function runThisFilter(atag) {
+  var filterObj = atag.parentNode.filterObject;
+  var tableName = filterObj.getName();
+  if (runFilterHandlers[tableName]) {
+    var filter = getFilter(tableName);
+    runFilterHandlers[tableName](tableName, filter);
+    return;
+  }
+  filterObj.runFilter();
+}
+
+function buildURL(tableName, query) {
+  var url = (tableName.split("."))[0] + "_list.do?sysparm_query=" + query;
+  var view = gel('sysparm_view');
+  if (view) {
+    view = view.value;
+    url += '&sysparm_view=' + view;
+  }
+  var refQuery = gel('sysparm_ref_list_query');
+  if (refQuery)
+    url += "&sysparm_ref_list_query=" + refQuery.value;
+  var target = gel('sysparm_target');
+  if (target) {
+    target = target.value;
+    url += '&sysparm_target=' + target;
+    url += '&sysparm_stack=no';
+    var e = gel("sysparm_reflist_pinned");
+    if (e)
+      url += '&sysparm_reflist_pinned=' + e.value;
+  }
+  return url;
+}
+
+function createCondFilter(tname, query, fieldName, elem) {
+  "use strict"
+  noOps = false;
+  noSort = false;
+  noConditionals = false;
+  useTextareas = false;
+  new GlideConditionsHandler(tname, function(filter) {
+    if (filter) {
+      var filterDiv = filter.getDiv() || getThing(filter.tableName, filter.divName);
+      if (filterDiv) {
+        filterDiv.initialQuery = query;
+      }
+      filter.setQuery(query);
+      g_form.registerHandler(fieldName, filter);
+      if (elem && elem.getAttribute("readonly") === "readonly") {
+        var formTable = g_form.getTableName();
+        var fieldNameWithoutPrefix = fieldName.replace(formTable + '.', '');
+        g_form.setReadOnly(fieldNameWithoutPrefix, true);
+      }
+      $(filterDiv).fire('glide:filter.create.condition_filter', filter);
+    }
+  }, fieldName);
+}
+
+function checkFilterSize(filterObject) {
+  var validFilterSize = true;
+  var filterString = "";
+  if (isNaN(g_glide_list_filter_max_length) || g_glide_list_filter_max_length <= 0)
+    return validFilterSize;
+  if (filterObject === undefined || filterObject === null)
+    return validFilterSize;
+  if (typeof filterObject === "object" && filterObject["type"] === 'GlideFilter')
+    filterString = getFilter(filterObject.getDiv().id.split("gcond_filters", 1));
+  if (filterString && filterString.length > g_glide_list_filter_max_length) {
+    var dialog = new GlideDialogWindow('filter_limit_window', false);
+    dialog.setTitle(getMessage("Filter Limit Reached"));
+    dialog.setBody("<div style='padding: 10px'>" + getMessage("The filter you are using is too big. Remove some conditions to make it smaller.") + "</div>", false, false);
+    $("filter_limit_window").style.visibility = "visible";
+    validFilterSize = false;
+  }
+  return validFilterSize;
+}
+document.on('click', 'button.filter_add_sort', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addSortSpec(name);
+  evt.stopPropagation();
+});
+document.on('click', 'button.filter_add_filter', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addConditionSpec(name);
+  evt.stopPropagation();
+});
+document.on('click', 'button.filter_and_filter', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addCondition(name);
+  evt.stopPropagation();
+});;

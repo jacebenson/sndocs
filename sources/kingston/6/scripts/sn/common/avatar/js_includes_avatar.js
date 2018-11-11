@@ -3333,88 +3333,1583 @@ angular.module("ng.amb").factory('snRecordWatcher', function($rootScope, amb, $t
 });;
 /*! RESOURCE: /scripts/app.ng.amb/factory.AMBOverlay.js */
 angular.module("ng.amb").factory("AMBOverlay", function($templateCache, $compile, $rootScope) {
-      "use strict";
-      var showCallbacks = [],
-        hideCallbacks = [],
-        isRendered = false,
-        modal,
-        modalScope,
-        modalOptions;
-      var defaults = {
-        backdrop: 'static',
-        keyboard: false,
-        show: true
-      };
+  "use strict";
+  var showCallbacks = [],
+    hideCallbacks = [],
+    isRendered = false,
+    modal,
+    modalScope,
+    modalOptions;
+  var defaults = {
+    backdrop: 'static',
+    keyboard: false,
+    show: true
+  };
 
-      function AMBOverlay(config) {
-        config = config || {};
-        if (angular.isFunction(config.onShow))
-          showCallbacks.push(config.onShow);
-        if (angular.isFunction(config.onHide))
-          hideCallbacks.push(config.onHide);
+  function AMBOverlay(config) {
+    config = config || {};
+    if (angular.isFunction(config.onShow))
+      showCallbacks.push(config.onShow);
+    if (angular.isFunction(config.onHide))
+      hideCallbacks.push(config.onHide);
 
-        function lazyRender() {
-          if (!angular.element('html')['modal']) {
-            var bootstrapInclude = "/scripts/bootstrap3/bootstrap.js";
-            ScriptLoader.getScripts([bootstrapInclude], renderModal);
-          } else
-            renderModal();
+    function lazyRender() {
+      if (!angular.element('html')['modal']) {
+        var bootstrapInclude = "/scripts/bootstrap3/bootstrap.js";
+        ScriptLoader.getScripts([bootstrapInclude], renderModal);
+      } else
+        renderModal();
+    }
+
+    function renderModal() {
+      if (isRendered)
+        return;
+      modalScope = angular.extend($rootScope.$new(), config);
+      modal = $compile($templateCache.get("amb_disconnect_modal.xml"))(modalScope);
+      angular.element("body").append(modal);
+      modal.on("shown.bs.modal", function(e) {
+        for (var i = 0, len = showCallbacks.length; i < len; i++)
+          showCallbacks[i](e);
+      });
+      modal.on("hidden.bs.modal", function(e) {
+        for (var i = 0, len = hideCallbacks.length; i < len; i++)
+          hideCallbacks[i](e);
+      });
+      modalOptions = angular.extend({}, defaults, config);
+      modal.modal(modalOptions);
+      isRendered = true;
+    }
+
+    function showModal() {
+      if (isRendered)
+        modal.modal('show');
+    }
+
+    function hideModal() {
+      if (isRendered)
+        modal.modal('hide');
+    }
+
+    function destroyModal() {
+      if (!isRendered)
+        return;
+      modal.modal('hide');
+      modal.remove();
+      modalScope.$destroy();
+      modalScope = void(0);
+      isRendered = false;
+      var pos = showCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        showCallbacks.splice(pos, 1);
+      pos = hideCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        hideCallbacks.splice(pos, 1);
+    }
+    return {
+      render: lazyRender,
+      destroy: destroyModal,
+      show: showModal,
+      hide: hideModal,
+      isVisible: function() {
+        if (!isRendered)
+          false;
+        return modal.visible();
+      }
+    }
+  }
+  $templateCache.put('amb_disconnect_modal.xml',
+    '<div id="amb_disconnect_modal" tabindex="-1" aria-hidden="true" class="modal" role="dialog">' +
+    '	<div class="modal-dialog small-modal" style="width:450px">' +
+    '		<div class="modal-content">' +
+    '			<header class="modal-header">' +
+    '				<h4 id="small_modal1_title" class="modal-title">{{title || "Login"}}</h4>' +
+    '			</header>' +
+    '			<div class="modal-body">' +
+    '			<iframe class="concourse_modal" ng-src=\'{{iframe || "/amb_login.do"}}\' frameborder="0" scrolling="no" height="400px" width="405px"></iframe>' +
+    '			</div>' +
+    '		</div>' +
+    '	</div>' +
+    '</div>'
+  );
+  return AMBOverlay;
+});;;
+/*! RESOURCE: /scripts/sn/common/presence/snPresenceLite.js */
+(function(exports, $) {
+  'use strict';
+  var PRESENCE_DISABLED = "false" === "true";
+  if (PRESENCE_DISABLED) {
+    return;
+  }
+  if (typeof $.Deferred === "undefined") {
+    return;
+  }
+  var USER_KEY = '{{SYSID}}';
+  var REPLACE_REGEX = new RegExp(USER_KEY, 'g');
+  var COLOR_ONLINE = '#71e279';
+  var COLOR_AWAY = '#fc8a3d';
+  var COLOR_OFFLINE = 'transparent';
+  var BASE_STYLES = [
+    '.sn-presence-lite { display: inline-block; width: 1rem; height: 1rem; border-radius: 50%; }'
+  ];
+  var USER_STYLES = [
+    '.sn-presence-' + USER_KEY + '-online [data-presence-id="' + USER_KEY + '"] { background-color: ' + COLOR_ONLINE + '; }',
+    '.sn-presence-' + USER_KEY + '-away [data-presence-id="' + USER_KEY + '"] { background-color: ' + COLOR_AWAY + '; }',
+    '.sn-presence-' + USER_KEY + '-offline [data-presence-id="' + USER_KEY + '"] { background-color: ' + COLOR_OFFLINE + '; }'
+  ];
+  var $head = $('head');
+  var stylesheet = $.Deferred();
+  var registeredUsers = {};
+  var registeredUsersLength = 0;
+  $(function() {
+    updateRegisteredUsers();
+  });
+  $head.ready(function() {
+    var styleElement = document.createElement('style');
+    $head.append(styleElement);
+    var $styleElement = $(styleElement);
+    stylesheet.resolve($styleElement);
+  });
+
+  function updateStyles(styles) {
+    stylesheet.done(function($styleElement) {
+      $styleElement.empty();
+      BASE_STYLES.forEach(function(baseStyle) {
+        $styleElement.append(baseStyle);
+      });
+      $styleElement.append(styles);
+    });
+  }
+
+  function getUserStyles(sysId) {
+    var newStyles = '';
+    for (var i = 0, iM = USER_STYLES.length; i < iM; i++) {
+      newStyles += USER_STYLES[i].replace(REPLACE_REGEX, sysId);
+    }
+    return newStyles;
+  }
+
+  function updateUserStyles() {
+    var userKeys = Object.keys(registeredUsers);
+    var userStyles = "";
+    userKeys.forEach(function(userKey) {
+      userStyles += getUserStyles(userKey);
+    });
+    updateStyles(userStyles);
+  }
+  exports.applyPresenceArray = applyPresenceArray;
+
+  function applyPresenceArray(presenceArray) {
+    if (!presenceArray || !presenceArray.length) {
+      return;
+    }
+    var users = presenceArray.filter(function(presence) {
+      return typeof registeredUsers[presence.user] !== "undefined";
+    });
+    updateUserPresenceStatus(users);
+  }
+
+  function updateUserPresenceStatus(users) {
+    var presenceStatus = getBaseCSSClasses();
+    for (var i = 0, iM = users.length; i < iM; i++) {
+      var presence = users[i];
+      var status = getNormalizedStatus(presence.status);
+      if (status === 'offline') {
+        continue;
+      }
+      presenceStatus.push('sn-presence-' + presence.user + '-' + status);
+    }
+    setCSSClasses(presenceStatus.join(' '));
+  }
+
+  function getNormalizedStatus(status) {
+    switch (status) {
+      case 'probably offline':
+      case 'maybe offline':
+        return 'away';
+      default:
+        return 'offline';
+      case 'online':
+      case 'offline':
+        return status;
+    }
+  }
+
+  function updateRegisteredUsers() {
+    var presenceIndicators = document.querySelectorAll('[data-presence-id]');
+    var obj = {};
+    for (var i = 0, iM = presenceIndicators.length; i < iM; i++) {
+      var uid = presenceIndicators[i].getAttribute('data-presence-id');
+      obj[uid] = true;
+    }
+    if (Object.keys(obj).length === registeredUsersLength) {
+      return;
+    }
+    registeredUsers = obj;
+    registeredUsersLength = Object.keys(registeredUsers).length;
+    updateUserStyles();
+  }
+
+  function setCSSClasses(classes) {
+    $('html')[0].className = classes;
+  }
+
+  function getBaseCSSClasses() {
+    return $('html')[0].className.split(' ').filter(function(item) {
+      return item.indexOf('sn-presence-') !== 0;
+    });
+  }
+})(window, window.jQuery || window.Zepto);;
+/*! RESOURCE: /scripts/sn/common/presence/_module.js */
+angular.module('sn.common.presence', ['ng.amb', 'sn.common.glide']).config(function($provide) {
+  "use strict";
+  $provide.constant("PRESENCE_DISABLED", "false" === "true");
+});;
+/*! RESOURCE: /scripts/sn/common/presence/factory.snPresence.js */
+angular.module("sn.common.presence").factory('snPresence', function($rootScope, $window, $log, amb, $timeout, $http, snRecordPresence, snTabActivity, urlTools, PRESENCE_DISABLED) {
+  "use strict";
+  var REST = {
+    PRESENCE: "/api/now/ui/presence"
+  };
+  var RETRY_INTERVAL = ($window.NOW.presence_interval || 15) * 1000;
+  var MAX_RETRY_DELAY = RETRY_INTERVAL * 10;
+  var initialized = false;
+  var primary = false;
+  var presenceArray = [];
+  var serverTimeMillis;
+  var skew = 0;
+  var st = 0;
+
+  function init() {
+    var location = urlTools.parseQueryString($window.location.search);
+    var table = location['table'] || location['sysparm_table'];
+    var sys_id = location['sys_id'] || location['sysparm_sys_id'];
+    return initPresence(table, sys_id);
+  }
+
+  function initPresence(t, id) {
+    if (PRESENCE_DISABLED)
+      return;
+    if (!initialized) {
+      initialized = true;
+      initRootScopes();
+      if (!primary) {
+        CustomEvent.observe('sn.presence', onPresenceEvent);
+        CustomEvent.fireTop('sn.presence.ping');
+      } else {
+        presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
+        if (presenceArray)
+          $timeout(schedulePresence, 100);
+        else
+          updatePresence();
+      }
+    }
+    return snRecordPresence.initPresence(t, id);
+  }
+
+  function onPresenceEvent(parms) {
+    presenceArray = parms;
+    $timeout(broadcastPresence);
+  }
+
+  function initRootScopes() {
+    if ($window.NOW.presence_scopes) {
+      var ps = $window.NOW.presence_scopes;
+      if (ps.indexOf($rootScope) == -1)
+        ps.push($rootScope);
+    } else {
+      $window.NOW.presence_scopes = [$rootScope];
+      primary = CustomEvent.isTopWindow();
+    }
+  }
+
+  function setPresence(data, st) {
+    var rt = new Date().getTime() - st;
+    if (rt > 500)
+      console.log("snPresence response time " + rt + "ms");
+    if (data.result && data.result.presenceArray) {
+      presenceArray = data.result.presenceArray;
+      setLocalPresence(presenceArray);
+      serverTimeMillis = data.result.serverTimeMillis;
+      skew = new Date().getTime() - serverTimeMillis;
+      var t = Math.floor(skew / 1000);
+      if (t < -15)
+        console.log(">>>>> server ahead " + Math.abs(t) + " seconds");
+      else if (t > 15)
+        console.log(">>>>> browser time ahead " + t + " seconds");
+    }
+    schedulePresence();
+  }
+
+  function updatePresence(numAttempts) {
+    presenceArray = getLocalPresence($window.localStorage.getItem('snPresence'));
+    if (presenceArray) {
+      determineStatus(presenceArray);
+      $timeout(schedulePresence);
+      return;
+    }
+    if (!amb.isLoggedIn() || !snTabActivity.isPrimary) {
+      $timeout(schedulePresence);
+      return;
+    }
+    var p = {
+      user_agent: navigator.userAgent,
+      ua_time: new Date().toISOString(),
+      href: window.location.href,
+      pathname: window.location.pathname,
+      search: window.location.search,
+      path: window.location.pathname + window.location.search
+    };
+    st = new Date().getTime();
+    $http.post(REST.PRESENCE + '?sysparm_auto_request=true&cd=' + st, p).success(function(data) {
+      setPresence(data, st);
+    }).error(function(response, status) {
+      console.log("snPresence " + status);
+      schedulePresence(numAttempts);
+    })
+  }
+
+  function schedulePresence(numAttempts) {
+    numAttempts = isFinite(numAttempts) ? numAttempts + 1 : 0;
+    var interval = getDecayingRetryInterval(numAttempts);
+    $timeout(function() {
+      updatePresence(numAttempts)
+    }, interval);
+    determineStatus(presenceArray);
+    broadcastPresence();
+  }
+
+  function broadcastPresence() {
+    if (angular.isDefined($window.applyPresenceArray)) {
+      $window.applyPresenceArray(presenceArray);
+    }
+    $rootScope.$emit("sn.presence", presenceArray);
+    if (!primary)
+      return;
+    CustomEvent.fireAll('sn.presence', presenceArray);
+  }
+
+  function determineStatus(presenceArray) {
+    if (!presenceArray || !presenceArray.forEach)
+      return;
+    var t = new Date().getTime();
+    t -= skew;
+    presenceArray.forEach(function(p) {
+      var x = 0 + p.last_on;
+      var y = t - x;
+      p.status = "online";
+      if (y > (5 * RETRY_INTERVAL))
+        p.status = "offline";
+      else if (y > (3 * RETRY_INTERVAL))
+        p.status = "probably offline";
+      else if (y > (2.5 * RETRY_INTERVAL))
+        p.status = "maybe offline";
+    })
+  }
+
+  function setLocalPresence(value) {
+    var p = {
+      saved: new $window.Date().getTime(),
+      presenceArray: value
+    };
+    $window.localStorage.setItem('snPresence', angular.toJson(p));
+  }
+
+  function getLocalPresence(p) {
+    if (!p)
+      return null;
+    try {
+      p = angular.fromJson(p);
+    } catch (e) {
+      p = {};
+    }
+    if (!p.presenceArray)
+      return null;
+    var now = new Date().getTime();
+    if (now - p.saved >= RETRY_INTERVAL)
+      return null;
+    return p.presenceArray;
+  }
+
+  function getDecayingRetryInterval(numAttempts) {
+    return Math.min(RETRY_INTERVAL * Math.pow(2, numAttempts), MAX_RETRY_DELAY);
+  }
+  return {
+    init: init,
+    initPresence: initPresence,
+    _getLocalPresence: getLocalPresence,
+    _setLocalPresence: setLocalPresence,
+    _determineStatus: determineStatus
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/presence/factory.snRecordPresence.js */
+angular.module("sn.common.presence").factory('snRecordPresence', function($rootScope, $location, amb, $timeout, $window, PRESENCE_DISABLED, snTabActivity) {
+  "use strict";
+  var statChannel;
+  var interval = ($window.NOW.record_presence_interval || 20) * 1000;
+  var sessions = {};
+  var primary = false;
+  var table;
+  var sys_id;
+
+  function initPresence(t, id) {
+    if (PRESENCE_DISABLED)
+      return;
+    if (!t || !id)
+      return;
+    if (t == table && id == sys_id)
+      return;
+    initRootScopes();
+    if (!primary)
+      return;
+    termPresence();
+    table = t;
+    sys_id = id;
+    var recordPresence = "/sn/rp/" + table + "/" + sys_id;
+    $rootScope.me = NOW.session_id;
+    statChannel = amb.getChannel(recordPresence);
+    statChannel.subscribe(onStatus);
+    amb.connected.then(function() {
+      setStatus("entered");
+      $rootScope.status = "viewing";
+    });
+    return statChannel;
+  }
+
+  function initRootScopes() {
+    if ($window.NOW.record_presence_scopes) {
+      var ps = $window.NOW.record_presence_scopes;
+      if (ps.indexOf($rootScope) == -1) {
+        ps.push($rootScope);
+        CustomEvent.observe('sn.sessions', onPresenceEvent);
+      }
+    } else {
+      $window.NOW.record_presence_scopes = [$rootScope];
+      primary = true;
+    }
+  }
+
+  function onPresenceEvent(sessionsToSend) {
+    $rootScope.$emit("sn.sessions", sessionsToSend);
+    $rootScope.$emit("sp.sessions", sessionsToSend);
+  }
+
+  function termPresence() {
+    if (!statChannel)
+      return;
+    statChannel.unsubscribe();
+    statChannel = table = sys_id = null;
+  }
+
+  function setStatus(status) {
+    if (status == $rootScope.status)
+      return;
+    $rootScope.status = status;
+    if (Object.keys(sessions).length == 0)
+      return;
+    if (getStatusPrecedence(status) > 1)
+      return;
+    publish($rootScope.status);
+  }
+
+  function publish(status) {
+    if (!statChannel)
+      return;
+    if (amb.getState() !== "opened")
+      return;
+    statChannel.publish({
+      presences: [{
+        status: status,
+        session_id: NOW.session_id,
+        user_name: NOW.user_name,
+        user_id: NOW.user_id,
+        user_display_name: NOW.user_display_name,
+        user_initials: NOW.user_initials,
+        user_avatar: NOW.user_avatar,
+        ua: navigator.userAgent,
+        table: table,
+        sys_id: sys_id,
+        time: new Date().toString().substring(0, 24)
+      }]
+    });
+  }
+
+  function onStatus(message) {
+    message.data.presences.forEach(function(d) {
+      if (!d.session_id || d.session_id == NOW.session_id)
+        return;
+      var s = sessions[d.session_id];
+      if (s)
+        angular.extend(s, d);
+      else
+        s = sessions[d.session_id] = d;
+      s.lastUpdated = new Date();
+      if (s.status == 'exited')
+        delete sessions[d.session_id];
+    });
+    broadcastSessions();
+  }
+
+  function broadcastSessions() {
+    var sessionsToSend = getUniqueSessions();
+    $rootScope.$emit("sn.sessions", sessionsToSend);
+    $rootScope.$emit("sp.sessions", sessionsToSend);
+    if (primary)
+      $timeout(function() {
+        CustomEvent.fire('sn.sessions', sessionsToSend);
+      })
+  }
+
+  function getUniqueSessions() {
+    var uniqueSessionsByUser = {};
+    var sessionKeys = Object.keys(sessions);
+    sessionKeys.forEach(function(key) {
+      var session = sessions[key];
+      if (session.user_id == NOW.user_id)
+        return;
+      if (session.user_id in uniqueSessionsByUser) {
+        var otherSession = uniqueSessionsByUser[session.user_id];
+        var thisPrecedence = getStatusPrecedence(session.status);
+        var otherPrecedence = getStatusPrecedence(otherSession.status);
+        uniqueSessionsByUser[session.user_id] = thisPrecedence < otherPrecedence ? session : otherSession;
+        return
+      }
+      uniqueSessionsByUser[session.user_id] = session;
+    });
+    var uniqueSessions = {};
+    angular.forEach(uniqueSessionsByUser, function(item) {
+      uniqueSessions[item.session_id] = item;
+    });
+    return uniqueSessions;
+  }
+
+  function getStatusPrecedence(status) {
+    switch (status) {
+      case 'typing':
+        return 0;
+      case 'viewing':
+        return 1;
+      case 'entered':
+        return 2;
+      case 'exited':
+      case 'probably left':
+        return 4;
+      case 'offline':
+        return 5;
+      default:
+        return 3;
+    }
+  }
+  $rootScope.$on("record.typing", function(evt, data) {
+    setStatus(data.status);
+  });
+  var idleTable, idleSysID;
+  snTabActivity.onIdle({
+    onIdle: function RecordPresenceTabIdle() {
+      idleTable = table;
+      idleSysID = sys_id;
+      sessions = {};
+      termPresence();
+      broadcastSessions();
+    },
+    onReturn: function RecordPresenceTabActive() {
+      initPresence(idleTable, idleSysID, true);
+      idleTable = idleSysID = void(0);
+    },
+    delay: interval * 4
+  });
+  return {
+    initPresence: initPresence,
+    termPresence: termPresence
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/presence/directive.snPresence.js */
+angular.module('sn.common.presence').directive('snPresence', function(snPresence, $rootScope, $timeout, i18n) {
+  'use strict';
+  $timeout(snPresence.init, 100);
+  var presenceStatus = {};
+  i18n.getMessages(['maybe offline', 'probably offline', 'offline', 'online', 'entered', 'viewing'], function(results) {
+    presenceStatus.maybe_offline = results['maybe offline'];
+    presenceStatus.probably_offline = results['probably offline'];
+    presenceStatus.offline = results['offline'];
+    presenceStatus.online = results['online'];
+    presenceStatus.entered = results['entered'];
+    presenceStatus.viewing = results['viewing'];
+  });
+  var presences = {};
+  $rootScope.$on('sn.presence', function(event, presenceArray) {
+    if (!presenceArray) {
+      angular.forEach(presences, function(p) {
+        p.status = "offline";
+      });
+      return;
+    }
+    presenceArray.forEach(function(presence) {
+      presences[presence.user] = presence;
+    });
+  });
+  return {
+    restrict: 'EA',
+    replace: false,
+    scope: {
+      userId: '@?',
+      snPresence: '=?',
+      user: '=?',
+      profile: '=?',
+      displayName: '=?'
+    },
+    link: function(scope, element) {
+      if (scope.profile) {
+        scope.user = scope.profile.userID;
+        scope.profile.tabIndex = -1;
+        if (scope.profile.isAccessible)
+          scope.profile.tabIndex = 0;
+      }
+      if (!element.hasClass('presence'))
+        element.addClass('presence');
+
+      function updatePresence() {
+        var id = scope.snPresence || scope.user;
+        if (!angular.isDefined(id) && angular.isDefined(scope.userId)) {
+          id = scope.userId;
         }
-
-        function renderModal() {
-          if (isRendered)
-            return;
-          modalScope = angular.extend($rootScope.$new(), config);
-          modal = $compile($templateCache.get("amb_disconnect_modal.xml"))(modalScope);
-          angular.element("body").append(modal);
-          modal.on("shown.bs.modal", function(e) {
-            for (var i = 0, len = showCallbacks.length; i < len; i++)
-              showCallbacks[i](e);
-          });
-          modal.on("hidden.bs.modal", function(e) {
-            for (var i = 0, len = hideCallbacks.length; i < len; i++)
-              hideCallbacks[i](e);
-          });
-          modalOptions = angular.extend({}, defaults, config);
-          modal.modal(modalOptions);
-          isRendered = true;
-        }
-
-        function showModal() {
-          if (isRendered)
-            modal.modal('show');
-        }
-
-        function hideModal() {
-          if (isRendered)
-            modal.modal('hide');
-        }
-
-        function destroyModal() {
-          if (!isRendered)
-            return;
-          modal.modal('hide');
-          modal.remove();
-          modalScope.$destroy();
-          modalScope = void(0);
-          isRendered = false;
-          var pos = showCallbacks.indexOf(config.onShow);
-          if (pos >= 0)
-            showCallbacks.splice(pos, 1);
-          pos = hideCallbacks.indexOf(config.onShow);
-          if (pos >= 0)
-            hideCallbacks.splice(pos, 1);
-        }
-        return {
-          render: lazyRender,
-          destroy: destroyModal,
-          show: showModal,
-          hide: hideModal,
-          isVisible: function() {
-            if (!isRendered)
-              false;
-            return modal.visible();
+        if (presences[id]) {
+          var status = presences[id].status;
+          if (status === 'maybe offline' || status === 'probably offline') {
+            element.removeClass('presence-online presence-offline presence-away');
+            element.addClass('presence-away');
+          } else if (status == "offline" && !element.hasClass('presence-offline')) {
+            element.removeClass('presence-online presence-away');
+            element.addClass('presence-offline');
+          } else if ((status == "online" || status == "entered" || status == "viewing") && !element.hasClass('presence-online')) {
+            element.removeClass('presence-offline presence-away');
+            element.addClass('presence-online');
           }
+          status = status.replace(/ /g, "_");
+          if (scope.profile)
+            angular.element('div[user-avatar-id="' + id + '"]').attr("aria-label", scope.profile.userName + ' ' + presenceStatus[status]);
+          else
+            angular.element('div[user-avatar-id="' + id + '"]').attr("aria-label", scope.displayName + ' ' + presenceStatus[status]);
+        } else {
+          if (!element.hasClass('presence-offline'))
+            element.addClass('presence-offline');
         }
       }
-      $templateCache.put('amb_
+      var unbind = $rootScope.$on('sn.presence', updatePresence);
+      scope.$on('$destroy', unbind);
+      updatePresence();
+    }
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/presence/directive.snComposing.js */
+angular.module('sn.common.presence').directive('snComposing', function(getTemplateUrl, snComposingPresence) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl("snComposing.xml"),
+    replace: true,
+    scope: {
+      conversation: "="
+    },
+    controller: function($scope, $element) {
+      var child = $element.children();
+      if (child && child.tooltip)
+        child.tooltip({
+          'template': '<div class="tooltip" style="white-space: pre-wrap" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+          'placement': 'top',
+          'container': 'body'
+        });
+      $scope.snComposingPresence = snComposingPresence;
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/presence/service.snComposingPresence.js */
+angular.module('sn.common.presence').service('snComposingPresence', function(i18n) {
+  "use strict";
+  var viewing = {};
+  var typing = {};
+  var allStrings = {};
+  var shortStrings = {};
+  var typing1 = "{0} is typing",
+    typing2 = "{0} and {1} are typing",
+    typingMore = "{0}, {1}, and {2} more are typing",
+    viewing1 = "{0} is viewing",
+    viewing2 = "{0} and {1} are viewing",
+    viewingMore = "{0}, {1}, and {2} more are viewing";
+  i18n.getMessages(
+    [
+      typing1,
+      typing2,
+      typingMore,
+      viewing1,
+      viewing2,
+      viewingMore
+    ],
+    function(results) {
+      typing1 = results[typing1];
+      typing2 = results[typing2];
+      typingMore = results[typingMore];
+      viewing1 = results[viewing1];
+      viewing2 = results[viewing2];
+      viewingMore = results[viewingMore];
+    });
+
+  function set(conversationID, newPresenceValues) {
+    if (newPresenceValues.viewing)
+      viewing[conversationID] = newPresenceValues.viewing;
+    if (newPresenceValues.typing)
+      typing[conversationID] = newPresenceValues.typing;
+    generateAllString(conversationID, {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    });
+    generateShortString(conversationID, {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    });
+    return {
+      viewing: viewing[conversationID],
+      typing: typing[conversationID]
+    }
+  }
+
+  function get(conversationID) {
+    return {
+      viewing: viewing[conversationID] || [],
+      typing: typing[conversationID] || []
+    }
+  }
+
+  function generateAllString(conversationID, members) {
+    var result = "";
+    var typingLength = members.typing.length;
+    var viewingLength = members.viewing.length;
+    if (typingLength < 4 && viewingLength < 4)
+      return "";
+    switch (typingLength) {
+      case 0:
+        break;
+      case 1:
+        result += i18n.format(typing1, members.typing[0].name);
+        break;
+      case 2:
+        result += i18n.format(typing2, members.typing[0].name, members.typing[1].name);
+        break;
+      default:
+        var allButLastTyper = "";
+        for (var i = 0; i < typingLength; i++) {
+          if (i < typingLength - 2)
+            allButLastTyper += members.typing[i].name + ", ";
+          else if (i === typingLength - 2)
+            allButLastTyper += members.typing[i].name + ",";
+          else
+            result += i18n.format(typing2, allButLastTyper, members.typing[i].name);
+        }
+    }
+    if (viewingLength > 0 && typingLength > 0)
+      result += "\n\n";
+    switch (viewingLength) {
+      case 0:
+        break;
+      case 1:
+        result += i18n.format(viewing1, members.viewing[0].name);
+        break;
+      case 2:
+        result += i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
+        break;
+      default:
+        var allButLastViewer = "";
+        for (var i = 0; i < viewingLength; i++) {
+          if (i < viewingLength - 2)
+            allButLastViewer += members.viewing[i].name + ", ";
+          else if (i === viewingLength - 2)
+            allButLastViewer += members.viewing[i].name + ",";
+          else
+            result += i18n.format(viewing2, allButLastViewer, members.viewing[i].name);
+        }
+    }
+    allStrings[conversationID] = result;
+  }
+
+  function generateShortString(conversationID, members) {
+    var typingLength = members.typing.length;
+    var viewingLength = members.viewing.length;
+    var typingString = "",
+      viewingString = "";
+    var inBetween = " ";
+    switch (typingLength) {
+      case 0:
+        break;
+      case 1:
+        typingString = i18n.format(typing1, members.typing[0].name);
+        break;
+      case 2:
+        typingString = i18n.format(typing2, members.typing[0].name, members.typing[1].name);
+        break;
+      case 3:
+        typingString = i18n.format(typing2, members.typing[0].name + ", " + members.typing[1].name + ",", members.typing[2].name);
+        break;
+      default:
+        typingString = i18n.format(typingMore, members.typing[0].name, members.typing[1].name, (typingLength - 2));
+    }
+    if (viewingLength > 0 && typingLength > 0)
+      inBetween = ". ";
+    switch (viewingLength) {
+      case 0:
+        break;
+      case 1:
+        viewingString = i18n.format(viewing1, members.viewing[0].name);
+        break;
+      case 2:
+        viewingString = i18n.format(viewing2, members.viewing[0].name, members.viewing[1].name);
+        break;
+      case 3:
+        viewingString = i18n.format(viewing2, members.viewing[0].name + ", " + members.viewing[1].name + ",", members.viewing[2].name);
+        break;
+      default:
+        viewingString = i18n.format(viewingMore, members.viewing[0].name, members.viewing[1].name, (viewingLength - 2));
+    }
+    shortStrings[conversationID] = typingString + inBetween + viewingString;
+  }
+
+  function getAllString(conversationID) {
+    if ((viewing[conversationID] && viewing[conversationID].length > 3) ||
+      (typing[conversationID] && typing[conversationID].length > 3))
+      return allStrings[conversationID];
+    return "";
+  }
+
+  function getShortString(conversationID) {
+    return shortStrings[conversationID];
+  }
+
+  function remove(conversationID) {
+    delete viewing[conversationID];
+  }
+  return {
+    set: set,
+    get: get,
+    generateAllString: generateAllString,
+    getAllString: getAllString,
+    generateShortString: generateShortString,
+    getShortString: getShortString,
+    remove: remove
+  }
+});;;
+/*! RESOURCE: /scripts/sn/common/user_profile/js_includes_user_profile.js */
+/*! RESOURCE: /scripts/sn/common/user_profile/_module.js */
+angular.module("sn.common.user_profile", ['sn.common.ui']);;
+/*! RESOURCE: /scripts/sn/common/user_profile/directive.snUserProfile.js */
+angular.module('sn.common.user_profile').directive('snUserProfile', function(getTemplateUrl, snCustomEvent, $window, avatarProfilePersister, $timeout, $http) {
+  "use strict";
+  return {
+    replace: true,
+    restrict: 'E',
+    templateUrl: getTemplateUrl('snUserProfile.xml'),
+    scope: {
+      profile: "=",
+      showDirectMessagePrompt: "="
+    },
+    link: function(scope, element) {
+      scope.showDirectMessagePromptFn = function() {
+        if (scope.showDirectMessagePrompt) {
+          var activeUserID = $window.NOW.user_id || "";
+          return !(!scope.profile ||
+            activeUserID === scope.profile.sysID ||
+            (scope.profile.document && activeUserID === scope.profile.document));
+        } else {
+          return false;
+        }
+      };
+      $timeout(function() {
+        element.find("#direct-message-popover-trigger").on("click", scope.openDirectMessageConversation);
+      }, 0, false);
+    },
+    controller: function($scope, snConnectService) {
+      if ($scope.profile && $scope.profile.userID && avatarProfilePersister.getAvatar($scope.profile.userID)) {
+        $scope.profile = avatarProfilePersister.getAvatar($scope.profile.userID);
+        $scope.$emit("sn-user-profile.ready");
+      } else {
+        $http.get('/api/now/live/profiles/sys_user.' + $scope.profile.userID).then(function(response) {
+          angular.merge($scope.profile, response.data.result);
+          avatarProfilePersister.setAvatar($scope.profile.userID, $scope.profile);
+          $scope.$emit("sn-user-profile.ready");
+        })
+      }
+      $scope.openDirectMessageConversation = function(evt) {
+        if (evt && evt.keyCode === 9)
+          return;
+        $timeout(function() {
+          snConnectService.openWithProfile($scope.profile);
+        }, 0, false);
+        angular.element('.popover').each(function() {
+          angular.element('body').off('click.snUserAvatarPopoverClose');
+          angular.element(this).popover('hide');
+        });
+      };
+    }
+  }
+});;;
+/*! RESOURCE: /scripts/sn/common/avatar/_module.js */
+angular.module('sn.common.avatar', ['sn.common.presence', 'sn.common.messaging', 'sn.common.user_profile']).config(function($provide) {
+  $provide.value("liveProfileID", '');
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snAvatarPopover.js */
+angular.module('sn.common.avatar').directive('snAvatarPopover', function($http, $compile, getTemplateUrl, avatarProfilePersister, $injector) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_avatar_popover.xml'),
+    replace: true,
+    transclude: true,
+    scope: {
+      members: '=',
+      primary: '=?',
+      showPresence: '=?',
+      enableContextMenu: '=?',
+      enableTooltip: '=?',
+      enableBindOnce: '@',
+      displayMemberCount: "=?",
+      groupAvatar: "@",
+      nopopover: "=",
+      directconversation: '@',
+      conversation: '=',
+      primaryNonAssign: '=?'
+    },
+    compile: function(tElement) {
+      var template = tElement.html();
+      return function(scope, element, attrs, controller, transcludeFn) {
+        if (scope.directconversation) {
+          if (scope.directconversation === "true")
+            scope.directconversation = true;
+          else
+            scope.directconversation = false;
+          scope.showdirectconversation = !scope.directconversation;
+        } else {
+          scope.showdirectconversation = true;
+        }
+        if ($injector.has('inSupportClient') && $injector.get('inSupportClient'))
+          scope.showdirectconversation = false;
+        if (scope.primaryNonAssign) {
+          scope.primary = angular.extend({}, scope.primary, scope.primaryNonAssign);
+          if (scope.users && scope.users[0])
+            scope.users[0] = scope.primary;
+        }
+
+        function recompile() {
+          if (scope.primaryNonAssign) {
+            scope.primary = angular.extend({}, scope.primary, scope.primaryNonAssign);
+            if (scope.users && scope.users[0])
+              scope.users[0] = scope.primary;
+          }
+          var newElement = $compile(template, transcludeFn)(scope);
+          element.html(newElement);
+          if (scope.enableTooltip) {
+            element.tooltip({
+              placement: 'auto top',
+              container: 'body'
+            }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+            if (element.hideFix)
+              element.hideFix();
+          }
+        }
+        if (attrs.enableBindOnce === 'false') {
+          scope.$watch('primary', recompile);
+          scope.$watch('primaryNonAssign', recompile);
+          scope.$watch('members', recompile);
+        }
+        if (scope.enableTooltip && scope.nopopover) {
+          var usersWatch = scope.$watch('users', function() {
+            if (scope.users && scope.users.length === 1 && scope.users[0] && scope.users[0].name) {
+              element.tooltip({
+                placement: 'auto top',
+                container: 'body'
+              }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+              if (element.hideFix)
+                element.hideFix();
+              usersWatch();
+            }
+          });
+        }
+      };
+    },
+    controller: function($scope, liveProfileID, $timeout, $element, $document, snCustomEvent) {
+      $scope.randId = Math.random();
+      $scope.loadEvent = 'sn-user-profile.ready';
+      $scope.closeEvent = ['chat:open_conversation', 'snAvatar.closePopover', 'body_clicked'];
+      $scope.popoverConfig = {
+        template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
+      };
+      $scope.displayMemberCount = $scope.displayMemberCount || false;
+      $scope.liveProfileID = liveProfileID;
+      if ($scope.primaryNonAssign) {
+        $scope.primary = angular.extend({}, $scope.primary, $scope.primaryNonAssign);
+        if ($scope.users && $scope.users[0])
+          $scope.users[0] = $scope.primary;
+      }
+      $scope.$watch('members', function(newVal, oldVal) {
+        if (newVal === oldVal)
+          return;
+        if ($scope.members)
+          buildAvatar();
+      });
+      $scope.noPopover = function() {
+        $scope.popoverCursor = ($scope.nopopover || ($scope.members && $scope.members.length > 2)) ? "default" : "pointer";
+        return ($scope.nopopover || ($scope.members && $scope.members.length > 2));
+      }
+      $scope.avatarType = function() {
+        var result = [];
+        if ($scope.groupAvatar || !$scope.users)
+          return result;
+        if ($scope.users.length > 1)
+          result.push("group")
+        if ($scope.users.length === 2)
+          result.push("avatar-duo")
+        if ($scope.users.length === 3)
+          result.push("avatar-trio")
+        if ($scope.users.length >= 4)
+          result.push("avatar-quad")
+        return result;
+      }
+      $scope.getBackgroundStyle = function(user) {
+        var avatar = (user ? user.avatar : '');
+        if ($scope.groupAvatar)
+          avatar = $scope.groupAvatar;
+        if (avatar && avatar !== '')
+          return {
+            'background-image': 'url(' + avatar + ')'
+          };
+        if (user && user.name)
+          return '';
+        return void(0);
+      };
+      $scope.stopPropCheck = function(evt) {
+        $scope.$broadcast("snAvatar.closeOtherPopovers", $scope.randId);
+        if (!$scope.nopopover) {
+          evt.stopPropagation();
+        }
+      };
+      $scope.$on("snAvatar.closeOtherPopovers", function(id) {
+        if (id !== $scope.randId)
+          snCustomEvent.fireTop('snAvatar.closePopover');
+      });
+      $scope.maxStringWidth = function() {
+        var paddedWidth = parseInt($scope.avatarWidth * 0.8, 10);
+        return $scope.users.length === 1 ? paddedWidth : paddedWidth / 2;
+      };
+
+      function buildInitials(name) {
+        if (!name)
+          return "--";
+        var initials = name.split(" ").map(function(word) {
+          return word.toUpperCase();
+        }).filter(function(word) {
+          return word.match(/^[A-Z]/);
+        }).map(function(word) {
+          return word.substring(0, 1);
+        }).join("");
+        return (initials.length > 3) ?
+          initials.substr(0, 3) :
+          initials;
+      }
+      $scope.avatartooltip = function() {
+        if (!$scope.enableTooltip) {
+          return '';
+        }
+        if (!$scope.users) {
+          return '';
+        }
+        var names = [];
+        $scope.users.forEach(function(user) {
+          if (!user) {
+            return;
+          }
+          names.push(user.name);
+        });
+        return names.join(', ');
+      };
+
+      function buildAvatar() {
+        if (typeof $scope.primary === 'string') {
+          $http.get('/api/now/live/profiles/sys_user.' + $scope.primary).then(function(response) {
+            $scope.users = [{
+              userID: $scope.primary,
+              name: response.data.result.name,
+              initials: buildInitials(response.data.result.name),
+              avatar: response.data.result.avatar
+            }];
+          });
+          return;
+        }
+        if ($scope.primary) {
+          if ($scope.primary.userImage)
+            $scope.primary.avatar = $scope.primary.userImage;
+          if (!$scope.primary.userID && $scope.primary.sys_id)
+            $scope.primary.userID = $scope.primary.sys_id;
+        }
+        $scope.isGroup = $scope.conversation && $scope.conversation.isGroup;
+        $scope.users = [$scope.primary];
+        if ($scope.primary && (!$scope.members || $scope.members.length <= 0) && ($scope.primary.avatar || $scope.primary.initials) && $scope.isDocument) {
+          $scope.users = [$scope.primary];
+        } else if ($scope.members && $scope.members.length > 0) {
+          $scope.users = buildCompositeAvatar($scope.members);
+        }
+        $scope.presenceEnabled = $scope.showPresence && !$scope.isGroup && $scope.users.length === 1;
+      }
+
+      function buildCompositeAvatar(members) {
+        var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+        var users = angular.isArray(members) ? members.slice() : [members];
+        users = users.sort(function(a, b) {
+          var aID = a.userID || a.document;
+          var bID = b.userID || b.document;
+          if (a.table === "chat_queue_entry")
+            return 1;
+          if (aID === currentUser)
+            return 1;
+          else if (bID === currentUser)
+            return -1;
+          return 0;
+        });
+        if (users.length === 2)
+          users = [users[0]];
+        if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+          var index = -1;
+          angular.forEach(users, function(user, i) {
+            if (user.sys_id === $scope.primary.sys_id) {
+              index = i;
+            }
+          });
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+          users.splice(1, 0, $scope.primary);
+        }
+        return users;
+      }
+      buildAvatar();
+      $scope.loadFullProfile = function() {
+        if ($scope.primary && !$scope.primary.sys_id && !avatarProfilePersister.getAvatar($scope.primary.userID)) {
+          $http.get('/api/now/live/profiles/' + $scope.primary.userID).then(
+            function(response) {
+              try {
+                angular.extend($scope.primary, response.data.result);
+                avatarProfilePersister.setAvatar($scope.primary.userID, $scope.primary);
+              } catch (e) {}
+            });
+        }
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snAvatar.js */
+angular.module('sn.common.avatar')
+  .factory('snAvatarFactory', function($http, $compile, $templateCache, $q, snCustomEvent, snConnectService) {
+    'use strict';
+    return function() {
+      return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        scope: {
+          members: '=',
+          primary: '=',
+          showPresence: '=?',
+          enableContextMenu: '=?',
+          enableTooltip: '=?',
+          enableBindOnce: '@',
+          displayMemberCount: "=?",
+          groupAvatar: "@"
+        },
+        compile: function(tElement) {
+          var template = tElement.html();
+          return function(scope, element, attrs, controller, transcludeFn) {
+            var newElement = $compile(template, transcludeFn)(scope);
+            element.html(newElement);
+            if (scope.enableTooltip) {
+              element.tooltip({
+                placement: 'auto top',
+                container: 'body'
+              }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+              if (element.hideFix)
+                element.hideFix();
+            }
+            if (attrs.enableBindOnce === 'false') {
+              scope.$watch('primary', recompile);
+              scope.$watch('members', recompile);
+            }
+            if (scope.enableTooltip) {
+              var usersWatch = scope.$watch('users', function() {
+                if (scope.users && scope.users.length === 1 && scope.users[0] && scope.users[0].name) {
+                  element.tooltip({
+                    placement: 'auto top',
+                    container: 'body'
+                  }).attr('data-original-title', scope.users[0].name).tooltip('fixTitle');
+                  if (element.hideFix)
+                    element.hideFix();
+                  usersWatch();
+                }
+              });
+            }
+            if (scope.enableContextMenu !== false) {
+              scope.contextOptions = [];
+              var gUser = null;
+              try {
+                gUser = g_user;
+              } catch (err) {}
+              if (scope.users && scope.users.length === 1 && scope.users[0] && (scope.users[0].userID || scope.users[0].sys_id)) {
+                scope.contextOptions = [
+                  ["Open user's profile", function() {
+                    if (scope.users && scope.users.length > 0) {
+                      window.open('/nav_to.do?uri=' + encodeURIComponent('sys_user.do?sys_id=' + scope.users[0].userID), '_blank');
+                    }
+                  }]
+                ];
+                if ((gUser && scope.users[0].userID && scope.users[0].userID !== gUser.userID) ||
+                  (scope.liveProfileID && scope.users[0] && scope.users[0].sysID !== scope.liveProfileID)) {
+                  scope.contextOptions.push(["Open a new chat", function() {
+                    snConnectService.openWithProfile(scope.users[0]);
+                  }]);
+                }
+              }
+            } else {
+              scope.contextOptions = [];
+            }
+          };
+        },
+        controller: function($scope, liveProfileID) {
+          var firstBuildAvatar = true;
+          $scope.displayMemberCount = $scope.displayMemberCount || false;
+          $scope.liveProfileID = liveProfileID;
+          $scope.$watch('primary', function(newValue, oldValue) {
+            if ($scope.primary && newValue !== oldValue) {
+              if (!firstBuildAvatar)
+                buildAvatar();
+              if ($scope.contextOptions.length > 0) {
+                $scope.contextOptions = [
+                  ["Open user's profile", function() {
+                    if ($scope.users && $scope.users.length > 0) {
+                      window.location.href = 'sys_user.do?sys_id=' + $scope.users[0].userID || $scope.users[0].userID;
+                    }
+                  }]
+                ];
+                var gUser = null;
+                try {
+                  gUser = g_user;
+                } catch (err) {}
+                if ((!gUser && !liveProfileID) || ($scope.users && $scope.users.length === 1 && $scope.users[0])) {
+                  if ((gUser && $scope.users[0].userID && $scope.users[0].userID !== gUser.userID) ||
+                    ($scope.liveProfileID && $scope.users[0] && $scope.users[0].sysID !== $scope.liveProfileID)) {
+                    $scope.contextOptions.push(["Open a new chat", function() {
+                      snConnectService.openWithProfile($scope.users[0]);
+                    }]);
+                  }
+                }
+              }
+            }
+          });
+          $scope.$watch('members', function() {
+            if ($scope.members && !firstBuildAvatar)
+              buildAvatar();
+          });
+          $scope.avatarType = function() {
+            var result = [];
+            if ($scope.groupAvatar || !$scope.users)
+              return result;
+            if ($scope.users.length > 1)
+              result.push("group");
+            if ($scope.users.length === 2)
+              result.push("avatar-duo");
+            if ($scope.users.length === 3)
+              result.push("avatar-trio");
+            if ($scope.users.length >= 4)
+              result.push("avatar-quad");
+            return result;
+          };
+          $scope.getBackgroundStyle = function(user) {
+            var avatar = (user ? user.avatar : '');
+            if ($scope.groupAvatar)
+              avatar = $scope.groupAvatar;
+            if (avatar && avatar !== '')
+              return {
+                'background-image': 'url(' + avatar + ')'
+              };
+            if (user && user.name)
+              return '';
+            return void(0);
+          };
+          $scope.maxStringWidth = function() {
+            var paddedWidth = parseInt($scope.avatarWidth * 0.8, 10);
+            return $scope.users.length === 1 ? paddedWidth : paddedWidth / 2;
+          };
+
+          function buildInitials(name) {
+            if (!name)
+              return "--";
+            var initials = name.split(" ").map(function(word) {
+              return word.toUpperCase();
+            }).filter(function(word) {
+              return word.match(/^[A-ZÀ-Ÿ]/);
+            }).map(function(word) {
+              return word.substring(0, 1);
+            }).join("");
+            return (initials.length > 3) ?
+              initials.substr(0, 3) :
+              initials;
+          }
+          $scope.avatartooltip = function() {
+            if (!$scope.enableTooltip) {
+              return '';
+            }
+            if (!$scope.users) {
+              return '';
+            }
+            var names = [];
+            $scope.users.forEach(function(user) {
+              if (!user) {
+                return;
+              }
+              names.push(user.name);
+            });
+            return names.join(', ');
+          };
+
+          function setPresence() {
+            $scope.presenceEnabled = $scope.showPresence && !$scope.isDocument && $scope.users.length === 1;
+            return $scope.presenceEnabled;
+          }
+
+          function buildAvatar() {
+            if (firstBuildAvatar)
+              firstBuildAvatar = false;
+            if (typeof $scope.primary === 'string') {
+              return $http.get('/api/now/live/profiles/sys_user.' + $scope.primary).then(function(response) {
+                $scope.users = [{
+                  userID: $scope.primary,
+                  name: response.data.result.name,
+                  initials: buildInitials(response.data.result.name),
+                  avatar: response.data.result.avatar
+                }];
+                return setPresence();
+              });
+            }
+            if ($scope.primary) {
+              if ($scope.primary.userImage)
+                $scope.primary.avatar = $scope.primary.userImage;
+              if (!$scope.primary.userID && $scope.primary.sys_id)
+                $scope.primary.userID = $scope.primary.sys_id;
+            }
+            $scope.isDocument = $scope.primary && $scope.primary.table && $scope.primary.table !== "sys_user" && $scope.primary.table !== "chat_queue_entry";
+            $scope.users = [$scope.primary];
+            if ($scope.primary && (!$scope.members || $scope.members.length <= 0) && ($scope.primary.avatar || $scope.primary.initials) && $scope.isDocument) {
+              $scope.users = [$scope.primary];
+            } else if ($scope.members && $scope.members.length > 0) {
+              $scope.users = buildCompositeAvatar($scope.members);
+            }
+            return $q.when(setPresence());
+          }
+
+          function buildCompositeAvatar(members) {
+            var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+            var users = angular.isArray(members) ? members.slice() : [members];
+            users = users.sort(function(a, b) {
+              var aID = a.userID || a.document;
+              var bID = b.userID || b.document;
+              if (a.table === "chat_queue_entry")
+                return 1;
+              if (aID === currentUser)
+                return 1;
+              else if (bID === currentUser)
+                return -1;
+              return 0;
+            });
+            if (users.length === 2)
+              users = [users[0]];
+            if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+              var index = -1;
+              angular.forEach(users, function(user, i) {
+                if (user.sys_id === $scope.primary.sys_id) {
+                  index = i;
+                }
+              });
+              if (index > -1) {
+                users.splice(index, 1);
+              }
+              users.splice(1, 0, $scope.primary);
+            }
+            return users;
+          }
+          buildAvatar();
+        }
+      }
+    }
+  })
+  .directive('snAvatar', function(snAvatarFactory, getTemplateUrl) {
+    var directive = snAvatarFactory();
+    directive.templateUrl = getTemplateUrl('sn_avatar.xml');
+    return directive;
+  })
+  .directive('snAvatarOnce', function(snAvatarFactory, getTemplateUrl) {
+    var directive = snAvatarFactory();
+    directive.templateUrl = getTemplateUrl('sn_avatar_once.xml');
+    return directive;
+  });;
+/*! RESOURCE: /scripts/sn/common/avatar/service.avatarProfilePersister.js */
+angular.module('sn.common.avatar').service('avatarProfilePersister', function() {
+  "use strict";
+  var avatars = {};
+
+  function setAvatar(id, payload) {
+    avatars[id] = payload;
+  }
+
+  function getAvatar(id) {
+    return avatars[id];
+  }
+  return {
+    setAvatar: setAvatar,
+    getAvatar: getAvatar
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snUserAvatar.js */
+angular.module('sn.common.avatar').directive('snUserAvatar', function(getTemplateUrl) {
+  "use strict";
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_user_avatar.xml'),
+    replace: true,
+    scope: {
+      profile: '=?',
+      userId: '=?',
+      avatarUrl: '=?',
+      initials: '=?',
+      enablePresence: '@',
+      disablePopover: '=?',
+      directConversationButton: '=?',
+      userName: '=?',
+      isAccessible: '=?'
+    },
+    link: function(scope, element) {
+      scope.evaluatedProfile = undefined;
+      scope.backgroundStyle = undefined;
+      scope.enablePresence = scope.enablePresence !== 'false';
+      if (scope.profile) {
+        scope.evaluatedProfile = scope.profile;
+        scope.userId = scope.profile.userID || "";
+        scope.avatarUrl = scope.profile.avatar || "";
+        scope.initials = scope.profile.initials || "";
+        scope.backgroundStyle = scope.getBackgroundStyle();
+      } else if (scope.userId || scope.avatarUrl || scope.initials || scope.userName) {
+        scope.evaluatedProfile = scope.profile = {
+          'userID': scope.userId || "",
+          'avatar': scope.avatarUrl || "",
+          'initials': scope.initials || "",
+          'userName': scope.userName || "",
+          'isAccessible': scope.isAccessible || false
+        };
+        scope.backgroundStyle = scope.getBackgroundStyle();
+      } else {
+        var unwatch = scope.$watch('profile', function(newVal) {
+          if (newVal) {
+            scope.evaluatedProfile = newVal;
+            scope.backgroundStyle = scope.getBackgroundStyle();
+            unwatch();
+          }
+        })
+      }
+      scope.directConversationButton = scope.directConversationButton !== 'false' && scope.directConversationButton !== false;
+      scope.template = '<sn-user-profile tabindex="-1" id="sn-bootstrap-popover" profile="evaluatedProfile" show-direct-message-prompt="::directConversationButton" class="avatar-popover avatar-popover-padding"></sn-user-profile>';
+      scope.ariaRole = scope.disablePopover ? 'presentation' : 'button';
+    },
+    controller: function($scope) {
+      $scope.getBackgroundStyle = function() {
+        if (($scope.avatarUrl && $scope.avatarUrl !== '') || $scope.evaluatedProfile && $scope.evaluatedProfile.avatar !== '')
+          return {
+            "background-image": 'url(' + ($scope.avatarUrl || $scope.evaluatedProfile.avatar) + ')'
+          };
+        return {
+          "background-image": ""
+        };
+      };
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/avatar/directive.snGroupAvatar.js */
+angular.module('sn.common.avatar').directive('snGroupAvatar', function($http, $compile, getTemplateUrl, avatarProfilePersister) {
+  'use strict';
+  return {
+    restrict: 'E',
+    templateUrl: getTemplateUrl('sn_group_avatar.xml'),
+    replace: true,
+    transclude: true,
+    scope: {
+      members: '=',
+      primary: '=?',
+      groupAvatar: "@"
+    },
+    controller: function($scope, liveProfileID) {
+      $scope.liveProfileID = liveProfileID;
+      $scope.$watch('members', function(newVal, oldVal) {
+        if (newVal === oldVal)
+          return;
+        if ($scope.members)
+          $scope.users = buildCompositeAvatar($scope.members);
+      });
+      $scope.avatarType = function() {
+        var result = [];
+        if ($scope.groupAvatar || !$scope.users)
+          return result;
+        if ($scope.users.length > 1)
+          result.push("group")
+        if ($scope.users.length === 2)
+          result.push("sn-avatar_duo")
+        if ($scope.users.length === 3)
+          result.push("sn-avatar_trio")
+        if ($scope.users.length >= 4)
+          result.push("sn-avatar_quad")
+        return result;
+      };
+      $scope.getBackgroundStyle = function(user) {
+        var avatar = (user ? user.avatar : '');
+        if ($scope.groupAvatar)
+          avatar = $scope.groupAvatar;
+        if (avatar && avatar !== '')
+          return {
+            "background-image": "url(" + avatar + ")"
+          };
+        return {};
+      };
+      $scope.users = buildCompositeAvatar($scope.members);
+
+      function buildCompositeAvatar(members) {
+        var currentUser = window.NOW.user ? window.NOW.user.userID : window.NOW.user_id;
+        var users = angular.isArray(members) ? members.slice() : [members];
+        users = users.sort(function(a, b) {
+          var aID = a.userID || a.document;
+          var bID = b.userID || b.document;
+          if (a.table === "chat_queue_entry")
+            return 1;
+          if (aID === currentUser)
+            return 1;
+          else if (bID === currentUser)
+            return -1;
+          return 0;
+        });
+        if (users.length === 2)
+          users = [users[0]];
+        if (users.length > 2 && $scope.primary && $scope.primary.name && $scope.primary.table === "sys_user") {
+          var index = -1;
+          angular.forEach(users, function(user, i) {
+            if (user.sys_id === $scope.primary.sys_id) {
+              index = i;
+            }
+          });
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+          users.splice(1, 0, $scope.primary);
+        }
+        return users;
+      }
+    }
+  }
+});;;

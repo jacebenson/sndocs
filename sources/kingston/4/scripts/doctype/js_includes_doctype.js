@@ -35227,6 +35227,434 @@ SN.formAnnotations = {
     });
   }
 })(jQuery);;
+/*! RESOURCE: scripts/classes/WFStageSet.js */
+var WFStageSet = (function() {
+  function getWorkflowVersionFromQuery(qry) {
+    if (!qry)
+      return null;
+    var exps = qry.split("^");
+    for (var i = 0; i < exps.length; i++) {
+      var exp = exps[i];
+      var parts = exp.split('=');
+      if (parts.length == 2 && parts[0].trim() == 'workflow_version' && parts[1].trim() != '')
+        return parts[1].trim();
+    }
+    return null;
+  }
+
+  function exportStageSet(setName, workflowVersionId, filter) {
+    var ga = new GlideAjax('WFStageSet');
+    ga.addParam('sysparm_name', 'exportStageSet');
+    ga.addParam('sysparm_set_name', setName);
+    ga.addParam('sysparm_workflow', workflowVersionId);
+    if (filter != null)
+      ga.addParam('sysparm_filter', filter);
+    ga.getXMLWait();
+    return ga.getAnswer();
+  }
+
+  function importStages(source, workflowVersionId, setId) {
+    var ga = new GlideAjax('WFStageSet');
+    ga.addParam('sysparm_name', 'import' + source);
+    ga.addParam('sysparm_set_id', setId);
+    ga.addParam('sysparm_workflow', workflowVersionId);
+    ga.getXMLWait();
+    return ga.getAnswer();
+  }
+
+  function incrementCounter(table, column, sys_id, increment) {
+    var ga = new GlideAjax('WFStageSet');
+    ga.addParam('sysparm_name', 'incrementCounter');
+    ga.addParam('sysparm_sys_id', sys_id);
+    ga.addParam('sysparm_table', table);
+    ga.addParam('sysparm_column', column);
+    ga.addParam('sysparm_increment', increment);
+    ga.getXMLWait();
+    return ga.getAnswer();
+  }
+
+  function warnNoWorkflow(msg) {
+    var dialog = new GlideDialogWindow('glide_warn');
+    var msgs = new GwtMessage();
+    dialog.setPreference('title', msgs.getMessage('Operation not supported.') +
+      '<br/>' +
+      msgs.getMessage(msg));
+    dialog.render();
+    return 'ok';
+  }
+  return {
+    getWorkflowVersionFromQuery: getWorkflowVersionFromQuery,
+    exportStageSet: exportStageSet,
+    importStages: importStages,
+    incrementCounter: incrementCounter,
+    warnNoWorkflow: warnNoWorkflow
+  }
+}());;
+/*! RESOURCE: scripts/labels.js */
+var refreshRateProperty = "60";
+var refreshLabelRate = (refreshRateProperty != null && refreshRateProperty > 0 ? refreshRateProperty : 60);
+var refreshLabelTimer = null;
+var g_label_status = initLabelStatus();
+CustomEvent.observe('nav.loaded', refreshLabels);
+
+function initLabelStatus() {
+  var answer = new Object();
+  answer.loading = false;
+  answer.error_count = 0;
+  return answer;
+}
+
+function refreshLabels() {
+  var labelList = new Array();
+  var divTags = document.getElementsByTagName('div');
+  if (divTags) {
+    for (var c = 0; c != divTags.length; ++c) {
+      var divTag = divTags[c];
+      var label = divTag.sclabel || divTag.getAttribute('sclabel');
+      if (label && label == 'true') {
+        var id = divTag.appid || divTag.getAttribute('appid');
+        labelList.push(id);
+      }
+    }
+  }
+  startRefresh(labelList);
+}
+
+function clearLabelRefresh() {
+  if (refreshLabelTimer == null)
+    return;
+  clearTimeout(refreshLabelTimer);
+  refreshLabelTimer = null;
+}
+
+function startRefresh(labelRefresh) {
+  clearLabelRefresh();
+  if (labelRefresh.length < 1)
+    return;
+  if (labelsGetRequest(labelRefresh))
+    refreshLabelTimer = setTimeout(refreshLabels, refreshLabelRate * 1000);
+}
+
+function labelsGetRequest(labelIds) {
+  if (g_label_status.loading)
+    return true;
+  if (g_label_status.error_count > 3) {
+    jslog('Stopped tag fetch due to excessive error counts');
+    return false;
+  }
+  g_label_status.loading = true;
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_value", labelIds.join(","));
+  aj.addParam("sysparm_type", 'get');
+  aj.getXML(labelsGetResponse);
+  return true;
+}
+
+function labelsGetResponse(request) {
+  g_label_status.loading = false;
+  if (request.status == 200)
+    g_label_status.error_count = 0;
+  else
+    g_label_status.error_count += 1;
+  if (!request.responseXML)
+    return;
+  var labels = request.responseXML.getElementsByTagName("label");
+  if (labels && labels.length > 0) {
+    for (var i = 0; i < labels.length; i++) {
+      var labelEntry = labels[i];
+      updateMenuItems(labelEntry);
+    }
+  }
+}
+
+function updateMenuItems(labelElement) {
+  var appid = labelElement.getAttribute("id");
+  var divElem = gel('div.' + appid)
+  var tds = divElem.getElementsByTagName("td");
+  var appTD = tds[0];
+  var notRead = 0;
+  var span = gel(appid);
+  var table = cel("table");
+  var tbody = cel("tbody", table);
+  var label;
+  var items = labelElement.getElementsByTagName("item");
+  if (items && items.length > 0) {
+    for (var i = 0; i < items.length; i++) {
+      label = items[i].getAttribute("label");
+      var lid = items[i].getAttribute("name");
+      var style = items[i].getAttribute("style");
+      var read = items[i].getAttribute("read");
+      if ("true" != read)
+        notRead++;
+      var url = items[i].getAttribute("url");
+      var title = items[i].getAttribute("title");
+      var image = items[i].getAttribute("image");
+      createLabelMod(tbody, style, lid, url, title, image, appid);
+    }
+  }
+  updateLabelReadCount(appTD, notRead);
+  clearNodes(span)
+  span.appendChild(table);
+  table = null;
+}
+
+function createLabelMod(parent, style, id, url, title, image, appid) {
+  var tr = cel("tr", parent);
+  var scrollIcon = isTextDirectionRTL() ? "images/scroll_lft.gifx" : "images/scroll_rt.gifx";
+  if (image == "images/s.gifx")
+    image = scrollIcon;
+  var img;
+  if (image == null || image == '')
+    img = '<img style="width:16px; cursor:hand" src="images/icons/remove.gifx" alt="Click me to remove the tag entry" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" src="images/icons/remove.gifx"/>';
+  else
+    img = "<img style='width:16px' src='" + image + "' alt='' />";
+  var tdimg = cel("td", tr);
+  tdimg.style.width = "16px";
+  var tdhtml;
+  if (image == scrollIcon)
+    tdhtml = img;
+  else
+    tdhtml = '<a onclick="removeLabel(\'' + appid + '\',\'' + id + '\');" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" title="Click me to remove the tag entry">' + img + '</a>';
+  tdimg.innerHTML = tdhtml;
+  var td = cel("td", tr);
+  var html = '<a class="menulabel" style="' + style + '" id= "' + id + '"';
+  html += ' target="gsft_main" href="' + url + '">' + title + '</a>';
+  td.innerHTML = html;
+  tr = null;
+  tdimg = null;
+  td = null;
+}
+
+function updateLabelReadCount(appTD, notRead) {
+  var inner = appTD.innerHTML;
+  var term = '</H2>';
+  var paren = inner.indexOf("</H2>");
+  if (paren < 0) {
+    paren = inner.indexOf("</h2");
+    term = '</h2>';
+  }
+  if (paren > -1) {
+    inner = inner.substring(0, paren);
+    paren--;
+    var c = inner.substring(paren, paren + 1);
+    if (c == ')') {
+      while (paren > 0 && c != '(') {
+        paren--;
+        c = inner.substring(paren, paren + 1)
+      }
+      if (paren > 0) {
+        inner = inner.substring(0, paren);
+      }
+    }
+    inner = inner.trim();
+    if (notRead > 0)
+      inner = inner + ' (' + notRead + ')';
+    inner = inner + term;
+    clearNodes(appTD);
+    appTD.innerHTML = inner;
+  }
+}
+
+function doAssignLabel(tableName, label, sysId) {
+  var form = getFormByTableName(tableName);
+  if (sysId == null || !sysId) {
+    if (!populateParmQuery(form, '', 'NULL'))
+      return false;
+  } else {
+    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
+  }
+  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
+    label = option.getAttribute("gsft_base_label");
+  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
+  addInput(form, 'HIDDEN', 'sys_action_type', 'assign_label');
+  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
+  form.submit();
+}
+
+function doRemoveLabel(tableName, label, sysId) {
+  var form = getFormByTableName(tableName);
+  if (sysId == null || !sysId) {
+    if (!populateParmQuery(form, '', 'NULL'))
+      return false;
+  } else {
+    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
+  }
+  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
+    label = option.getAttribute("gsft_base_label");
+  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
+  addInput(form, 'HIDDEN', 'sys_action_type', 'remove_label');
+  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
+  form.submit();
+}
+
+function assignLabelActionViaLookupModal(tableName, listId) {
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  assignLabelViaLookup(tableName, sysIds, list.getView());
+}
+
+function assignLabelViaLookup(tableName, sysId, viewName) {
+  var assignCallback = function(labelId) {
+    assignLabel(labelId, tableName, sysId, viewName);
+  };
+  showLabelLookupWindow("Assign Tag", tableName, sysId, assignCallback);
+}
+
+function removeLabelActionViaLookupModal(tableName, listId) {
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  removeLabelViaLookup(tableName, sysIds);
+}
+
+function removeLabelViaLookup(tableName, sysId) {
+  var removeCallback = function(labelId) {
+    removeLabelById(labelId, sysId);
+  };
+  showLabelLookupWindow("Remove Tag", tableName, sysId, removeCallback);
+}
+
+function showLabelLookupWindow(actionName, tableName, sysID, callback) {
+  var tagLookupForm = new GlideDialogWindow("tag_lookup_form");
+  tagLookupForm.setTitle(actionName);
+  tagLookupForm.setPreference("sys_ids", sysID);
+  tagLookupForm.setPreference("table_name", tableName);
+  tagLookupForm.setPreference('on_accept', callback);
+  tagLookupForm.removeCloseDecoration();
+  tagLookupForm.render();
+}
+
+function newLabel(tableName, sysID, callback) {
+  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
+  if (isDoctype) {
+    var tagForm = new GlideDialogWindow("tag_form");
+    tagForm.setTitle("");
+    tagForm.setPreference("sys_ids", sysID);
+    tagForm.setPreference("table_name", tableName);
+    tagForm.removeCloseDecoration();
+    tagForm.render();
+  } else {
+    var keys = ["Please enter the name for the new tag", "New tag"];
+    var msgs = getMessages(keys);
+    if (!callback)
+      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], function(labelName) {
+        newLabelRequest(tableName, labelName, sysID)
+      });
+    else
+      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], callback);
+  }
+}
+
+function newLabelRequest(tableName, labelName, sysID) {
+  if (labelName == null)
+    return;
+  var viewName;
+  var view = gel('sysparm_view');
+  if (view != null)
+    viewName = view.value;
+  assignLabel(labelName, tableName, sysID, viewName);
+}
+
+function assignLabel(labelName, tableName, sysId, viewName) {
+  if (!labelName)
+    return;
+  var url = new GlideAjax("LabelsAjax");
+  url.addParam("sysparm_name", tableName);
+  url.addParam("sysparm_value", sysId);
+  url.addParam("sysparm_chars", labelName);
+  url.addParam("sysparm_type", "create");
+  if (viewName)
+    url.addParam("sysparm_view", viewName);
+  url.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabel(appid, labelid) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", appid);
+  aj.addParam("sysparm_value", labelid);
+  aj.addParam("sysparm_type", 'delete');
+  aj.getXML(removeLabelResponse);
+}
+
+function removeLabelByName(labelName, sysId) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", labelName);
+  aj.addParam("sysparm_value", sysId);
+  aj.addParam("sysparm_type", 'removeByName');
+  aj.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabelById(labelId, sysId) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", labelId);
+  aj.addParam("sysparm_value", sysId);
+  aj.addParam("sysparm_type", 'remove');
+  aj.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabelResponse(response, args) {
+  var labelId = response.responseXML.documentElement.getAttribute("sysparm_name");
+  if (!labelId)
+    refreshNavIfNotDoctypeUI();
+  else {
+    var labelIds = new Array();
+    labelIds.push(labelId);
+    labelsGetRequest(labelIds);
+  }
+}
+
+function newLabelPromptListAction(tableName, listId) {
+  var nonDoctypeUICallback = function(labelName) {
+    assignLabelToCheckedSysIds(labelName, tableName, listId)
+  };
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  newLabel(tableName, sysIds, nonDoctypeUICallback);
+}
+
+function assignLabelToCheckedSysIds(labelName, tableName, listId) {
+  if (!labelName || labelName.strip() == '')
+    return;
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  assignLabel(labelName, tableName, sysIds, list.getView());
+}
+
+function removeLabelFromCheckedSysIds(labelName, listId) {
+  var list = GlideList2.get(listId);
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  removeLabelByName(labelName, sysIds);
+}
+
+function getFormByTableName(tableName) {
+  var form = getControlForm(tableName);
+  if (!form)
+    form = document.forms[tableName + '.do'];
+  return form;
+}
+
+function refreshNavIfNotDoctypeUI() {
+  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
+  if (!isDoctype)
+    refreshNav();
+};
 /*! RESOURCE: scripts/OpticsInspector.js */
 var OpticsInspector = Class
   .create({
@@ -35671,672 +36099,179 @@ CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
     g_optics_inspect_handler.processServerMessages();
   }
 });;
-/*! RESOURCE: scripts/classes/WFStageSet.js */
-var WFStageSet = (function() {
-  function getWorkflowVersionFromQuery(qry) {
-    if (!qry)
-      return null;
-    var exps = qry.split("^");
-    for (var i = 0; i < exps.length; i++) {
-      var exp = exps[i];
-      var parts = exp.split('=');
-      if (parts.length == 2 && parts[0].trim() == 'workflow_version' && parts[1].trim() != '')
-        return parts[1].trim();
+/*! RESOURCE: scripts/Uploader.js */
+var Uploader = Class.create({
+  initialize: function(containerName, tableName, sys_id) {
+    this.containerName = containerName;
+    this.height = 20;
+    this._createInput();
+    this.sys_id = sys_id;
+    this.tableName = tableName;
+    this.fieldName;
+    this.callback;
+    Event.observe(window, 'unload', this._reset.bind(this));
+    this.startLoading;
+    this.tempSpot;
+    this.mouseDown = false;
+  },
+  setCallback: function(fDefinition) {
+    this.callback = fDefinition;
+  },
+  setStartLoading: function(fDefinition) {
+    this.startLoading = fDefinition;
+  },
+  setFieldName: function(fieldName) {
+    this.fieldName = fieldName;
+  },
+  setTitle: function(title) {
+    this.input.title = title;
+  },
+  setHeight: function(height) {
+    if (this.height == height)
+      return;
+    this.height = height;
+    this.input.parentNode.removeChild(this.input);
+    delete(this.input);
+    this._createInput();
+  },
+  _createInput: function() {
+    var parent = this.containerName;
+    if (this.tempSpot)
+      parent = this.tempSpot;
+    parent = $(parent);
+    this.input = new Element("input");
+    var input = this.input;
+    input.setAttribute("type", "file");
+    input.className = "upload_input_file";
+    input.name = this.containerName + "_input_file";
+    input.setStyle({
+      display: 'inline',
+      height: this.height + "px",
+      width: this.height + "px",
+      fontSize: this.height + "px",
+      opacity: "0 !important",
+      filter: "alpha(opacity=0) !important",
+      cursor: "pointer !important",
+      zIndex: (isMSIE7) ? "100" : "100 !important"
+    });
+    Event.observe(input, 'change', this._onFileChange.bind(this, input));
+    parent.appendChild(input);
+  },
+  _onFileChange: function(input) {
+    if (this.startLoading)
+      this.startLoading.call();
+    var iframe = this._createIFrame();
+    var form = this._createForm();
+    form.appendChild(this.input);
+    Event.observe(iframe, 'load', this._uploaded.bind(this));
+    form.submit();
+  },
+  _uploaded: function() {
+    var f = this.iframe;
+    var doc = null;
+    if (isMSIE)
+      doc = f.contentWindow.document.XMLDocument ? f.contentWindow.document.XMLDocument : f.contentWindow.document;
+    else
+      doc = f.contentDocument;
+    var root = doc.documentElement;
+    if (this.callback) {
+      var uri = root.getAttribute('attachment_uri');
+      var name = root.getAttribute('file_name');
+      var sys_id = root.getAttribute('sys_id');
+      this.callback.call(this, uri, name, sys_id);
     }
-    return null;
+    this.form.parentNode.removeChild(this.form);
+    delete this.form;
+    this.form = null;
+    var iframe = this.iframe;
+    this.iframe = null;
+    setTimeout(function() {
+      iframe.parentNode.removeChild(iframe);
+      delete iframe;
+    }, 1000);
+    this._createInput();
+  },
+  _createIFrame: function() {
+    var name = this.containerName + "_iframe";
+    var s = "<iframe src='javascript: false' name='" + name + "'/>";
+    this.iframe = toElement(s);
+    this.iframe.style.display = 'none';
+    this.iframe.style.position = 'absolute';
+    this.iframe.style.left = '-999px';
+    document.body.appendChild(this.iframe);
+    return this.iframe;
+  },
+  _createForm: function() {
+    this.containerName + "_form";
+    var s = "<form method='post' enctype='multipart/form-data' name='" + this.containerName + "' ></form>";
+    var form = toElement(s)
+    this._addInput(form, "sysparm_table", this.tableName);
+    this._addInput(form, "sysparm_xml", "true");
+    if (this.fieldName)
+      this._addInput(form, "sysparm_fieldname", this.fieldName);
+    this._addInput(form, "sysparm_sys_id", this.sys_id);
+    if (typeof g_ck != 'undefined')
+      this._addInput(form, "sysparm_ck", g_ck);
+    form.setAttribute("action", "sys_attachment.do");
+    form.setAttribute("target", this.containerName + "_iframe");
+    form.style.display = 'none';
+    form.style.position = 'absolute';
+    form.style.left = '-999px';
+    this.form = form;
+    document.body.appendChild(this.form);
+    return form;
+  },
+  _addInput: function(form, name, value) {
+    var input = cel("input");
+    input.value = value;
+    input.name = name;
+    form.appendChild(input);
+  },
+  _reset: function() {
+    this.input = null;
+  },
+  moveInputTo: function(elementName) {
+    this.tempSpot = elementName;
+    if (elementName == null)
+      elementName = this.containerName;
+    var input = this.input;
+    var p = input.parentNode;
+    var parent = gel(elementName);
+    if (p == parent)
+      return;
+    input.parentNode.removeChild(input);
+    parent.appendChild(input);
+  },
+  toString: function() {
+    return 'Uploader';
   }
+});
 
-  function exportStageSet(setName, workflowVersionId, filter) {
-    var ga = new GlideAjax('WFStageSet');
-    ga.addParam('sysparm_name', 'exportStageSet');
-    ga.addParam('sysparm_set_name', setName);
-    ga.addParam('sysparm_workflow', workflowVersionId);
-    if (filter != null)
-      ga.addParam('sysparm_filter', filter);
-    ga.getXMLWait();
-    return ga.getAnswer();
-  }
-
-  function importStages(source, workflowVersionId, setId) {
-    var ga = new GlideAjax('WFStageSet');
-    ga.addParam('sysparm_name', 'import' + source);
-    ga.addParam('sysparm_set_id', setId);
-    ga.addParam('sysparm_workflow', workflowVersionId);
-    ga.getXMLWait();
-    return ga.getAnswer();
-  }
-
-  function incrementCounter(table, column, sys_id, increment) {
-    var ga = new GlideAjax('WFStageSet');
-    ga.addParam('sysparm_name', 'incrementCounter');
-    ga.addParam('sysparm_sys_id', sys_id);
-    ga.addParam('sysparm_table', table);
-    ga.addParam('sysparm_column', column);
-    ga.addParam('sysparm_increment', increment);
-    ga.getXMLWait();
-    return ga.getAnswer();
-  }
-
-  function warnNoWorkflow(msg) {
-    var dialog = new GlideDialogWindow('glide_warn');
-    var msgs = new GwtMessage();
-    dialog.setPreference('title', msgs.getMessage('Operation not supported.') +
-      '<br/>' +
-      msgs.getMessage(msg));
-    dialog.render();
-    return 'ok';
-  }
-  return {
-    getWorkflowVersionFromQuery: getWorkflowVersionFromQuery,
-    exportStageSet: exportStageSet,
-    importStages: importStages,
-    incrementCounter: incrementCounter,
-    warnNoWorkflow: warnNoWorkflow
-  }
-}());;
-/*! RESOURCE: scripts/labels.js */
-var refreshRateProperty = "60";
-var refreshLabelRate = (refreshRateProperty != null && refreshRateProperty > 0 ? refreshRateProperty : 60);
-var refreshLabelTimer = null;
-var g_label_status = initLabelStatus();
-CustomEvent.observe('nav.loaded', refreshLabels);
-
-function initLabelStatus() {
-  var answer = new Object();
-  answer.loading = false;
-  answer.error_count = 0;
-  return answer;
-}
-
-function refreshLabels() {
-  var labelList = new Array();
-  var divTags = document.getElementsByTagName('div');
-  if (divTags) {
-    for (var c = 0; c != divTags.length; ++c) {
-      var divTag = divTags[c];
-      var label = divTag.sclabel || divTag.getAttribute('sclabel');
-      if (label && label == 'true') {
-        var id = divTag.appid || divTag.getAttribute('appid');
-        labelList.push(id);
-      }
-    }
-  }
-  startRefresh(labelList);
-}
-
-function clearLabelRefresh() {
-  if (refreshLabelTimer == null)
-    return;
-  clearTimeout(refreshLabelTimer);
-  refreshLabelTimer = null;
-}
-
-function startRefresh(labelRefresh) {
-  clearLabelRefresh();
-  if (labelRefresh.length < 1)
-    return;
-  if (labelsGetRequest(labelRefresh))
-    refreshLabelTimer = setTimeout(refreshLabels, refreshLabelRate * 1000);
-}
-
-function labelsGetRequest(labelIds) {
-  if (g_label_status.loading)
-    return true;
-  if (g_label_status.error_count > 3) {
-    jslog('Stopped tag fetch due to excessive error counts');
+function toElement(innerHTML) {
+  var div = cel('div');
+  div.innerHTML = innerHTML;
+  var element = div.firstChild;
+  div.removeChild(element);
+  return element;
+};
+/*! RESOURCE: scripts/ImageUploader.js */
+var ImageUploader = Class.create(Uploader, {
+  initialize: function($super, containerName, tableName, sys_id) {
+    $super(containerName, tableName, sys_id);
+  },
+  _onFileChange: function($super, input) {
+    if (!this._isFileNameValid(input.value))
+      return;
+    $super(input);
+  },
+  _isFileNameValid: function(filename) {
+    if (endsWithImageExtension(filename))
+      return true;
+    var message = getMessage('Name is not a recognized image file format');
+    alert(message);
     return false;
   }
-  g_label_status.loading = true;
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_value", labelIds.join(","));
-  aj.addParam("sysparm_type", 'get');
-  aj.getXML(labelsGetResponse);
-  return true;
-}
-
-function labelsGetResponse(request) {
-  g_label_status.loading = false;
-  if (request.status == 200)
-    g_label_status.error_count = 0;
-  else
-    g_label_status.error_count += 1;
-  if (!request.responseXML)
-    return;
-  var labels = request.responseXML.getElementsByTagName("label");
-  if (labels && labels.length > 0) {
-    for (var i = 0; i < labels.length; i++) {
-      var labelEntry = labels[i];
-      updateMenuItems(labelEntry);
-    }
-  }
-}
-
-function updateMenuItems(labelElement) {
-  var appid = labelElement.getAttribute("id");
-  var divElem = gel('div.' + appid)
-  var tds = divElem.getElementsByTagName("td");
-  var appTD = tds[0];
-  var notRead = 0;
-  var span = gel(appid);
-  var table = cel("table");
-  var tbody = cel("tbody", table);
-  var label;
-  var items = labelElement.getElementsByTagName("item");
-  if (items && items.length > 0) {
-    for (var i = 0; i < items.length; i++) {
-      label = items[i].getAttribute("label");
-      var lid = items[i].getAttribute("name");
-      var style = items[i].getAttribute("style");
-      var read = items[i].getAttribute("read");
-      if ("true" != read)
-        notRead++;
-      var url = items[i].getAttribute("url");
-      var title = items[i].getAttribute("title");
-      var image = items[i].getAttribute("image");
-      createLabelMod(tbody, style, lid, url, title, image, appid);
-    }
-  }
-  updateLabelReadCount(appTD, notRead);
-  clearNodes(span)
-  span.appendChild(table);
-  table = null;
-}
-
-function createLabelMod(parent, style, id, url, title, image, appid) {
-  var tr = cel("tr", parent);
-  var scrollIcon = isTextDirectionRTL() ? "images/scroll_lft.gifx" : "images/scroll_rt.gifx";
-  if (image == "images/s.gifx")
-    image = scrollIcon;
-  var img;
-  if (image == null || image == '')
-    img = '<img style="width:16px; cursor:hand" src="images/icons/remove.gifx" alt="Click me to remove the tag entry" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" src="images/icons/remove.gifx"/>';
-  else
-    img = "<img style='width:16px' src='" + image + "' alt='' />";
-  var tdimg = cel("td", tr);
-  tdimg.style.width = "16px";
-  var tdhtml;
-  if (image == scrollIcon)
-    tdhtml = img;
-  else
-    tdhtml = '<a onclick="removeLabel(\'' + appid + '\',\'' + id + '\');" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" title="Click me to remove the tag entry">' + img + '</a>';
-  tdimg.innerHTML = tdhtml;
-  var td = cel("td", tr);
-  var html = '<a class="menulabel" style="' + style + '" id= "' + id + '"';
-  html += ' target="gsft_main" href="' + url + '">' + title + '</a>';
-  td.innerHTML = html;
-  tr = null;
-  tdimg = null;
-  td = null;
-}
-
-function updateLabelReadCount(appTD, notRead) {
-  var inner = appTD.innerHTML;
-  var term = '</H2>';
-  var paren = inner.indexOf("</H2>");
-  if (paren < 0) {
-    paren = inner.indexOf("</h2");
-    term = '</h2>';
-  }
-  if (paren > -1) {
-    inner = inner.substring(0, paren);
-    paren--;
-    var c = inner.substring(paren, paren + 1);
-    if (c == ')') {
-      while (paren > 0 && c != '(') {
-        paren--;
-        c = inner.substring(paren, paren + 1)
-      }
-      if (paren > 0) {
-        inner = inner.substring(0, paren);
-      }
-    }
-    inner = inner.trim();
-    if (notRead > 0)
-      inner = inner + ' (' + notRead + ')';
-    inner = inner + term;
-    clearNodes(appTD);
-    appTD.innerHTML = inner;
-  }
-}
-
-function doAssignLabel(tableName, label, sysId) {
-  var form = getFormByTableName(tableName);
-  if (sysId == null || !sysId) {
-    if (!populateParmQuery(form, '', 'NULL'))
-      return false;
-  } else {
-    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
-  }
-  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
-    label = option.getAttribute("gsft_base_label");
-  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
-  addInput(form, 'HIDDEN', 'sys_action_type', 'assign_label');
-  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
-  form.submit();
-}
-
-function doRemoveLabel(tableName, label, sysId) {
-  var form = getFormByTableName(tableName);
-  if (sysId == null || !sysId) {
-    if (!populateParmQuery(form, '', 'NULL'))
-      return false;
-  } else {
-    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
-  }
-  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
-    label = option.getAttribute("gsft_base_label");
-  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
-  addInput(form, 'HIDDEN', 'sys_action_type', 'remove_label');
-  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
-  form.submit();
-}
-
-function assignLabelActionViaLookupModal(tableName, listId) {
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  assignLabelViaLookup(tableName, sysIds, list.getView());
-}
-
-function assignLabelViaLookup(tableName, sysId, viewName) {
-  var assignCallback = function(labelId) {
-    assignLabel(labelId, tableName, sysId, viewName);
-  };
-  showLabelLookupWindow("Assign Tag", tableName, sysId, assignCallback);
-}
-
-function removeLabelActionViaLookupModal(tableName, listId) {
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  removeLabelViaLookup(tableName, sysIds);
-}
-
-function removeLabelViaLookup(tableName, sysId) {
-  var removeCallback = function(labelId) {
-    removeLabelById(labelId, sysId);
-  };
-  showLabelLookupWindow("Remove Tag", tableName, sysId, removeCallback);
-}
-
-function showLabelLookupWindow(actionName, tableName, sysID, callback) {
-  var tagLookupForm = new GlideDialogWindow("tag_lookup_form");
-  tagLookupForm.setTitle(actionName);
-  tagLookupForm.setPreference("sys_ids", sysID);
-  tagLookupForm.setPreference("table_name", tableName);
-  tagLookupForm.setPreference('on_accept', callback);
-  tagLookupForm.removeCloseDecoration();
-  tagLookupForm.render();
-}
-
-function newLabel(tableName, sysID, callback) {
-  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
-  if (isDoctype) {
-    var tagForm = new GlideDialogWindow("tag_form");
-    tagForm.setTitle("");
-    tagForm.setPreference("sys_ids", sysID);
-    tagForm.setPreference("table_name", tableName);
-    tagForm.removeCloseDecoration();
-    tagForm.render();
-  } else {
-    var keys = ["Please enter the name for the new tag", "New tag"];
-    var msgs = getMessages(keys);
-    if (!callback)
-      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], function(labelName) {
-        newLabelRequest(tableName, labelName, sysID)
-      });
-    else
-      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], callback);
-  }
-}
-
-function newLabelRequest(tableName, labelName, sysID) {
-  if (labelName == null)
-    return;
-  var viewName;
-  var view = gel('sysparm_view');
-  if (view != null)
-    viewName = view.value;
-  assignLabel(labelName, tableName, sysID, viewName);
-}
-
-function assignLabel(labelName, tableName, sysId, viewName) {
-  if (!labelName)
-    return;
-  var url = new GlideAjax("LabelsAjax");
-  url.addParam("sysparm_name", tableName);
-  url.addParam("sysparm_value", sysId);
-  url.addParam("sysparm_chars", labelName);
-  url.addParam("sysparm_type", "create");
-  if (viewName)
-    url.addParam("sysparm_view", viewName);
-  url.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabel(appid, labelid) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", appid);
-  aj.addParam("sysparm_value", labelid);
-  aj.addParam("sysparm_type", 'delete');
-  aj.getXML(removeLabelResponse);
-}
-
-function removeLabelByName(labelName, sysId) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", labelName);
-  aj.addParam("sysparm_value", sysId);
-  aj.addParam("sysparm_type", 'removeByName');
-  aj.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabelById(labelId, sysId) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", labelId);
-  aj.addParam("sysparm_value", sysId);
-  aj.addParam("sysparm_type", 'remove');
-  aj.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabelResponse(response, args) {
-  var labelId = response.responseXML.documentElement.getAttribute("sysparm_name");
-  if (!labelId)
-    refreshNavIfNotDoctypeUI();
-  else {
-    var labelIds = new Array();
-    labelIds.push(labelId);
-    labelsGetRequest(labelIds);
-  }
-}
-
-function newLabelPromptListAction(tableName, listId) {
-  var nonDoctypeUICallback = function(labelName) {
-    assignLabelToCheckedSysIds(labelName, tableName, listId)
-  };
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  newLabel(tableName, sysIds, nonDoctypeUICallback);
-}
-
-function assignLabelToCheckedSysIds(labelName, tableName, listId) {
-  if (!labelName || labelName.strip() == '')
-    return;
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  assignLabel(labelName, tableName, sysIds, list.getView());
-}
-
-function removeLabelFromCheckedSysIds(labelName, listId) {
-  var list = GlideList2.get(listId);
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  removeLabelByName(labelName, sysIds);
-}
-
-function getFormByTableName(tableName) {
-  var form = getControlForm(tableName);
-  if (!form)
-    form = document.forms[tableName + '.do'];
-  return form;
-}
-
-function refreshNavIfNotDoctypeUI() {
-  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
-  if (!isDoctype)
-    refreshNav();
-};
-/*! RESOURCE: scripts/TestClient.js */
-function popTestClient(test_definition, test_subject) {
-  var test_execution;
-  if (!test_subject)
-    test_execution = test_definition;
-  var dialog = new GlideDialogWindow('test_client', false, "50em", "25em");
-  if (test_execution) {
-    dialog.setPreference('sysparm_test_execution', test_execution);
-  } else {
-    dialog.setPreference('sysparm_test_definition', test_definition);
-    dialog.setPreference('sysparm_test_subject', test_subject);
-  }
-  dialog.render();
-}
-var TestClient = Class.create();
-TestClient.prototype = {
-  TEST_STATES: ["Pending", "Running", "Succeeded", "Failed"],
-  STATUS_IMAGES: ["images/workflow_skipped.gif",
-    "images/loading_anim2.gifx", "images/workflow_complete.gifx",
-    "images/workflow_rejected.gifx"
-  ],
-  TRANSLATED_TEXT: ["Pending", "Running", "Succeeded", "Failed",
-    "Details", "more", "Hide Details", "Show Details"
-  ],
-  TIMEOUT_INTERVAL: 1000,
-  translator: new GwtMessage(),
-  detailStates: {},
-  id: "",
-  container: null,
-  initialize: function(test_definition, test_subject) {
-    this.container = $("container");
-    this._setContainerStyles(this.container);
-    this.translator.getMessages(this.TRANSLATED_TEXT);
-    var test_execution;
-    if (!test_subject) {
-      this.id = test_definition
-      return
-    }
-    this.testDefinition = test_definition;
-    this.testSubject = test_subject;
-  },
-  start: function() {
-    if (this.id) {
-      this.getStatus();
-      return;
-    }
-    var ga = new GlideAjax('AJAXTestProcessor');
-    ga.addParam('sysparm_name', 'startTest');
-    ga.addParam('sysparm_test_definition', this.testDefinition);
-    ga.addParam('sysparm_test_subject', this.testSubject);
-    ga.getXML(this.handleStart.bind(this));
-  },
-  handleStart: function(response) {
-    this.id = response.responseXML.documentElement.getAttribute("answer");
-    this.getStatus();
-  },
-  getStatus: function() {
-    var ga = new GlideAjax('AJAXTestProcessor');
-    ga.addParam('sysparm_name', 'getStatus');
-    ga.addParam('sysparm_execution_id', this.id);
-    if (typeof this.id != "string" || this.id == "")
-      return;
-    ga.getXML(this.handleGetStatus.bind(this));
-  },
-  handleGetStatus: function(response) {
-    var answer = response.responseXML.documentElement.getAttribute("answer");
-    eval("var so = " + answer);
-    this.renderStatus(so);
-    this.container = $("container");
-    if (this.container == null)
-      return;
-    if (so.state == "0" || so.state == "1")
-      setTimeout(this.getStatus.bind(this), this.TIMEOUT_INTERVAL);
-  },
-  renderStatus: function(so) {
-    if (!so)
-      return;
-    var new_container = new Element("div");
-    this._setContainerStyles(new_container);
-    new_container.appendChild(this.getStatusRow(so));
-    this.container.replace(new_container);
-    this.container = new_container;
-  },
-  getStatusRow: function(obj, order) {
-    var name = obj.name;
-    var state = obj.state;
-    var message = obj.message;
-    var percent = NaN;
-    if (obj.percent_complete) {
-      percent = parseInt(obj.percent_complete);
-    }
-    var hasPercent = (!isNaN(percent) && percent > 0 && percent <= 100);
-    var hasDetails = (obj.results.length >= 1 || message != "");
-    var tr = new Element("div", {
-      id: "row_container-" + obj.sys_id
-    });
-    tr.style.padding = "5px";
-    var simp = new Element("div");
-    simp.appendChild(this._getImage(obj));
-    simp.appendChild(this._getItemTitleElement(name, order));
-    var det = this._getDetailElement();
-    var dtl;
-    if (hasDetails || hasPercent)
-      dtl = det.appendChild(this._getShowDetailsLink(obj.sys_id));
-    simp.appendChild(det);
-    simp.appendChild(this._getFloatClear("both"));
-    tr.appendChild(simp);
-    if (hasDetails || hasPercent) {
-      var dtd = new Element("div");
-      var ddc = new Element("div");
-      ddc.style.marginTop = ".5em";
-      ddc.style.marginLeft = "30px";
-      ddc.id = "detail_cont-" + obj.sys_id;
-      dtd.appendChild(ddc);
-      if (hasPercent) {
-        ddc.appendChild(this._getProgressBar(percent));
-        ddc.appendChild(this._getFloatClear("both"));
-      }
-      if (message != "") {
-        var dds = new Element("div");
-        dds.appendChild(this._getDetailsText(message, obj));
-        dds.style.fontSize = "smaller";
-        dds.style.marginBottom = ".5em";
-        ddc.appendChild(dds);
-      }
-      dtl.details_container = ddc;
-      if (typeof this.detailStates[obj.sys_id] == "boolean" && this.detailStates[obj.sys_id] == false && dtl != null)
-        dtl.onclick();
-      tr.appendChild(dtd);
-      this.renderChildren(obj, ddc);
-    }
-    return tr;
-  },
-  _getItemTitleElement: function(name, order) {
-    var nameHtml = "<b>" + name + "</b>";
-    if (order) {
-      nameHtml = "\t" + order + ".\t" + nameHtml;
-    }
-    var nsp = new Element("span");
-    nsp.innerHTML = nameHtml;
-    nsp.style.float = "left";
-    return nsp;
-  },
-  _getImage: function(obj) {
-    var state = obj.state;
-    var si = new Element("img");
-    si.id = "img-" + obj.sys_id;
-    si.src = this.STATUS_IMAGES[state];
-    si.style.marginRight = "10px";
-    si.style.float = "left";
-    si.title = this.TEST_STATES[state];
-    return si;
-  },
-  _getDetailElement: function() {
-    var det = new Element("span");
-    det.style.marginLeft = "10px";
-    det.style.float = "left";
-    return det;
-  },
-  _getShowDetailsLink: function(objSysID) {
-    var da = new Element("a");
-    da.id = objSysID;
-    da.controller = this;
-    da.innerHTML = "(" + this.translator.getMessage("Hide Details") + ")";
-    da.toggleText = "(" + this.translator.getMessage("Show Details") + ")";
-    da.style.fontSize = "8pt";
-    da.style.float = "left";
-    da.onclick = this.__detailsToggle;
-    return da;
-  },
-  __detailsToggle: function() {
-    var cont = this.details_container;
-    cont.toggle();
-    this.controller.detailStates[this.id] = cont.visible();
-    var nt = this.toggleText;
-    this.toggleText = this.innerHTML;
-    this.innerHTML = nt;
-  },
-  _getDetailsText: function(message, obj) {
-    if (message.length > 150) {
-      var new_message = new Element("span");
-      new_message.innerHTML = "<b>" +
-        this.translator.getMessage("Details") + ": </b>" +
-        message.slice(0, 150) + "... ";
-      var anch = new Element("a");
-      anch.href = "test_execution.do?sys_id=" + obj.sys_id;
-      anch.innerHTML = "<b>(" + this.translator.getMessage("more") +
-        ")</b>";
-      new_message.appendChild(anch);
-      return new_message;
-    } else {
-      var new_message = new Element("span")
-      new_message.innerHTML = "<b>" +
-        this.translator.getMessage("Details") + ": </b>" +
-        message;
-      return new_message;
-    }
-  },
-  _getProgressBar: function(percent) {
-    percent = Math.max(0, Math.min(100, percent));
-    var progressContainer = new Element("div");
-    progressContainer.style.width = "300px";
-    progressContainer.style.height = "8px";
-    progressContainer.style.border = "1px solid black";
-    progressContainer.style.borderRadius = "10px";
-    progressContainer.style.padding = "2px";
-    progressContainer.style.marginTop = "2px";
-    progressContainer.style.marginBottom = "2px";
-    progressContainer.style.float = "left";
-    var progressBar = new Element("div");
-    progressBar.style.width = percent + "%";
-    progressBar.style.height = "100%";
-    progressBar.style.borderRadius = "10px";
-    progressBar.style.backgroundColor = "#667788";
-    progressContainer.appendChild(progressBar);
-    return progressContainer;
-  },
-  _getFloatClear: function(which) {
-    var br = new Element("br");
-    br.style.clear = which;
-    return br;
-  },
-  renderChildren: function(so, pr_cont) {
-    if (!so.results)
-      return;
-    for (var i = 0; i < so.results.length; i++) {
-      pr_cont.appendChild(this.getStatusRow(so.results[i], i + 1)).style.marginLeft = "15px";
-    }
-  },
-  _setContainerStyles: function(container) {
-    container.id = "container";
-    container.style.overflowY = "auto";
-    container.style.maxHeight = "50em";
-    container.style.marginRight = ".25em";
-    container.style.marginLeft = ".25em";
-  },
-  type: 'TestClient'
-};;
+});;
 /*! RESOURCE: scripts/classes/GlideMenu.js */
 var GlideMenu = Class.create();
 GlideMenu.prototype = {
@@ -37117,179 +37052,306 @@ var AJAXTextSearchCompleter = Class.create(AJAXTableCompleter, {
     return width;
   }
 });;
-/*! RESOURCE: scripts/Uploader.js */
-var Uploader = Class.create({
-  initialize: function(containerName, tableName, sys_id) {
-    this.containerName = containerName;
-    this.height = 20;
-    this._createInput();
-    this.sys_id = sys_id;
-    this.tableName = tableName;
-    this.fieldName;
-    this.callback;
-    Event.observe(window, 'unload', this._reset.bind(this));
-    this.startLoading;
-    this.tempSpot;
-    this.mouseDown = false;
-  },
-  setCallback: function(fDefinition) {
-    this.callback = fDefinition;
-  },
-  setStartLoading: function(fDefinition) {
-    this.startLoading = fDefinition;
-  },
-  setFieldName: function(fieldName) {
-    this.fieldName = fieldName;
-  },
-  setTitle: function(title) {
-    this.input.title = title;
-  },
-  setHeight: function(height) {
-    if (this.height == height)
+/*! RESOURCE: scripts/CloudApiSCClient.js */
+var CloudApiSCClient = {
+  _fieldsInfo: {},
+  validateCatItemParameterVariables: function(ajaxProcessor, variableSysId, oldValue, newValue, isLoading, g_form) {
+    if (isLoading || oldValue == newValue)
       return;
-    this.height = height;
-    this.input.parentNode.removeChild(this.input);
-    delete(this.input);
-    this._createInput();
-  },
-  _createInput: function() {
-    var parent = this.containerName;
-    if (this.tempSpot)
-      parent = this.tempSpot;
-    parent = $(parent);
-    this.input = new Element("input");
-    var input = this.input;
-    input.setAttribute("type", "file");
-    input.className = "upload_input_file";
-    input.name = this.containerName + "_input_file";
-    input.setStyle({
-      display: 'inline',
-      height: this.height + "px",
-      width: this.height + "px",
-      fontSize: this.height + "px",
-      opacity: "0 !important",
-      filter: "alpha(opacity=0) !important",
-      cursor: "pointer !important",
-      zIndex: (isMSIE7) ? "100" : "100 !important"
+    var parameters = {};
+    parameters.variableSysId = variableSysId;
+    parameters.parameterValue = newValue.trim();
+    this.callAjax(ajaxProcessor, "validateVariableValue", parameters, function(answer) {
+      var result = JSON.parse(answer);
+      result.variableSysId = "IO:" + variableSysId;
+      CloudApiSCClient._fieldsInfo[result["name"]] = result;
+      CloudApiSCClient.showAllFieldMessages(g_form);
     });
-    Event.observe(input, 'change', this._onFileChange.bind(this, input));
-    parent.appendChild(input);
   },
-  _onFileChange: function(input) {
-    if (this.startLoading)
-      this.startLoading.call();
-    var iframe = this._createIFrame();
-    var form = this._createForm();
-    form.appendChild(this.input);
-    Event.observe(iframe, 'load', this._uploaded.bind(this));
-    form.submit();
-  },
-  _uploaded: function() {
-    var f = this.iframe;
-    var doc = null;
-    if (isMSIE)
-      doc = f.contentWindow.document.XMLDocument ? f.contentWindow.document.XMLDocument : f.contentWindow.document;
-    else
-      doc = f.contentDocument;
-    var root = doc.documentElement;
-    if (this.callback) {
-      var uri = root.getAttribute('attachment_uri');
-      var name = root.getAttribute('file_name');
-      var sys_id = root.getAttribute('sys_id');
-      this.callback.call(this, uri, name, sys_id);
+  callAjax: function(ajaxName, methodName, parameters, callback) {
+    var glideAjax = new GlideAjax(ajaxName);
+    glideAjax.addParam("sysparm_name", methodName);
+    if (parameters) {
+      for (var name in parameters) {
+        glideAjax.addParam(name, parameters[name]);
+      }
     }
-    this.form.parentNode.removeChild(this.form);
-    delete this.form;
-    this.form = null;
-    var iframe = this.iframe;
-    this.iframe = null;
-    setTimeout(function() {
-      iframe.parentNode.removeChild(iframe);
-      delete iframe;
-    }, 1000);
-    this._createInput();
+    if (callback) {
+      glideAjax.getXMLAnswer(callback);
+    } else {
+      glideAjax.getXMLWait();
+      return glideAjax.getAnswer();
+    }
   },
-  _createIFrame: function() {
-    var name = this.containerName + "_iframe";
-    var s = "<iframe src='javascript: false' name='" + name + "'/>";
-    this.iframe = toElement(s);
-    this.iframe.style.display = 'none';
-    this.iframe.style.position = 'absolute';
-    this.iframe.style.left = '-999px';
-    document.body.appendChild(this.iframe);
-    return this.iframe;
-  },
-  _createForm: function() {
-    this.containerName + "_form";
-    var s = "<form method='post' enctype='multipart/form-data' name='" + this.containerName + "' ></form>";
-    var form = toElement(s)
-    this._addInput(form, "sysparm_table", this.tableName);
-    this._addInput(form, "sysparm_xml", "true");
-    if (this.fieldName)
-      this._addInput(form, "sysparm_fieldname", this.fieldName);
-    this._addInput(form, "sysparm_sys_id", this.sys_id);
-    if (typeof g_ck != 'undefined')
-      this._addInput(form, "sysparm_ck", g_ck);
-    form.setAttribute("action", "sys_attachment.do");
-    form.setAttribute("target", this.containerName + "_iframe");
-    form.style.display = 'none';
-    form.style.position = 'absolute';
-    form.style.left = '-999px';
-    this.form = form;
-    document.body.appendChild(this.form);
-    return form;
-  },
-  _addInput: function(form, name, value) {
-    var input = cel("input");
-    input.value = value;
-    input.name = name;
-    form.appendChild(input);
-  },
-  _reset: function() {
-    this.input = null;
-  },
-  moveInputTo: function(elementName) {
-    this.tempSpot = elementName;
-    if (elementName == null)
-      elementName = this.containerName;
-    var input = this.input;
-    var p = input.parentNode;
-    var parent = gel(elementName);
-    if (p == parent)
-      return;
-    input.parentNode.removeChild(input);
-    parent.appendChild(input);
-  },
-  toString: function() {
-    return 'Uploader';
-  }
-});
-
-function toElement(innerHTML) {
-  var div = cel('div');
-  div.innerHTML = innerHTML;
-  var element = div.firstChild;
-  div.removeChild(element);
-  return element;
-};
-/*! RESOURCE: scripts/ImageUploader.js */
-var ImageUploader = Class.create(Uploader, {
-  initialize: function($super, containerName, tableName, sys_id) {
-    $super(containerName, tableName, sys_id);
-  },
-  _onFileChange: function($super, input) {
-    if (!this._isFileNameValid(input.value))
-      return;
-    $super(input);
-  },
-  _isFileNameValid: function(filename) {
-    if (endsWithImageExtension(filename))
+  beforeSubmitCloudRsrcTemplate: function(g_form) {
+    if (this.isFormValid())
       return true;
-    var message = getMessage('Name is not a recognized image file format');
-    alert(message);
+    var msg = "Please correct errors to submit order";
+    g_form.addErrorMessage(msg);
+    this.showAllFieldMessages(g_form);
     return false;
+  },
+  isFormValid: function() {
+    if (!this._fieldsInfo)
+      return true;
+    for (var name in this._fieldsInfo) {
+      if (!this._fieldsInfo[name].isValid)
+        return false;
+    }
+    return true;
+  },
+  showAllFieldMessages: function(g_form) {
+    g_form.hideAllFieldMsgs("error");
+    g_form.hideAllFieldMsgs("error");
+    g_form.clearMessages();
+    for (var name in this._fieldsInfo) {
+      var fieldInfo = this._fieldsInfo[name];
+      if (fieldInfo.message.length > 0) {
+        for (var i = 0; i < fieldInfo.message.length; i++) {
+          g_form.showFieldMsg(fieldInfo.variableSysId, fieldInfo.message[i], fieldInfo.msgtype);
+        }
+      }
+    }
   }
-});;
+};;
+/*! RESOURCE: scripts/TestClient.js */
+function popTestClient(test_definition, test_subject) {
+  var test_execution;
+  if (!test_subject)
+    test_execution = test_definition;
+  var dialog = new GlideDialogWindow('test_client', false, "50em", "25em");
+  if (test_execution) {
+    dialog.setPreference('sysparm_test_execution', test_execution);
+  } else {
+    dialog.setPreference('sysparm_test_definition', test_definition);
+    dialog.setPreference('sysparm_test_subject', test_subject);
+  }
+  dialog.render();
+}
+var TestClient = Class.create();
+TestClient.prototype = {
+  TEST_STATES: ["Pending", "Running", "Succeeded", "Failed"],
+  STATUS_IMAGES: ["images/workflow_skipped.gif",
+    "images/loading_anim2.gifx", "images/workflow_complete.gifx",
+    "images/workflow_rejected.gifx"
+  ],
+  TRANSLATED_TEXT: ["Pending", "Running", "Succeeded", "Failed",
+    "Details", "more", "Hide Details", "Show Details"
+  ],
+  TIMEOUT_INTERVAL: 1000,
+  translator: new GwtMessage(),
+  detailStates: {},
+  id: "",
+  container: null,
+  initialize: function(test_definition, test_subject) {
+    this.container = $("container");
+    this._setContainerStyles(this.container);
+    this.translator.getMessages(this.TRANSLATED_TEXT);
+    var test_execution;
+    if (!test_subject) {
+      this.id = test_definition
+      return
+    }
+    this.testDefinition = test_definition;
+    this.testSubject = test_subject;
+  },
+  start: function() {
+    if (this.id) {
+      this.getStatus();
+      return;
+    }
+    var ga = new GlideAjax('AJAXTestProcessor');
+    ga.addParam('sysparm_name', 'startTest');
+    ga.addParam('sysparm_test_definition', this.testDefinition);
+    ga.addParam('sysparm_test_subject', this.testSubject);
+    ga.getXML(this.handleStart.bind(this));
+  },
+  handleStart: function(response) {
+    this.id = response.responseXML.documentElement.getAttribute("answer");
+    this.getStatus();
+  },
+  getStatus: function() {
+    var ga = new GlideAjax('AJAXTestProcessor');
+    ga.addParam('sysparm_name', 'getStatus');
+    ga.addParam('sysparm_execution_id', this.id);
+    if (typeof this.id != "string" || this.id == "")
+      return;
+    ga.getXML(this.handleGetStatus.bind(this));
+  },
+  handleGetStatus: function(response) {
+    var answer = response.responseXML.documentElement.getAttribute("answer");
+    eval("var so = " + answer);
+    this.renderStatus(so);
+    this.container = $("container");
+    if (this.container == null)
+      return;
+    if (so.state == "0" || so.state == "1")
+      setTimeout(this.getStatus.bind(this), this.TIMEOUT_INTERVAL);
+  },
+  renderStatus: function(so) {
+    if (!so)
+      return;
+    var new_container = new Element("div");
+    this._setContainerStyles(new_container);
+    new_container.appendChild(this.getStatusRow(so));
+    this.container.replace(new_container);
+    this.container = new_container;
+  },
+  getStatusRow: function(obj, order) {
+    var name = obj.name;
+    var state = obj.state;
+    var message = obj.message;
+    var percent = NaN;
+    if (obj.percent_complete) {
+      percent = parseInt(obj.percent_complete);
+    }
+    var hasPercent = (!isNaN(percent) && percent > 0 && percent <= 100);
+    var hasDetails = (obj.results.length >= 1 || message != "");
+    var tr = new Element("div", {
+      id: "row_container-" + obj.sys_id
+    });
+    tr.style.padding = "5px";
+    var simp = new Element("div");
+    simp.appendChild(this._getImage(obj));
+    simp.appendChild(this._getItemTitleElement(name, order));
+    var det = this._getDetailElement();
+    var dtl;
+    if (hasDetails || hasPercent)
+      dtl = det.appendChild(this._getShowDetailsLink(obj.sys_id));
+    simp.appendChild(det);
+    simp.appendChild(this._getFloatClear("both"));
+    tr.appendChild(simp);
+    if (hasDetails || hasPercent) {
+      var dtd = new Element("div");
+      var ddc = new Element("div");
+      ddc.style.marginTop = ".5em";
+      ddc.style.marginLeft = "30px";
+      ddc.id = "detail_cont-" + obj.sys_id;
+      dtd.appendChild(ddc);
+      if (hasPercent) {
+        ddc.appendChild(this._getProgressBar(percent));
+        ddc.appendChild(this._getFloatClear("both"));
+      }
+      if (message != "") {
+        var dds = new Element("div");
+        dds.appendChild(this._getDetailsText(message, obj));
+        dds.style.fontSize = "smaller";
+        dds.style.marginBottom = ".5em";
+        ddc.appendChild(dds);
+      }
+      dtl.details_container = ddc;
+      if (typeof this.detailStates[obj.sys_id] == "boolean" && this.detailStates[obj.sys_id] == false && dtl != null)
+        dtl.onclick();
+      tr.appendChild(dtd);
+      this.renderChildren(obj, ddc);
+    }
+    return tr;
+  },
+  _getItemTitleElement: function(name, order) {
+    var nameHtml = "<b>" + name + "</b>";
+    if (order) {
+      nameHtml = "\t" + order + ".\t" + nameHtml;
+    }
+    var nsp = new Element("span");
+    nsp.innerHTML = nameHtml;
+    nsp.style.float = "left";
+    return nsp;
+  },
+  _getImage: function(obj) {
+    var state = obj.state;
+    var si = new Element("img");
+    si.id = "img-" + obj.sys_id;
+    si.src = this.STATUS_IMAGES[state];
+    si.style.marginRight = "10px";
+    si.style.float = "left";
+    si.title = this.TEST_STATES[state];
+    return si;
+  },
+  _getDetailElement: function() {
+    var det = new Element("span");
+    det.style.marginLeft = "10px";
+    det.style.float = "left";
+    return det;
+  },
+  _getShowDetailsLink: function(objSysID) {
+    var da = new Element("a");
+    da.id = objSysID;
+    da.controller = this;
+    da.innerHTML = "(" + this.translator.getMessage("Hide Details") + ")";
+    da.toggleText = "(" + this.translator.getMessage("Show Details") + ")";
+    da.style.fontSize = "8pt";
+    da.style.float = "left";
+    da.onclick = this.__detailsToggle;
+    return da;
+  },
+  __detailsToggle: function() {
+    var cont = this.details_container;
+    cont.toggle();
+    this.controller.detailStates[this.id] = cont.visible();
+    var nt = this.toggleText;
+    this.toggleText = this.innerHTML;
+    this.innerHTML = nt;
+  },
+  _getDetailsText: function(message, obj) {
+    if (message.length > 150) {
+      var new_message = new Element("span");
+      new_message.innerHTML = "<b>" +
+        this.translator.getMessage("Details") + ": </b>" +
+        message.slice(0, 150) + "... ";
+      var anch = new Element("a");
+      anch.href = "test_execution.do?sys_id=" + obj.sys_id;
+      anch.innerHTML = "<b>(" + this.translator.getMessage("more") +
+        ")</b>";
+      new_message.appendChild(anch);
+      return new_message;
+    } else {
+      var new_message = new Element("span")
+      new_message.innerHTML = "<b>" +
+        this.translator.getMessage("Details") + ": </b>" +
+        message;
+      return new_message;
+    }
+  },
+  _getProgressBar: function(percent) {
+    percent = Math.max(0, Math.min(100, percent));
+    var progressContainer = new Element("div");
+    progressContainer.style.width = "300px";
+    progressContainer.style.height = "8px";
+    progressContainer.style.border = "1px solid black";
+    progressContainer.style.borderRadius = "10px";
+    progressContainer.style.padding = "2px";
+    progressContainer.style.marginTop = "2px";
+    progressContainer.style.marginBottom = "2px";
+    progressContainer.style.float = "left";
+    var progressBar = new Element("div");
+    progressBar.style.width = percent + "%";
+    progressBar.style.height = "100%";
+    progressBar.style.borderRadius = "10px";
+    progressBar.style.backgroundColor = "#667788";
+    progressContainer.appendChild(progressBar);
+    return progressContainer;
+  },
+  _getFloatClear: function(which) {
+    var br = new Element("br");
+    br.style.clear = which;
+    return br;
+  },
+  renderChildren: function(so, pr_cont) {
+    if (!so.results)
+      return;
+    for (var i = 0; i < so.results.length; i++) {
+      pr_cont.appendChild(this.getStatusRow(so.results[i], i + 1)).style.marginLeft = "15px";
+    }
+  },
+  _setContainerStyles: function(container) {
+    container.id = "container";
+    container.style.overflowY = "auto";
+    container.style.maxHeight = "50em";
+    container.style.marginRight = ".25em";
+    container.style.marginLeft = ".25em";
+  },
+  type: 'TestClient'
+};;
 /*! RESOURCE: /scripts/jquery-ui-1.9.2.custom.js */
 (function($, undefined) {
   var uuid = 0,

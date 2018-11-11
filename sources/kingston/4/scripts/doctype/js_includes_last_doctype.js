@@ -4329,27 +4329,3424 @@ GlideSectionCondition.prototype = {
 };
 var GlideSubCondition = Class.create();
 GlideSubCondition.prototype = {
-    initialize: function(condition, queryID) {
-      this.condition = condition;
-      this.filter = condition.getFilter();
-      this.queryID = queryID;
-      this.id = guid();
+  initialize: function(condition, queryID) {
+    this.condition = condition;
+    this.filter = condition.getFilter();
+    this.queryID = queryID;
+    this.id = guid();
+  },
+  destroy: function() {
+    this.filter = null;
+    this.condition = null;
+    if (this.row)
+      this.row.destroy();
+  },
+  buildRow: function(parent, field, oper, value) {
+    this.field = field;
+    this.oper = oper;
+    if (value)
+      this.value = value.replace(/&amp;/g, '&');
+    else
+      this.value = value;
+    this.row = new GlideConditionRow(this.condition, queryID, false, false);
+    var tr = this.row.getRow();
+    parent.appendChild(tr);
+    tr.conditionObject = this;
+    this.row.build(field, oper, this.value)
+  },
+  getNameTD: function() {
+    return this.row.getNameTD();
+  },
+  getFieldSelect: function() {
+    return this.row.getFieldSelect();
+  },
+  getRow: function() {
+    return this.row.getRow();
+  },
+  getID: function() {
+    return this.id;
+  },
+  isPlaceHolder: function() {
+    return this.condition.isPlaceHolder();
+  },
+  remove: function() {
+    this.condition.removeSub(this.id);
+  },
+  z: null
+};
+var GlideConditionRow = Class.create();
+GlideConditionRow.prototype = {
+  initialize: function(condition, queryID, wantOr, first) {
+    this.condition = condition;
+    this.filter = condition.getFilter();
+    this.first = first;
+    this.wantOr = wantOr;
+    this.tableName = this.condition.getName();
+    this.queryID = queryID;
+    this.currentText = [];
+    var tr = celQuery('tr', null, queryID);
+    tr.conditionObject = this.condition;
+    tr.rowObject = this;
+    tr.className = "filter_row_condition";
+    tr.style.display = "table";
+    this.row = tr;
+    tr.conditionRow = this;
+    this.addAndOrTextCell();
+    td = this.addTD(tr, queryID);
+    this.tdName = td;
+    if (this.filter.listCollectorId)
+      td.id = this.filter.listCollectorId + "_field";
+    else
+      td.id = "field";
+    td.className += " condition-row__field-cell";
+    tr.tdField = td;
+    td = this.addTD(tr, queryID);
+    this.tdOper = td;
+    if (this.filter.listCollectorId)
+      td.id = this.filter.listCollectorId + "_oper";
+    else
+      td.id = "oper";
+    td.className += " condition-row__operator-cell";
+    tr.tdOper = td;
+    if (!this.filter.getOpsWanted())
+      td.style.display = "none";
+    td.style.width = "auto";
+    td = this.addTD(tr, queryID);
+    this.tdValue = td;
+    if (this.filter.listCollectorId)
+      td.id = this.filter.listCollectorId + "_value";
+    else
+      td.id = "value";
+    td.noWrap = true;
+    tr.tdValue = td;
+    td.className += " form-inline condition-row__value-cell";
+    if (this.filter.elementSupportsMapping) {
+      this.addMappingTd(tr);
+    }
+    if (this.filter.getTextAreasWanted())
+      td.style.width = "90%";
+    this.addPlusImageCell();
+    this.addRemoveButtonCell();
+    this.answer = getMessages(MESSAGES_FILTER_BUTTONS);
+  },
+  destroy: function() {
+    this.filter.clearFieldUsed(this.getField(), this.condition);
+    this.filter = null;
+    this.condition = null;
+    this.rowCondition = null;
+    if (this.row.handler)
+      this.row.handler.destroy();
+    this.row.tdOper = null;
+    this.row.tdValue = null;
+    this.row.tdField = null;
+    this.row.conditionObject = null;
+    this.row.rowObject = null;
+    this.row = null;
+    this.tdOper = null;
+    this.tdValue = null;
+    this.tdName = null;
+    if (this.fieldSelect) {
+      this.fieldSelect.onchange = null;
+      this.fieldSelect = null;
+    }
+    this.tdOrButton = null;
+    this.tdRemoveButton.conditionObject = null;
+    this.tdRemoveButton = null;
+    this.tdAndOrText = null;
+  },
+  setAsRunRow: function(field) {
+    this.build(field);
+    this.tdName.style.visibility = 'hidden';
+    this.tdOper.style.visibility = 'hidden';
+    this.tdAndOrText.style.visibility = 'hidden';
+    this.row.removeChild(this.tdValue);
+    this.row.removeChild(this.tdOrButton);
+    this.row.removeChild(this.tdRemoveButton);
+    clearNodes(this.tdValue);
+    clearNodes(this.tdOrButton);
+    clearNodes(this.tdRemoveButton);
+    var td = celQuery('td', this.row, this.queryID);
+    td.style.width = "100%";
+    td.style.paddingBottom = "4px";
+    td.filterObject = this.filter;
+    var runCode = "runThisFilter(this);";
+    if (this.filter.runCode)
+      runCode = this.filter.runCode;
+    td.innerHTML = this.buildRunButton(runCode);
+  },
+  addAndOrTextCell: function() {
+    var td = this.addTD(this.row, this.queryID);
+    td.className += " condition-row__and-or-text-cell";
+    this.tdAndOrText = td;
+    td.style.textAlign = "right";
+    if (!this.filter.getConditionsWanted())
+      td.style.display = "none";
+  },
+  addPlusImageCell: function() {
+    var td = this.addTD(this.row, this.queryID);
+    td.style.whiteSpace = "nowrap";
+    td.className += " condition_buttons_cell";
+    this.tdOrButton = td;
+    this.row.tdOrButton = td;
+    if (!this.filter.getConditionsWanted())
+      td.style.display = "none";
+  },
+  addRemoveButtonCell: function() {
+    var td = this.addTD(this.row, this.queryID);
+    this.tdRemoveButton = td;
+    this.row.tdRemoveButton = td;
+    td.conditionObject = this.condition;
+    td.className += " condition-row__remove-cell";
+    if (this.wantOr)
+      td.hasOrButton = 'true';
+  },
+  addTD: function(row, queryID) {
+    var td = celQuery('td', row, queryID);
+    $j(td).addClass("sn-filter-top");
+    return td;
+  },
+  addMappingTd: function(tr) {
+    var mappingTd = cel("td");
+    mappingTd.className = "condition-row__sys-mapping-cell form-inline";
+    tr.appendChild(mappingTd);
+    tr.tdMapping = mappingTd;
+  },
+  build: function(field, oper, value) {
+    this.field = field;
+    this.oper = oper;
+    this.value = value;
+    var tableName = this.getName();
+    var tds = this.row.getElementsByTagName("td");
+    this.fieldSelect = _createFilterSelect();
+    this.fieldSelect.onchange = this.fieldOnChange.bind(this);
+    var sname = tableName.split(".")[0];
+    if (this.field != null)
+      sname = sname + "." + field;
+    this.filter.setFieldUsed(field);
+    addFirstLevelFields(this.fieldSelect, sname, field, this.filter.filterFields.bind(this.filter), null, this.filter, this.filter);
+    if (!this.tdName) {
+      return [];
+    }
+    this.tdName.appendChild(this.fieldSelect);
+    updateFields(tableName, this.fieldSelect, oper, value, this.filter.getIncludeExtended(), this.filter);
+    if (this.filter.isProtectedField(field))
+      this._setReadOnly();
+    if (this.filter.fieldName == "sys_template.template" || this.filter.isTemplate)
+      this.addHelpText();
+    currentTable = tableName;
+    this.addLeftButtons();
+    return tds;
+  },
+  _setReadOnly: function() {
+    this.filter._hideClass(this.row, "filerTableAction", true);
+    this.filter._disableClass(this.row, "filerTableSelect", true);
+    this.filter._disableClass(this.row, "filerTableInput", true);
+  },
+  fieldOnChange: function() {
+    this.filter.setFieldUsed(this.getField());
+    this.filter.clearFieldUsed(this.field, this.condition);
+    this.field = this.getField();
+    var b = this.condition.isPlaceHolder();
+    this.condition.setPlaceHolder(false);
+    updateFields(this.getName(), this.fieldSelect, null, null, this.filter.getIncludeExtended(), this.filter);
+    if (b) {
+      this.condition.setPlaceHolder(false);
+      this.showFields();
+      this.condition.clearPlaceHolder();
+      if (this.condition.isFirst())
+        this.makeFirst();
+    }
+    this.filter.refreshSelectList();
+    if (this.filter.fieldName == "sys_template.template" || this.filter.isTemplate)
+      this.addHelpText();
+    var form = this.getFieldSelect().up('form');
+    if (form) {
+      var nameWithoutTablePrefix = this.getName().substring(this.getName().indexOf(".") + 1);
+      form.fire("glideform:onchange", {
+        id: nameWithoutTablePrefix,
+        value: unescape(getFilter(this.getName())),
+        modified: true
+      });
+    }
+  },
+  addHelpText: function() {
+    this.fieldElements = this.condition.actionRow.getAttribute("type");
+    if (this.fieldElements) {
+      switch (this.fieldElements) {
+        case "color":
+          this.helpText("Insert HTML color name or hex value");
+          break;
+        case "glide_list":
+        case "slushbucket":
+        case "user_roles":
+          this.helpText("Separate individual references with a comma");
+          break;
+        case "composite_name":
+          this.helpText("Use the following format: TableName.FieldName");
+          break;
+        case "days_of_week":
+          this.helpText("1 for Monday, 2 for Tuesday, etc. Multiple values can be entered, like '135' for Monday, Wednesday, and Friday");
+          break;
+        case "html":
+        case "translated_html":
+          this.helpText("Enter text in HTML format");
+          break;
+        default:
+          this.removeHelpText();
+      }
+    }
+  },
+  helpText: function(text) {
+    this.removeHelpText();
+    var newDiv = document.createElement("div");
+    var newContent = document.createTextNode(text);
+    newDiv.appendChild(newContent);
+    newDiv.id = this.fieldElements;
+    newDiv.className = 'fieldmsg';
+    var currentDiv = this.condition.tbody;
+    currentDiv.insertBefore(newDiv, null);
+    this.currentText.push(this.fieldElements);
+  },
+  removeHelpText: function() {
+    for (i = 0; i < this.currentText.length; i++) {
+      var parNode = gel(this.currentText[i]).parentElement;
+      var chilNode = parNode.childNodes;
+      chilNode[1].remove();
+      this.currentText.splice(i, 1);
+    }
+  },
+  getNameTD: function() {
+    return this.tdName;
+  },
+  getFieldSelect: function() {
+    return this.fieldSelect;
+  },
+  getField: function() {
+    var select = getSelectedOption(this.fieldSelect);
+    if (select != null)
+      return select.value;
+    return null;
+  },
+  getOper: function() {
+    var s = this.getOperSelect();
+    return getSelectedOption(s).value;
+  },
+  getOperSelect: function() {
+    return this.tdOper.getElementsByTagName("select")[0];
+  },
+  getValueInput: function() {
+    return this.tdValue.getElementsByTagName("input")[0];
+  },
+  getRow: function() {
+    return this.row;
+  },
+  getName: function() {
+    return this.tableName;
+  },
+  showFields: function() {
+    this.tdRemoveButton.style.visibility = 'visible';
+    this.tdOrButton.style.visibility = 'visible';
+    if (!this.first)
+      this.tdAndOrText.style.visibility = 'visible';
+    this.getOperSelect().disabled = false;
+    var cel = this.getValueInput();
+    if (cel)
+      cel.disabled = false;
+  },
+  addLeftButtons: function() {
+    if (this.wantOr) {
+      tdAddOr = this.tdOrButton;
+      var fDiv = this.filter.getDiv() || getThing(this.filter.tableName, this.filter.divName);
+      fDiv = fDiv.id.split("gcond_filters", 1);
+      var andOnClick = "addConditionSpec('" + htmlEscape(this.tableName) + "','" + htmlEscape(this.queryID) + "','','','','" + fDiv + "'); return false;";
+      var orOnClick = "newSubRow(this,'" + fDiv + "'); return false;";
+      tdAddOr.innerHTML = this.getAndButtonHTML(andOnClick) + this.getOrButtonHTML(orOnClick);
+      if (this.condition.isPlaceHolder())
+        tdAddOr.style.visibility = 'hidden';
+    }
+    var td = this.tdRemoveButton;
+    var tdMessage = this.tdAndOrText;
+    if (!this.wantOr) {
+      if (td.parentNode.sortSpec != true) {
+        var fieldTD = this.row.childNodes[1];
+        var orSpan = "<span class='sn-or-message'>" + this.answer['or'] + "</span>";
+        $(fieldTD).insert({
+          top: orSpan
+        });
+      } else {
+        tdMessage.innerHTML = '';
+      }
+    }
+    tdMessage.style.width = DEFAULT_WIDTH;
+    var id = 'r' + guid();
+    td.id = id;
+    var deleteOnClick = "deleteFilterByID('" + htmlEscape(this.getName()) + "','" + id + "');";
+    td.innerHTML = this.getDeleteButtonHTML(id, deleteOnClick);
+    if (!this.condition.isPlaceHolder())
+      return;
+    if (!this.filter.defaultPlaceHolder)
+      return;
+    if (this.filter.getMaintainPlaceHolder() || this.filter.singleCondition())
+      td.style.visibility = 'hidden';
+  },
+  getAndButtonHTML: function(onClick) {
+    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add AND Condition'] + "' alt='" + this.answer['Add AND Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['and'].toUpperCase() + "</button>";
+  },
+  getOrButtonHTML: function(onClick) {
+    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Add OR Condition'] + "' alt='" + this.answer['Add OR Condition'] + "' class='btn btn-default filerTableAction'>" + this.answer['or'].toUpperCase() + "</button>";
+  },
+  getDeleteButtonHTML: function(id, onClick) {
+    return "<button onclick=\"" + onClick + "\" title='" + this.answer['Delete'] + "' type='button' class='filerTableAction btn btn-default deleteButton'><span class='icon-cross'></span><span class=\"sr-only\">'" + this.answer['Delete'] + "'</span></button>";
+  },
+  makeFirst: function() {
+    var tdMessage = this.tdAndOrText;
+    tdMessage.innerHTML = '';
+    tdMessage.style.color = tdMessage.style.backgroundColor;
+    tdMessage.style.visibility = 'hidden';
+    tdMessage.style.width = DEFAULT_WIDTH;
+  },
+  refreshSelectList: function() {
+    if (this.condition.isPlaceHolder())
+      return;
+    var tableName = this.getName();
+    var sname = tableName.split(".")[0];
+    if (this.field != null)
+      sname = sname + "." + this.field;
+    addFirstLevelFields(this.fieldSelect, sname, this.field, this.filter.filterFields.bind(this.filter), null, this.filter);
+  },
+  buildRunButton: function(f) {
+    var m = new GwtMessage();
+    return '<button class="btn btn-default" tabindex="0" onclick="' + f + '" title="' + m.getMessage('Run Filter') + '">' + m.getMessage('Run') + '</button>';
+  },
+  z: null
+};
+var GlideSortSection = Class.create();
+GlideSortSection.prototype = {
+  initialize: function(filter) {
+    this.filter = filter;
+    this.locateSection();
+  },
+  destroy: function() {
+    this.filter = null;
+    this.section = null;
+    this.rowTable = null;
+  },
+  locateSection: function() {
+    this.section = null;
+    this.rowTable = null;
+    var divRows = this.filter.sortElement.getElementsByTagName("tr");
+    for (var i = 0; i < divRows.length; i++) {
+      var rowTR = divRows[i];
+      if (rowTR.sortRow == 'true') {
+        this.section = rowTR.rowObject;
+        this.rowTable = this.section.getFilterTable();
+        this.queryID = this.section.getQueryID();
+        break;
+      }
+    }
+    if (!this.section) {
+      section = new GlideFilterSection(this.filter);
+      section.setSort(true);
+      this.queryID = section._setup(true);
+      this.section = section;
+      this.rowTable = section.getFilterTable();
+      this.section.getRow().sortRow = 'true';
+    }
+  },
+  addField: function(field, oper) {
+    this.locateSection();
+    if (!oper)
+      oper = "ascending";
+    var condition = this.section.addSortCondition(false);
+    var row = condition.getRow();
+    row.sortSpec = true;
+    row = condition.getActionRow();
+    row.sortSpec = true;
+    var fSelect = addFields(this.getName(), field, true, this.filter.getIncludeExtended());
+    var tdName = row.tdField;
+    tdName.appendChild(fSelect);
+    updateFields(this.getName(), fSelect, oper, null, this.filter.getIncludeExtended(), this.filter);
+    condition.addLeftButtons();
+  },
+  getSection: function() {
+    return this.section;
+  },
+  getName: function() {
+    return this.filter.getName();
+  },
+  getID: function() {
+    return this.queryID;
+  },
+  removeRunButton: function() {
+    this.section.removeRunButton();
+  },
+  addRunButton: function() {
+    this.section.addRunButton();
+  },
+  z: null
+};
+var GlideEncodedQuery = Class.create();
+GlideEncodedQuery.prototype = {
+  initialize: function(name, query, callback) {
+    this.init();
+    this.callback = callback;
+    this.name = name;
+    this.encodedQuery = query;
+  },
+  init: function() {
+    this.orderBy = [];
+    this.groupBy = [];
+    this.terms = [];
+  },
+  parse: function() {
+    this.reset(this.name, this.encodedQuery);
+  },
+  destroy: function() {
+    for (var i = 0; i < this.orderBy.length; i++)
+      this.orderBy[i].destroy();
+    for (var i = 0; i < this.groupBy.length; i++)
+      this.groupBy[i].destroy();
+  },
+  reset: function(name, query) {
+    this.init();
+    this.tableName = name;
+    this.encodedQuery = query;
+    this.decode();
+  },
+  decode: function() {
+    this.getEncodedParts();
+  },
+  getEncodedParts: function() {
+    if (typeof g_filter_description != 'undefined' && this.tableName == g_filter_description.getName() &&
+      this.encodedQuery == g_filter_description.getFilter()) {
+      this.partsXML = loadXML(g_filter_description.getParsedQuery());
+      this.parseXML();
+      return;
+    }
+    var ajax = new GlideAjax('QueryParseAjax');
+    ajax.addParam('sysparm_chars', this.encodedQuery);
+    ajax.addParam('sysparm_name', this.tableName);
+    if (this.callback)
+      ajax.getXML(this.getEncodedPartsResponse.bind(this));
+    else {
+      this.partsXML = ajax.getXMLWait();
+      this.parseXML();
+    }
+  },
+  getEncodedPartsResponse: function(response) {
+    if (!response || !response.responseXML)
+      this.callback();
+    this.partsXML = response.responseXML;
+    this.parseXML();
+  },
+  parseXML: function() {
+    var items = this.partsXML.getElementsByTagName("item");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var qp = new GlideQueryPart(item);
+      if (qp.isGroupBy()) {
+        this.addGroupBy(qp.getValue())
+      } else if (qp.isOrderBy()) {
+        this.addOrderBy(qp.getValue(), qp.isAscending());
+      } else
+        this.terms[this.terms.length] = qp;
+    }
+    if (this.callback)
+      this.callback();
+  },
+  getXML: function() {
+    return this.partsXML;
+  },
+  addGroupBy: function(groupBy) {
+    this.groupBy[this.groupBy.length] = groupBy;
+  },
+  addOrderBy: function(orderBy, ascending) {
+    this.orderBy[this.orderBy.length] = new GlideSortSpec(orderBy, ascending);
+  },
+  getTerms: function() {
+    return this.terms;
+  },
+  getOrderBy: function() {
+    return this.orderBy;
+  },
+  getGroupBy: function() {
+    return this.groupBy;
+  },
+  z: null
+};
+var GlideQueryPart = Class.create();
+GlideQueryPart.prototype = {
+  initialize: function(item) {
+    this.item = item;
+    this.groupBy = false;
+    this.orderBy = false;
+    this.ascending = false;
+    this.Goto = item.getAttribute("goto");
+    this.EndQuery = item.getAttribute("endquery");
+    this.NewQuery = item.getAttribute("newquery");
+    this.OR = item.getAttribute("or");
+    this.displayValue = item.getAttribute("display_value");
+    this.valid = true;
+    this.extract();
+  },
+  destroy: function() {
+    this.item = null;
+  },
+  isOR: function() {
+    return this.OR == 'true';
+  },
+  isNewQuery: function() {
+    return this.NewQuery == 'true';
+  },
+  isGoTo: function() {
+    return this.Goto == 'true';
+  },
+  extract: function() {
+    if (this.EndQuery == 'true') {
+      this.valid = false;
+      return;
+    }
+    this.operator = this.item.getAttribute("operator");
+    this.value = this.item.getAttribute("value");
+    this.field = this.item.getAttribute("field");
+    if (this.operator == 'GROUPBY') {
+      this.groupBy = true;
+      return;
+    }
+    if (this.operator == 'ORDERBYDESC') {
+      this.orderBy = true;
+      this.ascending = false;
+      return;
+    }
+    if (this.operator == 'ORDERBY') {
+      this.orderBy = true;
+      this.ascending = true;
+      return;
+    }
+    for (i = 0; i < operators.length; i++) {
+      if (this.operator == operators[i])
+        break;
+    }
+    if (i == operators.length) {
+      this.valid = false;
+      return;
+    }
+    if (this.field.startsWith("variables.")) {
+      this.value = this.field.substring(10) + this.operator + this.value;
+      this.field = "variables";
+      this.operator = '=';
+    }
+    if (this.field.startsWith("sys_tags."))
+      this.field = "sys_tags";
+    if (this.operator == "HASVARIABLE" || this.operator == "HASITEMVARIABLE") {
+      this.operator = '=';
+      this.field = "variables";
+      this.value = this.value.substring(1);
+    }
+    if (this.operator == "HASQUESTION") {
+      this.operator = '=';
+      this.field = "variables";
+      this.value = this.value.substring(1);
+    }
+  },
+  getOperator: function() {
+    this.operator.title = "Operator";
+    return this.operator;
+  },
+  getField: function() {
+    this.field.title = "Field";
+    return this.field;
+  },
+  getValue: function() {
+    this.value.title = "Value";
+    return this.value;
+  },
+  isValid: function() {
+    return this.valid;
+  },
+  isGroupBy: function() {
+    return this.groupBy;
+  },
+  isOrderBy: function() {
+    return this.orderBy;
+  },
+  isAscending: function() {
+    return this.ascending;
+  },
+  z: null
+};
+var GlideSortSpec = Class.create();
+GlideSortSpec.prototype = {
+  initialize: function(name, ascending) {
+    this.field = name;
+    this.ascending = ascending;
+  },
+  getName: function() {
+    return this.field;
+  },
+  isAscending: function() {
+    return this.ascending;
+  },
+  z: null
+};
+
+function newSubRow(elBut, name) {
+  var fDiv = getThing(name, 'gcond_filters');
+  if (fDiv && !checkFilterSize(fDiv.filterObject))
+    return;
+  var butTD = elBut.parentNode;
+  var butTR = butTD.parentNode;
+  var butTable = butTR.parentNode;
+  butTable.conditionObject.addNewSubCondition();
+  _frameChanged();
+}
+
+function findInArray(a, searchID) {
+  for (var i = 0; i < a.length; i++) {
+    var condition = a[i];
+    if (condition.getID() == searchID)
+      return i;
+  }
+  return null;
+}
+
+function celQuery(name, parent, queryID) {
+  var e = cel(name);
+  if (parent)
+    parent.appendChild(e);
+  e.queryID = queryID;
+  return e;
+}
+
+function runThisFilter(atag) {
+  var filterObj = atag.parentNode.filterObject;
+  var tableName = filterObj.getName();
+  if (runFilterHandlers[tableName]) {
+    var filter = getFilter(tableName);
+    runFilterHandlers[tableName](tableName, filter);
+    return;
+  }
+  filterObj.runFilter();
+}
+
+function buildURL(tableName, query) {
+  var url = (tableName.split("."))[0] + "_list.do?sysparm_query=" + query;
+  var view = gel('sysparm_view');
+  if (view) {
+    view = view.value;
+    url += '&sysparm_view=' + view;
+  }
+  var refQuery = gel('sysparm_ref_list_query');
+  if (refQuery)
+    url += "&sysparm_ref_list_query=" + refQuery.value;
+  var target = gel('sysparm_target');
+  if (target) {
+    target = target.value;
+    url += '&sysparm_target=' + target;
+    url += '&sysparm_stack=no';
+    var e = gel("sysparm_reflist_pinned");
+    if (e)
+      url += '&sysparm_reflist_pinned=' + e.value;
+  }
+  return url;
+}
+
+function createCondFilter(tname, query, fieldName, elem) {
+  "use strict"
+  noOps = false;
+  noSort = false;
+  noConditionals = false;
+  useTextareas = false;
+  new GlideConditionsHandler(tname, function(filter) {
+    if (filter) {
+      var filterDiv = filter.getDiv() || getThing(filter.tableName, filter.divName);
+      if (filterDiv) {
+        filterDiv.initialQuery = query;
+      }
+      filter.setQuery(query);
+      g_form.registerHandler(fieldName, filter);
+      if (elem && elem.getAttribute("readonly") === "readonly") {
+        var formTable = g_form.getTableName();
+        var fieldNameWithoutPrefix = fieldName.replace(formTable + '.', '');
+        g_form.setReadOnly(fieldNameWithoutPrefix, true);
+      }
+      $(filterDiv).fire('glide:filter.create.condition_filter', filter);
+    }
+  }, fieldName);
+}
+
+function checkFilterSize(filterObject) {
+  var validFilterSize = true;
+  var filterString = "";
+  if (isNaN(g_glide_list_filter_max_length) || g_glide_list_filter_max_length <= 0)
+    return validFilterSize;
+  if (filterObject === undefined || filterObject === null)
+    return validFilterSize;
+  if (typeof filterObject === "object" && filterObject["type"] === 'GlideFilter')
+    filterString = getFilter(filterObject.getDiv().id.split("gcond_filters", 1));
+  if (filterString && filterString.length > g_glide_list_filter_max_length) {
+    var dialog = new GlideDialogWindow('filter_limit_window', false);
+    dialog.setTitle(getMessage("Filter Limit Reached"));
+    dialog.setBody("<div style='padding: 10px'>" + getMessage("The filter you are using is too big. Remove some conditions to make it smaller.") + "</div>", false, false);
+    $("filter_limit_window").style.visibility = "visible";
+    validFilterSize = false;
+  }
+  return validFilterSize;
+}
+document.on('click', 'button.filter_add_sort', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addSortSpec(name);
+  evt.stopPropagation();
+});
+document.on('click', 'button.filter_add_filter', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addConditionSpec(name);
+  evt.stopPropagation();
+});
+document.on('click', 'button.filter_and_filter', function(evt, element) {
+  evt.preventDefault();
+  var name = element.getAttribute('data-name');
+  addCondition(name);
+  evt.stopPropagation();
+});;
+/*! RESOURCE: /scripts/classes/util/NameMapEntry.js */
+var NameMapEntry = Class.create({
+  initialize: function(prettyName, realName, label) {
+    this.prettyName = prettyName;
+    this.realName = realName;
+    this.label = label;
+  }
+});;
+/*! RESOURCE: /scripts/doctype/form_submitted_mask.js */
+addLoadEvent(function() {
+  var isDoctype = document.documentElement.getAttribute('data-doctype') == 'true';
+  if (!isDoctype)
+    return;
+  CustomEvent.observe('glide:form_submitted', function() {
+    $(document.body).addClassName('submitted');
+    setTimeout(function() {
+      CustomEvent.fireTop('glide:nav_form_stay', window);
+    }, 750);
+  })
+  CustomEvent.observe('glide:nav_form_stay', function(originWindow) {
+    var ga = new GlideAjax('AJAXFormLoad');
+    ga.addParam('sysparm_name', 'canFormReload');
+    if (window.g_form && g_form.isNewRecord()) {
+      ga.addParam('sysparm_table', g_form.getTableName());
+      ga.addParam('sysparm_sys_id', g_form.getUniqueValue());
+    }
+    ga.getXMLAnswer(function(answer) {
+      if (answer == 'submitted') {
+        jslog("Record already submitted, not re-enabling form controls");
+        return;
+      }
+      enableFormControls(originWindow);
+    })
+  });
+
+  function enableFormControls(originWindow) {
+    if (originWindow != self)
+      return;
+    $(document.body).removeClassName('submitted');
+    if (window.g_form)
+      g_form.submitted = false;
+    if (window.g_submitted)
+      g_submitted = false;
+  }
+});
+/*! RESOURCE: /scripts/plugins/InPlaceEdit.js */
+Plugin.create('inPlaceEdit', {
+  initialize: function(elem, options) {
+    if (elem.retrieve('inPlaceEdit'))
+      return;
+    this.options = Object.extend({
+      editOnSingleClick: false,
+      turnClickEditingOff: false,
+      onBeforeEdit: function() {},
+      onEditCancelled: function() {},
+      onAfterEdit: function() {},
+      selectOnStart: false,
+      convertNbspToSpaces: true,
+      titleText: null
+    }, options || {});
+    this.elem = elem;
+    this.elem.setAttribute('class', 'content_editable');
+    var mouseEvent;
+    if (!this.options.turnClickEditingOff) {
+      if (this.options.editOnSingleClick)
+        mouseEvent = 'click';
+      else
+        mouseEvent = 'dblclick';
+      this.elem.observe(mouseEvent, this.beginEdit.bind(this));
+    }
+    this.elem.onselectstart = function() {
+      return true;
+    };
+    this.elem.style.MozUserSelect = 'text';
+    if (this.options.titleText)
+      this.elem.writeAttribute('title', this.options.titleText);
+    this.keyPressHandler = this.keyPress.bind(this);
+    this.keyDownHandler = this.keyDown.bind(this);
+    this.endEditHandler = this.endEdit.bind(this);
+    this.elem.beginEdit = this.beginEdit.bind(this);
+    this.elem.store('inPlaceEdit', this);
+  },
+  beginEdit: function(event) {
+    this.options.onBeforeEdit.call(this);
+    this.elem.writeAttribute("contentEditable", "true");
+    this.elem.addClassName("contentEditing");
+    this.elem.observe('keypress', this.keyPressHandler);
+    this.elem.observe('keydown', this.keyDownHandler);
+    this.elem.observe('blur', this.endEditHandler);
+    this.elem.focus();
+    if (this.options.selectOnStart) {
+      this.elem.select();
+      var range;
+      if ((range = document.createRange)) {
+        if (range.selectNodeContents) {
+          range.selectNodeContents(this.elem);
+          window.getSelection().addRange(range);
+        }
+      } else if (document.body.createTextRange) {
+        range = document.body.createTextRange();
+        if (range.moveToElementText) {
+          range.moveToElementText(this.elem);
+          range.collapse(true);
+          range.select();
+        }
+      }
+    }
+    this.oldValue = this.elem.innerHTML;
+    if (typeof event != 'undefined' && event)
+      Event.stop(event);
+  },
+  keyPress: function(event) {
+    return this._submitEdit(event);
+  },
+  keyDown: function(event) {
+    return this._submitEdit(event);
+  },
+  endEdit: function(event) {
+    this.elem.writeAttribute("contentEditable", "false");
+    this.elem.removeClassName("contentEditing");
+    this.elem.stopObserving('keypress', this.keyPressHandler);
+    this.elem.stopObserving('blur', this.endEditHandler);
+    var newValue = this.elem.innerHTML.replace(/<br>$/, '');
+    if (this.options.convertNbspToSpaces)
+      newValue = newValue.replace(/&nbsp;/g, ' ');
+    if (newValue != this.oldValue) {
+      newValue = newValue.replace(/^\s+|\s+$/g, '');
+      this.elem.update(newValue);
+      this.options.onAfterEdit.call(this, newValue);
+    } else {
+      this.options.onEditCancelled.call(this);
+    }
+    return false;
+  },
+  _submitEdit: function(event) {
+    var key = event.which || event.keyCode;
+    var e = Event.element(event);
+    if (key == Event.KEY_RETURN) {
+      e.blur();
+      Event.stop(event);
+      return false;
+    }
+    if (key == Event.KEY_ESC) {
+      this.elem.innerHTML = this.oldValue;
+      e.blur();
+      return false;
+    }
+    return true;
+  }
+});;
+/*! RESOURCE: /scripts/doctype/PersonalizeForm.js */
+var PersonalizeForm = Class.create({
+  initialize: function(toggleButtonSelector) {
+    var self = this;
+    this.$toggleButton = $j(toggleButtonSelector);
+    this.$toggleButton.hideFix();
+    if (this.$toggleButton.length < 1)
+      return;
+    this.isOpen = false;
+    this.isInitialized = false;
+    this.ref = this.$toggleButton.data("ref");
+    this.$container = $j(this.$toggleButton.data('target'));
+    this.$fieldLabelHideButtons = null;
+    this.$fields = null;
+    this.$toggleButton.click(function() {
+      if (self.isOpen) {
+        self.hideSidebar();
+      } else {
+        if (!self.isInitialized) {
+          self.initializeSidebar();
+        } else
+          self.showSidebar();
+      }
+    });
+    $j('html').on('click', function(e) {
+      if (self.isOpen && !self.$toggleButton.is(e.target) && self.$container.parents('.popover').has($j(e.target)).length == 0) {
+        self.hideSidebar();
+      }
+    });
+    this.$container.on('click', '.dismiss', function(e) {
+      self.hideSidebar();
+    });
+    $j(document).keyup(function(e) {
+      if (e.keyCode == 27) {
+        if (self.isOpen && self.$container.parents('.popover').has($j(e.target)).length == 0) {
+          self.hideSidebar();
+        }
+      }
+    });
+    $j(window).on('resize', function() {
+      if (self.isOpen)
+        self.hideSidebar();
+    });
+    this.initializeForm();
+  },
+  initializeForm: function() {
+    var fields = g_form._getPersonalizeHiddenFields();
+    fields.forEach(function(f) {
+      g_form.setDisplay(f, false);
+    })
+  },
+  initializeSidebar: function() {
+    var self = this;
+    this.$toggleButton.popover({
+      html: true,
+      placement: 'bottom',
+      trigger: 'manual',
+      content: function() {
+        self.$container.show();
+        return self.$container;
+      }
+    });
+    this.render();
+    this.isInitialized = true;
+    this.showSidebar();
+  },
+  hideSidebar: function() {
+    this.$toggleButton.removeClass("icon-cog-selected").addClass("icon-cog");
+    this.$toggleButton.popover('hide');
+    if (this.$fieldLabelHideButtons != null)
+      this.$fieldLabelHideButtons.hide();
+    this.isOpen = false;
+    this.$toggleButton.attr('aria-expanded', 'false');
+  },
+  showSidebar: function() {
+    this.$toggleButton.removeClass("icon-cog").addClass("icon-cog-selected");
+    this.$toggleButton.popover('show');
+    this.$container.parent().parent().find('h3.popover-title').hide();
+    this.setPopoverHeight();
+    if (this.$fieldLabelHideButtons != null)
+      this.$fieldLabelHideButtons.show();
+    if (g_form.personalizeHiddenFields.length) {
+      $j(".personalize_form_preference_reset").show().click(function(e) {
+        g_form.resetPersonalizeHiddenFields();
+        e.preventDefault();
+      });
+    }
+    if (this.$fields != null)
+      this.$fields.change(this, function(event) {
+        var fieldName = $j(this).attr('name');
+        var display = $j(this).prop('checked');
+        g_form.setUserDisplay(fieldName, display);
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    this.isOpen = true;
+    this.$toggleButton.attr('aria-expanded', 'true');
+  },
+  setPopoverHeight: function() {
+    var bootstrapPopoverContentPadding = 28;
+    var popoverMaxHeight = window.innerHeight - 120;
+    var popoverContentsHeight = this.$container.height();
+    var topOffset = this.$container.position().top;
+    var popoverOuterHeight = popoverMaxHeight;
+    var popoverInnerHeight = (popoverMaxHeight - topOffset) + bootstrapPopoverContentPadding;
+    if (popoverContentsHeight + bootstrapPopoverContentPadding <= popoverMaxHeight) {
+      popoverOuterHeight = popoverContentsHeight;
+      popoverInnerHeight = popoverContentsHeight;
+    }
+    this.$container.parent(".popover-content").height(popoverOuterHeight);
+    this.$container.height(popoverInnerHeight);
+  },
+  render: function() {
+    var formElements = this.getFormElements();
+    var container = this.$container.find('.personalize_form_fields');
+    var template = new XMLTemplate('personalize_item');
+    var self = this;
+    formElements.forEach(function(e) {
+      var html = $j(template.evaluate(e));
+      var input = html.find('input').prop('checked', e.display);
+      if (e.isDisabled)
+        input.attr("disabled", "disabled");
+      else {
+        var fieldLabelTd = $j(gel("label." + self.ref + "." + e.name));
+        fieldLabelTd.css("position", "relative");
+        var hideButton = $j("<a class='icon icon-delete personalize_form_hide_field' href='#'></a>");
+        hideButton.attr("title", "Hide " + e.label);
+        hideButton.data("input", input);
+        fieldLabelTd.find('label').prepend(hideButton);
+        fieldLabelTd.parent().mouseenter(self, function(event) {
+          if (event.data.isOpen)
+            $j(self).addClass("personalize_hover");
+        }).mouseleave(self, function(event) {
+          if (event.data.isOpen)
+            $j(self).removeClass("personalize_hover");
+        });
+        input.next().mouseenter(fieldLabelTd, function(event) {
+          event.data.parent().addClass("personalize_hover");
+        }).mouseleave(fieldLabelTd, function(event) {
+          event.data.parent().removeClass("personalize_hover");
+        });
+        if (self.$fieldLabelHideButtons === null)
+          self.$fieldLabelHideButtons = hideButton;
+        else
+          self.$fieldLabelHideButtons = self.$fieldLabelHideButtons.add(hideButton);
+        if (self.$fields === null)
+          self.$fields = input;
+        else
+          self.$fields = self.$fields.add(input);
+      }
+      container.append(html);
+    });
+    if (this.$fieldLabelHideButtons != null)
+      this.$fieldLabelHideButtons.click(function(event) {
+        $j(this).data("input").click();
+        event.preventDefault();
+        event.stopPropagation();
+      });
+  },
+  getFormElements: function() {
+    var fieldNames = g_form.elements.sort(function(a, b) {
+      return a.fieldName <= b.fieldName ? -1 : 1;
+    });
+    var answer = [];
+    fieldNames.each(function(item) {
+      if (item.tableName == "variable")
+        return;
+      answer.push({
+        name: item.fieldName,
+        label: g_form.getLabelOf(item.fieldName),
+        display: !g_form.isUserPersonalizedField(item.fieldName),
+        isDisabled: (g_form.isMandatory(item.fieldName) || g_form.isDisplayNone(item, g_form.getControl(item.fieldName))) && !g_form.isUserPersonalizedField(item.fieldName)
+      })
+    });
+    return answer;
+  },
+  toString: function() {
+    return 'PersonalizeForm';
+  }
+});
+$j(function() {
+  "use strict";
+  if (typeof g_form !== "undefined")
+    new PersonalizeForm("#togglePersonalizeForm");
+});;
+/*! RESOURCE: /scripts/doctype/deferred_related_lists.js */
+$j(function($) {
+  "use strict";
+  if (window.NOW.concourseLists) {
+    return;
+  }
+  var timeout = 50;
+  var loadingTimeout = 3000;
+  var loadingTimer = null;
+  setTimeout(function() {
+    if (!window.g_form || window.g_related_list_timing != 'deferred')
+      return;
+    getRelatedLists();
+  }, timeout);
+  $('.related-list-trigger').on('click', function() {
+    $(this).closest('.related-list-trigger-container').hide();
+    loadingTimeout = 0;
+    getRelatedLists();
+  })
+
+  function getRelatedLists() {
+    setupLoadingMessage();
+    var deferred_start_time = new Date();
+    var listContainer = $('#related_lists_wrapper');
+    if (listContainer.length === 0)
+      return;
+    var url = new GlideURL('list2_deferred_related_lists.do');
+    url.addParam('sysparm_table', g_form.getTableName());
+    url.addParam('sysparm_keep_related_lists_open', 'true');
+    url.addEncodedString('sysparm_sys_id=' + g_form.getUniqueValue().trim());
+    url.addParam('sysparm_view', $('#sysparm_view').val());
+    if ($('#sysparm_domain'))
+      url.addParam('sysparm_domain', $('#sysparm_domain').val());
+    if ($('#sysparm_domain_scope'))
+      url.addParam('sysparm_domain_scope', $('#sysparm_domain_scope').val());
+    url.addParam('sysparm_stack', 'no');
+    url.addParam('partial_page', 'related_lists');
+    url.addEncodedString('sysparm_embedded=' + $('#sysparm_embedded').val());
+    var ga = new GlideAjax(null, url.getURL());
+    ga.getXML(function(response) {
+      var deferred_responsetime = new Date();
+      CustomEvent.fire('page_timing', {
+        name: 'RLV2',
+        child: 'Delay until load',
+        ms: (deferred_responsetime - deferred_start_time)
+      });
+      var html = response.responseText;
+      listContainer[0].innerHTML = html;
+      html.evalScripts(true);
+      CustomEvent.fire('partial.page.reload');
+      CustomEvent.fire('list.initialize.tags');
+      clearLoadingMessage();
+      var lists_loaded_time = new Date();
+      var deferred_loadtime = lists_loaded_time - deferred_start_time;
+      CustomEvent.fire('page_timing', {
+        name: 'RLV2',
+        child: 'Network time',
+        ms: (lists_loaded_time - deferred_responsetime)
+      });
+    });
+  }
+  CustomEvent.observe('list.loaded', function(table, list) {
+    if (!table) {
+      return;
+    }
+    if (!list) {
+      return;
+    }
+    if (list.getReferringURL().indexOf('list2_deferred_related_lists.do') != -1 ||
+      list.getReferringURL() == 'undefined')
+      list.setReferringURL(window.location.pathname + window.location.search);
+  });
+
+  function setupLoadingMessage() {
+    loadingTimer = setTimeout(function() {
+      $('.related-list-loading').fadeIn();
+    }, loadingTimeout)
+  }
+
+  function clearLoadingMessage() {
+    if (loadingTimer)
+      clearTimeout(loadingTimer);
+    $('.related-list-loading').hide();
+  }
+});
+/*! RESOURCE: /scripts/classes/GlideNavigation.js */
+;
+(function() {
+  var GlideNavigation = function() {};
+  var MAX_URL_LENGTH = 2000;
+  var _open = function(url, target) {
+    if (target) {
+      window.open(url, target);
+      return;
+    }
+    window.location.href = url;
+  };
+  GlideNavigation.prototype = {
+    open: function(url, target) {
+      if (url.length <= MAX_URL_LENGTH) {
+        _open(url, target);
+        return;
+      }
+      jQuery.ajax({
+        type: "POST",
+        url: '/api/now/tinyurl',
+        data: JSON.stringify({
+          url: url
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json"
+      }).done(function(response) {
+        _open(response.result, target);
+      });
+    },
+    openList: function(table, query) {
+      var url = table + '_list.do';
+      if (query)
+        url += "?sysparm_query=" + encodeURIComponent(query);
+      this.open(url);
+    },
+    openRecord: function(table, sys_id) {
+      var url = table + '.do?sys_id=' + sys_id;
+      this.open(url);
+    },
+    reloadWindow: function() {
+      if (window.location.reload)
+        window.location.reload();
+    },
+    refreshNavigator: function() {
+      CustomEvent.fireTop('navigator.refresh');
+    },
+    getURL: function() {
+      return window.location.href;
+    },
+    openPopup: function(url, name, features, noStack) {
+      if (noStack === true && url.indexOf("sysparm_nameofstack") == -1)
+        url += "&sysparm_stack=no";
+      var win = window.open(url, name, features, false);
+      return win;
+    },
+    setPermalink: function(title, relativePath) {
+      CustomEvent.fireTop('magellanNavigator.permalink.set', {
+        title: title,
+        relativePath: relativePath
+      });
+    },
+    addUserHistoryEntry: function(title, relativePath, description, isTable) {
+      if (typeof description == "undefined")
+        description = "";
+      if (typeof isTable == "undefined")
+        isTable = false;
+      CustomEvent.fireTop('magellanNavigator.sendHistoryEvent', {
+        title: title,
+        url: relativePath,
+        description: description,
+        isTable: isTable
+      });
+    }
+  };
+  window.g_navigation = new GlideNavigation();
+})();;
+/*! RESOURCE: /scripts/classes/GlideAPI1.js */
+window.g_api = 1;;
+/*! RESOURCE: /scripts/ac.js */
+var g_isInternetExplorer = isMSIE;
+var KEY_RETURN = 3;
+var KEY_BACKSPACE = 8;
+var KEY_TAB = 9;
+var KEY_ENTER = 13;
+var KEY_PAGEUP = 33;
+var KEY_PAGEDOWN = 34;
+var KEY_END = 35;
+var KEY_HOME = 36;
+var KEY_ARROWLEFT = 37;
+var KEY_ARROWUP = 38;
+var KEY_ARROWRIGHT = 39;
+var KEY_ARROWDOWN = 40;
+var KEY_INSERT = 45;
+var KEY_DELETE = 46;
+var KEY_ESC = 27;
+var NO_INVISIBLE = 0;
+var itemHeight = 16;
+var ctimeVal = {};
+var TAG_DIV = "div";
+var TAG_SPAN = "span";
+var ONE_TO_MANY = "OTM";
+var g_ac_objects = new Array();
+
+function acKeyDown(evt, elementName, type, dependent) {
+  var typedChar = getKeyCode(evt);
+  if (typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP)
+    fieldChange(evt, elementName, type, dependent);
+}
+
+function acKeyUp(evt, elementName, type, dependent) {
+  var typedChar = getKeyCode(evt);
+  if (typedChar != KEY_ARROWDOWN && typedChar != KEY_ARROWUP)
+    fieldChange(evt, elementName, type, dependent);
+}
+
+function fieldChange(event, elementName, type, dependent) {
+  if (document.readyState && document.readyState != "complete") {
+    jslog("fieldChange delayed due to document not being ready");
+    return;
+  }
+  var table = elementName.split('.')[0];
+  var additional = null;
+  if (dependent != null) {
+    var dparts = dependent.split(",");
+    var el = document.getElementsByName(table + "." + dparts[0])[0];
+    if (el != null) {
+      var selectValue = "";
+      if (el.tagName == "INPUT") {
+        var selectValue = el.value;
+      } else {
+        selectValue = el.options[el.selectedIndex].value;
+      }
+      additional = "sysparm_value=" + selectValue;
+    }
+  }
+  fieldProcess(event, elementName, type, false, true, null, additional);
+}
+
+function fieldProcess(evt, elementName, type, noMax, useInvisible, uFieldName, additional, refField) {
+  var typedChar = getKeyCode(evt);
+  if (ctimeVal[elementName] > 0 && typedChar != 0)
+    clearTimeout(ctimeVal[elementName]);
+  var displayField;
+  var invisibleField;
+  if (type == "Reference") {
+    displayField = gel("sys_display." + elementName);
+    if (useInvisible)
+      invisibleField = gel(elementName);
+  } else {
+    displayField = gel(elementName);
+    if (useInvisible)
+      invisibleField = gel("sys_display." + elementName);
+  }
+  var updateField;
+  if (uFieldName != null)
+    updateField = gel(uFieldName);
+  var ac = displayField.ac;
+  if (ac == null) {
+    ac = getAC(displayField.name);
+    if (ac == null) {
+      ac = newAC(displayField, invisibleField, updateField, elementName, type);
+      if (ac.isOTM())
+        ac.refField = refField;
+    }
+  }
+  if (typedChar != KEY_TAB) {
+    ac.fieldChanged = true;
+    ac.matched = false;
+    ac.ignoreAJAX = false;
+    if (ac.type == 'Reference')
+      ac.dirty = true;
+  }
+  var waitTime = 50;
+  if (typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP || typedChar == NO_INVISIBLE)
+    waitTime = 0;
+  ctimeVal[elementName] = setTimeout(function() {
+    fieldProcessNow(typedChar, elementName, type, noMax, useInvisible, uFieldName, additional, refField);
+  }, g_acWaitTime || waitTime);
+}
+
+function initAutoCompleteField(ac) {
+  if (ac.getUpdateField())
+    return;
+  Event.observe(ac.getField(), 'blur', fieldBlurred.bind(ac.getField()), false);
+  setDropDownSizes();
+  setStyle(ac.getMenu(), "dropDownTableStyle");
+  window.onresize = setDropDownSizes;
+  setSavedText(ac, new Array((ac.getInvisibleField() ? ac.getInvisibleField().value : null), ac.getField().value));
+  var request = new Object();
+  request.responseXML = new Object();
+  request.responseXML.ac = ac;
+  storeResults(ac, "", request);
+}
+
+function setDropDownSizes() {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    var ac = g_ac_objects[i];
+    if (!ac)
+      continue;
+    setDropDownSize(ac);
+  }
+}
+
+function setDropDownSize(ac) {
+  var field = ac.getField();
+  var mLeft = grabOffsetLeft(field) + "px";
+  var mTop = grabOffsetTop(field) + (field.offsetHeight - 1) + "px";
+  var mWidth = estimateWidth(ac) + "px";
+  var menu = ac.getMenu();
+  if (menu.offsetWidth > parseInt(mWidth))
+    mWidth = menu.offsetWidth + "px";
+  acSetTopLeftWidth(menu.style, mTop, mLeft, mWidth);
+  var iframe = ac.getIFrame();
+  if (iframe)
+    acSetTopLeftWidth(iframe.style, mTop, mLeft, mWidth);
+}
+
+function acSetTopLeftWidth(style, top, left, width) {
+  style.left = left;
+  style.top = top;
+  style.width = width;
+}
+
+function estimateWidth(ac) {
+  var field = ac.getField();
+  if (g_isInternetExplorer)
+    return field.offsetWidth - (ac.menuBorderSize * 2);
+  else
+    return field.offsetWidth;
+}
+
+function fieldBlurred() {
+  var theField = this;
+  var ac = theField.ac;
+  ac.ignoreAJAX = true;
+  var cc = ac.getField().value;
+  if (cc.indexOf("javascript:") != 0) {
+    if (ac.type == 'Reference' && ac.matched == false && ac.fieldChanged == true) {
+      setReferenceField(ac, cc);
+    }
+  }
+  ac.matched = false;
+  ac.fieldChanged = false;
+  ac.previousTextValue = '';
+  checkForDirty(ac);
+  ac.hideDropDown();
+}
+
+function setReferenceField(ac, cc) {
+  var encodedText = encodeText(cc);
+  var url = "xmlhttp.do?sysparm_processor=" + ac.type +
+    "&sysparm_name=" + ac.elementName +
+    "&sysparm_exact_match=yes" +
+    "&sysparm_chars=" + encodedText +
+    "&sysparm_type=" + ac.type;
+  var response = serverRequestWait(url);
+  var items = response.responseXML.getElementsByTagName("item");
+  if (items.length == 1) {
+    var item = items[0];
+    var name = trim(item.getAttribute("name"));
+    var label = trim(item.getAttribute("label"));
+    ac.getField().value = label;
+    ac.getInvisibleField().value = name;
+  } else {
+    var e = ac.getField();
+    var f = e.filter;
+    if (!f || f == '') {
+      ac.getInvisibleField().value = "x";
+      ac.getField().value = "";
+      ac.getInvisibleField().value = "";
+    }
+  }
+  fieldSet(ac);
+  refFlipImage(ac.getField(), ac.elementName);
+  ac.dirty = true;
+}
+
+function stripNewlines(data) {
+  var retData = "";
+  var Ib = "\n\r";
+  for (var c = 0; c < data.length; c++) {
+    if (Ib.indexOf(data.charAt(c)) == -1)
+      retData += data.charAt(c);
+    else
+      retData += " ";
+  }
+  return retData;
+}
+
+function grabMenuInfo(j) {
+  var spanTag = j.getElementsByTagName(TAG_SPAN);
+  var spanInfo = new Array();
+  if (!spanTag)
+    return spanInfo;
+  for (var i = 0; i < spanTag.length; i++) {
+    var e = spanTag[i];
+    if (e.className != "selected_item")
+      continue;
+    var spanData = e.innerHTML;
+    if (spanData != "&nbsp;") {
+      spanInfo = new Array(e.gname, stripNewlines(e.glabel));
+    }
+    break;
+  }
+  return spanInfo;
+}
+
+function storeResults(ac, searchString, req) {
+  ac.resultsStorage[searchString] = req;
+}
+
+function retrieveStorage(ac, textStr) {
+  return ac.resultsStorage[textStr];
+}
+
+function storeZeroString(ac, searchString, req) {
+  ac.emptyResults[searchString] = req;
+}
+
+function findRelatedZeroString(ac, searchString) {
+  for (var str in ac.emptyResults) {
+    if (searchString.substring(0, str.length) == str) {
+      return ac.emptyResults[str];
+    }
+  }
+}
+var handleClickedDropDown = function() {
+  setAllText(this.ac, grabMenuInfo(this));
+  this.ac.dirty = false;
+}
+var handleMouseOverDropDown = function() {
+  setStyle(this, "selectedItemStyle");
+}
+var handleMouseOutDropDown = function() {
+  setStyle(this, "nonSelectedItemStyle");
+}
+
+function dropDownHilight(ac, direction) {
+  setTextField(ac, new Array((ac.getInvisibleField() ? ac.savedInvisibleTextValue : null), ac.savedTextValue));
+  ac.matched = true;
+  if (!ac.currentMenuItems || ac.currentMenuCount <= 0)
+    return;
+  ac.showDropDown();
+  var toSelect = ac.selectedItemNum + direction;
+  if (toSelect >= ac.currentMenuCount)
+    toSelect = ac.currentMenuCount - 1;
+  if (ac.selectedItemNum != -1 && toSelect != ac.selectedItemNum) {
+    setStyle(ac.selectedItemObj, "nonSelectedItemStyle");
+    ac.selectedItemNum = -1;
+  }
+  if (toSelect < 0) {
+    ac.selectedItemNum = -1;
+    ac.getField().focus();
+    return;
+  }
+  ac.selectItem(toSelect);
+  setStyle(ac.selectedItemObj, "selectedItemStyle");
+  setTextField(ac, grabMenuInfo(ac.selectedItemObj));
+  ac.dirty = true;
+}
+
+function setPreviousText(ac, textArray) {
+  if (textArray[1] != null)
+    ac.previousTextValue = textArray[1];
+}
+
+function setSavedText(ac, textArray) {
+  ac.setSavedText(textArray);
+}
+
+function setTextValue(ac, textArray) {
+  ac.textValue = textArray[1].replace(/\r\n/g, "\n");
+  if (textArray[0] != null && ac.getInvisibleField()) {
+    ac.invisibleTextValue = textArray[0];
+  }
+}
+
+function setTextField(ac, textArray) {
+  var f;
+  if (textArray[0] != null && ac.getInvisibleField()) {
+    f = ac.getInvisibleField();
+    f.value = textArray[0];
+  }
+  f = ac.getField();
+  f.value = textArray[1];
+  fireOnFormat(ac);
+}
+
+function setAllText(ac, textArray) {
+  setSavedText(ac, textArray);
+  setTextValue(ac, textArray);
+  setTextField(ac, textArray);
+  setPreviousText(ac, textArray);
+  fieldSet(ac);
+}
+
+function fieldSet(ac) {
+  ac.dirty = false;
+  ac.matched = true;
+  updateRelated(ac);
+  fireChange(ac);
+  fireOnFormat(ac);
+}
+
+function fireChange(ac) {
+  callOnChange(ac.getInvisibleField());
+  callOnChange(ac.getField());
+}
+
+function callOnChange(f) {
+  if (!f)
+    return;
+  if (f["onchange"])
+    f.onchange();
+}
+
+function fireOnFormat(ac) {
+  var f = ac.getField();
+  if (f.getAttribute("onformat"))
+    eval(f.getAttribute("onformat"));
+}
+
+function updateRelated(ac) {
+  var elementName = ac.elementName;
+  var elementValue = ac.invisibleTextValue;
+  if (elementValue != '')
+    updateRelatedGivenNameAndValue(elementName, elementValue);
+  if (ac["fCall"]) {
+    var onset = ac["fCall"];
+    eval(onset);
+  }
+}
+
+function clearRelated(ac) {
+  var elementName = ac.elementName;
+  var nodes = document.getElementsByTagName('input');
+  var sName = elementName + ".";
+  for (var i = 0; i < nodes.length; i++) {
+    var current = nodes[i];
+    var id = current.id;
+    var index = id.indexOf(sName);
+    if (index == -1)
+      continue;
+    index = id.lastIndexOf(".");
+    var fName = id.substring(index + 1, id.length);
+    var select = gel(elementName + "." + fName);
+    if (select != null) {
+      var x = select.tagName;
+      if (x == 'select' || x == 'SELECT') {
+        var selindex = select.selectedIndex;
+        if (selindex != -1) {
+          var option = select.options[selindex];
+          option.selected = false;
+        }
+        var options = select.options;
+        for (oi = 0; oi < options.length; oi++) {
+          var option = options[oi];
+          var optval = option.value;
+          if (optval == '') {
+            option.selected = true;
+            break;
+          }
+        }
+      }
+    }
+    current.value = '';
+  }
+}
+
+function setStyle(child, styleName) {
+  child.className = styleName;
+  var style = child.style;
+  var ac = child.ac;
+  if (styleName == "dropDownTableStyle") {
+    style.fontSize = "13px";
+    style.fontFamily = "arial,sans-serif";
+    style.wordWrap = "break-word";
+  } else if (styleName == "nonSelectedItemStyle") {
+    ac.setNonSelectedStyle(child);
+  } else if (styleName == "selectedItemStyle") {
+    ac.setSelectedStyle(child);
+  } else if (styleName == "dropDownRowStyle") {
+    style.display = "block";
+    style.paddingLeft = 3;
+    style.paddingRight = 3;
+    style.height = itemHeight + "px";
+    style.overflow = "hidden";
+    style.whiteSpace = "nowrap";
+  }
+}
+
+function createDropDown(ac, foundStrings) {
+  ac.clearDropDown();
+  for (var c = 0; c < foundStrings.length; c++) {
+    var child = createChild(ac, foundStrings[c]);
+    ac.appendItem(child);
+  }
+  setSavedText(ac, new Array((ac.getInvisibleField() ? ac.invisibleTextValue : null), ac.textValue));
+  if (ac.currentMenuCount != 0) {
+    var height = (itemHeight * ac.currentMenuCount) + 4;
+    ac.setHeight(height);
+  }
+  ac.selectedItemObj = null;
+  ac.selectedItemNum = -1;
+}
+
+function createChild(ac, sa) {
+  var theDiv = cel(TAG_DIV);
+  theDiv.ac = ac;
+  setStyle(theDiv, "nonSelectedItemStyle");
+  theDiv.onmousedown = handleClickedDropDown;
+  theDiv.onmouseover = handleMouseOverDropDown;
+  theDiv.onmouseout = handleMouseOutDropDown;
+  var menuRow = cel(TAG_SPAN);
+  setStyle(menuRow, "dropDownRowStyle");
+  if (false && sa.length == 4) {
+    var r = cel(TAG_SPAN);
+    r.innerHTML = sa[3];
+    menuRow.appendChild(r);
+    r = cel(TAG_SPAN);
+    r.innerHTML = "&nbsp;";
+    menuRow.appendChild(r);
+  }
+  var itemInRow = cel(TAG_SPAN);
+  itemInRow.innerHTML = sa[1].escapeHTML();
+  itemInRow.gname = sa[0];
+  if (ac.type == "PickList")
+    itemInRow.glabel = sa[2];
+  else
+    itemInRow.glabel = sa[1];
+  itemInRow.className = "selected_item";
+  menuRow.appendChild(itemInRow);
+  theDiv.appendChild(menuRow);
+  return theDiv;
+}
+
+function encodeText(txt) {
+  if (encodeURIComponent)
+    return encodeURIComponent(txt);
+  if (escape)
+    return escape(txt);
+}
+
+function newAC(fld, invfld, ufld, elementName, type) {
+  var name = fld.name + "_form";
+  var ac = new AJAXOtherCompleter(name, elementName);
+  ac.setType(type);
+  ac.setField(fld);
+  ac.setInvisibleField(invfld);
+  ac.setUpdateField(ufld);
+  var oCount = g_ac_objects.length;
+  g_ac_objects[oCount] = ac;
+  initAutoCompleteField(ac);
+  ac.firstUse = true;
+  return ac;
+}
+
+function removeAC(name) {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    if (g_ac_objects[i] == null)
+      continue;
+    if (g_ac_objects[i].elementName == name)
+      g_ac_objects[i] = null;
+  }
+}
+
+function getAC(name) {
+  for (var i = 0; i < g_ac_objects.length; i++) {
+    if (g_ac_objects[i] == null)
+      continue;
+    if (g_ac_objects[i].name == name)
+      return g_ac_objects[i];
+  }
+  return getacPerInput(name);
+}
+
+function getacPerInput(elementName) {
+  var f = gel("sys_display." + elementName);
+  if (f != null && f.ac != null)
+    return f.ac;
+  f = gel(elementName);
+  if (f != null && f.ac != null)
+    return f.ac;
+  return null;
+}
+
+function checkEnter(e, elementName) {
+  var ac = getAC(elementName);
+  if (ac == null)
+    return true;
+  var keyCode = getKeyCode(e);
+  if (keyCode == KEY_ENTER) {
+    if (ac.type != 'PickList') {
+      Event.stop(e);
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkForDirty(ac) {
+  if (!ac.dirty)
+    return;
+  setTextValue(ac, new Array((ac.getInvisibleField() ? ac.getInvisibleField().value : null), ac.getField().value));
+  fieldSet(ac);
+}
+
+function fieldChangeSlush(event, elementName, type, noMax, uFieldName, additional) {
+  fieldProcess(event, elementName, type, noMax, false, uFieldName, additional);
+}
+
+function fieldChangeSlush1(event, elementName, fieldName, type, noMax, uFieldName) {
+  var filter = getFilter();
+  displayField = document.getElementsByName(elementName)[0];
+  displayField.value = filter;
+  fieldProcess(event, elementName, ONE_TO_MANY, noMax, false, uFieldName, 1, fieldName);
+}
+
+function fieldChangeSlush2(event, elementName, fieldName, type, noMax, uFieldName, queryAddOn, additional, fDiv) {
+  var filter = getFilter(elementName, '', fDiv);
+  filter += "^" + queryAddOn;
+  displayField = gel(elementName);
+  displayField.value = filter;
+  fieldProcess(event, elementName, ONE_TO_MANY, noMax, false, uFieldName, additional, fieldName);
+}
+
+function updateSlushField(ac, values) {
+  var updateField = ac.getUpdateField();
+  destroyUpdateField(ac);
+  if (values != null) {
+    for (var zi = 0; zi < values.length; zi++) {
+      updateField.options[zi] = new Option(values[zi][1], values[zi][0]);
+    }
+  }
+  if (updateField["onchange"])
+    updateField.onchange();
+}
+
+function destroyUpdateField(ac) {
+  ac.getUpdateField().options.length = 0;
+}
+
+function getKeyCode(e) {
+  if (e == null)
+    return 0;
+  return g_isInternetExplorer && window.event ? event.keyCode : e.keyCode;
+}
+
+function fieldProcessNow(typedChar, elementName, type, noMax, useInvisible, uFieldName, additional, refField) {
+  var displayField;
+  var invisibleField;
+  var updateField;
+  if (type == "Reference") {
+    displayField = gel("sys_display." + elementName);
+    if (useInvisible)
+      invisibleField = gel(elementName);
+  } else {
+    displayField = gel(elementName);
+    if (useInvisible)
+      invisibleField = gel("sys_display." + elementName);
+  }
+  if (uFieldName != null)
+    updateField = gel(uFieldName);
+  var ac = displayField.ac;
+  if (ac == null) {
+    ac = getAC(displayField.name);
+    if (ac == null) {
+      ac = newAC(displayField, invisibleField, updateField, elementName, type);
+      if (ac.isOTM())
+        ac.refField = refField;
+    }
+  }
+  ac.element = displayField;
+  var itemName = ac.element.getAttribute("function");
+  if (itemName != null)
+    ac.fCall = itemName;
+  setTextValue(ac, new Array((invisibleField ? invisibleField.value : null), displayField.value));
+  if (typedChar == KEY_TAB)
+    return;
+  ac.fieldChanged = true;
+  if (typedChar != 0 || updateField || ac.isOTM()) {
+    if (ac.isOTM() || ((typedChar == KEY_ARROWDOWN || typedChar == KEY_ARROWUP) && !updateField)) {
+      if (ac.isOTM() || !ac.isVisible()) {
+        if (ac.isOTM())
+          searchForData(ac, elementName, 'M2MList', noMax, additional);
+        else
+          searchForData(ac, elementName, type, noMax, additional);
+      } else {
+        ac.showDropDown();
+        dropDownHilight(ac, typedChar == KEY_ARROWUP ? -1 : 1);
+      }
+    } else {
+      if (!updateField)
+        setSavedText(ac, new Array((invisibleField ? ac.invisibleTextValue : null), ac.textValue));
+      if (typedChar != KEY_ENTER && typedChar != KEY_RETURN) {
+        if (ac.firstUse || ac.previousTextValue != ac.textValue) {
+          searchForData(ac, elementName, type, noMax, additional);
+          ac.firstUse = false;
+        } else
+          clearRelated(ac);
+      } else {
+        var selectedItemNum = ac.selectedItemNum;
+        ac.hideDropDown();
+        if (ac.matched == false && selectedItemNum == -1) {
+          jslog("Enter hit without matches, ignoring it");
+          return;
+        }
+        fieldSet(ac);
+        ac.previousTextValue = '';
+      }
+    }
+  }
+}
+
+function updateRelatedGivenNameAndValue(elementName, elementValue) {
+  var viewField = gel("view." + elementName);
+  if (viewField == null)
+    return;
+  if (isDoctype())
+    viewField.style.display = '';
+  else
+    viewField.style.display = "inline";
+  var viewRField = gel("viewr." + elementName);
+  var viewHideField = gel("view." + elementName + ".no");
+  if (viewRField != null) {
+    if (isDoctype())
+      viewRField.style.display = '';
+    else
+      viewRField.style.display = "inline";
+  }
+  if (viewHideField != null)
+    viewHideField.style.display = "none";
+  if (typeof(g_form) == 'undefined')
+    return;
+  var list = g_form.getDerivedFields(elementName);
+  if (list == null)
+    return;
+  var url = "xmlhttp.do?sysparm_processor=GetReferenceRecord" +
+    "&sysparm_name=" + elementName +
+    "&sysparm_value=" + elementValue;
+  var args = new Array(elementName, list.join(','));
+  serverRequest(url, refFieldChangeResponse, args);
+}
+
+function emptySubstr(ac) {
+  return findRelatedZeroString(ac, ac.textValue);
+}
+
+function searchForData(ac, elementName, type, noMax, additional) {
+  var cachedData;
+  if (!additional && !ac.isOTM())
+    cachedData = retrieveStorage(ac, ac.textValue);
+  window.status = "Searching for: " + ac.textValue;
+  if (ac.textValue != '^' && emptySubstr(ac))
+    cachedData = emptySubstr(ac);
+  if (cachedData) {
+    fieldChangeResponse(cachedData, true);
+  } else {
+    var encodedText = encodeText(ac.textValue);
+    var url = "sysparm_processor=" + type +
+      "&sysparm_name=" + elementName +
+      "&sysparm_chars=" + encodedText +
+      "&sysparm_nomax=" + noMax +
+      "&sysparm_type=" + type;
+    if (ac.isOTM())
+      url += "&sysparm_field=" + ac.refField;
+    if (additional)
+      url += "&" + additional;
+    if (type != "Reference" && typeof(g_form) != "undefined")
+      url += "&" + g_form.serialize();
+    serverRequestPost("xmlhttp.do", url, fieldChangeResponse);
+    var target = ac.getField();
+    if (target.type != 'hidden' && ac.ignoreAJAX != true)
+      ac.getField().focus();
+  }
+  setPreviousText(ac, new Array(ac.invisibleTextValue, ac.textValue));
+}
+
+function fieldChangeResponse(request, nozero) {
+  if (request == null)
+    return;
+  var ac = request.responseXML.ac;
+  if (request.responseXML.documentElement) {
+    var xml = request.responseXML;
+    var e = xml.documentElement;
+    var cancelMessage = e.getAttribute('cancel_message');
+    if (cancelMessage) {
+      GlideUI.get().addOutputMessage({
+        msg: cancelMessage,
+        type: 'error'
+      });
+      $j('#select_0')[0].firstChild.text = new GwtMessage().getMessage("List's data could not be retrieved");
+      return;
+    }
+    var items = xml.getElementsByTagName("item");
+    var elementName = e.getAttribute("sysparm_name");
+    var searchText = e.getAttribute("sysparm_chars");
+    var type = e.getAttribute("sysparm_type");
+    var displayField;
+    var invisibleField;
+    if (type == "Reference") {
+      displayField = gel("sys_display." + elementName);
+      invisibleField = gel(elementName);
+    } else {
+      displayField = gel(elementName);
+      invisibleField = gel("sys_display." + elementName);
+    }
+    var ac = displayField.ac;
+    if (ac.ignoreAJAX == true)
+      return;
+    var values = new Array();
+    window.status = "Matches" + (searchText ? " for " + searchText : "") + ": " + items.length;
+    if (items.length == 0) {
+      if (ac.getInvisibleField())
+        ac.getInvisibleField().value = "";
+      if (nozero != true)
+        storeZeroString(ac, searchText, request);
+    }
+    if (searchText && ac.textValue && searchText != ac.textValue)
+      return;
+    storeResults(ac, (searchText ? searchText : ""), request);
+    for (var iCnt = 0; iCnt < items.length; iCnt++) {
+      var item = items[iCnt];
+      var name = item.getAttribute("name");
+      var label = item.getAttribute("label");
+      var value = item.getAttribute("value");
+      var className = item.getAttribute("sys_class_name");
+      value = replaceRegEx(value, document, elementName.split(".")[0]);
+      values[values.length] = new Array(name, label, value, className);
+    }
+    if (type == "Reference") {
+      if (items.length == 1 && searchText != null && fieldMatches(searchText, items[0].getAttribute("label"))) {
+        displayField.value = items[0].getAttribute("label");
+        invisibleField.value = items[0].getAttribute("name");
+        fieldSet(ac);
+      } else {
+        var viewField = document.getElementById("view." + elementName);
+        var viewHideField = document.getElementById("view." + elementName + ".no");
+        if (viewField != null)
+          viewField.style.display = "none";
+        if (viewHideField != null)
+          viewHideField.style.display = "inline";
+        invisibleField.value = "";
+        ac.dirty = true;
+      }
+    }
+    if (ac.getUpdateField()) {
+      updateSlushField(ac, values);
+    } else {
+      createDropDown(ac, values);
+      ac.showDropDown();
+    }
+  } else {
+    window.status = "";
+    if (ac.getUpdateField())
+      updateSlushField(ac, null);
+    else {
+      clearRelated(ac);
+      ac.clearDropDown();
+    }
+  }
+  if (!ac.getUpdateField() && ac.currentMenuCount < 1)
+    ac.hideDropDown();
+}
+
+function fieldMatches(search, retitem) {
+  if (search.length >= retitem.length) {
+    var cc = retitem.substring(0, search.length);
+    if (search.toLowerCase() == cc.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function lightWeightReferenceLink(inputName, tableName, addOnRefClick) {
+  var input = gel(inputName);
+  var sys_id = input.value;
+  var url = tableName + ".do?sys_id=" + sys_id;
+  var frame = top.gsft_main;
+  if (!frame)
+    frame = top;
+  frame.location = url;
+}
+
+function clearDependents(name) {
+  var nodes = document.getElementsByTagName('input');
+  for (var i = 0; i < nodes.length; i++) {
+    var current = nodes[i];
+    var dependentField = current.dependent_field;
+    if (!dependentField)
+      continue;
+    if (name == dependentField) {
+      current.value = "";
+      var ac = getAC(current.name);
+      if (ac) {
+        ac.resultsStorage = new Object();
+        ac.emptyResults = new Object();
+      }
+      clearDependents(current.id);
+    }
+  }
+};
+/*! RESOURCE: /scripts/ac_derived_field_support.js */
+function refFieldChangeResponse(request, args) {
+  if (request == null)
+    return;
+  var elementName = args[0];
+  var parts = elementName.split(".");
+  parts.shift();
+  var sName = parts.join(".") + ".";
+  if (args[1]) {
+    var fields = args[1].split(',');
+    setNodes(sName, fields, request);
+    return;
+  }
+  jslog("************** WHAT ARE WE DOING HERE *********************");
+}
+
+function setNodes(sName, array, request) {
+  for (var i = 0; i < array.length; i++) {
+    var fn = array[i];
+    var eln = sName + fn;
+    var elo = g_form.getGlideUIElement(eln);
+    if (!elo)
+      continue;
+    var field = request.responseXML.getElementsByTagName(fn);
+    if (field.length != 1) {
+      g_form.clearValue(eln);
+      if (g_form._isDerivedWaiting(eln)) {
+        g_form.setReadOnly(eln, false);
+        g_form._removeDerivedWaiting(eln);
+      }
+      continue;
+    }
+    var dv = field[0].getAttribute('value');
+    var v = field[0].getAttribute('db_value');
+    if (elo.getType() == 'glide_list' || elo.getType() == 'reference') {
+      g_form._setValue(eln, v, dv.split(","), false);
+    } else if (v)
+      g_form.setValue(eln, v, dv);
+    else
+      g_form.setValue(eln, dv);
+    if (g_form._isDerivedWaiting(eln)) {
+      g_form.setReadOnly(eln, false);
+      g_form._removeDerivedWaiting(eln);
+    }
+  }
+};
+/*! RESOURCE: /scripts/lib/glide_updates/prototype.effects.js */
+(function() {
+  var elemdisplay = {};
+  var rfxtypes = /^(?:toggle|show|hide)$/;
+  var ralpha = /alpha\([^)]*\)/i;
+  var rdigit = /\d/;
+  var ropacity = /opacity=([^)]*)/;
+  var rfxnum = /^([+\-]=)?([\d+.\-]+)(.*)$/;
+  var rnumpx = /^-?\d+(?:px)?$/i;
+  var rnum = /^-?\d/;
+  var timerId;
+  var fxAttrs = [
+    ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+    ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+    ["opacity"]
+  ];
+  var shrinkWrapBlocks = false;
+  var inlineBlockNeedsLayout = false;
+  var cssFloat = false;
+  var curCSS;
+  var opacitySupport;
+  document.observe("dom:loaded", function() {
+    var div = document.createElement("div");
+    div.style.width = div.style.paddingLeft = "1px";
+    document.body.appendChild(div);
+    if ("zoom" in div.style) {
+      div.style.display = "inline";
+      div.style.zoom = 1;
+      inlineBlockNeedsLayout = div.offsetWidth === 2;
+      div.style.display = "";
+      div.innerHTML = "<div style='width:4px;'></div>";
+      shrinkWrapBlocks = div.offsetWidth !== 2;
+      document.body.removeChild(div);
+    }
+    div = document.createElement("div");
+    div.style.display = "none";
+    div.innerHTML = "<link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
+    document.body.appendChild(div);
+    var a = div.getElementsByTagName("a")[0];
+    opacitySupport = /^0.55$/.test(a.style.opacity);
+    cssFloat = !!a.style.cssFloat;
+    document.body.removeChild(div);
+    if (!opacitySupport) {
+      Prototype.cssHooks.opacity = {
+        get: function(elem, computed) {
+          return ropacity.test((computed && elem.currentStyle ? elem.currentStyle.filter : elem.style.filter) || "") ?
+            (parseFloat(RegExp.$1) / 100) + "" :
+            computed ? "1" : "";
+        },
+        set: function(elem, value) {
+          var style = elem.style;
+          style.zoom = 1;
+          var opacity = Prototype.isNaN(value) ?
+            "" :
+            "alpha(opacity=" + value * 100 + ")",
+            filter = style.filter || "";
+          style.filter = ralpha.test(filter) ?
+            filter.replace(ralpha, opacity) :
+            style.filter + ' ' + opacity;
+        }
+      };
+    }
+  });
+  if (document.defaultView && document.defaultView.getComputedStyle) {
+    curCSS = function(elem, newName, name) {
+      var ret;
+      var defaultView;
+      var computedStyle;
+      name = name.replace(rupper, "-$1").toLowerCase();
+      if (!(defaultView = elem.ownerDocument.defaultView))
+        return undefined;
+      if ((computedStyle = defaultView.getComputedStyle(elem, null))) {
+        ret = computedStyle.getPropertyValue(name);
+        if (ret === "" && !contains(elem.ownerDocument.documentElement, elem))
+          ret = style(elem, name);
+      }
+      return ret;
+    };
+  } else if (document.documentElement.currentStyle) {
+    curCSS = function(elem, name) {
+      var left;
+      var rsLeft;
+      var ret = elem.currentStyle && elem.currentStyle[name];
+      var style = elem.style;
+      if (!rnumpx.test(ret) && rnum.test(ret)) {
+        left = style.left;
+        rsLeft = elem.runtimeStyle.left;
+        elem.runtimeStyle.left = elem.currentStyle.left;
+        style.left = name === "fontSize" ? "1em" : (ret || 0);
+        ret = style.pixelLeft + "px";
+        style.left = left;
+        elem.runtimeStyle.left = rsLeft;
+      }
+      return ret === "" ? "auto" : ret;
+    };
+  }
+
+  function contains(a, b) {
+    return document.compareDocumentPosition ? a.compareDocumentPosition(b) & 16 :
+      (a !== b && (a.contains ? a.contains(b) : true));
+  }
+
+  function style(elem, name, value, extra) {
+    if (!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style)
+      return;
+    var ret;
+    var origName = name.camelize();
+    var s = elem.style;
+    var hooks = Prototype.cssHooks[origName];
+    name = Prototype.cssProps[origName] || origName;
+    if (value !== undefined) {
+      if (typeof value === "number" && isNaN(value) || value == null)
+        return;
+      if (typeof value === "number" && !Prototype.cssNumber[origName])
+        value += "px";
+      if (!hooks || !("set" in hooks) || (value = hooks.set(elem, value)) !== undefined) {
+        try {
+          s[name] = value;
+        } catch (e) {}
+      }
+    } else {
+      if (hooks && "get" in hooks && (ret = hooks.get(elem, false, extra)) !== undefined)
+        return ret;
+      return s[name];
+    }
+  }
+
+  function isEmptyObject(obj) {
+    for (var name in obj)
+      return false;
+    return true;
+  }
+
+  function isWindow(obj) {
+    return obj && typeof obj === "object" && "setInterval" in obj;
+  }
+
+  function arrayMerge(first, second) {
+    var i = first.length;
+    var j = 0;
+    if (typeof second.length === "number") {
+      for (var l = second.length; j < l; j++)
+        first[i++] = second[j];
+    } else {
+      while (second[j] !== undefined)
+        first[i++] = second[j++];
+    }
+    first.length = i;
+    return first;
+  }
+
+  function makeArray(array) {
+    var ret = [];
+    if (array != null) {
+      var type = typeof array;
+      if (array.length == null || type === "string" || type === "function" || type === "regexp" || isWindow(array))
+        Array.prototype.push.call(ret, array);
+      else
+        arrayMerge(ret, array);
+    }
+    return ret;
+  }
+
+  function genFx(type, num) {
+    var obj = {};
+    fxAttrs.concat.apply([], fxAttrs.slice(0, num)).each(function(context) {
+      obj[context] = type;
+    });
+    return obj;
+  }
+
+  function defaultDisplay(nodeName) {
+    if (elemdisplay[nodeName])
+      return elemdisplay[nodeName];
+    var e = $(document.createElement(nodeName));
+    document.body.appendChild(e);
+    var display = e.getStyle("display");
+    e.remove();
+    if (display === "none" || display === "")
+      display = "block";
+    elemdisplay[nodeName] = display;
+    return display;
+  }
+  Prototype.effects = {
+    speed: function(speed, easing, fn) {
+      var opt = speed && typeof speed === "object" ? Object.extend({}, speed) : {
+        complete: fn || !fn && easing || typeof speed == 'function' && speed,
+        duration: speed,
+        easing: fn && easing || easing && !(typeof easing == 'function') && easing
+      };
+      opt.duration = Prototype.effects.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
+        opt.duration in Prototype.effects.fx.speeds ? Prototype.effects.fx.speeds[opt.duration] : Prototype.effects.fx.speeds._default;
+      opt.old = opt.complete;
+      opt.complete = function() {
+        if (opt.queue !== false)
+          $(this).dequeue();
+        if (typeof opt.old == 'function')
+          opt.old.call(this);
+      };
+      return opt;
+    },
+    easing: {
+      linear: function(p, n, firstNum, diff) {
+        return firstNum + diff * p;
+      },
+      swing: function(p, n, firstNum, diff) {
+        return ((-Math.cos(p * Math.PI) / 2) + 0.5) * diff + firstNum;
+      }
+    },
+    timers: [],
+    fx: function(elem, options, prop) {
+      this.elem = elem;
+      this.options = options;
+      this.prop = prop;
+      if (!options.orig)
+        options.orig = {};
+    }
+  };
+  Prototype.effects.fx.prototype = {
+    update: function() {
+      if (this.options.step)
+        this.options.step.call(this.elem, this.now, this);
+      (Prototype.effects.fx.step[this.prop] || Prototype.effects.fx.step._default)(this);
+    },
+    cur: function() {
+      if (this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null))
+        return this.elem[this.prop];
+      var r = parseFloat(this.elem.getStyle(this.prop));
+      return r || 0;
+    },
+    custom: function(from, to, unit) {
+      var self = this;
+      var fx = Prototype.effects.fx;
+      this.startTime = new Date().getTime()
+      this.start = from;
+      this.end = to;
+      this.unit = unit || this.unit || "px";
+      this.now = this.start;
+      this.pos = this.state = 0;
+
+      function t(gotoEnd) {
+        return self.step(gotoEnd);
+      }
+      t.elem = this.elem;
+      if (t() && Prototype.effects.timers.push(t) && !timerId)
+        timerId = setInterval(fx.tick, fx.interval);
+    },
+    show: function() {
+      this.options.orig[this.prop] = style(this.elem, this.prop);
+      this.options.show = true;
+      this.custom(this.prop === "width" || this.prop === "height" ? 1 : 0, this.cur());
+      $(this.elem).show();
+    },
+    hide: function() {
+      this.options.orig[this.prop] = style(this.elem, this.prop);
+      this.options.hide = true;
+      this.custom(this.cur(), 0);
+    },
+    step: function(gotoEnd) {
+      var t = new Date().getTime();
+      var done = true;
+      if (gotoEnd || t >= this.options.duration + this.startTime) {
+        this.now = this.end;
+        this.pos = this.state = 1;
+        this.update();
+        this.options.curAnim[this.prop] = true;
+        for (var i in this.options.curAnim) {
+          if (this.options.curAnim[i] !== true)
+            done = false;
+        }
+        if (done) {
+          if (this.options.overflow != null && !shrinkWrapBlocks) {
+            var elem = this.elem;
+            var options = this.options;
+            var overflowArray = ["", "X", "Y"];
+            for (var ii = 0, ll = overflowArray.length; ii < ll; ii++)
+              elem.style["overflow" + overflowArray[ii]] = options.overflow[ii];
+          }
+          if (this.options.hide) {
+            $(this.elem).hide();
+            if (Prototype.Browser.IE)
+              $(this.elem).setStyle({
+                filter: ''
+              });
+          }
+          if (this.options.hide || this.options.show) {
+            for (var p in this.options.curAnim)
+              style(this.elem, p, this.options.orig[p]);
+          }
+          this.options.complete.call(this.elem);
+        }
+        return false;
+      } else {
+        var n = t - this.startTime;
+        this.state = n / this.options.duration;
+        var specialEasing = this.options.specialEasing && this.options.specialEasing[this.prop];
+        var defaultEasing = this.options.easing || (Prototype.effects.easing.swing ? "swing" : "linear");
+        this.pos = Prototype.effects.easing[specialEasing || defaultEasing](this.state, n, 0, 1, this.options.duration);
+        this.now = this.start + ((this.end - this.start) * this.pos);
+        this.update();
+      }
+      return true;
+    }
+  };
+  Object.extend(Prototype.effects.fx, {
+    tick: function() {
+      var timers = Prototype.effects.timers;
+      for (var i = 0; i < timers.length; i++) {
+        if (!timers[i]())
+          timers.splice(i--, 1);
+      }
+      if (!timers.length)
+        Prototype.effects.fx.stop();
+    },
+    interval: 13,
+    stop: function() {
+      clearInterval(timerId);
+      timerId = null;
+    },
+    speeds: {
+      slow: 600,
+      fast: 200,
+      _default: 400
+    },
+    step: {
+      opacity: function(fx) {
+        fx.elem.setStyle({
+          opacity: fx.now
+        });
+      },
+      _default: function(fx) {
+        if (fx.elem.style && fx.elem.style[fx.prop] != null)
+          fx.elem.style[fx.prop] = (fx.prop === "width" || fx.prop === "height" ? Math.max(0, fx.now) : fx.now) + fx.unit;
+        else
+          fx.elem[fx.prop] = fx.now;
+      }
+    }
+  });
+  Object.extend(Prototype, {
+    isNaN: function(obj) {
+      return obj == null || !rdigit.test(obj) || isNaN(obj);
+    },
+    queue: function(elem, type, data) {
+      if (!elem)
+        return;
+      type = (type || "fx") + "queue";
+      var q = elem.retrieve(type);
+      if (!data)
+        return q || [];
+      if (!q || Object.isArray(data))
+        q = elem.store(type, makeArray(data));
+      else
+        q.push(data);
+      return q;
+    },
+    dequeue: function(elem, type) {
+      type = type || "fx";
+      var queue = Prototype.queue(elem, type);
+      var fn = queue.shift();
+      if (fn === "inprogress")
+        fn = queue.shift();
+      if (fn) {
+        if (type === "fx")
+          queue.unshift("inprogress");
+        fn.call(elem, function() {
+          Prototype.dequeue(elem, type);
+        });
+      }
+    },
+    cssHooks: {
+      opacity: {
+        get: function(elem, computed) {
+          if (computed) {
+            var ret = curCSS(elem, "opacity", "opacity");
+            return ret === "" ? "1" : ret;
+          }
+          return elem.style.opacity;
+        }
+      }
+    },
+    cssProps: {
+      "float": cssFloat ? "cssFloat" : "styleFloat"
+    },
+    cssNumber: {
+      "zIndex": true,
+      "fontWeight": true,
+      "opacity": true,
+      "zoom": true,
+      "lineHeight": true
+    }
+  });
+
+  function show(elem, speed, easing, callback) {
+    if (speed || speed === 0)
+      return animate(elem, genFx("show", 3), speed, easing, callback);
+    var display = elem.style.display;
+    if (!elem.retrieve("olddisplay") && display === "none")
+      display = elem.style.display = "";
+    if (display === "" && elem.getStyle("display") === "none")
+      elem.store("olddisplay", defaultDisplay(elem.nodeName));
+    display = elem.style.display;
+    if (display === "" || display === "none")
+      elem.style.display = elem.retrieve("olddisplay") || "";
+    return elem;
+  }
+
+  function hide(elem, speed, easing, callback) {
+    if (speed || speed === 0)
+      return animate(elem, genFx("hide", 3), speed, easing, callback);
+    var display = elem.getStyle('display');
+    if (display !== "none")
+      elem.store("olddisplay", elem.getStyle('display'));
+    elem.style.display = "none";
+    return elem;
+  }
+
+  function toggle(elem, fn, fn2, callback) {
+    var bool = typeof fn === "boolean";
+    if (typeof fn == 'function' && typeof fn2 == 'function')
+      toggle.apply(this, arguments);
+    else if (fn == null || bool) {
+      var state = bool ? fn : !elem.visible();
+      elem[state ? "show" : "hide"]();
+    } else
+      animate(elem, genFx("toggle", 3), fn, fn2, callback);
+    return elem;
+  }
+
+  function fadeTo(elem, speed, to, easing, callback) {
+    elem.setStyle({
+      opacity: 0
+    });
+    if (!elem.visible())
+      elem.show();
+    return animate(elem, {
+      opacity: to
+    }, speed, easing, callback);
+  }
+
+  function animate(elem, prop, speed, easing, callback) {
+    var optall = Prototype.effects.speed(speed, easing, callback);
+    if (isEmptyObject(prop))
+      return optall.complete;
+    return elem[optall.queue === false ? "_execute" : "queue"](function() {
+      var opt = Object.extend({}, optall);
+      var p;
+      var isElement = elem.nodeType === 1;
+      var hidden = isElement && !elem.visible();
+      for (p in prop) {
+        var name = p.camelize();
+        if (p !== name) {
+          prop[name] = prop[p];
+          delete prop[p];
+          p = name;
+        }
+        if (prop[p] === "hide" && hidden || prop[p] === "show" && !hidden)
+          return opt.complete.call(this);
+        if (isElement && (p === "height" || p === "width")) {
+          opt.overflow = [elem.style.overflow, elem.style.overflowX, elem.style.overflowY];
+          if (elem.getStyle("display") === "inline" && elem.getStyle("float") === "none") {
+            if (!inlineBlockNeedsLayout)
+              elem.style.display = "inline-block";
+            else {
+              var display = defaultDisplay(this.nodeName);
+              if (display === "inline")
+                elem.style.display = "inline-block";
+              else {
+                elem.style.display = "inline";
+                elem.style.zoom = 1;
+              }
+            }
+          }
+        }
+        if (Object.isArray(prop[p])) {
+          (opt.specialEasing = opt.specialEasing || {})[p] = prop[p][1];
+          prop[p] = prop[p][0];
+        }
+      }
+      if (opt.overflow != null)
+        elem.style.overflow = "hidden";
+      opt.curAnim = Object.extend({}, prop);
+      for (var i in prop) {
+        var name = i;
+        var val = prop[i];
+        var e = new Prototype.effects.fx(elem, opt, name);
+        if (rfxtypes.test(val)) {
+          e[val === "toggle" ? hidden ? "show" : "hide" : val](prop);
+        } else {
+          var parts = rfxnum.exec(val);
+          var start = e.cur() || 0;
+          if (parts) {
+            var end = parseFloat(parts[2]);
+            var unit = parts[3] || "px";
+            if (unit !== "px") {
+              style(elem, name, (end || 1) + unit);
+              start = ((end || 1) / e.cur()) * start;
+              style(name, start + unit);
+            }
+            if (parts[1])
+              end = ((parts[1] === "-=" ? -1 : 1) * end) + start;
+            e.custom(start, end, unit);
+          } else {
+            e.custom(start, val, "");
+          }
+        }
+      }
+      return true;
+    });
+  }
+
+  function stop(elem, clearQueue, gotoEnd) {
+    var timers = Prototype.effects.timers;
+    if (clearQueue)
+      elem.queue([]);
+    for (var i = timers.length - 1; i >= 0; i--) {
+      if (timers[i].elem === elem) {
+        if (gotoEnd) {
+          timers[i](true);
+        }
+        timers.splice(i, 1);
+      }
+    }
+    if (!gotoEnd)
+      elem.dequeue();
+    return elem;
+  }
+
+  function queue(elem, type, data) {
+    if (typeof type !== "string") {
+      data = type;
+      type = "fx";
+    }
+    if (data === undefined)
+      return Prototype.queue(elem, type);
+    var queue = Prototype.queue(elem, type, data);
+    if (type === "fx" && queue[0] !== "inprogress")
+      Prototype.dequeue(elem, type);
+    return elem;
+  }
+
+  function dequeue(elem, type) {
+    Prototype.dequeue(elem, type);
+    return elem;
+  }
+
+  function delay(elem, time, type) {
+    time = Prototype.effects.fx ? Prototype.effects.fx.speeds[time] || time : time;
+    type = type || "fx";
+    return elem.queue(type, function() {
+      setTimeout(function() {
+        Prototype.dequeue(elem, type);
+      }, time);
+    });
+  }
+
+  function clearQueue(elem, type) {
+    return elem.queue(type || "fx", []);
+  }
+  return Element.addMethods({
+    show: show,
+    hide: hide,
+    toggle: toggle,
+    fadeTo: fadeTo,
+    animate: animate,
+    slideDown: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('show', 1), speed, easing, callback);
+    },
+    slideUp: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('hide', 1), speed, easing, callback);
+    },
+    slideToggle: function(elem, speed, easing, callback) {
+      return animate(elem, genFx('toggle', 1), speed, easing, callback);
+    },
+    fadeIn: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'show'
+      }, speed, easing, callback);
+    },
+    fadeOut: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'hide'
+      }, speed, easing, callback);
+    },
+    fadeToggle: function(elem, speed, easing, callback) {
+      return animate(elem, {
+        opacity: 'toggle'
+      }, speed, easing, callback);
+    },
+    stop: stop,
+    queue: queue,
+    dequeue: dequeue,
+    delay: delay,
+    clearQueue: clearQueue,
+    _execute: function(elem, f) {
+      f();
+      return elem;
+    }
+  });
+}());;
+/*! RESOURCE: /scripts/classes/doctype/GlideModal.js */
+(function(global, $) {
+  "use strict";
+  var GlideModal = function() {
+    GlideModal.prototype.initialize.apply(this, arguments);
+  };
+  GlideModal.prototype = {
+    initialize: function(id, readOnly, width, height) {
+      this.preferences = {};
+      this.id = id;
+      this.readOnly = readOnly;
+      this.backdropStatic = false;
+      this.nologValue = false;
+      this.setDialog(id);
+      this.setSize(width, height);
+      this.setPreference('renderer', 'RenderForm');
+      this.setPreference('type', 'direct');
+      this.setPreference('focusTrap', false);
+    },
+    setDialog: function(dialogName) {
+      this.setPreference('table', dialogName);
+    },
+    setPreference: function(name, value) {
+      this.preferences[name] = value;
+    },
+    getPreference: function(name) {
+      return this.preferences[name];
+    },
+    setAutoFullHeight: function(isAutoFullHeight) {
+      this.isAutoFullHeight = isAutoFullHeight;
+    },
+    setSize: function(width) {
+      this.size = 'modal-md';
+      if (!width)
+        this.size = 'modal-md';
+      else if (typeof width == 'string' && width.indexOf('modal-') == 0)
+        this.size = width;
+      else if (width < 350)
+        this.size = 'modal-alert';
+      else if (width < 450)
+        this.size = 'modal-sm';
+      else if (width < 650)
+        this.size = 'modal-md';
+      else
+        this.size = 'modal-lg';
+    },
+    setWidth: function(width) {
+      this.setSize(width);
+    },
+    setTitle: function(title) {
+      this.title = title;
+    },
+    setBackdropStatic: function(makeStatic) {
+      this.backdropStatic = makeStatic;
+    },
+    setNologValue: function(nolog) {
+      this.nologValue = !!nolog;
+    },
+    updateTitle: function() {
+      $('.modal-title', this.$window).html(this.title);
+    },
+    updateSize: function() {
+      $('.modal-dialog', this.$window).attr('class', 'modal-dialog').addClass(this.size);
+    },
+    setFocus: function(el) {},
+    render: function() {
+      var description = this.getDescribingText();
+      var ajax = new GlideAjax("RenderInfo");
+      if (this.nologValue)
+        ajax.addParam("ni.nolog.sysparm_value", true);
+      ajax.addParam("sysparm_value", description);
+      ajax.addParam("sysparm_name", this.id);
+      ajax.getXML(this._renderFromAjax.bind(this));
+    },
+    switchView: function(newView) {
+      this.setPreferenceAndReload({
+        'sysparm_view': newView
+      });
+    },
+    setPreferenceAndReload: function(params) {
+      for (var key in params)
+        this.preferences[key] = params[key];
+      this.render();
+    },
+    _renderFromAjax: function(response) {
+      var xml = response.responseXML;
+      var newBody = xml.getElementsByTagName("html")[0];
+      xml = newBody.xml ? newBody.xml :
+        new XMLSerializer().serializeToString(newBody);
+      if (!xml)
+        return;
+      this.setPreferencesFromBody(response.responseXML);
+      this.setEscapedBody(xml);
+      this._evalScripts(xml);
+    },
+    maximizeHeight: function(callback) {
+      if (this.resizeTimeout)
+        clearTimeout(this.resizeTimeout);
+      var context = this;
+      this.resizeTimeout = setTimeout(function() {
+        var padding = 100;
+        var $modalBody = context.$modalContent.find('.modal-body');
+        var modalHeight = context.$modalContent.height();
+        var modalToolsHeight = modalHeight - $modalBody.height();
+        var newHeight = $(window).height() - padding - modalToolsHeight;
+        $modalBody.height(newHeight);
+        if (callback)
+          callback.apply(context);
+      }, 150);
+    },
+    renderWithContent: function(content) {
+      this._createModal();
+      if (typeof content == 'string')
+        $('.modal-body', this.$window)[0].innerHTML = content;
+      else
+        $('.modal-body', this.$window).html(content);
+      var self = this;
+      this.$window.on('show.bs.modal', function() {
+        self.isOpen = true;
+        self.$modalContent = self.$window.find('.modal-content');
+        if (self.isAutoFullHeight)
+          self.maximizeHeight();
+      }).on('hidden.bs.modal', function() {
+        self.isOpen = false;
+      });
+      this.$window.modal({
+        backdrop: this.readOnly || this.backdropStatic ? 'static' : undefined,
+        keyboard: !this.readOnly
+      });
+      this.fireEvent("bodyrendered", this);
+      _frameChanged();
+    },
+    renderIframe: function(url, onloadCallback) {
+      var loadingMessage = 'Loading...';
+      var div = document.createElement('div');
+      div.setAttribute('style', 'position: absolute; top: 2px; right: 2px; bottom: 2px; left: 2px;');
+      var loading = document.createElement('div');
+      loading.setAttribute('style', 'position: absolute; top: 10px; left: 10px;');
+      loading.setAttribute('class', 'loading');
+      if (loading.textContent)
+        loading.textContent = loadingMessage;
+      else
+        loading.innerText = loadingMessage;
+      var iframe = document.createElement('iframe');
+      iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white; visibility: hidden;');
+      iframe.src = url;
+      div.appendChild(loading);
+      div.appendChild(iframe);
+      var context = this;
+      this.on('bodyrendered', function() {
+        context.$modalContent.find('iframe').load(function(evt) {
+          context.$modalContent.find('.loading').hide();
+          iframe.setAttribute('style', 'width: 100%; height: 100%; border: 0; background-color: white;');
+          if (onloadCallback && evt.target && evt.target.contentWindow)
+            onloadCallback.apply(evt.target.contentWindow);
+        });
+      });
+      this.renderWithContent(div);
+    },
+    _createModal: function() {
+      var template;
+      if (this.$window) {
+        this.updateTitle();
+        this.updateSize();
+        return;
+      }
+      if (this.template) {
+        template = this.template
+      } else {
+        template = getTemplate();
+      }
+      this._closeIdenticalModals();
+      var html = new Template(template).evaluate({
+        title: this.title,
+        id: this.id,
+        size: this.size,
+        readOnly: this.readOnly ? 'true' : 'false',
+        showHelp: this.showHelp ? 'true' : 'false',
+        focusEscape: !this.getPreference('focusTrap') ? 'true' : 'false'
+      });
+      var $modal = $(html);
+      $modal.data('gWindow', this);
+      this.$window = $modal;
+      $(document.body).append(this.$window);
+      this._watchForClose();
+      this._watchHelp();
+    },
+    locate: function(domElement) {
+      while (domElement.parentNode) {
+        domElement = domElement.parentNode;
+        if (jQuery(domElement).data('gWindow'))
+          return jQuery(domElement).data('gWindow');
+      }
+      alert('GlideModal.locate: window not found');
+      return null;
+    },
+    _onWindowResize: function(context) {
+      return function() {
+        if (context.isOpen && context.isAutoFullHeight) {
+          context.maximizeHeight();
+        }
+      }
+    },
+    setEscapedBody: function(body) {
+      if (!body)
+        return;
+      body = body.replace(/\t/g, "");
+      body = body.replace(/\r/g, "");
+      body = body.replace(/\n+/g, "\n");
+      body = body.replace(/%27/g, "'");
+      body = body.replace(/%3c/g, "<");
+      body = body.replace(/%3e/g, ">");
+      body = body.replace(/&amp;/g, "&");
+      this.setBody(body, true);
+    },
+    setBody: function(html, noEvaluate) {
+      if (typeof html == 'string') {
+        html = this._substituteGet(html);
+        html = this._fixBrowserTags(html);
+        this.renderWithContent(html);
+        if (!noEvaluate)
+          this._evalScripts(html);
+      } else {
+        this.renderWithContent(html);
+      }
+    },
+    setPreferencesFromBody: function(xml) {
+      var prefs = xml.getElementsByTagName("renderpreference");
+      if (prefs.length > 0) {
+        for (var i = 0; i < prefs.length; i++) {
+          var pref = prefs[i];
+          var name = pref.getAttribute("name");
+          var valu = pref.getAttribute("value");
+          this.setPreference(name, valu);
+          if (name == "title")
+            this.setTitle(valu);
+          if (name == "render_title" && valu == "false")
+            this.setTitle("");
+        }
+      }
+    },
+    _substituteGet: function(html) {
+      if (!html)
+        return html;
+      var substitutions = [this.type(), 'GlideDialogWindow', 'GlideDialogForm'];
+      for (var i = 0; i < substitutions.length; i++) {
+        var reg = new RegExp(substitutions[i] + ".get\\(", "g");
+        html = html.replace(reg, this.type() + ".prototype.get('" + this.getID() + "'");
+      }
+      return html;
+    },
+    _fixBrowserTags: function(html) {
+      if (!html)
+        return html;
+      var tags = ["script", "a ", "div", "span", "select"];
+      for (var i = 0; i < tags.length; i++) {
+        var tag = tags[i];
+        html = html.replace(new RegExp('<' + tag + '([^>]*?)/>', 'img'), '<' + tag + '$1></' + tag + '>');
+      }
+      return html;
+    },
+    _evalScripts: function(html) {
+      html = this._substituteGet(html, this.type());
+      var x = loadXML("<xml>" + html + "</xml>");
+      if (x) {
+        var scripts = x.getElementsByTagName("script");
+        for (var i = 0; i < scripts.length; i++) {
+          var script = scripts[i];
+          var s = "";
+          if (script.getAttribute("type") == "application/xml")
+            continue;
+          if (script.getAttribute("src")) {
+            var url = script.getAttribute("src");
+            var req = serverRequestWait(url);
+            s = req.responseText;
+          } else {
+            s = getTextValue(script);
+            if (!s)
+              s = script.innerHTML;
+          }
+          if (s)
+            evalScript(s, true);
+        }
+      }
+      if (!window.G_vmlCanvasManager)
+        return;
+      window.G_vmlCanvasManager.init_(document)
+    },
+    getID: function() {
+      return this.id;
+    },
+    getPreferences: function() {
+      return this.preferences;
+    },
+    getDescribingXML: function() {
+      var section = document.createElement("section");
+      section.setAttribute("name", this.getID());
+      var preferences = this.getPreferences();
+      for (var name in preferences) {
+        if (!preferences.hasOwnProperty(name))
+          continue;
+        var p = document.createElement("preference");
+        var v = preferences[name];
+        p.setAttribute("name", name);
+        if (v !== null && typeof v == 'object') {
+          if (typeof v.join == "function") {
+            v = v.join(",");
+          } else if (typeof v.toString == "function") {
+            v = v.toString();
+          }
+        }
+        if (v && typeof v.escapeHTML === "function")
+          v = v.escapeHTML();
+        if (v)
+          p.setAttribute("value", v);
+        section.appendChild(p);
+      }
+      return section;
+    },
+    getDescribingText: function() {
+      var gxml = document.createElement("gxml");
+      var x = this.getDescribingXML();
+      gxml.appendChild(x);
+      return gxml.innerHTML;
     },
     destroy: function() {
-      this.filter = null;
-      this.condition = null;
-      if (this.row)
-        this.row.destroy();
+      if (!this.fireEvent('closeconfirm', this))
+        return;
+      if (this.$window)
+        this.$window.modal('hide');
     },
-    buildRow: function(parent, field, oper, value) {
-        this.field = field;
-        this.oper = oper;
-        if (value)
-          this.value = value.replace(/&amp;/g, '&');
-        else
-          this.value = value;
-        this.row = new GlideConditionRow(this.condition, queryID, false, false);
-        var tr = this.row.getRow();
-        parent.appendChild(tr);
-        tr.conditionObject = this;
-        this.row.buil
+    _removeWindow: function() {
+      this.fireEvent('beforeclose', this);
+      this.$window.remove();
+    },
+    get: function(id) {
+      if (!id)
+        return this;
+      var win = document.getElementById(id);
+      if (!win)
+        return this;
+      return $(win).data('gWindow');
+    },
+    _watchForClose: function() {
+      this.$window.on('click', '[data-dismiss=GlideModal]', function() {
+        this.destroy();
+      }.bind(this));
+      this.$window.on('hidden.bs.modal', function() {
+        this._removeWindow(true);
+      }.bind(this));
+    },
+    _watchHelp: function() {
+      this.$window.on('click', '.help', function() {
+        if (this._helpCallback)
+          this._helpCallback.call();
+      }.bind(this));
+    },
+    on: function(evtName, callbackFn) {
+      if (!this._events)
+        this._events = {};
+      if (!this._events[evtName])
+        this._events[evtName] = [];
+      this._events[evtName].push(callbackFn);
+    },
+    fireEvent: function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      var evtName = args.shift();
+      if (!this._events || !this._events[evtName])
+        return true;
+      for (var i = 0; i < this._events[evtName].length; i++) {
+        var ev = this._events[evtName][i];
+        if (!ev)
+          continue;
+        if (ev.apply(this, args) === false)
+          return false;
+      }
+      return true;
+    },
+    _closeIdenticalModals: function() {
+      var $existingModal = $('#' + this.id).data('gWindow');
+      if (!$existingModal)
+        return;
+      $existingModal.destroy();
+    },
+    addDecoration: function(decorationElement, leftSide) {},
+    addFunctionDecoration: function(imgSrc, imgAlt, func, side) {
+      if (imgSrc == 'images/help.gif')
+        this.addHelpDecoration(func);
+    },
+    addHelpDecoration: function(func) {
+      this.showHelp = true;
+      this._helpCallback = func;
+    },
+    type: function() {
+      return "GlideModal";
+    }
+  };
+
+  function getTemplate() {
+    return '<div id="#{HTML:id}" tabindex="-1" ' +
+      'aria-hidden="true" class="modal" role="dialog" ' +
+      'aria-labelledby="#{HTML:id}_title" data-readonly="#{HTML:readOnly}" data-has-help="#{HTML:showHelp}" focus-escape="#{HTML:focusEscape}">' +
+      '	<div class="modal-dialog #{size}">' +
+      '		<div class="modal-content">' +
+      '			<header class="modal-header">' +
+      '				<button data-dismiss="GlideModal" class="btn btn-icon close icon-cross">' +
+      '					<span class="sr-only">Close</span>' +
+      '				</button>' +
+      '			<h1 id="#{HTML:id}_title" class="modal-title h4">' +
+      '				#{HTML:title}' +
+      '			<button class="btn btn-icon icon-help help">' +
+      '				<span class="sr-only">Help</span>' +
+      '			</button>' +
+      '			</h1>' +
+      '			</header>' +
+      '			<div class="modal-body container-fluid"></div>' +
+      '		</div>' +
+      '	</div>' +
+      '</div>';
+  }
+  global.GlideModal = GlideModal;
+})(window, jQuery);;
+/*! RESOURCE: /scripts/classes/doctype/GlideModalForm.js */
+(function(global, $) {
+  "use strict";
+  var GlideModalForm = function() {
+    GlideModalForm.prototype.init.apply(this, arguments);
+  };
+  GlideModalForm.prototype = $.extend({}, GlideModal.prototype, {
+    IGNORED_PREFERENCES: {
+      'renderer': true,
+      'type': true,
+      'table': true
+    },
+    init: function(title, tableName, onCompletionCallback, readOnly) {
+      this.initialize.call(this, tableName, readOnly, 800);
+      this.tableName = tableName;
+      if (title) {
+        this.setTitle(title);
+      }
+      if (onCompletionCallback) {
+        this.setCompletionCallback(onCompletionCallback);
+      }
+    },
+    setSize: function(width) {
+      this.size = 'modal-95';
+    },
+    setFooter: function(bool) {
+      this.hasFooter = !!bool;
+    },
+    setSysID: function(id) {
+      this.setPreference('sys_id', id);
+    },
+    setType: function(type) {
+      this.setPreference('type', type);
+    },
+    setTemplate: function(template) {
+      this.template = template;
+    },
+    setCompletionCallback: function(func) {
+      this.onCompletionFunc = func;
+    },
+    setOnloadCallback: function(func) {
+      this.onFormLoad = func;
+    },
+    render: function() {
+      this._createModal();
+      var body = $('.modal-body', this.$window)[0];
+      body.innerHTML = getFormTemplate();
+      var frame = $('.modal-frame', this.$window);
+      frame.on('load', function() {
+        this._formLoaded();
+      }.bind(this));
+      this.$window.modal({
+        backdrop: 'static'
+      });
+      this._bodyHeight = $('#' + this.id)[0].getHeight();
+      var margin = $('.modal-dialog', this.$window)[0].offsetTop * 2;
+      margin += frame.offset().top;
+      if (this._bodyHeight > margin)
+        this._bodyHeight -= margin;
+      if (this.hasFooter) {
+        this._bodyHeight = this._bodyHeight - 40;
+      }
+      frame.css('height', this._bodyHeight);
+      var $doc = frame[0].contentWindow ? frame[0].contentWindow.document : frame[0].contentDocument;
+      var $body = $($doc.body);
+      $body.html('');
+      $body.append($('link').clone());
+      $body.append('<center>' + getMessage('Loading') + '... <br/><img src="images/ajax-loader.gifx"/></center></span>');
+      var f = $('.modal_dialog_form_poster', this.$window)[0];
+      f.action = this.getPreference('table') + '.do';
+      addHidden(f, 'sysparm_clear_stack', 'true');
+      addHidden(f, 'sysparm_nameofstack', 'formDialog');
+      addHidden(f, 'sysparm_titleless', 'true');
+      addHidden(f, 'sysparm_is_dialog_form', 'true');
+      var sysId = this.getPreference('sys_id');
+      if (!sysId)
+        sysId = '';
+      addHidden(f, 'sys_id', sysId);
+      var targetField = '';
+      if (this.fieldIDSet)
+        targetField = this.getPreference('sysparm_target_field');
+      for (var id in this.preferences) {
+        if (!this.IGNORED_PREFERENCES[id])
+          addHidden(f, id, this.preferences[id]);
+      }
+      var parms = [];
+      parms.push('sysparm_skipmsgs=true');
+      parms.push('sysparm_nostack=true');
+      parms.push('sysparm_target_field=' + targetField);
+      parms.push('sysparm_returned_action=$action');
+      parms.push('sysparm_returned_sysid=$sys_id');
+      parms.push('sysparm_returned_value=$display_value');
+      addHidden(f, 'sysparm_goto_url', 'modal_dialog_form_response.do?' + parms.join('&'));
+      f.submit();
+    },
+    switchView: function(newView) {
+      this.setPreferenceAndReload({
+        'sysparm_view': newView
+      });
+    },
+    setPreferenceAndReload: function(params) {
+      for (var key in params)
+        this.preferences[key] = params[key];
+      this.render();
+    },
+    _formLoaded: function() {
+      var frame = $('.modal-frame', this.$window);
+      var pathname = frame.contents().get(0).location.pathname.indexOf('modal_dialog_form_response.do');
+      if (pathname == 0 || pathname == 1) {
+        if (this.onCompletionFunc) {
+          var f = $('.modal_dialog_form_response form', frame.contents())[0];
+          this.onCompletionFunc(f.action.value, f.sysid.value, this.tableName, f.value.value);
+        }
+        this.destroy();
+        return;
+      }
+      if (this.onFormLoad)
+        this.onFormLoad(this);
+    },
+    addParm: function(k, v) {
+      this.setPreference(k, v);
+    }
+  });
+
+  function getFormTemplate() {
+    return '<form class="modal_dialog_form_poster" target="dialog_frame" method="POST" style="display: inline;"/>' +
+      '<iframe id="dialog_frame" name="dialog_frame" class="modal-frame" style="width:100%;height:100%;" frameborder="no" />';
+  }
+  global.GlideModalForm = GlideModalForm;
+})(window, jQuery);;
+/*! RESOURCE: /scripts/doctype/AngularBootstrapper.js */
+window.ANGULAR_BOOTSTRAPPER = (function angularBootstrapper() {
+  function createBootstrapModule(baseModules) {
+    var allModules = baseModules.slice();
+    $j('[sn-ng-formatter]').each(function(index, item) {
+      var formatterModule = item.getAttribute('sn-ng-formatter');
+      if (!formatterModule)
+        return;
+      try {
+        angular.module(formatterModule);
+        allModules.push(formatterModule);
+      } catch (e) {
+        jslog("Skipped loading of module " + formatterModule + " from " + item + " because it does not exist");
+      }
+    });
+    var bootstrapModule = angular.module('appBootstrap', allModules);
+    bootstrapModule.config(['$compileProvider', function($compileProvider) {}]);
+    return bootstrapModule;
+  }
+
+  function getElemDepth(elem) {
+    var parent = elem;
+    var depth = 0;
+    while (parent = parent.parentElement)
+      depth++;
+    return depth;
+  }
+
+  function getElemsOrderedByDepth(selectors) {
+    return selectors.reduce(function(memo, selector) {
+      return memo.concat(Array.prototype.slice.call(document.querySelectorAll(selector)));
+    }, []).map(function(elem) {
+      return {
+        elem: elem,
+        depth: getElemDepth(elem)
+      }
+    }).sort(function(a, b) {
+      return a.depth - b.depth
+    }).map(function(a) {
+      return a.elem;
+    });
+  }
+
+  function scheduleCompilation(selectors) {
+    var elems = getElemsOrderedByDepth(selectors);
+    if (!elems.length > 0) {
+      jslog("Element matching selector not found, skipping Angular compilation of: " + selectors);
+      return;
+    }
+    addLateLoadEvent(function compile() {
+      var injector = angular.element(document.documentElement).injector();
+      var $compile = injector.get('$compile');
+      var $scope = injector.get('$rootScope').$new();
+      var uncompiledElems = [];
+      var compiledParent = null;
+      for (var i = 0; i < elems.length; i++) {
+        if (compiledParent = getCompiledParent(elems[i])) {
+          continue;
+        }
+        uncompiledElems.push(elems[i]);
+        markElementCompiled(elems[i]);
+      }
+      console.log("Compiling in AngularBootstrapper.js", uncompiledElems);
+      $compile(uncompiledElems)($scope);
+    });
+  }
+
+  function markElementCompiled(elem) {
+    elem.setAttribute('sn-ng-compiled', 'true');
+  }
+
+  function getCompiledParent(elem) {
+    var parent = elem;
+    while (parent != null) {
+      if (parent.getAttribute('sn-ng-compiled'))
+        return parent;
+      if (parent.getAttribute('ng-non-bindable'))
+        return null;
+      if (parent.classList && parent.classList.contains('ng-non-bindable'))
+        return null;
+      parent = parent.parentElement;
+    }
+    return null;
+  }
+
+  function compileTemplates() {
+    var templates = document.querySelectorAll('script[type="text/ng-template"]');
+    if (!templates.length)
+      return;
+    var $templateCache = angular.element(document.documentElement).injector().get('$templateCache');
+    var i;
+    for (i = 0; i < templates.length; ++i)
+      $templateCache.put(templates[i].id, templates[i].textContent);
+  }
+
+  function bootstrap(baseModules) {
+    if (!window.angular)
+      return;
+    window.NOW = window.NOW || {};
+    window.NOW.singleFormBootstrap = true;
+    var bootstrapModule = createBootstrapModule(baseModules);
+    angular.bootstrap(document.documentElement, [bootstrapModule.name]);
+    compileTemplates();
+    var compilationTargets = [
+      'now-message',
+      '.activity_table',
+      '.section_zero',
+      'sn-related-list',
+      'sn-record-preview',
+      'sn-reference-selector',
+      '[sn-ng-formatter]'
+    ];
+    scheduleCompilation(compilationTargets);
+  }
+  return {
+    bootstrap: bootstrap
+  }
+})();;;
