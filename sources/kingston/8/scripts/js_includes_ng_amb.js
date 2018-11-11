@@ -2611,131 +2611,823 @@ amb.Channel = function Channel(cometd, channelName, initialized) {
 };;
 /*! RESOURCE: /scripts/amb.MessageClient.js */
 (function() {
-    amb.MessageClient = function MessageClient() {
-        var cometd = new window.Cometd();
-        cometd.unregisterTransport('websocket');
-        cometd.unregisterTransport('callback-polling');
-        var serverConnection = new amb.ServerConnection(cometd);
-        var channels = {};
-        var LOGGER = new amb.Logger('amb.MessageClient');
-        var channelRedirect = null;
-        var connected = false;
-        var initialized = false;
-        var uninitializedChannels = [];
-        serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_BROKEN, _connectionBroken);
-        serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_OPENED, _connectionOpened);
-        serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_INITIALIZED, _connectionInitialized);
-        serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_OUT, _unsubscribeAll);
-        serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_INVALIDATED, _unsubscribeAll);
-        serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_IN, _resubscribeAll);
-        var _connectionBrokenEvent = false;
+  amb.MessageClient = function MessageClient() {
+    var cometd = new window.Cometd();
+    cometd.unregisterTransport('websocket');
+    cometd.unregisterTransport('callback-polling');
+    var serverConnection = new amb.ServerConnection(cometd);
+    var channels = {};
+    var LOGGER = new amb.Logger('amb.MessageClient');
+    var channelRedirect = null;
+    var connected = false;
+    var initialized = false;
+    var uninitializedChannels = [];
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_BROKEN, _connectionBroken);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_OPENED, _connectionOpened);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().CONNECTION_INITIALIZED, _connectionInitialized);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_OUT, _unsubscribeAll);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_INVALIDATED, _unsubscribeAll);
+    serverConnection.subscribeToEvent(serverConnection.getEvents().SESSION_LOGGED_IN, _resubscribeAll);
+    var _connectionBrokenEvent = false;
 
-        function _connectionBroken() {
-          LOGGER.debug("connection broken!");
-          _connectionBrokenEvent = true;
-        }
+    function _connectionBroken() {
+      LOGGER.debug("connection broken!");
+      _connectionBrokenEvent = true;
+    }
 
-        function _connectionInitialized() {
-          initialized = true;
-          _initChannelRedirect();
-          channelRedirect.initialize();
-          LOGGER.debug("Connection initialized. Initializing " + uninitializedChannels.length + " channels.");
-          for (var i = 0; i < uninitializedChannels.length; i++) {
-            uninitializedChannels[i].subscribeOnInitCompletion();
-          }
-          uninitializedChannels = [];
-        }
+    function _connectionInitialized() {
+      initialized = true;
+      _initChannelRedirect();
+      channelRedirect.initialize();
+      LOGGER.debug("Connection initialized. Initializing " + uninitializedChannels.length + " channels.");
+      for (var i = 0; i < uninitializedChannels.length; i++) {
+        uninitializedChannels[i].subscribeOnInitCompletion();
+      }
+      uninitializedChannels = [];
+    }
 
-        function _connectionOpened() {
-          if (_connectionBrokenEvent) {
-            LOGGER.debug("connection opened!");
-            var sc = serverConnection;
-            if (sc.getLastError() !== sc.getErrorMessages().UNKNOWN_CLIENT)
-              return;
-            sc.setLastError(null);
-            LOGGER.debug("channel resubscribe!");
-            var request = new XMLHttpRequest();
-            request.open("GET", "/amb_session_setup.do", true);
-            request.setRequestHeader("Content-type", "application/json;charset=UTF-8");
-            request.setRequestHeader("X-UserToken", window.g_ck);
-            request.send();
-            request.onload = function() {
-              if (this.status != 200) {
-                return;
-              }
-              _resubscribeAll();
-              _connectionBrokenEvent = false;
-            };
-          }
-        }
-
-        function _unsubscribeAll() {
-          LOGGER.debug("Unsubscribing from all!");
-          for (var name in channels) {
-            var channel = channels[name];
-            channel.unsubscribeFromCometD();
-          }
-        }
-
-        function _resubscribeAll() {
-          LOGGER.debug("Resubscribing to all!");
-          for (var name in channels) {
-            var channel = channels[name];
-            channel.resubscribeToCometD();
-          }
-        }
-
-        function _initChannelRedirect() {
-          if (channelRedirect)
+    function _connectionOpened() {
+      if (_connectionBrokenEvent) {
+        LOGGER.debug("connection opened!");
+        var sc = serverConnection;
+        if (sc.getLastError() !== sc.getErrorMessages().UNKNOWN_CLIENT)
+          return;
+        sc.setLastError(null);
+        LOGGER.debug("channel resubscribe!");
+        var request = new XMLHttpRequest();
+        request.open("GET", "/amb_session_setup.do", true);
+        request.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+        request.setRequestHeader("X-UserToken", window.g_ck);
+        request.send();
+        request.onload = function() {
+          if (this.status != 200) {
             return;
-          channelRedirect = new amb.ChannelRedirect(cometd, serverConnection, _getChannel);
-        }
+          }
+          _resubscribeAll();
+          _connectionBrokenEvent = false;
+        };
+      }
+    }
 
-        function _getChannel(channelName) {
-          if (channelName in channels)
-            return channels[channelName];
-          var channel = new amb.Channel(cometd, channelName, initialized);
-          channels[channelName] = channel;
-          if (!initialized)
-            uninitializedChannels.push(channel);
+    function _unsubscribeAll() {
+      LOGGER.debug("Unsubscribing from all!");
+      for (var name in channels) {
+        var channel = channels[name];
+        channel.unsubscribeFromCometD();
+      }
+    }
+
+    function _resubscribeAll() {
+      LOGGER.debug("Resubscribing to all!");
+      for (var name in channels) {
+        var channel = channels[name];
+        channel.resubscribeToCometD();
+      }
+    }
+
+    function _initChannelRedirect() {
+      if (channelRedirect)
+        return;
+      channelRedirect = new amb.ChannelRedirect(cometd, serverConnection, _getChannel);
+    }
+
+    function _getChannel(channelName) {
+      if (channelName in channels)
+        return channels[channelName];
+      var channel = new amb.Channel(cometd, channelName, initialized);
+      channels[channelName] = channel;
+      if (!initialized)
+        uninitializedChannels.push(channel);
+      return channel;
+    }
+
+    function _removeChannel(channelName) {
+      delete channels[channelName];
+    }
+    return {
+      getServerConnection: function() {
+        return serverConnection;
+      },
+      isLoggedIn: function() {
+        return serverConnection.isLoggedIn();
+      },
+      loginComplete: function() {
+        serverConnection.loginComplete();
+      },
+      connect: function() {
+        if (connected) {
+          LOGGER.addInfoMessage(">>> connection exists, request satisfied");
+          return;
+        }
+        connected = true;
+        serverConnection.connect();
+      },
+      reload: function() {
+        connected = false;
+        serverConnection.reload();
+      },
+      abort: function() {
+        connected = false;
+        serverConnection.abort();
+      },
+      disconnect: function() {
+        connected = false;
+        serverConnection.disconnect();
+      },
+      getConnectionEvents: function() {
+        return serverConnection.getEvents();
+      },
+      subscribeToEvent: function(event, callback) {
+        return serverConnection.subscribeToEvent(event, callback);
+      },
+      unsubscribeFromEvent: function(id) {
+        serverConnection.unsubscribeFromEvent(id);
+      },
+      getConnectionState: function() {
+        return serverConnection.getConnectionState();
+      },
+      getClientId: function() {
+        return cometd.getClientId();
+      },
+      getChannel: function(channelName) {
+        _initChannelRedirect();
+        var channel = _getChannel(channelName);
+        return channel.newListener(serverConnection, channelRedirect);
+      },
+      registerExtension: function(extensionName, extension) {
+        cometd.registerExtension(extensionName, extension);
+      },
+      unregisterExtension: function(extensionName) {
+        cometd.unregisterExtension(extensionName);
+      },
+      batch: function(block) {
+        cometd.batch(block);
+      },
+      removeChannel: function(channelName) {
+        _removeChannel(channelName)
+      }
+    }
+  };
+})();;
+/*! RESOURCE: /scripts/amb.MessageClientBuilder.js */
+(function() {
+  'use strict';
+  amb.getClient = function() {
+    return getClient();
+  };
+
+  function getClient() {
+    var client = getParentAmbClient(window);
+    if (client) {
+      return wrapClient(client, window);
+    }
+    client = wrapClient(buildClient(), window);
+    setClient(client);
+    return client;
+  }
+
+  function getParentAmbClient(clientWindow) {
+    try {
+      if (!(clientWindow.MSInputMethodContext && clientWindow.document.documentMode)) {
+        while (clientWindow !== clientWindow.parent) {
+          if (clientWindow.g_ambClient) {
+            break;
+          }
+          clientWindow = clientWindow.parent;
+        }
+      }
+      if (clientWindow.g_ambClient) {
+        return clientWindow.g_ambClient;
+      }
+    } catch (e) {
+      console.log('AMB getClient() tried to access parent from an iFrame. Caught error: ' + e);
+    }
+    return null;
+  }
+
+  function wrapClient(client, clientWindow) {
+    if (typeof client.getClientWindow !== 'undefined') {
+      var context = client.getClientWindow();
+      if (context === clientWindow) {
+        return client;
+      }
+    }
+    var wrappedClient = clone({}, client);
+    wrappedClient.getChannel = function(channelName, overrideWindow) {
+      return client.getChannel(channelName, overrideWindow || clientWindow);
+    };
+    wrappedClient.subscribeToEvent = function(event, callback, overrideWindow) {
+      return client.subscribeToEvent(event, callback, overrideWindow || clientWindow);
+    };
+    wrappedClient.unsubscribeFromEvent = function(id, overrideWindow) {
+      return client.unsubscribeFromEvent(id, overrideWindow || clientWindow);
+    };
+    wrappedClient.getClientWindow = function() {
+      return clientWindow;
+    };
+    return wrappedClient;
+  }
+
+  function clone(dest, source) {
+    for (var prop in source) {
+      if (Object.prototype.hasOwnProperty.call(source, prop)) {
+        dest[prop] = source[prop];
+      }
+    }
+    return dest;
+  }
+
+  function setClient(client) {
+    var _window = window.self;
+    _window.g_ambClient = client;
+    _window.addEventListener("unload", function() {
+      _window.g_ambClient.disconnect();
+    });
+    var documentReadyState = _window.document ? _window.document.readyState : null;
+    if (documentReadyState === 'complete') {
+      autoConnect();
+    } else {
+      _window.addEventListener('load', autoConnect);
+    }
+    setTimeout(autoConnect, 10000);
+    var initiatedConnection = false;
+
+    function autoConnect() {
+      if (!initiatedConnection) {
+        initiatedConnection = true;
+        _window.g_ambClient.connect();
+      }
+    }
+  }
+
+  function buildClient() {
+    return (function() {
+      var ambClient = new amb.MessageClient();
+      var clientSubscriptions = buildClientSubscriptions();
+      return {
+        getServerConnection: function() {
+          return ambClient.getServerConnection();
+        },
+        connect: function() {
+          ambClient.connect();
+        },
+        abort: function() {
+          ambClient.abort();
+        },
+        disconnect: function() {
+          ambClient.disconnect();
+        },
+        getConnectionState: function() {
+          return ambClient.getConnectionState();
+        },
+        getState: function() {
+          return ambClient.getConnectionState();
+        },
+        getClientId: function() {
+          return ambClient.getClientId();
+        },
+        getChannel: function(channelName, windowContext) {
+          var channel = ambClient.getChannel(channelName);
+          var originalSubscribe = channel.subscribe;
+          var originalUnsubscribe = channel.unsubscribe;
+          windowContext = windowContext || window;
+          channel.subscribe = function(listener) {
+            clientSubscriptions.add(windowContext, channel, listener, function() {
+              channel.unsubscribe(listener);
+            });
+            windowContext.addEventListener('unload', function() {
+              ambClient.removeChannel(channelName);
+            });
+            originalSubscribe.call(channel, listener);
+            return channel;
+          };
+          channel.unsubscribe = function(listener) {
+            clientSubscriptions.remove(windowContext, channel, listener);
+            return originalUnsubscribe.call(channel, listener);
+          };
           return channel;
+        },
+        getChannel0: function(channelName) {
+          return ambClient.getChannel(channelName);
+        },
+        registerExtension: function(extensionName, extension) {
+          ambClient.registerExtension(extensionName, extension);
+        },
+        unregisterExtension: function(extensionName) {
+          ambClient.unregisterExtension(extensionName);
+        },
+        batch: function(block) {
+          ambClient.batch(block);
+        },
+        subscribeToEvent: function(event, callback, windowContext) {
+          windowContext = windowContext || window;
+          var id = ambClient.subscribeToEvent(event, callback);
+          clientSubscriptions.add(windowContext, id, true, function() {
+            ambClient.unsubscribeFromEvent(id);
+          });
+          return id;
+        },
+        unsubscribeFromEvent: function(id, windowContext) {
+          windowContext = windowContext || window;
+          clientSubscriptions.remove(windowContext, id, true);
+          ambClient.unsubscribeFromEvent(id);
+        },
+        isLoggedIn: function() {
+          return ambClient.isLoggedIn();
+        },
+        getConnectionEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        getEvents: function() {
+          return ambClient.getConnectionEvents();
+        },
+        loginComplete: function() {
+          ambClient.loginComplete();
         }
+      };
+    })();
 
-        function _removeChannel(channelName) {
-          delete channels[channelName];
+    function buildClientSubscriptions() {
+      var contexts = [];
+
+      function addSubscription(clientWindow, id, callback, unsubscribe) {
+        if (!clientWindow || !callback || !unsubscribe) {
+          return;
         }
-        return {
-          getServerConnection: function() {
-            return serverConnection;
-          },
-          isLoggedIn: function() {
-            return serverConnection.isLoggedIn();
-          },
-          loginComplete: function() {
-            serverConnection.loginComplete();
-          },
-          connect: function() {
-            if (connected) {
-              LOGGER.addInfoMessage(">>> connection exists, request satisfied");
-              return;
+        removeSubscription(clientWindow, id, callback);
+        var context = getContext(clientWindow);
+        if (!context) {
+          context = createContext(clientWindow);
+        }
+        if (context.unloading) {
+          return;
+        }
+        context.subscriptions.push({
+          id: id,
+          callback: callback,
+          unsubscribe: unsubscribe
+        });
+      }
+
+      function removeSubscription(clientWindow, id, callback) {
+        if (!clientWindow || !callback) {
+          return;
+        }
+        var context = getContext(clientWindow);
+        if (!context) {
+          return;
+        }
+        var subscriptions = context.subscriptions;
+        for (var i = subscriptions.length - 1; i >= 0; i--) {
+          if (subscriptions[i].id === id && subscriptions[i].callback === callback) {
+            subscriptions.splice(i, 1);
+          }
+        }
+      }
+
+      function getContext(clientWindow) {
+        for (var i = 0, iM = contexts.length; i < iM; i++) {
+          if (contexts[i].window === clientWindow) {
+            return contexts[i];
+          }
+        }
+        return null;
+      }
+
+      function createContext(clientWindow) {
+        var context = {
+          window: clientWindow,
+          onUnload: function() {
+            context.unloading = true;
+            var subscriptions = context.subscriptions;
+            var subscription;
+            while (subscription = subscriptions.pop()) {
+              subscription.unsubscribe();
             }
-            connected = true;
-            serverConnection.connect();
+            destroyContext(context);
           },
-          reload: function() {
-            connected = false;
-            serverConnection.reload();
-          },
-          abort: function() {
-            connected = false;
-            serverConnection.abort();
-          },
-          disconnect: function() {
-            connected = false;
-            serverConnection.disconnect();
-          },
-          getConnectionEvents: function() {
-            return serverConnection.getEvents();
-          },
-          subscribeToEvent: function(event, callback) {
-              return serverConnection.subs
+          unloading: false,
+          subscriptions: []
+        };
+        clientWindow.addEventListener('unload', context.onUnload);
+        contexts.push(context);
+        return context;
+      }
+
+      function destroyContext(context) {
+        for (var i = 0, iM = contexts.length; i < iM; i++) {
+          if (contexts[i].window === context.window) {
+            contexts.splice(i, 1);
+            break;
+          }
+        }
+        context.subscriptions = [];
+        context.window.removeEventListener('unload', context.onUnload);
+        context.onUnload = null;
+        context.window = null;
+      }
+      return {
+        add: addSubscription,
+        remove: removeSubscription
+      };
+    }
+  }
+})();;;
+/*! RESOURCE: /scripts/app.ng.amb/app.ng.amb.js */
+angular.module("ng.amb", ['sn.common.presence', 'sn.common.util'])
+  .value("ambLogLevel", 'info')
+  .value("ambServletURI", '/amb')
+  .value("cometd", angular.element.cometd)
+  .value("ambLoginWindow", 'true');;
+/*! RESOURCE: /scripts/app.ng.amb/service.AMB.js */
+angular.module("ng.amb").service("amb", function(AMBOverlay, $window, $q, $log, $rootScope, $timeout) {
+  "use strict";
+  var ambClient = null;
+  var _window = $window.self;
+  var loginWindow = null;
+  var sameScope = false;
+  ambClient = amb.getClient();
+  if (_window.g_ambClient) {
+    sameScope = true;
+  }
+  if (sameScope) {
+    var serverConnection = ambClient.getServerConnection();
+    serverConnection.loginShow = function() {
+      if (!serverConnection.isLoginWindowEnabled())
+        return;
+      if (loginWindow && loginWindow.isVisible())
+        return;
+      if (serverConnection.isLoginWindowOverride())
+        return;
+      loginWindow = new AMBOverlay();
+      loginWindow.render();
+      loginWindow.show();
+    };
+    serverConnection.loginHide = function() {
+      if (!loginWindow)
+        return;
+      loginWindow.hide();
+      loginWindow.destroy();
+      loginWindow = null;
+    }
+  }
+  var AUTO_CONNECT_TIMEOUT = 20 * 1000;
+  var connected = $q.defer();
+  var connectionInterrupted = false;
+  var monitorAMB = false;
+  $timeout(startMonitoringAMB, AUTO_CONNECT_TIMEOUT);
+  connected.promise.then(startMonitoringAMB);
+
+  function startMonitoringAMB() {
+    monitorAMB = true;
+  }
+
+  function ambInterrupted() {
+    var state = ambClient.getState();
+    return monitorAMB && state !== "opened" && state !== "initialized"
+  }
+  var interruptionTimeout;
+  var extendedInterruption = false;
+
+  function setInterrupted(eventName) {
+    connectionInterrupted = true;
+    $rootScope.$broadcast(eventName);
+    if (!interruptionTimeout) {
+      interruptionTimeout = $timeout(function() {
+        extendedInterruption = true;
+      }, 30 * 1000)
+    }
+    connected = $q.defer();
+  }
+  var connectOpenedEventId = ambClient.subscribeToEvent("connection.opened", function() {
+    $rootScope.$broadcast("amb.connection.opened");
+    if (interruptionTimeout) {
+      $timeout.cancel(interruptionTimeout);
+      interruptionTimeout = null;
+    }
+    extendedInterruption = false;
+    if (connectionInterrupted) {
+      connectionInterrupted = false;
+      $rootScope.$broadcast("amb.connection.recovered");
+    }
+    connected.resolve();
+  });
+  var connectClosedEventId = ambClient.subscribeToEvent("connection.closed", function() {
+    setInterrupted("amb.connection.closed");
+  });
+  var connectBrokenEventId = ambClient.subscribeToEvent("connection.broken", function() {
+    setInterrupted("amb.connection.broken");
+  });
+  var onUnloadWindow = function() {
+    ambClient.unsubscribeFromEvent(connectOpenedEventId);
+    ambClient.unsubscribeFromEvent(connectClosedEventId);
+    ambClient.unsubscribeFromEvent(connectBrokenEventId);
+    angular.element($window).off('unload', onUnloadWindow);
+  };
+  angular.element($window).on('unload', onUnloadWindow);
+  var documentReadyState = $window.document ? $window.document.readyState : null;
+  if (documentReadyState === 'complete') {
+    autoConnect();
+  } else {
+    angular.element($window).on('load', autoConnect);
+  }
+  $timeout(autoConnect, 10000);
+  var initiatedConnection = false;
+
+  function autoConnect() {
+    if (!initiatedConnection) {
+      initiatedConnection = true;
+      ambClient.connect();
+    }
+  }
+  return {
+    getServerConnection: function() {
+      return ambClient.getServerConnection();
+    },
+    connect: function() {
+      if (initiatedConnection) {
+        ambClient.connect();
+      }
+      return connected.promise;
+    },
+    get interrupted() {
+      return ambInterrupted();
+    },
+    get extendedInterruption() {
+      return extendedInterruption;
+    },
+    get connected() {
+      return connected.promise;
+    },
+    abort: function() {
+      ambClient.abort();
+    },
+    disconnect: function() {
+      ambClient.disconnect();
+    },
+    getConnectionState: function() {
+      return ambClient.getConnectionState();
+    },
+    getClientId: function() {
+      return ambClient.getClientId();
+    },
+    getChannel: function(channelName) {
+      return ambClient.getChannel(channelName);
+    },
+    registerExtension: function(extensionName, extension) {
+      ambClient.registerExtension(extensionName, extension);
+    },
+    unregisterExtension: function(extensionName) {
+      ambClient.unregisterExtension(extensionName);
+    },
+    batch: function(batch) {
+      ambClient.batch(batch);
+    },
+    getState: function() {
+      return ambClient.getState();
+    },
+    getFilterString: function(filter) {
+      filter = filter.
+      replace(/\^EQ/g, '').
+      replace(/\^ORDERBY(?:DESC)?[^^]*/g, '').
+      replace(/^GOTO/, '');
+      return btoa(filter).replace(/=/g, '-');
+    },
+    getChannelRW: function(table, filter) {
+      var t = '/rw/default/' + table + '/' + this.getFilterString(filter);
+      return this.getChannel(t);
+    },
+    isLoggedIn: function() {
+      return ambClient.isLoggedIn();
+    },
+    subscribeToEvent: function(event, callback) {
+      return ambClient.subscribeToEvent(event, callback);
+    },
+    getConnectionEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    getEvents: function() {
+      return ambClient.getConnectionEvents();
+    },
+    loginComplete: function() {
+      ambClient.loginComplete();
+    }
+  };
+});;
+/*! RESOURCE: /scripts/app.ng.amb/controller.AMBRecordWatcher.js */
+angular.module("ng.amb").controller("AMBRecordWatcher", function($scope, $timeout, $window) {
+  "use strict";
+  var amb = $window.top.g_ambClient;
+  $scope.messages = [];
+  var lastFilter;
+  var watcherChannel;
+  var watcher;
+
+  function onMessage(message) {
+    $scope.messages.push(message.data);
+  }
+  $scope.getState = function() {
+    return amb.getState();
+  };
+  $scope.initWatcher = function() {
+    angular.element(":focus").blur();
+    if (!$scope.filter || $scope.filter === lastFilter)
+      return;
+    lastFilter = $scope.filter;
+    console.log("initiating watcher on " + $scope.filter);
+    $scope.messages = [];
+    if (watcher) {
+      watcher.unsubscribe();
+    }
+    var base64EncodeQuery = btoa($scope.filter).replace(/=/g, '-');
+    var channelId = '/rw/' + base64EncodeQuery;
+    watcherChannel = amb.getChannel(channelId)
+    watcher = watcherChannel.subscribe(onMessage);
+  };
+  amb.connect();
+});
+/*! RESOURCE: /scripts/app.ng.amb/factory.snRecordWatcher.js */
+angular.module("ng.amb").factory('snRecordWatcher', function($rootScope, amb, $timeout, snPresence, $log, urlTools) {
+  "use strict";
+  var watcherChannel;
+  var connected = false;
+  var diagnosticLog = true;
+
+  function initWatcher(table, sys_id, query) {
+    if (!table)
+      return;
+    if (sys_id)
+      var filter = "sys_id=" + sys_id;
+    else
+      filter = query;
+    if (!filter)
+      return;
+    return initChannel(table, filter);
+  }
+
+  function initList(table, query) {
+    if (!table)
+      return;
+    query = query || "sys_idISNOTEMPTY";
+    return initChannel(table, query);
+  }
+
+  function initTaskList(list, prevChannel) {
+    if (prevChannel)
+      prevChannel.unsubscribe();
+    var sys_ids = list.toString();
+    var filter = "sys_idIN" + sys_ids;
+    return initChannel("task", filter);
+  }
+
+  function initChannel(table, filter) {
+    if (isBlockedTable(table)) {
+      $log.log("Blocked from watching", table);
+      return null;
+    }
+    if (diagnosticLog)
+      log(">>> init " + table + "?" + filter);
+    watcherChannel = amb.getChannelRW(table, filter);
+    watcherChannel.subscribe(onMessage);
+    amb.connect();
+    return watcherChannel;
+  }
+
+  function onMessage(message) {
+    var r = message.data;
+    var c = message.channel;
+    if (diagnosticLog)
+      log(">>> record " + r.operation + ": " + r.table_name + "." + r.sys_id + " " + r.display_value);
+    $rootScope.$broadcast('record.updated', r);
+    $rootScope.$broadcast("sn.stream.tap");
+    $rootScope.$broadcast('list.updated', r, c);
+  }
+
+  function log(message) {
+    $log.log(message);
+  }
+
+  function isBlockedTable(table) {
+    return table == 'sys_amb_message' || table.startsWith('sys_rw');
+  }
+  return {
+    initTaskList: initTaskList,
+    initChannel: initChannel,
+    init: function() {
+      var location = urlTools.parseQueryString(window.location.search);
+      var table = location['table'] || location['sysparm_table'];
+      var sys_id = location['sys_id'] || location['sysparm_sys_id'];
+      var query = location['sysparm_query'];
+      initWatcher(table, sys_id, query);
+      snPresence.init(table, sys_id, query);
+    },
+    initList: initList,
+    initRecord: function(table, sysId) {
+      initWatcher(table, sysId, null);
+      snPresence.initPresence(table, sysId);
+    },
+    _initWatcher: initWatcher
+  }
+});;
+/*! RESOURCE: /scripts/app.ng.amb/factory.AMBOverlay.js */
+angular.module("ng.amb").factory("AMBOverlay", function($templateCache, $compile, $rootScope) {
+  "use strict";
+  var showCallbacks = [],
+    hideCallbacks = [],
+    isRendered = false,
+    modal,
+    modalScope,
+    modalOptions;
+  var defaults = {
+    backdrop: 'static',
+    keyboard: false,
+    show: true
+  };
+
+  function AMBOverlay(config) {
+    config = config || {};
+    if (angular.isFunction(config.onShow))
+      showCallbacks.push(config.onShow);
+    if (angular.isFunction(config.onHide))
+      hideCallbacks.push(config.onHide);
+
+    function lazyRender() {
+      if (!angular.element('html')['modal']) {
+        var bootstrapInclude = "/scripts/bootstrap3/bootstrap.js";
+        ScriptLoader.getScripts([bootstrapInclude], renderModal);
+      } else
+        renderModal();
+    }
+
+    function renderModal() {
+      if (isRendered)
+        return;
+      modalScope = angular.extend($rootScope.$new(), config);
+      modal = $compile($templateCache.get("amb_disconnect_modal.xml"))(modalScope);
+      angular.element("body").append(modal);
+      modal.on("shown.bs.modal", function(e) {
+        for (var i = 0, len = showCallbacks.length; i < len; i++)
+          showCallbacks[i](e);
+      });
+      modal.on("hidden.bs.modal", function(e) {
+        for (var i = 0, len = hideCallbacks.length; i < len; i++)
+          hideCallbacks[i](e);
+      });
+      modalOptions = angular.extend({}, defaults, config);
+      modal.modal(modalOptions);
+      isRendered = true;
+    }
+
+    function showModal() {
+      if (isRendered)
+        modal.modal('show');
+    }
+
+    function hideModal() {
+      if (isRendered)
+        modal.modal('hide');
+    }
+
+    function destroyModal() {
+      if (!isRendered)
+        return;
+      modal.modal('hide');
+      modal.remove();
+      modalScope.$destroy();
+      modalScope = void(0);
+      isRendered = false;
+      var pos = showCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        showCallbacks.splice(pos, 1);
+      pos = hideCallbacks.indexOf(config.onShow);
+      if (pos >= 0)
+        hideCallbacks.splice(pos, 1);
+    }
+    return {
+      render: lazyRender,
+      destroy: destroyModal,
+      show: showModal,
+      hide: hideModal,
+      isVisible: function() {
+        if (!isRendered)
+          false;
+        return modal.visible();
+      }
+    }
+  }
+  $templateCache.put('amb_disconnect_modal.xml',
+    '<div id="amb_disconnect_modal" tabindex="-1" aria-hidden="true" class="modal" role="dialog">' +
+    '	<div class="modal-dialog small-modal" style="width:450px">' +
+    '		<div class="modal-content">' +
+    '			<header class="modal-header">' +
+    '				<h4 id="small_modal1_title" class="modal-title">{{title || "Login"}}</h4>' +
+    '			</header>' +
+    '			<div class="modal-body">' +
+    '			<iframe class="concourse_modal" ng-src=\'{{iframe || "/amb_login.do"}}\' frameborder="0" scrolling="no" height="400px" width="405px"></iframe>' +
+    '			</div>' +
+    '		</div>' +
+    '	</div>' +
+    '</div>'
+  );
+  return AMBOverlay;
+});;;

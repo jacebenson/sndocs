@@ -35342,612 +35342,211 @@ var WFStageSet = (function() {
     warnNoWorkflow: warnNoWorkflow
   }
 }());;
-/*! RESOURCE: scripts/labels.js */
-var refreshRateProperty = "60";
-var refreshLabelRate = (refreshRateProperty != null && refreshRateProperty > 0 ? refreshRateProperty : 60);
-var refreshLabelTimer = null;
-var g_label_status = initLabelStatus();
-CustomEvent.observe('nav.loaded', refreshLabels);
-
-function initLabelStatus() {
-  var answer = new Object();
-  answer.loading = false;
-  answer.error_count = 0;
-  return answer;
-}
-
-function refreshLabels() {
-  var labelList = new Array();
-  var divTags = document.getElementsByTagName('div');
-  if (divTags) {
-    for (var c = 0; c != divTags.length; ++c) {
-      var divTag = divTags[c];
-      var label = divTag.sclabel || divTag.getAttribute('sclabel');
-      if (label && label == 'true') {
-        var id = divTag.appid || divTag.getAttribute('appid');
-        labelList.push(id);
+/*! RESOURCE: scripts/CloudFormationClient.js */
+var CloudFormationClient = {
+  _fieldsInfo: {},
+  validateCatItemParameterVariables: function(control, oldValue, newValue, isLoading) {
+    if (isLoading)
+      return;
+    var parameters = {};
+    parameters.variable_control_id = control.id;
+    parameters.parameter_value = newValue.trim();
+    this.callAjax("CloudFormationAjax", "validateVariableValue", parameters, function(answer) {
+      var result = answer.evalJSON();
+      result.control = control;
+      CloudFormationClient._fieldsInfo[result["name"]] = result;
+      if (!result.isValid) {
+        control.focus();
       }
-    }
-  }
-  startRefresh(labelList);
-}
-
-function clearLabelRefresh() {
-  if (refreshLabelTimer == null)
-    return;
-  clearTimeout(refreshLabelTimer);
-  refreshLabelTimer = null;
-}
-
-function startRefresh(labelRefresh) {
-  clearLabelRefresh();
-  if (labelRefresh.length < 1)
-    return;
-  if (labelsGetRequest(labelRefresh))
-    refreshLabelTimer = setTimeout(refreshLabels, refreshLabelRate * 1000);
-}
-
-function labelsGetRequest(labelIds) {
-  if (g_label_status.loading)
-    return true;
-  if (g_label_status.error_count > 3) {
-    jslog('Stopped tag fetch due to excessive error counts');
-    return false;
-  }
-  g_label_status.loading = true;
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_value", labelIds.join(","));
-  aj.addParam("sysparm_type", 'get');
-  aj.getXML(labelsGetResponse);
-  return true;
-}
-
-function labelsGetResponse(request) {
-  g_label_status.loading = false;
-  if (request.status == 200)
-    g_label_status.error_count = 0;
-  else
-    g_label_status.error_count += 1;
-  if (!request.responseXML)
-    return;
-  var labels = request.responseXML.getElementsByTagName("label");
-  if (labels && labels.length > 0) {
-    for (var i = 0; i < labels.length; i++) {
-      var labelEntry = labels[i];
-      updateMenuItems(labelEntry);
-    }
-  }
-}
-
-function updateMenuItems(labelElement) {
-  var appid = labelElement.getAttribute("id");
-  var divElem = gel('div.' + appid)
-  var tds = divElem.getElementsByTagName("td");
-  var appTD = tds[0];
-  var notRead = 0;
-  var span = gel(appid);
-  var table = cel("table");
-  var tbody = cel("tbody", table);
-  var label;
-  var items = labelElement.getElementsByTagName("item");
-  if (items && items.length > 0) {
-    for (var i = 0; i < items.length; i++) {
-      label = items[i].getAttribute("label");
-      var lid = items[i].getAttribute("name");
-      var style = items[i].getAttribute("style");
-      var read = items[i].getAttribute("read");
-      if ("true" != read)
-        notRead++;
-      var url = items[i].getAttribute("url");
-      var title = items[i].getAttribute("title");
-      var image = items[i].getAttribute("image");
-      createLabelMod(tbody, style, lid, url, title, image, appid);
-    }
-  }
-  updateLabelReadCount(appTD, notRead);
-  clearNodes(span)
-  span.appendChild(table);
-  table = null;
-}
-
-function createLabelMod(parent, style, id, url, title, image, appid) {
-  var tr = cel("tr", parent);
-  var scrollIcon = isTextDirectionRTL() ? "images/scroll_lft.gifx" : "images/scroll_rt.gifx";
-  if (image == "images/s.gifx")
-    image = scrollIcon;
-  var img;
-  if (image == null || image == '')
-    img = '<img style="width:16px; cursor:hand" src="images/icons/remove.gifx" alt="Click me to remove the tag entry" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" src="images/icons/remove.gifx"/>';
-  else
-    img = "<img style='width:16px' src='" + image + "' alt='' />";
-  var tdimg = cel("td", tr);
-  tdimg.style.width = "16px";
-  var tdhtml;
-  if (image == scrollIcon)
-    tdhtml = img;
-  else
-    tdhtml = '<a onclick="removeLabel(\'' + appid + '\',\'' + id + '\');" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" title="Click me to remove the tag entry">' + img + '</a>';
-  tdimg.innerHTML = tdhtml;
-  var td = cel("td", tr);
-  var html = '<a class="menulabel" style="' + style + '" id= "' + id + '"';
-  html += ' target="gsft_main" href="' + url + '">' + title + '</a>';
-  td.innerHTML = html;
-  tr = null;
-  tdimg = null;
-  td = null;
-}
-
-function updateLabelReadCount(appTD, notRead) {
-  var inner = appTD.innerHTML;
-  var term = '</H2>';
-  var paren = inner.indexOf("</H2>");
-  if (paren < 0) {
-    paren = inner.indexOf("</h2");
-    term = '</h2>';
-  }
-  if (paren > -1) {
-    inner = inner.substring(0, paren);
-    paren--;
-    var c = inner.substring(paren, paren + 1);
-    if (c == ')') {
-      while (paren > 0 && c != '(') {
-        paren--;
-        c = inner.substring(paren, paren + 1)
-      }
-      if (paren > 0) {
-        inner = inner.substring(0, paren);
-      }
-    }
-    inner = inner.trim();
-    if (notRead > 0)
-      inner = inner + ' (' + notRead + ')';
-    inner = inner + term;
-    clearNodes(appTD);
-    appTD.innerHTML = inner;
-  }
-}
-
-function doAssignLabel(tableName, label, sysId) {
-  var form = getFormByTableName(tableName);
-  if (sysId == null || !sysId) {
-    if (!populateParmQuery(form, '', 'NULL'))
-      return false;
-  } else {
-    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
-  }
-  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
-    label = option.getAttribute("gsft_base_label");
-  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
-  addInput(form, 'HIDDEN', 'sys_action_type', 'assign_label');
-  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
-  form.submit();
-}
-
-function doRemoveLabel(tableName, label, sysId) {
-  var form = getFormByTableName(tableName);
-  if (sysId == null || !sysId) {
-    if (!populateParmQuery(form, '', 'NULL'))
-      return false;
-  } else {
-    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
-  }
-  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
-    label = option.getAttribute("gsft_base_label");
-  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
-  addInput(form, 'HIDDEN', 'sys_action_type', 'remove_label');
-  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
-  form.submit();
-}
-
-function assignLabelActionViaLookupModal(tableName, listId) {
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  assignLabelViaLookup(tableName, sysIds, list.getView());
-}
-
-function assignLabelViaLookup(tableName, sysId, viewName) {
-  var assignCallback = function(labelId) {
-    assignLabel(labelId, tableName, sysId, viewName);
-  };
-  showLabelLookupWindow("Assign Tag", tableName, sysId, assignCallback);
-}
-
-function removeLabelActionViaLookupModal(tableName, listId) {
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  removeLabelViaLookup(tableName, sysIds);
-}
-
-function removeLabelViaLookup(tableName, sysId) {
-  var removeCallback = function(labelId) {
-    removeLabelById(labelId, sysId);
-  };
-  showLabelLookupWindow("Remove Tag", tableName, sysId, removeCallback);
-}
-
-function showLabelLookupWindow(actionName, tableName, sysID, callback) {
-  var tagLookupForm = new GlideDialogWindow("tag_lookup_form");
-  tagLookupForm.setTitle(actionName);
-  tagLookupForm.setPreference("sys_ids", sysID);
-  tagLookupForm.setPreference("table_name", tableName);
-  tagLookupForm.setPreference('on_accept', callback);
-  tagLookupForm.removeCloseDecoration();
-  tagLookupForm.render();
-}
-
-function newLabel(tableName, sysID, callback) {
-  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
-  if (isDoctype) {
-    var tagForm = new GlideDialogWindow("tag_form");
-    tagForm.setTitle("");
-    tagForm.setPreference("sys_ids", sysID);
-    tagForm.setPreference("table_name", tableName);
-    tagForm.removeCloseDecoration();
-    tagForm.render();
-  } else {
-    var keys = ["Please enter the name for the new tag", "New tag"];
-    var msgs = getMessages(keys);
-    if (!callback)
-      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], function(labelName) {
-        newLabelRequest(tableName, labelName, sysID)
-      });
-    else
-      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], callback);
-  }
-}
-
-function newLabelRequest(tableName, labelName, sysID) {
-  if (labelName == null)
-    return;
-  var viewName;
-  var view = gel('sysparm_view');
-  if (view != null)
-    viewName = view.value;
-  assignLabel(labelName, tableName, sysID, viewName);
-}
-
-function assignLabel(labelName, tableName, sysId, viewName) {
-  if (!labelName)
-    return;
-  var url = new GlideAjax("LabelsAjax");
-  url.addParam("sysparm_name", tableName);
-  url.addParam("sysparm_value", sysId);
-  url.addParam("sysparm_chars", labelName);
-  url.addParam("sysparm_type", "create");
-  if (viewName)
-    url.addParam("sysparm_view", viewName);
-  url.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabel(appid, labelid) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", appid);
-  aj.addParam("sysparm_value", labelid);
-  aj.addParam("sysparm_type", 'delete');
-  aj.getXML(removeLabelResponse);
-}
-
-function removeLabelByName(labelName, sysId) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", labelName);
-  aj.addParam("sysparm_value", sysId);
-  aj.addParam("sysparm_type", 'removeByName');
-  aj.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabelById(labelId, sysId) {
-  var aj = new GlideAjax("LabelsAjax");
-  aj.addParam("sysparm_name", labelId);
-  aj.addParam("sysparm_value", sysId);
-  aj.addParam("sysparm_type", 'remove');
-  aj.getXML(refreshNavIfNotDoctypeUI);
-}
-
-function removeLabelResponse(response, args) {
-  var labelId = response.responseXML.documentElement.getAttribute("sysparm_name");
-  if (!labelId)
-    refreshNavIfNotDoctypeUI();
-  else {
-    var labelIds = new Array();
-    labelIds.push(labelId);
-    labelsGetRequest(labelIds);
-  }
-}
-
-function newLabelPromptListAction(tableName, listId) {
-  var nonDoctypeUICallback = function(labelName) {
-    assignLabelToCheckedSysIds(labelName, tableName, listId)
-  };
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  newLabel(tableName, sysIds, nonDoctypeUICallback);
-}
-
-function assignLabelToCheckedSysIds(labelName, tableName, listId) {
-  if (!labelName || labelName.strip() == '')
-    return;
-  var list = GlideList2.get(listId);
-  if (!list)
-    return;
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  assignLabel(labelName, tableName, sysIds, list.getView());
-}
-
-function removeLabelFromCheckedSysIds(labelName, listId) {
-  var list = GlideList2.get(listId);
-  var sysIds = list.getChecked();
-  if (!sysIds)
-    return;
-  removeLabelByName(labelName, sysIds);
-}
-
-function getFormByTableName(tableName) {
-  var form = getControlForm(tableName);
-  if (!form)
-    form = document.forms[tableName + '.do'];
-  return form;
-}
-
-function refreshNavIfNotDoctypeUI() {
-  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
-  if (!isDoctype)
-    refreshNav();
-};
-/*! RESOURCE: scripts/TestClient.js */
-function popTestClient(test_definition, test_subject) {
-  var test_execution;
-  if (!test_subject)
-    test_execution = test_definition;
-  var dialog = new GlideDialogWindow('test_client', false, "50em", "25em");
-  if (test_execution) {
-    dialog.setPreference('sysparm_test_execution', test_execution);
-  } else {
-    dialog.setPreference('sysparm_test_definition', test_definition);
-    dialog.setPreference('sysparm_test_subject', test_subject);
-  }
-  dialog.render();
-}
-var TestClient = Class.create();
-TestClient.prototype = {
-  TEST_STATES: ["Pending", "Running", "Succeeded", "Failed"],
-  STATUS_IMAGES: ["images/workflow_skipped.gif",
-    "images/loading_anim2.gifx", "images/workflow_complete.gifx",
-    "images/workflow_rejected.gifx"
-  ],
-  TRANSLATED_TEXT: ["Pending", "Running", "Succeeded", "Failed",
-    "Details", "more", "Hide Details", "Show Details"
-  ],
-  TIMEOUT_INTERVAL: 1000,
-  translator: new GwtMessage(),
-  detailStates: {},
-  id: "",
-  container: null,
-  initialize: function(test_definition, test_subject) {
-    this.container = $("container");
-    this._setContainerStyles(this.container);
-    this.translator.getMessages(this.TRANSLATED_TEXT);
-    var test_execution;
-    if (!test_subject) {
-      this.id = test_definition
-      return
-    }
-    this.testDefinition = test_definition;
-    this.testSubject = test_subject;
-  },
-  start: function() {
-    if (this.id) {
-      this.getStatus();
-      return;
-    }
-    var ga = new GlideAjax('AJAXTestProcessor');
-    ga.addParam('sysparm_name', 'startTest');
-    ga.addParam('sysparm_test_definition', this.testDefinition);
-    ga.addParam('sysparm_test_subject', this.testSubject);
-    ga.getXML(this.handleStart.bind(this));
-  },
-  handleStart: function(response) {
-    this.id = response.responseXML.documentElement.getAttribute("answer");
-    this.getStatus();
-  },
-  getStatus: function() {
-    var ga = new GlideAjax('AJAXTestProcessor');
-    ga.addParam('sysparm_name', 'getStatus');
-    ga.addParam('sysparm_execution_id', this.id);
-    if (typeof this.id != "string" || this.id == "")
-      return;
-    ga.getXML(this.handleGetStatus.bind(this));
-  },
-  handleGetStatus: function(response) {
-    var answer = response.responseXML.documentElement.getAttribute("answer");
-    eval("var so = " + answer);
-    this.renderStatus(so);
-    this.container = $("container");
-    if (this.container == null)
-      return;
-    if (so.state == "0" || so.state == "1")
-      setTimeout(this.getStatus.bind(this), this.TIMEOUT_INTERVAL);
-  },
-  renderStatus: function(so) {
-    if (!so)
-      return;
-    var new_container = new Element("div");
-    this._setContainerStyles(new_container);
-    new_container.appendChild(this.getStatusRow(so));
-    this.container.replace(new_container);
-    this.container = new_container;
-  },
-  getStatusRow: function(obj, order) {
-    var name = obj.name;
-    var state = obj.state;
-    var message = obj.message;
-    var percent = NaN;
-    if (obj.percent_complete) {
-      percent = parseInt(obj.percent_complete);
-    }
-    var hasPercent = (!isNaN(percent) && percent > 0 && percent <= 100);
-    var hasDetails = (obj.results.length >= 1 || message != "");
-    var tr = new Element("div", {
-      id: "row_container-" + obj.sys_id
+      CloudFormationClient.showAllFieldMessages();
     });
-    tr.style.padding = "5px";
-    var simp = new Element("div");
-    simp.appendChild(this._getImage(obj));
-    simp.appendChild(this._getItemTitleElement(name, order));
-    var det = this._getDetailElement();
-    var dtl;
-    if (hasDetails || hasPercent)
-      dtl = det.appendChild(this._getShowDetailsLink(obj.sys_id));
-    simp.appendChild(det);
-    simp.appendChild(this._getFloatClear("both"));
-    tr.appendChild(simp);
-    if (hasDetails || hasPercent) {
-      var dtd = new Element("div");
-      var ddc = new Element("div");
-      ddc.style.marginTop = ".5em";
-      ddc.style.marginLeft = "30px";
-      ddc.id = "detail_cont-" + obj.sys_id;
-      dtd.appendChild(ddc);
-      if (hasPercent) {
-        ddc.appendChild(this._getProgressBar(percent));
-        ddc.appendChild(this._getFloatClear("both"));
+  },
+  callAjax: function(ajaxName, methodName, parameters, callback) {
+    var glideAjax = new GlideAjax(ajaxName);
+    glideAjax.addParam("sysparm_name", methodName);
+    if (parameters) {
+      for (var name in parameters) {
+        glideAjax.addParam(name, parameters[name]);
       }
-      if (message != "") {
-        var dds = new Element("div");
-        dds.appendChild(this._getDetailsText(message, obj));
-        dds.style.fontSize = "smaller";
-        dds.style.marginBottom = ".5em";
-        ddc.appendChild(dds);
-      }
-      dtl.details_container = ddc;
-      if (typeof this.detailStates[obj.sys_id] == "boolean" && this.detailStates[obj.sys_id] == false && dtl != null)
-        dtl.onclick();
-      tr.appendChild(dtd);
-      this.renderChildren(obj, ddc);
     }
-    return tr;
-  },
-  _getItemTitleElement: function(name, order) {
-    var nameHtml = "<b>" + name + "</b>";
-    if (order) {
-      nameHtml = "\t" + order + ".\t" + nameHtml;
-    }
-    var nsp = new Element("span");
-    nsp.innerHTML = nameHtml;
-    nsp.style.float = "left";
-    return nsp;
-  },
-  _getImage: function(obj) {
-    var state = obj.state;
-    var si = new Element("img");
-    si.id = "img-" + obj.sys_id;
-    si.src = this.STATUS_IMAGES[state];
-    si.style.marginRight = "10px";
-    si.style.float = "left";
-    si.title = this.TEST_STATES[state];
-    return si;
-  },
-  _getDetailElement: function() {
-    var det = new Element("span");
-    det.style.marginLeft = "10px";
-    det.style.float = "left";
-    return det;
-  },
-  _getShowDetailsLink: function(objSysID) {
-    var da = new Element("a");
-    da.id = objSysID;
-    da.controller = this;
-    da.innerHTML = "(" + this.translator.getMessage("Hide Details") + ")";
-    da.toggleText = "(" + this.translator.getMessage("Show Details") + ")";
-    da.style.fontSize = "8pt";
-    da.style.float = "left";
-    da.onclick = this.__detailsToggle;
-    return da;
-  },
-  __detailsToggle: function() {
-    var cont = this.details_container;
-    cont.toggle();
-    this.controller.detailStates[this.id] = cont.visible();
-    var nt = this.toggleText;
-    this.toggleText = this.innerHTML;
-    this.innerHTML = nt;
-  },
-  _getDetailsText: function(message, obj) {
-    if (message.length > 150) {
-      var new_message = new Element("span");
-      new_message.innerHTML = "<b>" +
-        this.translator.getMessage("Details") + ": </b>" +
-        message.slice(0, 150) + "... ";
-      var anch = new Element("a");
-      anch.href = "test_execution.do?sys_id=" + obj.sys_id;
-      anch.innerHTML = "<b>(" + this.translator.getMessage("more") +
-        ")</b>";
-      new_message.appendChild(anch);
-      return new_message;
+    if (callback) {
+      glideAjax.getXMLAnswer(callback);
     } else {
-      var new_message = new Element("span")
-      new_message.innerHTML = "<b>" +
-        this.translator.getMessage("Details") + ": </b>" +
-        message;
-      return new_message;
+      glideAjax.getXMLWait();
+      return glideAjax.getAnswer();
     }
   },
-  _getProgressBar: function(percent) {
-    percent = Math.max(0, Math.min(100, percent));
-    var progressContainer = new Element("div");
-    progressContainer.style.width = "300px";
-    progressContainer.style.height = "8px";
-    progressContainer.style.border = "1px solid black";
-    progressContainer.style.borderRadius = "10px";
-    progressContainer.style.padding = "2px";
-    progressContainer.style.marginTop = "2px";
-    progressContainer.style.marginBottom = "2px";
-    progressContainer.style.float = "left";
-    var progressBar = new Element("div");
-    progressBar.style.width = percent + "%";
-    progressBar.style.height = "100%";
-    progressBar.style.borderRadius = "10px";
-    progressBar.style.backgroundColor = "#667788";
-    progressContainer.appendChild(progressBar);
-    return progressContainer;
+  beforeSubmitCloudFormation: function() {
+    if (this.isFormValid())
+      return true;
+    var msg = new GwtMessage().getMessage('Please correct errors to submit order');
+    g_form.addErrorMessage(msg);
+    this.showAllFieldMessages('error');
+    return false;
   },
-  _getFloatClear: function(which) {
-    var br = new Element("br");
-    br.style.clear = which;
-    return br;
+  isFormValid: function() {
+    if (!this._fieldsInfo)
+      return true;
+    for (var name in this._fieldsInfo) {
+      if (!this._fieldsInfo[name].isValid)
+        return false;
+    }
+    return true;
   },
-  renderChildren: function(so, pr_cont) {
-    if (!so.results)
+  showAllFieldMessages: function() {
+    g_form.hideAllFieldMsgs();
+    g_form.clearMessages();
+    for (var name in this._fieldsInfo) {
+      var fieldInfo = this._fieldsInfo[name];
+      if (fieldInfo.message.length > 0) {
+        for (var i = 0; i < fieldInfo.message.length; i++)
+          g_form.showFieldMsg(fieldInfo.control, fieldInfo.message[i], fieldInfo.msgtype);
+      }
+    }
+  }
+};
+var WaitDialogUtil = {
+  _intervalHandler: null,
+  _waitDialog: null,
+  _waitProps: null,
+  _postRenderInterval: null,
+  _dialogName: "glide_progress_no_button",
+  _postDialogRenderHandler: null,
+  setProgressDialogName: function(dialogName) {
+    this._dialogName = dialogName;
+  },
+  setPostRenderHandler: function(handler) {
+    this._postDialogRenderHandler = handler;
+  },
+  startWait: function(props) {
+    props = props || this._createDefaultProps();
+    this.stopWait();
+    this._waitProps = props;
+    this._popDialog();
+    this._intervalHandler = setInterval(WaitDialogUtil._checkInterval, this._waitProps.interval * 1000);
+  },
+  stopWait: function() {
+    var util = WaitDialogUtil;
+    if (util._waitDialog) {
+      util._waitDialog.destroy();
+      util._waitDialog = null;
+    }
+    if (util._intervalHandler) {
+      clearInterval(util._intervalHandler);
+      util._intervalHandler = null;
+    }
+    util._waitProps = null;
+  },
+  _popDialog: function() {
+    var dialog = new GlideDialogWindow(this._dialogName);
+    dialog.setTitle(this._waitProps.title);
+    dialog.setPreference("title", this._waitProps.description);
+    dialog.hideCloseButton();
+    this._waitDialog = dialog;
+    this._waitDialog.render();
+    if (this._postDialogRenderHandler)
+      this._postRenderInterval = setInterval(WaitDialogUtil._postDialogRender, 100);
+  },
+  _postDialogRender: function() {
+    if (!WaitDialogUtil._postDialogRenderHandler)
       return;
-    for (var i = 0; i < so.results.length; i++) {
-      pr_cont.appendChild(this.getStatusRow(so.results[i], i + 1)).style.marginLeft = "15px";
-    }
+    WaitDialogUtil._postDialogRenderHandler.call(WaitDialogUtil);
   },
-  _setContainerStyles: function(container) {
-    container.id = "container";
-    container.style.overflowY = "auto";
-    container.style.maxHeight = "50em";
-    container.style.marginRight = ".25em";
-    container.style.marginLeft = ".25em";
+  _checkInterval: function() {
+    var util = WaitDialogUtil;
+    if (!util._waitProps.onInterval)
+      return;
+    util._waitProps.onInterval.call(util._waitProps.thisObj, util._waitProps.data, util.stopWait);
   },
-  type: 'TestClient'
+  _createDefaultProps: function() {
+    return {
+      interval: 5,
+      title: "Error",
+      description: "Properties are not set. Destroied after about 30 seconds",
+      data: {
+        loop: 0
+      },
+      onInterval: function(data, stopWaitFun) {
+        if (data.loop > 6) {
+          stopWaitFun();
+          return;
+        }
+        data.loop = data.loop + 1;
+      }
+    };
+  }
 };;
-/*! RESOURCE: scripts/CSDCatItemUtilClient.js */
-var CSDCatItemUtilClient = {
-  g_formError: [],
+/*! RESOURCE: scripts/CloudWaitDialogUtil.js */
+var CloudWaitDialogUtil = {
+  _intervalHandler: null,
+  _waitDialog: null,
+  _waitProps: null,
+  _postRenderInterval: null,
+  _dialogName: "glide_progress_no_button",
+  _postDialogRenderHandler: null,
+  cloudSetProgressDialogName: function(dialogName) {
+    this._dialogName = dialogName;
+  },
+  setPostRenderHandler: function(handler) {
+    this._postDialogRenderHandler = handler;
+  },
+  cloudStartWait: function(props) {
+    props = props || this._createDefaultProps();
+    this.stopWait();
+    this._waitProps = props;
+    this._popDialog();
+    this._intervalHandler = setInterval(CloudWaitDialogUtil._checkInterval, this._waitProps.interval * 1000);
+  },
+  stopWait: function() {
+    var util = CloudWaitDialogUtil;
+    if (util._waitDialog) {
+      util._waitDialog.destroy();
+      util._waitDialog = null;
+    }
+    if (util._intervalHandler) {
+      clearInterval(util._intervalHandler);
+      util._intervalHandler = null;
+    }
+    util._waitProps = null;
+  },
+  _popDialog: function() {
+    var dialog = new GlideDialogWindow(this._dialogName);
+    dialog.setTitle(this._waitProps.title);
+    dialog.setPreference("title", this._waitProps.description);
+    dialog.hideCloseButton();
+    this._waitDialog = dialog;
+    this._waitDialog.render();
+    if (this._postDialogRenderHandler)
+      this._postRenderInterval = setInterval(CloudWaitDialogUtil._postDialogRender, 100);
+  },
+  _postDialogRender: function() {
+    if (!CloudWaitDialogUtil._postDialogRenderHandler)
+      return;
+    CloudWaitDialogUtil._postDialogRenderHandler.call(CloudWaitDialogUtil);
+  },
+  _checkInterval: function() {
+    var util = CloudWaitDialogUtil;
+    if (!util._waitProps.onInterval)
+      return;
+    util._waitProps.onInterval.call(util._waitProps.thisObj, util._waitProps.data, util.stopWait);
+  },
+  _createDefaultProps: function() {
+    return {
+      interval: 5,
+      title: "Error",
+      description: "Properties are not set. Destroied after about 30 seconds",
+      data: {
+        loop: 0
+      },
+      onInterval: function(data, stopWaitFun) {
+        if (data.loop > 6) {
+          stopWaitFun();
+          return;
+        }
+        data.loop = data.loop + 1;
+      }
+    };
+  }
 };;
 /*! RESOURCE: scripts/classes/GlideMenu.js */
 var GlideMenu = Class.create();
@@ -36617,6 +36216,941 @@ CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
     g_optics_inspect_handler.processServerMessages();
   }
 });;
+/*! RESOURCE: scripts/CloudCatItemUtilClient.js */
+var CloudCatItemUtilClient = {
+  g_formError: [],
+  handleErrorField: function(fieldName) {
+    if (CloudCatItemUtilClient.g_formError[fieldName]) {
+      g_form.hideFieldMsg(fieldName, true);
+      g_form.showErrorBox(fieldName, CloudCatItemUtilClient.g_formError[fieldName], true);
+      return false;
+    }
+    return true;
+  },
+  handleSubmit: function(require_vars) {
+    for (var i = 0; i < require_vars.length; i++) {
+      if (!this.handleErrorField(require_vars[i])) {
+        return false;
+      }
+    }
+    return true;
+  },
+  setErrorField: function(msg, field, control) {
+    control.focus();
+    g_form.showFieldMsg(control, msg, 'error');
+    CloudCatItemUtilClient.g_formError[field] = msg;
+  },
+  setDisplay: function(fieldName, show) {
+    g_form.setDisplay(fieldName, show);
+  }
+};;
+/*! RESOURCE: scripts/labels.js */
+var refreshRateProperty = "60";
+var refreshLabelRate = (refreshRateProperty != null && refreshRateProperty > 0 ? refreshRateProperty : 60);
+var refreshLabelTimer = null;
+var g_label_status = initLabelStatus();
+CustomEvent.observe('nav.loaded', refreshLabels);
+
+function initLabelStatus() {
+  var answer = new Object();
+  answer.loading = false;
+  answer.error_count = 0;
+  return answer;
+}
+
+function refreshLabels() {
+  var labelList = new Array();
+  var divTags = document.getElementsByTagName('div');
+  if (divTags) {
+    for (var c = 0; c != divTags.length; ++c) {
+      var divTag = divTags[c];
+      var label = divTag.sclabel || divTag.getAttribute('sclabel');
+      if (label && label == 'true') {
+        var id = divTag.appid || divTag.getAttribute('appid');
+        labelList.push(id);
+      }
+    }
+  }
+  startRefresh(labelList);
+}
+
+function clearLabelRefresh() {
+  if (refreshLabelTimer == null)
+    return;
+  clearTimeout(refreshLabelTimer);
+  refreshLabelTimer = null;
+}
+
+function startRefresh(labelRefresh) {
+  clearLabelRefresh();
+  if (labelRefresh.length < 1)
+    return;
+  if (labelsGetRequest(labelRefresh))
+    refreshLabelTimer = setTimeout(refreshLabels, refreshLabelRate * 1000);
+}
+
+function labelsGetRequest(labelIds) {
+  if (g_label_status.loading)
+    return true;
+  if (g_label_status.error_count > 3) {
+    jslog('Stopped tag fetch due to excessive error counts');
+    return false;
+  }
+  g_label_status.loading = true;
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_value", labelIds.join(","));
+  aj.addParam("sysparm_type", 'get');
+  aj.getXML(labelsGetResponse);
+  return true;
+}
+
+function labelsGetResponse(request) {
+  g_label_status.loading = false;
+  if (request.status == 200)
+    g_label_status.error_count = 0;
+  else
+    g_label_status.error_count += 1;
+  if (!request.responseXML)
+    return;
+  var labels = request.responseXML.getElementsByTagName("label");
+  if (labels && labels.length > 0) {
+    for (var i = 0; i < labels.length; i++) {
+      var labelEntry = labels[i];
+      updateMenuItems(labelEntry);
+    }
+  }
+}
+
+function updateMenuItems(labelElement) {
+  var appid = labelElement.getAttribute("id");
+  var divElem = gel('div.' + appid)
+  var tds = divElem.getElementsByTagName("td");
+  var appTD = tds[0];
+  var notRead = 0;
+  var span = gel(appid);
+  var table = cel("table");
+  var tbody = cel("tbody", table);
+  var label;
+  var items = labelElement.getElementsByTagName("item");
+  if (items && items.length > 0) {
+    for (var i = 0; i < items.length; i++) {
+      label = items[i].getAttribute("label");
+      var lid = items[i].getAttribute("name");
+      var style = items[i].getAttribute("style");
+      var read = items[i].getAttribute("read");
+      if ("true" != read)
+        notRead++;
+      var url = items[i].getAttribute("url");
+      var title = items[i].getAttribute("title");
+      var image = items[i].getAttribute("image");
+      createLabelMod(tbody, style, lid, url, title, image, appid);
+    }
+  }
+  updateLabelReadCount(appTD, notRead);
+  clearNodes(span)
+  span.appendChild(table);
+  table = null;
+}
+
+function createLabelMod(parent, style, id, url, title, image, appid) {
+  var tr = cel("tr", parent);
+  var scrollIcon = isTextDirectionRTL() ? "images/scroll_lft.gifx" : "images/scroll_rt.gifx";
+  if (image == "images/s.gifx")
+    image = scrollIcon;
+  var img;
+  if (image == null || image == '')
+    img = '<img style="width:16px; cursor:hand" src="images/icons/remove.gifx" alt="Click me to remove the tag entry" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" src="images/icons/remove.gifx"/>';
+  else
+    img = "<img style='width:16px' src='" + image + "' alt='' />";
+  var tdimg = cel("td", tr);
+  tdimg.style.width = "16px";
+  var tdhtml;
+  if (image == scrollIcon)
+    tdhtml = img;
+  else
+    tdhtml = '<a onclick="removeLabel(\'' + appid + '\',\'' + id + '\');" onmouseover="this.src = \'images/closex_hover.gifx\'" onmouseout="this.src = \'images/icons/remove.gifx\'" title="Click me to remove the tag entry">' + img + '</a>';
+  tdimg.innerHTML = tdhtml;
+  var td = cel("td", tr);
+  var html = '<a class="menulabel" style="' + style + '" id= "' + id + '"';
+  html += ' target="gsft_main" href="' + url + '">' + title + '</a>';
+  td.innerHTML = html;
+  tr = null;
+  tdimg = null;
+  td = null;
+}
+
+function updateLabelReadCount(appTD, notRead) {
+  var inner = appTD.innerHTML;
+  var term = '</H2>';
+  var paren = inner.indexOf("</H2>");
+  if (paren < 0) {
+    paren = inner.indexOf("</h2");
+    term = '</h2>';
+  }
+  if (paren > -1) {
+    inner = inner.substring(0, paren);
+    paren--;
+    var c = inner.substring(paren, paren + 1);
+    if (c == ')') {
+      while (paren > 0 && c != '(') {
+        paren--;
+        c = inner.substring(paren, paren + 1)
+      }
+      if (paren > 0) {
+        inner = inner.substring(0, paren);
+      }
+    }
+    inner = inner.trim();
+    if (notRead > 0)
+      inner = inner + ' (' + notRead + ')';
+    inner = inner + term;
+    clearNodes(appTD);
+    appTD.innerHTML = inner;
+  }
+}
+
+function doAssignLabel(tableName, label, sysId) {
+  var form = getFormByTableName(tableName);
+  if (sysId == null || !sysId) {
+    if (!populateParmQuery(form, '', 'NULL'))
+      return false;
+  } else {
+    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
+  }
+  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
+    label = option.getAttribute("gsft_base_label");
+  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
+  addInput(form, 'HIDDEN', 'sys_action_type', 'assign_label');
+  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
+  form.submit();
+}
+
+function doRemoveLabel(tableName, label, sysId) {
+  var form = getFormByTableName(tableName);
+  if (sysId == null || !sysId) {
+    if (!populateParmQuery(form, '', 'NULL'))
+      return false;
+  } else {
+    addInput(form, 'HIDDEN', 'sysparm_checked_items', sysId);
+  }
+  if (!label && typeof option != 'undefined' && option.getAttribute("gsft_base_label"))
+    label = option.getAttribute("gsft_base_label");
+  addInput(form, 'HIDDEN', 'sys_action', 'java:com.glide.labels.LabelActions');
+  addInput(form, 'HIDDEN', 'sys_action_type', 'remove_label');
+  addInput(form, 'HIDDEN', 'sysparm_label_picked', label);
+  form.submit();
+}
+
+function assignLabelActionViaLookupModal(tableName, listId) {
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  assignLabelViaLookup(tableName, sysIds, list.getView());
+}
+
+function assignLabelViaLookup(tableName, sysId, viewName) {
+  var assignCallback = function(labelId) {
+    assignLabel(labelId, tableName, sysId, viewName);
+  };
+  showLabelLookupWindow("Assign Tag", tableName, sysId, assignCallback);
+}
+
+function removeLabelActionViaLookupModal(tableName, listId) {
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  removeLabelViaLookup(tableName, sysIds);
+}
+
+function removeLabelViaLookup(tableName, sysId) {
+  var removeCallback = function(labelId) {
+    removeLabelById(labelId, sysId);
+  };
+  showLabelLookupWindow("Remove Tag", tableName, sysId, removeCallback);
+}
+
+function showLabelLookupWindow(actionName, tableName, sysID, callback) {
+  var tagLookupForm = new GlideDialogWindow("tag_lookup_form");
+  tagLookupForm.setTitle(actionName);
+  tagLookupForm.setPreference("sys_ids", sysID);
+  tagLookupForm.setPreference("table_name", tableName);
+  tagLookupForm.setPreference('on_accept', callback);
+  tagLookupForm.removeCloseDecoration();
+  tagLookupForm.render();
+}
+
+function newLabel(tableName, sysID, callback) {
+  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
+  if (isDoctype) {
+    var tagForm = new GlideDialogWindow("tag_form");
+    tagForm.setTitle("");
+    tagForm.setPreference("sys_ids", sysID);
+    tagForm.setPreference("table_name", tableName);
+    tagForm.removeCloseDecoration();
+    tagForm.render();
+  } else {
+    var keys = ["Please enter the name for the new tag", "New tag"];
+    var msgs = getMessages(keys);
+    if (!callback)
+      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], function(labelName) {
+        newLabelRequest(tableName, labelName, sysID)
+      });
+    else
+      gsftPrompt(msgs["New tag"], msgs["Please enter the name for the new tag"], callback);
+  }
+}
+
+function newLabelRequest(tableName, labelName, sysID) {
+  if (labelName == null)
+    return;
+  var viewName;
+  var view = gel('sysparm_view');
+  if (view != null)
+    viewName = view.value;
+  assignLabel(labelName, tableName, sysID, viewName);
+}
+
+function assignLabel(labelName, tableName, sysId, viewName) {
+  if (!labelName)
+    return;
+  var url = new GlideAjax("LabelsAjax");
+  url.addParam("sysparm_name", tableName);
+  url.addParam("sysparm_value", sysId);
+  url.addParam("sysparm_chars", labelName);
+  url.addParam("sysparm_type", "create");
+  if (viewName)
+    url.addParam("sysparm_view", viewName);
+  url.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabel(appid, labelid) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", appid);
+  aj.addParam("sysparm_value", labelid);
+  aj.addParam("sysparm_type", 'delete');
+  aj.getXML(removeLabelResponse);
+}
+
+function removeLabelByName(labelName, sysId) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", labelName);
+  aj.addParam("sysparm_value", sysId);
+  aj.addParam("sysparm_type", 'removeByName');
+  aj.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabelById(labelId, sysId) {
+  var aj = new GlideAjax("LabelsAjax");
+  aj.addParam("sysparm_name", labelId);
+  aj.addParam("sysparm_value", sysId);
+  aj.addParam("sysparm_type", 'remove');
+  aj.getXML(refreshNavIfNotDoctypeUI);
+}
+
+function removeLabelResponse(response, args) {
+  var labelId = response.responseXML.documentElement.getAttribute("sysparm_name");
+  if (!labelId)
+    refreshNavIfNotDoctypeUI();
+  else {
+    var labelIds = new Array();
+    labelIds.push(labelId);
+    labelsGetRequest(labelIds);
+  }
+}
+
+function newLabelPromptListAction(tableName, listId) {
+  var nonDoctypeUICallback = function(labelName) {
+    assignLabelToCheckedSysIds(labelName, tableName, listId)
+  };
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  newLabel(tableName, sysIds, nonDoctypeUICallback);
+}
+
+function assignLabelToCheckedSysIds(labelName, tableName, listId) {
+  if (!labelName || labelName.strip() == '')
+    return;
+  var list = GlideList2.get(listId);
+  if (!list)
+    return;
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  assignLabel(labelName, tableName, sysIds, list.getView());
+}
+
+function removeLabelFromCheckedSysIds(labelName, listId) {
+  var list = GlideList2.get(listId);
+  var sysIds = list.getChecked();
+  if (!sysIds)
+    return;
+  removeLabelByName(labelName, sysIds);
+}
+
+function getFormByTableName(tableName) {
+  var form = getControlForm(tableName);
+  if (!form)
+    form = document.forms[tableName + '.do'];
+  return form;
+}
+
+function refreshNavIfNotDoctypeUI() {
+  var isDoctype = document.documentElement.getAttribute("data-doctype") == "true";
+  if (!isDoctype)
+    refreshNav();
+};
+/*! RESOURCE: scripts/CloudRsrcTemplateClient.js */
+var CloudRsrcTemplateClient = {
+  _fieldsInfo: {},
+  validateCatItemParameterVariables: function(ajaxProcessor, control, oldValue, newValue, isLoading) {
+    if (isLoading)
+      return;
+    var parameters = {};
+    parameters.variable_control_id = control.id;
+    parameters.parameter_value = newValue.trim();
+    this.callAjax(ajaxProcessor, "validateVariableValue", parameters, function(answer) {
+      var result = answer.evalJSON();
+      result.control = control;
+      CloudRsrcTemplateClient._fieldsInfo[result["name"]] = result;
+      if (!result.isValid) {
+        control.focus();
+      }
+      CloudRsrcTemplateClient.showAllFieldMessages();
+    });
+  },
+  callAjax: function(ajaxName, methodName, parameters, callback) {
+    var glideAjax = new GlideAjax(ajaxName);
+    glideAjax.addParam("sysparm_name", methodName);
+    if (parameters) {
+      for (var name in parameters) {
+        glideAjax.addParam(name, parameters[name]);
+      }
+    }
+    if (callback) {
+      glideAjax.getXMLAnswer(callback);
+    } else {
+      glideAjax.getXMLWait();
+      return glideAjax.getAnswer();
+    }
+  },
+  beforeSubmitCloudRsrcTemplate: function() {
+    if (this.isFormValid())
+      return true;
+    var msg = new GwtMessage().getMessage('Please correct errors to submit order');
+    g_form.addErrorMessage(msg);
+    this.showAllFieldMessages('error');
+    return false;
+  },
+  isFormValid: function() {
+    if (!this._fieldsInfo)
+      return true;
+    for (var name in this._fieldsInfo) {
+      if (!this._fieldsInfo[name].isValid)
+        return false;
+    }
+    return true;
+  },
+  showAllFieldMessages: function() {
+    for (var name in this._fieldsInfo) {
+      var fieldInfo = this._fieldsInfo[name];
+      if (fieldInfo.message.length > 0) {
+        for (var i = 0; i < fieldInfo.message.length; i++) {
+          g_form.hideAllFieldMsgs();
+          g_form.clearMessages();
+          g_form.showFieldMsg(fieldInfo.control, fieldInfo.message[i], fieldInfo.msgtype);
+        }
+      } else {
+        g_form.hideFieldMsg(fieldInfo.control);
+      }
+    }
+  }
+};;
+/*! RESOURCE: scripts/CloudBulkTaggingUtil.js */
+var CloudBulkTaggingUtil = {
+  getSelectedIds: function(field, list, form) {
+    var ids;
+    var listView = typeof list != 'undefined' && list != null;
+    if (listView)
+      ids = list.getChecked();
+    else
+      ids = form.getUniqueValue();
+    if (!field)
+      return ids.split(",");
+    else {
+      var selectedIds = ids.split(",");
+      var tableName;
+      if (listView)
+        tableName = list.getTableName();
+      else
+        return form.getValue(field).split(",");
+      var ga = new GlideAjax('CloudBulkTagUtil');
+      ga.addParam('sysparm_name', 'getSelectedIds');
+      ga.addParam('sysparm_table_name', tableName);
+      ga.addParam('sysparm_ids', JSON.stringify(selectedIds));
+      ga.addParam('sysparm_field', field);
+      ga.getXMLWait();
+      return ga.getAnswer().split(",");
+    }
+  },
+  createBulkTagDialogWindowForCI: function(field, list, form) {
+    var title = '';
+    var dd;
+    var listView = typeof list != 'undefined' && list != null;
+    if (g_api == 1) {
+      title = new GwtMessage().getMessage('Assign Standard Cloud Management Tags');
+      dd = new GlideDialogWindow('assign_cloud_mgmt_tags');
+      dd.setSize(500, 350);
+      dd.setTitle(title);
+      dd.setPreference('sysparm_sys_id', this.getSelectedIds(field, list, form));
+      dd.setPreference('sysparm_list_view', listView);
+      dd.render();
+    } else if (g_api == 2) {
+      title = g_i18n.getMessage('Assign Standard Cloud Management Tags');
+      var url = GlideURLBuilder.newGlideUrl("assign_cloud_mgmt_tags_v3.do");
+      url.addParam('sysparm_sys_id', this.getSelectedIds(field, list, form));
+      url.addParam('sysparm_list_view', listView);
+      url.addParam("sysparm_nostack", "no");
+      var o = new GlideModal("assign_cloud_mgmt_tags_v3", false, "modal-md", "");
+      o.setTitle(title);
+      o.renderIframe(url.getURL(), function() {
+        this.parent.$("#assign_cloud_mgmt_tags_v3").find("iframe").height("420");
+        this.parent.$("#assign_cloud_mgmt_tags_v3").find(".modal-content").height("470");
+      });
+      CustomEvent.observe("cloud.mgmt.assigntags", function() {
+        o.destroy();
+        if (listView)
+          g_notification.show("info", g_i18n.getMessage("Assigning standard Cloud Management tags can take up to a few moments to complete."));
+        else
+          g_notification.show("info", g_i18n.getMessage("Assigning standard Cloud Management tags can take up to a few moments to complete. Refresh the page to see the updated tags."));
+      });
+    }
+    return false;
+  }
+};;
+/*! RESOURCE: scripts/TestClient.js */
+function popTestClient(test_definition, test_subject) {
+  var test_execution;
+  if (!test_subject)
+    test_execution = test_definition;
+  var dialog = new GlideDialogWindow('test_client', false, "50em", "25em");
+  if (test_execution) {
+    dialog.setPreference('sysparm_test_execution', test_execution);
+  } else {
+    dialog.setPreference('sysparm_test_definition', test_definition);
+    dialog.setPreference('sysparm_test_subject', test_subject);
+  }
+  dialog.render();
+}
+var TestClient = Class.create();
+TestClient.prototype = {
+  TEST_STATES: ["Pending", "Running", "Succeeded", "Failed"],
+  STATUS_IMAGES: ["images/workflow_skipped.gif",
+    "images/loading_anim2.gifx", "images/workflow_complete.gifx",
+    "images/workflow_rejected.gifx"
+  ],
+  TRANSLATED_TEXT: ["Pending", "Running", "Succeeded", "Failed",
+    "Details", "more", "Hide Details", "Show Details"
+  ],
+  TIMEOUT_INTERVAL: 1000,
+  translator: new GwtMessage(),
+  detailStates: {},
+  id: "",
+  container: null,
+  initialize: function(test_definition, test_subject) {
+    this.container = $("container");
+    this._setContainerStyles(this.container);
+    this.translator.getMessages(this.TRANSLATED_TEXT);
+    var test_execution;
+    if (!test_subject) {
+      this.id = test_definition
+      return
+    }
+    this.testDefinition = test_definition;
+    this.testSubject = test_subject;
+  },
+  start: function() {
+    if (this.id) {
+      this.getStatus();
+      return;
+    }
+    var ga = new GlideAjax('AJAXTestProcessor');
+    ga.addParam('sysparm_name', 'startTest');
+    ga.addParam('sysparm_test_definition', this.testDefinition);
+    ga.addParam('sysparm_test_subject', this.testSubject);
+    ga.getXML(this.handleStart.bind(this));
+  },
+  handleStart: function(response) {
+    this.id = response.responseXML.documentElement.getAttribute("answer");
+    this.getStatus();
+  },
+  getStatus: function() {
+    var ga = new GlideAjax('AJAXTestProcessor');
+    ga.addParam('sysparm_name', 'getStatus');
+    ga.addParam('sysparm_execution_id', this.id);
+    if (typeof this.id != "string" || this.id == "")
+      return;
+    ga.getXML(this.handleGetStatus.bind(this));
+  },
+  handleGetStatus: function(response) {
+    var answer = response.responseXML.documentElement.getAttribute("answer");
+    eval("var so = " + answer);
+    this.renderStatus(so);
+    this.container = $("container");
+    if (this.container == null)
+      return;
+    if (so.state == "0" || so.state == "1")
+      setTimeout(this.getStatus.bind(this), this.TIMEOUT_INTERVAL);
+  },
+  renderStatus: function(so) {
+    if (!so)
+      return;
+    var new_container = new Element("div");
+    this._setContainerStyles(new_container);
+    new_container.appendChild(this.getStatusRow(so));
+    this.container.replace(new_container);
+    this.container = new_container;
+  },
+  getStatusRow: function(obj, order) {
+    var name = obj.name;
+    var state = obj.state;
+    var message = obj.message;
+    var percent = NaN;
+    if (obj.percent_complete) {
+      percent = parseInt(obj.percent_complete);
+    }
+    var hasPercent = (!isNaN(percent) && percent > 0 && percent <= 100);
+    var hasDetails = (obj.results.length >= 1 || message != "");
+    var tr = new Element("div", {
+      id: "row_container-" + obj.sys_id
+    });
+    tr.style.padding = "5px";
+    var simp = new Element("div");
+    simp.appendChild(this._getImage(obj));
+    simp.appendChild(this._getItemTitleElement(name, order));
+    var det = this._getDetailElement();
+    var dtl;
+    if (hasDetails || hasPercent)
+      dtl = det.appendChild(this._getShowDetailsLink(obj.sys_id));
+    simp.appendChild(det);
+    simp.appendChild(this._getFloatClear("both"));
+    tr.appendChild(simp);
+    if (hasDetails || hasPercent) {
+      var dtd = new Element("div");
+      var ddc = new Element("div");
+      ddc.style.marginTop = ".5em";
+      ddc.style.marginLeft = "30px";
+      ddc.id = "detail_cont-" + obj.sys_id;
+      dtd.appendChild(ddc);
+      if (hasPercent) {
+        ddc.appendChild(this._getProgressBar(percent));
+        ddc.appendChild(this._getFloatClear("both"));
+      }
+      if (message != "") {
+        var dds = new Element("div");
+        dds.appendChild(this._getDetailsText(message, obj));
+        dds.style.fontSize = "smaller";
+        dds.style.marginBottom = ".5em";
+        ddc.appendChild(dds);
+      }
+      dtl.details_container = ddc;
+      if (typeof this.detailStates[obj.sys_id] == "boolean" && this.detailStates[obj.sys_id] == false && dtl != null)
+        dtl.onclick();
+      tr.appendChild(dtd);
+      this.renderChildren(obj, ddc);
+    }
+    return tr;
+  },
+  _getItemTitleElement: function(name, order) {
+    var nameHtml = "<b>" + name + "</b>";
+    if (order) {
+      nameHtml = "\t" + order + ".\t" + nameHtml;
+    }
+    var nsp = new Element("span");
+    nsp.innerHTML = nameHtml;
+    nsp.style.float = "left";
+    return nsp;
+  },
+  _getImage: function(obj) {
+    var state = obj.state;
+    var si = new Element("img");
+    si.id = "img-" + obj.sys_id;
+    si.src = this.STATUS_IMAGES[state];
+    si.style.marginRight = "10px";
+    si.style.float = "left";
+    si.title = this.TEST_STATES[state];
+    return si;
+  },
+  _getDetailElement: function() {
+    var det = new Element("span");
+    det.style.marginLeft = "10px";
+    det.style.float = "left";
+    return det;
+  },
+  _getShowDetailsLink: function(objSysID) {
+    var da = new Element("a");
+    da.id = objSysID;
+    da.controller = this;
+    da.innerHTML = "(" + this.translator.getMessage("Hide Details") + ")";
+    da.toggleText = "(" + this.translator.getMessage("Show Details") + ")";
+    da.style.fontSize = "8pt";
+    da.style.float = "left";
+    da.onclick = this.__detailsToggle;
+    return da;
+  },
+  __detailsToggle: function() {
+    var cont = this.details_container;
+    cont.toggle();
+    this.controller.detailStates[this.id] = cont.visible();
+    var nt = this.toggleText;
+    this.toggleText = this.innerHTML;
+    this.innerHTML = nt;
+  },
+  _getDetailsText: function(message, obj) {
+    if (message.length > 150) {
+      var new_message = new Element("span");
+      new_message.innerHTML = "<b>" +
+        this.translator.getMessage("Details") + ": </b>" +
+        message.slice(0, 150) + "... ";
+      var anch = new Element("a");
+      anch.href = "test_execution.do?sys_id=" + obj.sys_id;
+      anch.innerHTML = "<b>(" + this.translator.getMessage("more") +
+        ")</b>";
+      new_message.appendChild(anch);
+      return new_message;
+    } else {
+      var new_message = new Element("span")
+      new_message.innerHTML = "<b>" +
+        this.translator.getMessage("Details") + ": </b>" +
+        message;
+      return new_message;
+    }
+  },
+  _getProgressBar: function(percent) {
+    percent = Math.max(0, Math.min(100, percent));
+    var progressContainer = new Element("div");
+    progressContainer.style.width = "300px";
+    progressContainer.style.height = "8px";
+    progressContainer.style.border = "1px solid black";
+    progressContainer.style.borderRadius = "10px";
+    progressContainer.style.padding = "2px";
+    progressContainer.style.marginTop = "2px";
+    progressContainer.style.marginBottom = "2px";
+    progressContainer.style.float = "left";
+    var progressBar = new Element("div");
+    progressBar.style.width = percent + "%";
+    progressBar.style.height = "100%";
+    progressBar.style.borderRadius = "10px";
+    progressBar.style.backgroundColor = "#667788";
+    progressContainer.appendChild(progressBar);
+    return progressContainer;
+  },
+  _getFloatClear: function(which) {
+    var br = new Element("br");
+    br.style.clear = which;
+    return br;
+  },
+  renderChildren: function(so, pr_cont) {
+    if (!so.results)
+      return;
+    for (var i = 0; i < so.results.length; i++) {
+      pr_cont.appendChild(this.getStatusRow(so.results[i], i + 1)).style.marginLeft = "15px";
+    }
+  },
+  _setContainerStyles: function(container) {
+    container.id = "container";
+    container.style.overflowY = "auto";
+    container.style.maxHeight = "50em";
+    container.style.marginRight = ".25em";
+    container.style.marginLeft = ".25em";
+  },
+  type: 'TestClient'
+};;
+/*! RESOURCE: scripts/CSDCatItemUtilClient.js */
+var CSDCatItemUtilClient = {
+  g_formError: [],
+};;
+/*! RESOURCE: scripts/CloudStackClient.js */
+var CloudStackClient = {
+  _scCatItemInfo: {
+    'cmdb_ci_cloudformation_stack': 'e24787ec9f132100eff2d07bf67fcf8d',
+    'cmdb_ci_azure_resource_group': 'cd5c77239f300200eff2d07bf67fcf7f'
+  },
+  requestStackChange: function(stack_id, lease_start, table_name) {
+    var ITEM = CloudStackClient._scCatItemInfo[table_name];
+    var u_lease_end = CloudStackClient.getStackLeaseEndTime(lease_start).toString();
+    var itemVars = {
+      'u_lease_end': u_lease_end,
+      'u_vm_instance_sys_id': stack_id
+    };
+    if (itemVars.u_lease_end != null) {
+      CloudStackClient.callAjax(ITEM, stack_id, table_name, itemVars);
+    }
+    return false;
+  },
+  callAjax: function(item, stack_id, table_name, itemVars, callback) {
+    var ga = new GlideAjax('CloudStackAjax');
+    ga.addParam('sysparm_name', 'requestChange');
+    ga.addParam('table', table_name);
+    ga.addParam('current', stack_id);
+    ga.addParam('item', item);
+    ga.addParam('itemVars', Object.toJSON(itemVars));
+    ga.getXMLAnswer(CloudStackClient.callAjaxHandleResponse);
+  },
+  callAjaxHandleResponse: function(responseData) {
+    var response = responseData.evalJSON();
+    if (response.changeRequest == null) {
+      if (response.errorMessage != null) {
+        g_form.addErrorMessage(response.errorMessage);
+      } else {
+        gsftSubmit(document.getElementById('sysverb_back'));
+      }
+    } else {
+      window.location = response.changeRequest.url;
+    }
+    return false;
+  },
+  isChangeRequiredForStack: function(stack_id, table_name) {
+    var ga = new GlideAjax('CloudStackAjax');
+    ga.addParam('sysparm_name', 'isChangeRequired');
+    ga.addParam('sysparm_id', stack_id);
+    ga.addParam('sysparm_table', table_name);
+    ga.addParam('action', 'update_lease_end');
+    ga.getXMLWait();
+    return ga.getAnswer() == 'true';
+  },
+  showLeaseUpdateDialog: function() {
+    var stack_id = g_form.getUniqueValue();
+    var lease_start;
+    var lease_end;
+    var gr = new GlideRecord(g_form.getTableName());
+    if (gr.get(stack_id)) {
+      if (gr.getTableName().startsWith('cloud_report_')) {
+        stack_id = gr.ci;
+        gr = new GlideRecord('cmdb_ci');
+        if (!gr.get(stack_id)) {
+          console.error('Stack ' + stack_id + ' not found');
+          return;
+        }
+      }
+      var stack_lease_start = gr.lease_start + '';
+      var stack_lease_end = gr.lease_end + '';
+      if ((stack_lease_start == '') && (stack_lease_end == '')) {
+        lease_start = new GwtDate();
+        lease_start.now();
+        lease_end = new GwtDate();
+        lease_end.now();
+        lease_end.addDays(CloudStackClient.getDefaultLeaseDurationForStack());
+      } else {
+        lease_start = CloudStackClient.adjustStackTime(new GwtDate(stack_lease_start), false);
+        lease_end = CloudStackClient.adjustStackTime(new GwtDate(stack_lease_end), false);
+      }
+    }
+    dlog = new GlideDialogWindow('update_lease_end', false, 320);
+    dlog.setTitle(new GwtMessage().getMessage('New Lease End Date Time'));
+    dlog.setPreference('vm_instance_sys_id', stack_id);
+    dlog.setPreference('lease_start', lease_start);
+    dlog.setPreference('lease_end', lease_end);
+    dlog.setPreference('change_required', CloudStackClient.isChangeRequiredForStack(stack_id, gr.sys_class_name));
+    dlog.setPreference('onConfirm_ok', function() {
+      CloudStackClient.requestStackChange(stack_id, lease_start, gr.sys_class_name);
+    });
+    dlog.render();
+  },
+  getDefaultLeaseDurationForStack: function() {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'getProperty');
+    ga.addParam('sysparm_property_name', 'lease_duration');
+    ga.getXMLWait();
+    return ga.getAnswer();
+  },
+  adjustStackTime: function(dt, toUTC) {
+    var dtObject = dt.getDateObject(true);
+    var offset = dtObject.getTimezoneOffset();
+    if (toUTC) {
+      dt.addMinutes(offset);
+    } else {
+      dt.subtractMinutes(offset);
+    }
+    return dt;
+  },
+  getStackLeaseEndTime: function(lease_start) {
+    var lease_end = trim(gel('lease_end').value);
+    lease_end = CloudStackClient.getStackInternalDateFormat(lease_end);
+    var dt_lease_end = null;
+    var old_lease_end = g_form.getValue('lease_end');
+    if (lease_end != old_lease_end) {
+      if (CloudStackClient.validateLeaseEndTime(lease_start, lease_end, true)) {
+        dt_lease_end = CloudStackClient.adjustStackTime(new GwtDate(lease_end), true);
+      }
+    }
+    return dt_lease_end;
+  },
+  getStackInternalDateFormat: function(userDateStr) {
+    var time_milli_seconds = getDateFromFormat(userDateStr, g_user_date_time_format);
+    return new GwtDate(time_milli_seconds).toString();
+  },
+  validateLeaseEndTime: function(lease_start, lease_end, skipConvert) {
+    if (!skipConvert)
+      lease_end = CloudStackClient.getStackInternalDateFormat(lease_end);
+    if (lease_end == '') {
+      setValidationError(true, new GwtMessage().getMessage('Lease end time cannot be blank'));
+      return false;
+    }
+    var newTime = new GwtDate(lease_end + '');
+    if (newTime.compare(new GwtDate(lease_start + ''), true) < 0) {
+      setValidationError(true, new GwtMessage().getMessage('Lease end time must be later than lease start time'));
+      return false;
+    }
+    if (newTime.compare(timeWindow(), true) < 0) {
+      setValidationError(true, new GwtMessage().getMessage('Lease end time must be later than current time'));
+      return false;
+    }
+    var maxLease = getMaxLeaseDuration();
+    if (maxLease != '') {
+      var currentTime = timeWindow();
+      var startTime = new GwtDate(lease_start + '');
+      var dt = (currentTime.compare(startTime, true) > 0) ? currentTime : startTime;
+      dt.addDays(maxLease);
+      if (dt.compare(new GwtDate(lease_end + ''), true) < 0) {
+        setValidationError(true, new GwtMessage().getMessage('Lease end time exceeds the max lease duration (Max lease duration: {0} days)', maxLease));
+        return false;
+      }
+    }
+    setValidationError(false, '');
+    return true;
+
+    function timeWindow() {
+      var tm = new GwtDate();
+      tm.now();
+      tm.subtractSeconds(2);
+      return tm;
+    }
+
+    function getMaxLeaseDuration() {
+      var ga = new GlideAjax('VMAjax');
+      ga.addParam('sysparm_name', 'getProperty');
+      ga.addParam('sysparm_property_name', 'max_lease_duration');
+      ga.getXMLWait();
+      return ga.getAnswer();
+    }
+
+    function setValidationError(isVisible, msg) {
+      var control = document.getElementById('lease_end_error');
+      control.style.display = isVisible ? '' : 'none';
+      control.innerHTML = msg + '';
+    }
+  }
+};;
 /*! RESOURCE: scripts/spell.js */
 var TAG_DIV = "div";
 var TAG_SPAN = "span";
@@ -37173,6 +37707,200 @@ var AJAXTextSearchCompleter = Class.create(AJAXTableCompleter, {
     return width;
   }
 });;
+/*! RESOURCE: scripts/VMCommon.js */
+var VMStateMachine = (function() {
+  var pub = {};
+  pub.requestChange = function(item, vm_id, itemVars) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'requestChange');
+    ga.addParam('current', vm_id);
+    ga.addParam('item', item);
+    ga.addParam('itemVars', Object.toJSON(itemVars));
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.change = function(state, vm_id) {
+    var isChangeRequired = VMStateMachine.isChangeRequired(state, vm_id);
+    if (state == 'terminate' || isChangeRequired) {
+      var msgs = new GwtMessage();
+      var title_msg = state.charAt(0).toUpperCase() + state.slice(1);
+      var title = msgs.getMessage('{0} VM', title_msg);
+      confirm(vm_id, title, state, '', isChangeRequired, function() {
+        doChange(state, vm_id);
+      });
+    } else {
+      doChange(state, vm_id);
+    }
+  }
+  pub.confirm = function(vm_id, title, state, message, isChangeRequired, okCallback) {
+    confirm(vm_id, title, state, message, isChangeRequired, okCallback);
+  }
+  pub.takeSnapshot = function(name, shortDescription, vm_id) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'takeSnapshot');
+    ga.addParam('current', vm_id);
+    ga.addParam('name', name);
+    ga.addParam('shortDescription', shortDescription);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.takeSnapshotEC2 = function(name, shortDescription, volume_id, vm_id) {
+    var ga = new GlideAjax('EC2VMAjax');
+    ga.addParam('sysparm_name', 'takeSnapshot');
+    ga.addParam('current', vm_id);
+    ga.addParam('name', name);
+    ga.addParam('shortDescription', shortDescription);
+    ga.addParam('volume_id', volume_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.takeSnapshotAzure = function(name, shortDescription, item_vars, vm_id) {
+    var ga = new GlideAjax('sn_azure.AzureOperationAjax');
+    ga.addParam('sysparm_name', 'takeSnapshot');
+    ga.addParam('current', vm_id);
+    ga.addParam('name', name);
+    ga.addParam('shortDescription', shortDescription);
+    ga.addParam('item_vars', Object.toJSON(item_vars));
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.restoreSnapshot = function(vm_snapshot_id) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'restoreSnapshot');
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.restoreSnapshotEC2 = function(attach_device, volume_type, volume_size, iops, vm_snapshot_id) {
+    var ga = new GlideAjax('EC2VMAjax');
+    ga.addParam('sysparm_name', 'restoreSnapshot');
+    ga.addParam('attach_device', attach_device);
+    ga.addParam('volume_type', volume_type);
+    ga.addParam('volume_size', volume_size);
+    ga.addParam('iops', iops);
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.restoreSnapshotAzure = function(vm_snapshot_id) {
+    var ga = new GlideAjax('sn_azure.AzureOperationAjax');
+    ga.addParam('sysparm_name', 'restoreSnapshot');
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.restoreSnapshotClient = function(vm_snapshot_id) {
+    var vm = VMStateMachine.getVMRecordFromSnapshotId(vm_snapshot_id);
+    if (vm.sys_class_name == "cmdb_ci_ec2_instance") {
+      this.restoreSnapshotEC2Client(vm_snapshot_id);
+    } else {
+      this.restoreSnapshotVMWClient(vm_snapshot_id);
+    }
+  }
+  pub.restoreSnapshotEC2Client = function(vm_snapshot_id) {
+    var state = 'restore_snapshot_ec2';
+    var action = 'restore_snapshot';
+    var gdw = new GlideDialogWindow(state, false, 600);
+    gdw.setTitle(getMessage('Restore VM Snapshot'));
+    gdw.setPreference('change_required', VMStateMachine.isSnapshotVMChangeRequired(action, vm_snapshot_id));
+    gdw.setPreference('vm_snapshot_id', rowSysId);
+    gdw.render();
+  }
+  pub.restoreSnapshotVMWClient = function(vm_snapshot_id) {
+    var state = 'restore_snapshot';
+    var msg_title = getMessage('Restore snapshot');
+    var msg_prompt = getMessage('Restoring VM snapshot');
+    var changeRequired = VMStateMachine.isSnapshotVMChangeRequired(state, vm_snapshot_id);
+    VMStateMachine.confirm(vm_snapshot_id, msg_title, state, msg_prompt,
+      changeRequired,
+      function() {
+        VMStateMachine.restoreSnapshot(vm_snapshot_id);
+      });
+  }
+  pub.deleteSnapshot = function(vm_snapshot_id) {
+    var vm = this.getVMRecordFromSnapshotId(vm_snapshot_id);
+    if (vm.sys_class_name == 'cmdb_ci_ec2_instance') {
+      this.deleteSnapshotEC2(vm_snapshot_id);
+      return;
+    }
+    if (vm.sys_class_name == 'cmdb_ci_vm_instance') {
+      this.deleteSnapshotEC2(vm_snapshot_id);
+      return;
+    }
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'deleteSnapshot');
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.deleteSnapshotEC2 = function(vm_snapshot_id) {
+    var ga = new GlideAjax('EC2VMAjax');
+    ga.addParam('sysparm_name', 'deleteSnapshot');
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.deleteSnapshotAzure = function(vm_snapshot_id) {
+    var ga = new GlideAjax('sn_azure.AzureOperationAjax');
+    ga.addParam('sysparm_name', 'deleteSnapshot');
+    ga.addParam('current', vm_snapshot_id);
+    ga.getXMLAnswer(handleResponse);
+  }
+  pub.isSnapshotVMChangeRequired = function(action, vm_snapshot_id) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'isSnapshotVMChangeRequired');
+    ga.addParam('vm_snapshot_id', vm_snapshot_id);
+    ga.addParam('action', action);
+    ga.getXMLWait();
+    return ga.getAnswer() == 'true';
+  }
+  pub.isChangeRequired = function(action, vm_id) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'isChangeRequired');
+    ga.addParam('sysparm_id', vm_id);
+    ga.addParam('action', action);
+    ga.getXMLWait();
+    return ga.getAnswer() == 'true';
+  }
+  pub.getVMRecordFromSnapshotId = function(snapshot_id) {
+    var gr = new GlideRecord('vm_snapshot');
+    gr.get(snapshot_id);
+    var vm = new GlideRecord('cmdb_ci_vm_instance');
+    vm.get(gr.instance);
+    return vm;
+  }
+
+  function confirm(vm_id, title, state, prompt, isChangeRequired, okCallback) {
+    var dialog = new GlideDialogWindow('change_vm_state');
+    dialog.setTitle(title);
+    dialog.setPreference('prompt', prompt);
+    dialog.setPreference('state', state);
+    dialog.setPreference('change_required', isChangeRequired);
+    dialog.setPreference('onConfirm_ok', okCallback);
+    dialog.setPreference('onConfirm_cancel', function() {
+      return false;
+    });
+    dialog.render();
+    return false;
+  }
+
+  function doChange(newState, vm_id, callback) {
+    var ga = new GlideAjax('VMAjax');
+    ga.addParam('sysparm_name', 'change');
+    ga.addParam('current', vm_id);
+    ga.addParam('state', newState);
+    if (callback === undefined || callback == null) {
+      callback = handleResponse;
+    }
+    ga.getXMLAnswer(callback);
+  }
+
+  function handleResponse(responseData) {
+    var response = responseData.evalJSON();
+    if (response.changeRequest == null) {
+      if (response.errorMessage != null) {
+        g_form.addErrorMessage(response.errorMessage);
+      } else {
+        gsftSubmit(document.getElementById('sysverb_back'));
+      }
+    } else {
+      window.location = response.changeRequest.url;
+    }
+    return false;
+  }
+  return pub;
+}());;
 /*! RESOURCE: scripts/CloudApiSCClient.js */
 var CloudApiSCClient = {
   _fieldsInfo: {},

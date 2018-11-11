@@ -753,100 +753,911 @@ angular.module('sn.common.util').provider('getTemplateUrl', function(angularProc
 });;
 /*! RESOURCE: /scripts/sn/common/util/service.snTabActivity.js */
 angular.module("sn.common.util").service("snTabActivity", function($window, $timeout, $rootElement, $document) {
-      "use strict";
-      var activeEvents = ["keydown", "DOMMouseScroll", "mousewheel", "mousedown", "touchstart", "mousemove", "mouseenter", "input", "focus", "scroll"],
-        defaultIdle = 75000,
-        isPrimary = true,
-        idleTime = 0,
-        isVisible = true,
-        idleTimeout = void(0),
-        pageIdleTimeout = void(0),
-        hasActed = false,
-        appName = $rootElement.attr('ng-app') || "",
-        storageKey = "sn.tabs." + appName + ".activeTab";
-      var callbacks = {
-        "tab.primary": [],
-        "tab.secondary": [],
-        "activity.active": [],
-        "activity.idle": [{
-          delay: defaultIdle,
-          cb: function() {}
-        }]
-      };
-      $window.tabGUID = $window.tabGUID || createGUID();
+  "use strict";
+  var activeEvents = ["keydown", "DOMMouseScroll", "mousewheel", "mousedown", "touchstart", "mousemove", "mouseenter", "input", "focus", "scroll"],
+    defaultIdle = 75000,
+    isPrimary = true,
+    idleTime = 0,
+    isVisible = true,
+    idleTimeout = void(0),
+    pageIdleTimeout = void(0),
+    hasActed = false,
+    appName = $rootElement.attr('ng-app') || "",
+    storageKey = "sn.tabs." + appName + ".activeTab";
+  var callbacks = {
+    "tab.primary": [],
+    "tab.secondary": [],
+    "activity.active": [],
+    "activity.idle": [{
+      delay: defaultIdle,
+      cb: function() {}
+    }]
+  };
+  $window.tabGUID = $window.tabGUID || createGUID();
 
-      function getActiveEvents() {
-        return activeEvents.join(".snTabActivity ") + ".snTabActivity";
+  function getActiveEvents() {
+    return activeEvents.join(".snTabActivity ") + ".snTabActivity";
+  }
+
+  function setAppName(an) {
+    appName = an;
+    storageKey = "sn.tabs." + appName + ".activeTab";
+    makePrimary(true);
+  }
+
+  function createGUID(l) {
+    l = l || 32;
+    var strResult = '';
+    while (strResult.length < l)
+      strResult += (((1 + Math.random() + new Date().getTime()) * 0x10000) | 0).toString(16).substring(1);
+    return strResult.substr(0, l);
+  }
+
+  function ngObjectIndexOf(arr, obj) {
+    for (var i = 0, len = arr.length; i < len; i++)
+      if (angular.equals(arr[i], obj))
+        return i;
+    return -1;
+  }
+  var detectedApi,
+    apis = [{
+      eventName: 'visibilitychange',
+      propertyName: 'hidden'
+    }, {
+      eventName: 'mozvisibilitychange',
+      propertyName: 'mozHidden'
+    }, {
+      eventName: 'msvisibilitychange',
+      propertyName: 'msHidden'
+    }, {
+      eventName: 'webkitvisibilitychange',
+      propertyName: 'webkitHidden'
+    }];
+  apis.some(function(api) {
+    if (angular.isDefined($document[0][api.propertyName])) {
+      detectedApi = api;
+      return true;
+    }
+  });
+  if (detectedApi)
+    $document.on(detectedApi.eventName, function() {
+      if (!$document[0][detectedApi.propertyName]) {
+        makePrimary();
+        isVisible = true;
+      } else {
+        if (!idleTimeout && !idleTime)
+          waitForIdle(0);
+        isVisible = false;
       }
-
-      function setAppName(an) {
-        appName = an;
-        storageKey = "sn.tabs." + appName + ".activeTab";
-        makePrimary(true);
+    });
+  angular.element($window).on({
+    "mouseleave": function(e) {
+      var destination = angular.isUndefined(e.toElement) ? e.relatedTarget : e.toElement;
+      if (destination === null && $document[0].hasFocus()) {
+        waitForIdle(0);
       }
+    },
+    "storage": function(e) {
+      if (e.originalEvent.key !== storageKey)
+        return;
+      if ($window.localStorage.getItem(storageKey) !== $window.tabGUID)
+        makeSecondary();
+    }
+  });
 
-      function createGUID(l) {
-        l = l || 32;
-        var strResult = '';
-        while (strResult.length < l)
-          strResult += (((1 + Math.random() + new Date().getTime()) * 0x10000) | 0).toString(16).substring(1);
-        return strResult.substr(0, l);
+  function waitForIdle(index, delayOffset) {
+    var callback = callbacks['activity.idle'][index];
+    var numCallbacks = callbacks['activity.idle'].length;
+    delayOffset = delayOffset || callback.delay;
+    angular.element($window).off(getActiveEvents());
+    angular.element($window).one(getActiveEvents(), setActive);
+    if (index >= numCallbacks)
+      return;
+    if (idleTimeout)
+      $timeout.cancel(idleTimeout);
+    idleTimeout = $timeout(function() {
+      idleTime = callback.delay;
+      callback.cb();
+      $timeout.cancel(idleTimeout);
+      idleTimeout = void(0);
+      angular.element($window).off(getActiveEvents());
+      angular.element($window).one(getActiveEvents(), setActive);
+      for (var i = index + 1; i < numCallbacks; i++) {
+        var nextDelay = callbacks['activity.idle'][i].delay;
+        if (nextDelay <= callback.delay)
+          callbacks['activity.idle'][i].cb();
+        else {
+          waitForIdle(i, nextDelay - callback.delay);
+          break;
+        }
       }
+    }, delayOffset, false);
+  }
 
-      function ngObjectIndexOf(arr, obj) {
-        for (var i = 0, len = arr.length; i < len; i++)
-          if (angular.equals(arr[i], obj))
-            return i;
+  function setActive() {
+    angular.element($window).off(getActiveEvents());
+    if (idleTimeout) {
+      $timeout.cancel(idleTimeout);
+      idleTimeout = void(0);
+    }
+    var activeCallbacks = callbacks['activity.active'];
+    activeCallbacks.some(function(callback) {
+      if (callback.delay <= idleTime)
+        callback.cb();
+      else
+        return true;
+    });
+    idleTime = 0;
+    makePrimary();
+    if (pageIdleTimeout) {
+      $timeout.cancel(pageIdleTimeout);
+      pageIdleTimeout = void(0);
+    }
+    var minDelay = callbacks['activity.idle'][0].delay;
+    hasActed = false;
+    if (!pageIdleTimeout)
+      pageIdleTimeout = $timeout(pageIdleHandler, minDelay, false);
+    listenForActivity();
+  }
+
+  function pageIdleHandler() {
+    if (idleTimeout)
+      return;
+    var minDelay = callbacks['activity.idle'][0].delay;
+    if (hasActed) {
+      hasActed = false;
+      if (pageIdleTimeout)
+        $timeout.cancel(pageIdleTimeout);
+      pageIdleTimeout = $timeout(pageIdleHandler, minDelay, false);
+      listenForActivity();
+      return;
+    }
+    var delayOffset = minDelay;
+    if (callbacks['activity.idle'].length > 1)
+      delayOffset = callbacks['activity.idle'][1].delay - minDelay;
+    idleTime = minDelay;
+    callbacks['activity.idle'][0].cb();
+    waitForIdle(1, delayOffset);
+    pageIdleTimeout = void(0);
+  }
+
+  function listenForActivity() {
+    angular.element($window).off(getActiveEvents());
+    angular.element($window).one(getActiveEvents(), onActivity);
+    angular.element("#gsft_main").on("load.snTabActivity", function() {
+      var src = angular.element(this).attr('src');
+      if (src.indexOf("/") == 0 || src.indexOf($window.location.origin) == 0 || src.indexOf('http') == -1) {
+        var iframeWindow = this.contentWindow ? this.contentWindow : this.contentDocument.defaultView;
+        angular.element(iframeWindow).off(getActiveEvents());
+        angular.element(iframeWindow).one(getActiveEvents(), onActivity);
+      }
+    });
+    angular.element('iframe').each(function(idx, iframe) {
+      var src = angular.element(iframe).attr('src');
+      if (!src)
+        return;
+      if (src.indexOf("/") == 0 || src.indexOf($window.location.origin) == 0 || src.indexOf('http') == -1) {
+        var iframeWindow = iframe.contentWindow ? iframe.contentWindow : iframe.contentDocument.defaultView;
+        angular.element(iframeWindow).off(getActiveEvents());
+        angular.element(iframeWindow).one(getActiveEvents(), onActivity);
+      }
+    });
+  }
+
+  function onActivity() {
+    hasActed = true;
+    makePrimary();
+  }
+
+  function makePrimary(initial) {
+    var oldGuid = $window.localStorage.getItem(storageKey);
+    isPrimary = true;
+    isVisible = true;
+    $timeout.cancel(idleTimeout);
+    idleTimeout = void(0);
+    if (canUseStorage() && oldGuid !== $window.tabGUID && !initial)
+      for (var i = 0, len = callbacks["tab.primary"].length; i < len; i++)
+        callbacks["tab.primary"][i].cb();
+    try {
+      $window.localStorage.setItem(storageKey, $window.tabGUID);
+    } catch (ignored) {}
+    if (idleTime && $document[0].hasFocus())
+      setActive();
+  }
+
+  function makeSecondary() {
+    isPrimary = false;
+    isVisible = false;
+    for (var i = 0, len = callbacks["tab.secondary"].length; i < len; i++)
+      callbacks["tab.secondary"][i].cb();
+  }
+
+  function registerCallback(event, callback, scope) {
+    var cbObject = angular.isObject(callback) ? callback : {
+      delay: defaultIdle,
+      cb: callback
+    };
+    if (callbacks[event]) {
+      callbacks[event].push(cbObject);
+      callbacks[event].sort(function(a, b) {
+        return a.delay - b.delay;
+      })
+    }
+
+    function destroyCallback() {
+      if (callbacks[event]) {
+        var pos = ngObjectIndexOf(callbacks[event], cbObject);
+        if (pos !== -1)
+          callbacks[event].splice(pos, 1);
+      }
+    }
+    if (scope)
+      scope.$on("$destroy", function() {
+        destroyCallback();
+      });
+    return destroyCallback;
+  }
+
+  function registerIdleCallback(options, onIdle, onReturn, scope) {
+    var delay = options,
+      onIdleDestroy,
+      onReturnDestroy;
+    if (angular.isObject(options)) {
+      delay = options.delay;
+      onIdle = options.onIdle || onIdle;
+      onReturn = options.onReturn || onReturn;
+      scope = options.scope || scope;
+    }
+    if (angular.isFunction(onIdle))
+      onIdleDestroy = registerCallback("activity.idle", {
+        delay: delay,
+        cb: onIdle
+      });
+    else if (angular.isFunction(onReturn)) {
+      onIdleDestroy = registerCallback("activity.idle", {
+        delay: delay,
+        cb: function() {}
+      });
+    }
+    if (angular.isFunction(onReturn))
+      onReturnDestroy = registerCallback("activity.active", {
+        delay: delay,
+        cb: onReturn
+      });
+
+    function destroyAll() {
+      if (angular.isFunction(onIdleDestroy))
+        onIdleDestroy();
+      if (angular.isFunction(onReturnDestroy))
+        onReturnDestroy();
+    }
+    if (scope)
+      scope.$on("$destroy", function() {
+        destroyAll();
+      });
+    return destroyAll;
+  }
+
+  function canUseStorage() {
+    var canWe = false;
+    try {
+      $window.localStorage.setItem(storageKey, $window.tabGUID);
+      canWe = true;
+    } catch (ignored) {}
+    return canWe;
+  }
+
+  function resetIdleTime() {
+    if (idleTime > 0) {
+      idleTime = 0;
+      if (pageIdleTimeout) {
+        $timeout.cancel(pageIdleTimeout);
+        pageIdleTimeout = void(0);
+      }
+    }
+    waitForIdle(0);
+  }
+  makePrimary(true);
+  listenForActivity();
+  pageIdleTimeout = $timeout(pageIdleHandler, defaultIdle, false);
+  return {
+    on: registerCallback,
+    onIdle: registerIdleCallback,
+    setAppName: setAppName,
+    get isPrimary() {
+      return isPrimary;
+    },
+    get isIdle() {
+      return idleTime > 0;
+    },
+    get idleTime() {
+      return idleTime;
+    },
+    get isVisible() {
+      return isVisible;
+    },
+    get appName() {
+      return appName;
+    },
+    get defaultIdleTime() {
+      return defaultIdle
+    },
+    isActive: function() {
+      return this.idleTime < this.defaultIdleTime && this.isVisible;
+    },
+    resetIdleTime: resetIdleTime
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/factory.ArraySynchronizer.js */
+angular.module("sn.common.util").factory("ArraySynchronizer", function() {
+  'use strict';
+
+  function ArraySynchronizer() {}
+
+  function index(key, arr) {
+    var result = {};
+    var keys = [];
+    result.orderedKeys = keys;
+    angular.forEach(arr, function(item) {
+      var keyValue = item[key];
+      result[keyValue] = item;
+      keys.push(keyValue);
+    });
+    return result;
+  }
+
+  function sortByKeyAndModel(arr, key, model) {
+    arr.sort(function(a, b) {
+      var aIndex = model.indexOf(a[key]);
+      var bIndex = model.indexOf(b[key]);
+      if (aIndex > bIndex)
+        return 1;
+      else if (aIndex < bIndex)
         return -1;
-      }
-      var detectedApi,
-        apis = [{
-          eventName: 'visibilitychange',
-          propertyName: 'hidden'
-        }, {
-          eventName: 'mozvisibilitychange',
-          propertyName: 'mozHidden'
-        }, {
-          eventName: 'msvisibilitychange',
-          propertyName: 'msHidden'
-        }, {
-          eventName: 'webkitvisibilitychange',
-          propertyName: 'webkitHidden'
-        }];
-      apis.some(function(api) {
-        if (angular.isDefined($document[0][api.propertyName])) {
-          detectedApi = api;
-          return true;
-        }
-      });
-      if (detectedApi)
-        $document.on(detectedApi.eventName, function() {
-          if (!$document[0][detectedApi.propertyName]) {
-            makePrimary();
-            isVisible = true;
+      return 0;
+    });
+  }
+  ArraySynchronizer.prototype = {
+    add: function(syncField, dest, source, end) {
+      end = end || "bottom";
+      var destIndex = index(syncField, dest);
+      var sourceIndex = index(syncField, source);
+      angular.forEach(sourceIndex.orderedKeys, function(key) {
+        if (destIndex.orderedKeys.indexOf(key) === -1) {
+          if (end === "bottom") {
+            dest.push(sourceIndex[key]);
           } else {
-            if (!idleTimeout && !idleTime)
-              waitForIdle(0);
-            isVisible = false;
+            dest.unshift(sourceIndex[key]);
           }
-        });
-      angular.element($window).on({
-        "mouseleave": function(e) {
-          var destination = angular.isUndefined(e.toElement) ? e.relatedTarget : e.toElement;
-          if (destination === null && $document[0].hasFocus()) {
-            waitForIdle(0);
-          }
-        },
-        "storage": function(e) {
-          if (e.originalEvent.key !== storageKey)
-            return;
-          if ($window.localStorage.getItem(storageKey) !== $window.tabGUID)
-            makeSecondary();
         }
       });
+    },
+    synchronize: function(syncField, dest, source, deepKeySyncArray) {
+      var destIndex = index(syncField, dest);
+      var sourceIndex = index(syncField, source);
+      deepKeySyncArray = (typeof deepKeySyncArray === "undefined") ? [] : deepKeySyncArray;
+      for (var i = destIndex.orderedKeys.length - 1; i >= 0; i--) {
+        var key = destIndex.orderedKeys[i];
+        if (sourceIndex.orderedKeys.indexOf(key) === -1) {
+          destIndex.orderedKeys.splice(i, 1);
+          dest.splice(i, 1);
+        }
+        if (deepKeySyncArray.length > 0) {
+          angular.forEach(deepKeySyncArray, function(deepKey) {
+            if (sourceIndex[key] && destIndex[key][deepKey] !== sourceIndex[key][deepKey]) {
+              destIndex[key][deepKey] = sourceIndex[key][deepKey];
+            }
+          });
+        }
+      }
+      angular.forEach(sourceIndex.orderedKeys, function(key) {
+        if (destIndex.orderedKeys.indexOf(key) === -1)
+          dest.push(sourceIndex[key]);
+      });
+      sortByKeyAndModel(dest, syncField, sourceIndex.orderedKeys);
+    }
+  };
+  return ArraySynchronizer;
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snBindOnce.js */
+angular.module("sn.common.util").directive("snBindOnce", function($sanitize) {
+  "use strict";
+  return {
+    restrict: "A",
+    link: function(scope, element, attrs) {
+      var value = scope.$eval(attrs.snBindOnce);
+      var sanitizedValue = $sanitize(value);
+      element.append(sanitizedValue);
+    }
+  }
+});
+/*! RESOURCE: /scripts/sn/common/util/directive.snCloak.js */
+angular.module("sn.common.util").directive("snCloak", function() {
+  "use strict";
+  return {
+    restrict: "A",
+    compile: function(element, attr) {
+      return function() {
+        attr.$set('snCloak', undefined);
+        element.removeClass('sn-cloak');
+      }
+    }
+  };
+});
+/*! RESOURCE: /scripts/sn/common/util/service.md5.js */
+angular.module('sn.common.util').factory('md5', function() {
+  'use strict';
+  var md5cycle = function(x, k) {
+    var a = x[0],
+      b = x[1],
+      c = x[2],
+      d = x[3];
+    a = ff(a, b, c, d, k[0], 7, -680876936);
+    d = ff(d, a, b, c, k[1], 12, -389564586);
+    c = ff(c, d, a, b, k[2], 17, 606105819);
+    b = ff(b, c, d, a, k[3], 22, -1044525330);
+    a = ff(a, b, c, d, k[4], 7, -176418897);
+    d = ff(d, a, b, c, k[5], 12, 1200080426);
+    c = ff(c, d, a, b, k[6], 17, -1473231341);
+    b = ff(b, c, d, a, k[7], 22, -45705983);
+    a = ff(a, b, c, d, k[8], 7, 1770035416);
+    d = ff(d, a, b, c, k[9], 12, -1958414417);
+    c = ff(c, d, a, b, k[10], 17, -42063);
+    b = ff(b, c, d, a, k[11], 22, -1990404162);
+    a = ff(a, b, c, d, k[12], 7, 1804603682);
+    d = ff(d, a, b, c, k[13], 12, -40341101);
+    c = ff(c, d, a, b, k[14], 17, -1502002290);
+    b = ff(b, c, d, a, k[15], 22, 1236535329);
+    a = gg(a, b, c, d, k[1], 5, -165796510);
+    d = gg(d, a, b, c, k[6], 9, -1069501632);
+    c = gg(c, d, a, b, k[11], 14, 643717713);
+    b = gg(b, c, d, a, k[0], 20, -373897302);
+    a = gg(a, b, c, d, k[5], 5, -701558691);
+    d = gg(d, a, b, c, k[10], 9, 38016083);
+    c = gg(c, d, a, b, k[15], 14, -660478335);
+    b = gg(b, c, d, a, k[4], 20, -405537848);
+    a = gg(a, b, c, d, k[9], 5, 568446438);
+    d = gg(d, a, b, c, k[14], 9, -1019803690);
+    c = gg(c, d, a, b, k[3], 14, -187363961);
+    b = gg(b, c, d, a, k[8], 20, 1163531501);
+    a = gg(a, b, c, d, k[13], 5, -1444681467);
+    d = gg(d, a, b, c, k[2], 9, -51403784);
+    c = gg(c, d, a, b, k[7], 14, 1735328473);
+    b = gg(b, c, d, a, k[12], 20, -1926607734);
+    a = hh(a, b, c, d, k[5], 4, -378558);
+    d = hh(d, a, b, c, k[8], 11, -2022574463);
+    c = hh(c, d, a, b, k[11], 16, 1839030562);
+    b = hh(b, c, d, a, k[14], 23, -35309556);
+    a = hh(a, b, c, d, k[1], 4, -1530992060);
+    d = hh(d, a, b, c, k[4], 11, 1272893353);
+    c = hh(c, d, a, b, k[7], 16, -155497632);
+    b = hh(b, c, d, a, k[10], 23, -1094730640);
+    a = hh(a, b, c, d, k[13], 4, 681279174);
+    d = hh(d, a, b, c, k[0], 11, -358537222);
+    c = hh(c, d, a, b, k[3], 16, -722521979);
+    b = hh(b, c, d, a, k[6], 23, 76029189);
+    a = hh(a, b, c, d, k[9], 4, -640364487);
+    d = hh(d, a, b, c, k[12], 11, -421815835);
+    c = hh(c, d, a, b, k[15], 16, 530742520);
+    b = hh(b, c, d, a, k[2], 23, -995338651);
+    a = ii(a, b, c, d, k[0], 6, -198630844);
+    d = ii(d, a, b, c, k[7], 10, 1126891415);
+    c = ii(c, d, a, b, k[14], 15, -1416354905);
+    b = ii(b, c, d, a, k[5], 21, -57434055);
+    a = ii(a, b, c, d, k[12], 6, 1700485571);
+    d = ii(d, a, b, c, k[3], 10, -1894986606);
+    c = ii(c, d, a, b, k[10], 15, -1051523);
+    b = ii(b, c, d, a, k[1], 21, -2054922799);
+    a = ii(a, b, c, d, k[8], 6, 1873313359);
+    d = ii(d, a, b, c, k[15], 10, -30611744);
+    c = ii(c, d, a, b, k[6], 15, -1560198380);
+    b = ii(b, c, d, a, k[13], 21, 1309151649);
+    a = ii(a, b, c, d, k[4], 6, -145523070);
+    d = ii(d, a, b, c, k[11], 10, -1120210379);
+    c = ii(c, d, a, b, k[2], 15, 718787259);
+    b = ii(b, c, d, a, k[9], 21, -343485551);
+    x[0] = add32(a, x[0]);
+    x[1] = add32(b, x[1]);
+    x[2] = add32(c, x[2]);
+    x[3] = add32(d, x[3]);
+  };
+  var cmn = function(q, a, b, x, s, t) {
+    a = add32(add32(a, q), add32(x, t));
+    return add32((a << s) | (a >>> (32 - s)), b);
+  };
+  var ff = function(a, b, c, d, x, s, t) {
+    return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+  };
+  var gg = function(a, b, c, d, x, s, t) {
+    return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+  };
+  var hh = function(a, b, c, d, x, s, t) {
+    return cmn(b ^ c ^ d, a, b, x, s, t);
+  };
+  var ii = function(a, b, c, d, x, s, t) {
+    return cmn(c ^ (b | (~d)), a, b, x, s, t);
+  };
+  var md51 = function(s) {
+    var txt = '';
+    var n = s.length,
+      state = [1732584193, -271733879, -1732584194, 271733878],
+      i;
+    for (i = 64; i <= s.length; i += 64) {
+      md5cycle(state, md5blk(s.substring(i - 64, i)));
+    }
+    s = s.substring(i - 64);
+    var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (i = 0; i < s.length; i++)
+      tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+    tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+    if (i > 55) {
+      md5cycle(state, tail);
+      for (i = 0; i < 16; i++) tail[i] = 0;
+    }
+    tail[14] = n * 8;
+    md5cycle(state, tail);
+    return state;
+  };
+  var md5blk = function(s) {
+    var md5blks = [],
+      i;
+    for (i = 0; i < 64; i += 4) {
+      md5blks[i >> 2] = s.charCodeAt(i) +
+        (s.charCodeAt(i + 1) << 8) +
+        (s.charCodeAt(i + 2) << 16) +
+        (s.charCodeAt(i + 3) << 24);
+    }
+    return md5blks;
+  };
+  var hex_chr = '0123456789abcdef'.split('');
+  var rhex = function(n) {
+    var s = '',
+      j = 0;
+    for (; j < 4; j++)
+      s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] +
+      hex_chr[(n >> (j * 8)) & 0x0F];
+    return s;
+  };
+  var hex = function(x) {
+    for (var i = 0; i < x.length; i++)
+      x[i] = rhex(x[i]);
+    return x.join('');
+  };
+  var add32 = function(a, b) {
+    return (a + b) & 0xFFFFFFFF;
+  };
+  return function(s) {
+    return hex(md51(s));
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.priorityQueue.js */
+angular.module('sn.common.util').factory('priorityQueue', function() {
+  'use strict';
+  return function(comparator) {
+    var items = [];
+    var compare = comparator || function(a, b) {
+      return a - b;
+    };
+    var swap = function(a, b) {
+      var temp = items[a];
+      items[a] = items[b];
+      items[b] = temp;
+    };
+    var bubbleUp = function(pos) {
+      var parent;
+      while (pos > 0) {
+        parent = (pos - 1) >> 1;
+        if (compare(items[pos], items[parent]) >= 0)
+          break;
+        swap(parent, pos);
+        pos = parent;
+      }
+    };
+    var bubbleDown = function(pos) {
+      var left, right, min, last = items.length - 1;
+      while (true) {
+        left = (pos << 1) + 1;
+        right = left + 1;
+        min = pos;
+        if (left <= last && compare(items[left], items[min]) < 0)
+          min = left;
+        if (right <= last && compare(items[right], items[min]) < 0)
+          min = right;
+        if (min === pos)
+          break;
+        swap(min, pos);
+        pos = min;
+      }
+    };
+    return {
+      add: function(item) {
+        items.push(item);
+        bubbleUp(items.length - 1);
+      },
+      poll: function() {
+        var first = items[0],
+          last = items.pop();
+        if (items.length > 0) {
+          items[0] = last;
+          bubbleDown(0);
+        }
+        return first;
+      },
+      peek: function() {
+        return items[0];
+      },
+      clear: function() {
+        items = [];
+      },
+      inspect: function() {
+        return angular.toJson(items, true);
+      },
+      get size() {
+        return items.length;
+      },
+      get all() {
+        return items;
+      },
+      set comparator(fn) {
+        compare = fn;
+      }
+    };
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snResource.js */
+angular.module('sn.common.util').factory('snResource', function($http, $q, priorityQueue, md5) {
+  'use strict';
+  var methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'jsonp', 'trace'],
+    queue = priorityQueue(function(a, b) {
+      return a.timestamp - b.timestamp;
+    }),
+    resource = {},
+    pendingRequests = [],
+    inFlightRequests = [];
+  return function() {
+    var requestInterceptors = $http.defaults.transformRequest,
+      responseInterceptors = $http.defaults.transformResponse;
+    var next = function() {
+      var request = queue.peek();
+      pendingRequests.shift();
+      inFlightRequests.push(request.hash);
+      $http(request.config).then(function(response) {
+        request.deferred.resolve(response);
+      }, function(reason) {
+        request.deferred.reject(reason);
+      }).finally(function() {
+        queue.poll();
+        inFlightRequests.shift();
+        if (queue.size > 0)
+          next();
+      });
+    };
+    angular.forEach(methods, function(method) {
+      resource[method] = function(url, data) {
+        var deferredRequest = $q.defer(),
+          promise = deferredRequest.promise,
+          deferredAbort = $q.defer(),
+          config = {
+            method: method,
+            url: url,
+            data: data,
+            transformRequest: requestInterceptors,
+            transformResponse: responseInterceptors,
+            timeout: deferredAbort.promise
+          },
+          hash = md5(JSON.stringify(config));
+        pendingRequests.push(hash);
+        queue.add({
+          config: config,
+          deferred: deferredRequest,
+          timestamp: Date.now(),
+          hash: hash
+        });
+        if (queue.size === 1)
+          next();
+        promise.abort = function() {
+          deferredAbort.resolve('Request cancelled');
+        };
+        return promise;
+      };
+    });
+    resource.addRequestInterceptor = function(fn) {
+      requestInterceptors = requestInterceptors.concat([fn]);
+    };
+    resource.addResponseInterceptor = function(fn) {
+      responseInterceptors = responseInterceptors.concat([fn]);
+    };
+    resource.queueSize = function() {
+      return queue.size;
+    };
+    resource.queuedRequests = function() {
+      return queue.all;
+    };
+    return resource;
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/service.snConnect.js */
+angular.module("sn.common.util").service("snConnectService", function($http, snCustomEvent) {
+  "use strict";
+  var connectPaths = ["/$c.do", "/$chat.do"];
 
-      function waitForIdle(index, delayOffset) {
-        var callback = callbacks['activity.idle'][index];
-        var numCallbacks = callbacks['activity.idle'].length;
-        delayOffset = delayOffset || callback.delay;
-        angular.e
+  function canOpenInFrameset() {
+    return window.top.NOW.collaborationFrameset;
+  }
+
+  function isInConnect() {
+    var parentPath = getParentPath();
+    return connectPaths.some(function(path) {
+      return parentPath == path;
+    });
+  }
+
+  function getParentPath() {
+    try {
+      return window.top.location.pathname;
+    } catch (IGNORED) {
+      return "";
+    }
+  }
+
+  function openWithProfile(profile) {
+    if (isInConnect() || canOpenInFrameset())
+      snCustomEvent.fireTop('chat:open_conversation', profile);
+    else
+      window.open("$c.do#/with/" + profile.sys_id, "_blank");
+  }
+  return {
+    openWithProfile: openWithProfile
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/snPolyfill.js */
+(function() {
+  "use strict";
+  polyfill(String.prototype, 'startsWith', function(prefix) {
+    return this.indexOf(prefix) === 0;
+  });
+  polyfill(String.prototype, 'endsWith', function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+  });
+  polyfill(Number, 'isNaN', function(value) {
+    return value !== value;
+  });
+  polyfill(window, 'btoa', function(input) {
+    var str = String(input);
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    for (
+      var block, charCode, idx = 0, map = chars, output = ''; str.charAt(idx | 0) || (map = '=', idx % 1); output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+      charCode = str.charCodeAt(idx += 3 / 4);
+      if (charCode > 0xFF) {
+        throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+      }
+      block = block << 8 | charCode;
+    }
+    return output;
+  });
+
+  function polyfill(obj, slot, fn) {
+    if (obj[slot] === void(0)) {
+      obj[slot] = fn;
+    }
+  }
+  window.console = window.console || {
+    log: function() {}
+  };
+})();;
+/*! RESOURCE: /scripts/sn/common/util/directive.snFocus.js */
+angular.module('sn.common.util').directive('snFocus', function($timeout) {
+  'use strict';
+  return function(scope, element, attrs) {
+    scope.$watch(attrs.snFocus, function(value) {
+      if (value !== true)
+        return;
+      $timeout(function() {
+        element[0].focus();
+      });
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snResizeHeight.js */
+angular.module('sn.common.util').directive('snResizeHeight', function($window) {
+  'use strict';
+  return {
+    restrict: 'A',
+    link: function(scope, elem, attrs) {
+      if (typeof $window.autosize === 'undefined') {
+        return;
+      }
+      $window.autosize(elem);
+
+      function _update() {
+        $window.autosize.update(elem);
+      }
+
+      function _destroy() {
+        $window.autosize.destroy(elem);
+      }
+      if (typeof attrs.disableValueWatcher === "undefined") {
+        scope.$watch(function() {
+          return elem.val();
+        }, function valueWatcher(newValue, oldValue) {
+          if (newValue === oldValue) {
+            return;
+          }
+          _update();
+        });
+      }
+      elem.on('input.resize', _update());
+      scope.$on('$destroy', function() {
+        _destroy();
+      });
+      if (attrs.snTextareaAutosizer === 'trim') {
+        elem.on('blur', function() {
+          elem.val(elem.val().trim());
+          _update();
+        })
+      }
+    }
+  }
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snBlurOnEnter.js */
+angular.module('sn.common.util').directive('snBlurOnEnter', function() {
+  'use strict';
+  return function(scope, element) {
+    element.bind("keydown keypress", function(event) {
+      if (event.which !== 13)
+        return;
+      element.blur();
+      event.preventDefault();
+    });
+  };
+});;
+/*! RESOURCE: /scripts/sn/common/util/directive.snStickyHeaders.js */
+angular.module('sn.common.util').directive('snStickyHeaders', function() {
+  "use strict";
+  return {
+    restrict: 'A',
+    transclude: false,
+    replace: false,
+    link: function(scope, element, attrs) {
+      element.addClass('sticky-headers');
+      var containers;
+      var scrollContainer = element.find('[sn-sticky-scroll-container]');
+      scrollContainer.addClass('sticky-scroll-container');
+
+      function refreshHeaders() {
+        if (attrs.snStickyHeaders !== 'false') {
+          angular.forEach(containers, function(container) {
+            var stickyContainer = angular.element(container);
+            var stickyHeader = stickyContainer.find('[sn-sticky-header]');
+            var stickyOffset = stickyContainer.position().top + stickyContainer.outerHeight();
+            stickyContainer.addClass('sticky-container');
+            if (stickyOffset < stickyContainer.outerHeight() && stickyOffset > -stickyHeader.outerHeight()) {
+              stickyContainer.css('padding-top', stickyHeader.outerHeight());
+              stickyHeader.css('width', stickyHeader.outerWidth());
+              stickyHeader.removeClass('sticky-header-disabled').addClass('sticky-header-enabled');
+            } else {
+              stickyContainer.css('padding-top', '');
+              stickyHeader.css('width', '');
+              stickyHeader.removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+            }
+          });
+        } else {
+          element.find('[sn-sticky-container]').removeClass('sticky-container');
+          element.find('[sn-sticky-container]').css('padding-top', '');
+          element.find('[sn-sticky-header]').css('width', '');
+          element.find('[sn-sticky-header]').removeClass('sticky-header-enabled').addClass('sticky-header-disabled');
+        }
+      }
+      scope.$watch(function() {
+        scrollContainer.find('[sn-sticky-header]').addClass('sticky-header');
+        containers = element.find('[sn-sticky-container]');
+        return attrs.snStickyHeaders;
+      }, refreshHeaders);
+      scope.$watch(function() {
+        return scrollContainer[0].scrollHeight;
+      }, refreshHeaders);
+      scrollContainer.on('scroll', refreshHeaders);
+    }
+  };
+});;;

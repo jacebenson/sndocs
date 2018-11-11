@@ -12933,642 +12933,2863 @@ var gActiveContext;
 var contextMenus = new Object();
 var shortcuts = new Object();
 var GwtContextMenu = Class.create({
-      SUBMENU_INDICATOR: "<img src='images/context_arrow.gifx' class='context_item_menu_img' alt='Add' />",
-      initialize: function(id, useBodyAsParent) {
-        this.timeout = null;
-        this.properties = new Object();
-        this.setID(id);
-        this.getMenu();
-        this.onshow = null;
-        this.onhide = null;
-        this.beforehide = null;
-        this.docRoot = this._getDocRoot();
-        this.hasItems = false;
-        this.hideOnlySelf = false;
-        this.trackSelected = false;
-        if (typeof useBodyAsParent == "undefined")
-          useBodyAsParent = false;
-        this._getParentElement(useBodyAsParent);
-      },
-      isEmpty: function() {
-        return !this.hasItems;
-      },
-      _getParentElement: function(useBodyAsParent) {
-        if (useBodyAsParent) {
-          this.parentElement = document.body;
-          return;
-        }
-        this.parentElement = getFormContentParent();
-      },
-      _getDocRoot: function() {
-        var docRoot = window.location.protocol + "//" + window.location.host;
-        if (window.location.pathname.indexOf("/") > -1) {
-          var fp = window.location.pathname;
-          fp = fp.substring(0, fp.lastIndexOf("/"));
-          if (fp.substring(0, 1).indexOf("/") != -1)
-            docRoot = docRoot + fp;
-          else
-            docRoot = docRoot + "/" + fp;
-        }
-        docRoot += "/";
-        return docRoot;
-      },
-      add: function(label, id, keys) {
-        this.hasItems = true;
-        var m = this.getMenu();
-        var d = document.createElement("div");
-        d.setAttribute("item_id", id);
-        d.className = "context_item";
-        d.isMenuItem = true;
-        var l = !keys ? label : (label + ' (' + keys + ')');
-        d.innerHTML = l;
-        if (keys)
-          d.setAttribute("data-label", label);
-        m.appendChild(d);
-        return d;
-      },
-      addHref: function(label, href, img, title, id, keys) {
-        keys = this.addKeyShortcut(keys, href);
-        var d = this.add(label, id, keys);
-        d.setAttribute("href", href);
-        if (title && title != null)
-          d.setAttribute("title", title);
-        this.setImage(d, img);
-        return d;
-      },
-      addFunc: function(label, func, id) {
-        var d = this.add(label, id);
-        d.setAttribute("func_set", "true");
-        d.func = func;
-        return d;
-      },
-      addURL: function(label, url, target, id) {
-        var d = this.add(label, id);
-        url = this._updateURL(d, label, url);
-        d.setAttribute("url", url);
-        if (target)
-          d.setAttribute("target", target);
-        return d;
-      },
-      addHrefNoSort: function(label, href, id) {
-        var item = this.addHref(label, href, null, null, id);
-        item.setAttribute("not_sortable", "true");
+  SUBMENU_INDICATOR: "<img src='images/context_arrow.gifx' class='context_item_menu_img' alt='Add' />",
+  initialize: function(id, useBodyAsParent) {
+    this.timeout = null;
+    this.properties = new Object();
+    this.setID(id);
+    this.getMenu();
+    this.onshow = null;
+    this.onhide = null;
+    this.beforehide = null;
+    this.docRoot = this._getDocRoot();
+    this.hasItems = false;
+    this.hideOnlySelf = false;
+    this.trackSelected = false;
+    if (typeof useBodyAsParent == "undefined")
+      useBodyAsParent = false;
+    this._getParentElement(useBodyAsParent);
+  },
+  isEmpty: function() {
+    return !this.hasItems;
+  },
+  _getParentElement: function(useBodyAsParent) {
+    if (useBodyAsParent) {
+      this.parentElement = document.body;
+      return;
+    }
+    this.parentElement = getFormContentParent();
+  },
+  _getDocRoot: function() {
+    var docRoot = window.location.protocol + "//" + window.location.host;
+    if (window.location.pathname.indexOf("/") > -1) {
+      var fp = window.location.pathname;
+      fp = fp.substring(0, fp.lastIndexOf("/"));
+      if (fp.substring(0, 1).indexOf("/") != -1)
+        docRoot = docRoot + fp;
+      else
+        docRoot = docRoot + "/" + fp;
+    }
+    docRoot += "/";
+    return docRoot;
+  },
+  add: function(label, id, keys) {
+    this.hasItems = true;
+    var m = this.getMenu();
+    var d = document.createElement("div");
+    d.setAttribute("item_id", id);
+    d.className = "context_item";
+    d.isMenuItem = true;
+    var l = !keys ? label : (label + ' (' + keys + ')');
+    d.innerHTML = l;
+    if (keys)
+      d.setAttribute("data-label", label);
+    m.appendChild(d);
+    return d;
+  },
+  addHref: function(label, href, img, title, id, keys) {
+    keys = this.addKeyShortcut(keys, href);
+    var d = this.add(label, id, keys);
+    d.setAttribute("href", href);
+    if (title && title != null)
+      d.setAttribute("title", title);
+    this.setImage(d, img);
+    return d;
+  },
+  addFunc: function(label, func, id) {
+    var d = this.add(label, id);
+    d.setAttribute("func_set", "true");
+    d.func = func;
+    return d;
+  },
+  addURL: function(label, url, target, id) {
+    var d = this.add(label, id);
+    url = this._updateURL(d, label, url);
+    d.setAttribute("url", url);
+    if (target)
+      d.setAttribute("target", target);
+    return d;
+  },
+  addHrefNoSort: function(label, href, id) {
+    var item = this.addHref(label, href, null, null, id);
+    item.setAttribute("not_sortable", "true");
+    return item;
+  },
+  addHrefNoFilter: function(label, href, id) {
+    var item = this.addHref(label, href, null, null, id);
+    item.setAttribute("not_filterable", "true");
+    return item;
+  },
+  addMenu: function(label, menu, id) {
+    var item = this.add(label + this.SUBMENU_INDICATOR, id);
+    item.setAttribute("label", "true");
+    menu.setParent(this);
+    item.subMenu = menu;
+    return item;
+  },
+  addAction: function(label, action, id) {
+    return this.addHref(label, "contextAction('" + this.getTableName() + "', '" + action + "')", null, null, id);
+  },
+  addConfirmedAction: function(label, action, id) {
+    return this.addHref(label, "contextConfirm('" + this.getTableName() + "', '" + action + "')", null, null, id);
+  },
+  addLine: function() {
+    this.hasItems = true;
+    var m = this.getMenu();
+    var d = document.createElement("div");
+    d.className = "context_item_hr";
+    d.isMenuItem = true;
+    d.disabled = "disabled";
+    m.appendChild(d);
+    return d;
+  },
+  addLabel: function(label, id) {
+    var m = this.getMenu();
+    var d = document.createElement("div");
+    d.setAttribute("item_id", id);
+    d.className = "context_item";
+    d.isMenuItem = true;
+    d.innerHTML = label;
+    d.disabled = "disabled";
+    m.appendChild(d);
+    return d;
+  },
+  addKeyShortcut: function(keys, href) {
+    var topWindow = getTopWindow();
+    var keyboardEnabled = topWindow.com && topWindow.com.glide && topWindow.com.glide.ui && topWindow.com.glide.ui.keyboard;
+    if (!keyboardEnabled)
+      return null;
+    if (!keys)
+      return keys;
+    if (shortcuts[keys])
+      return keys;
+    shortcuts[keys] = {};
+    var callback = function(e) {
+      var start = e.data.href.indexOf('javascript:') == 0 ? 11 : 0;
+      var startParen = e.data.href.indexOf('(');
+      var functionName = startParen > start ? e.data.href.substring(start, startParen) : {};
+      var func = eval(functionName);
+      if (typeof func == 'function')
+        eval(e.data.href);
+      else
+        document.location.href = e.data.href;
+    };
+    addLoadEvent(function() {
+      var keyboard = getTopWindow().com.glide.ui.keyboard;
+      var isMainFrame = window.frameElement.id == keyboard.mainFrame;
+      var isFormFrame = window.frameElement.id == keyboard.formFrame;
+      if (isMainFrame)
+        shortcuts[keys] = keyboard.bind(keys, callback, {
+          href: href
+        }).global(keyboard.formFrame);
+      else if (isFormFrame)
+        shortcuts[keys] = keyboard.bind(keys, callback, {
+          href: href
+        }).formFrame();
+      else
+        shortcuts[keys] = null;
+    });
+    return keys;
+  },
+  getItem: function(itemId) {
+    var items = this.getMenu().getElementsByTagName("div");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.getAttribute("item_id") == itemId)
         return item;
-      },
-      addHrefNoFilter: function(label, href, id) {
-        var item = this.addHref(label, href, null, null, id);
-        item.setAttribute("not_filterable", "true");
-        return item;
-      },
-      addMenu: function(label, menu, id) {
-        var item = this.add(label + this.SUBMENU_INDICATOR, id);
-        item.setAttribute("label", "true");
-        menu.setParent(this);
-        item.subMenu = menu;
-        return item;
-      },
-      addAction: function(label, action, id) {
-        return this.addHref(label, "contextAction('" + this.getTableName() + "', '" + action + "')", null, null, id);
-      },
-      addConfirmedAction: function(label, action, id) {
-        return this.addHref(label, "contextConfirm('" + this.getTableName() + "', '" + action + "')", null, null, id);
-      },
-      addLine: function() {
-        this.hasItems = true;
-        var m = this.getMenu();
-        var d = document.createElement("div");
-        d.className = "context_item_hr";
-        d.isMenuItem = true;
-        d.disabled = "disabled";
-        m.appendChild(d);
-        return d;
-      },
-      addLabel: function(label, id) {
-        var m = this.getMenu();
-        var d = document.createElement("div");
-        d.setAttribute("item_id", id);
-        d.className = "context_item";
-        d.isMenuItem = true;
-        d.innerHTML = label;
-        d.disabled = "disabled";
-        m.appendChild(d);
-        return d;
-      },
-      addKeyShortcut: function(keys, href) {
-        var topWindow = getTopWindow();
-        var keyboardEnabled = topWindow.com && topWindow.com.glide && topWindow.com.glide.ui && topWindow.com.glide.ui.keyboard;
-        if (!keyboardEnabled)
-          return null;
-        if (!keys)
-          return keys;
-        if (shortcuts[keys])
-          return keys;
-        shortcuts[keys] = {};
-        var callback = function(e) {
-          var start = e.data.href.indexOf('javascript:') == 0 ? 11 : 0;
-          var startParen = e.data.href.indexOf('(');
-          var functionName = startParen > start ? e.data.href.substring(start, startParen) : {};
-          var func = eval(functionName);
-          if (typeof func == 'function')
-            eval(e.data.href);
-          else
-            document.location.href = e.data.href;
-        };
-        addLoadEvent(function() {
-          var keyboard = getTopWindow().com.glide.ui.keyboard;
-          var isMainFrame = window.frameElement.id == keyboard.mainFrame;
-          var isFormFrame = window.frameElement.id == keyboard.formFrame;
-          if (isMainFrame)
-            shortcuts[keys] = keyboard.bind(keys, callback, {
-              href: href
-            }).global(keyboard.formFrame);
-          else if (isFormFrame)
-            shortcuts[keys] = keyboard.bind(keys, callback, {
-              href: href
-            }).formFrame();
-          else
-            shortcuts[keys] = null;
-        });
-        return keys;
-      },
-      getItem: function(itemId) {
-        var items = this.getMenu().getElementsByTagName("div");
-        for (var i = 0; i < items.length; i++) {
-          var item = items[i];
-          if (item.getAttribute("item_id") == itemId)
-            return item;
-        }
-        return null;
-      },
-      setImage: function(item, img) {
-        if (item && img) {
-          item.style.backgroundImage = "url(" + this.docRoot + img + ")";
-          item.style.backgroundRepeat = "no-repeat";
-        }
-      },
-      setChecked: function(item) {
-        if (item)
-          this.setImage(item, "images/checked.pngx");
-      },
-      clearImage: function(item) {
-        if (item) {
-          item.style.backgroundImage = "";
-          item.style.backgroundRepeat = "";
-        }
-      },
-      setDisabled: function(item) {
-        if (!item)
-          return;
-        this._dullItem(item);
-      },
-      setEnabled: function(item) {
-        if (!item)
-          return;
-        this._undullItem(item);
-      },
-      setHidden: function(item) {
-        if (!item)
-          return;
-        this._hideItem(item);
-      },
-      setVisible: function(item) {
-        if (!item)
-          return;
-        this._showItem(item);
-      },
-      setLabel: function(item, label) {
-        if (item)
-          item.innerHTML = label;
-      },
-      setHideOnlySelf: function(hideSelf) {
-        this.hideOnlySelf = hideSelf;
-      },
-      clearSelected: function() {
-        var items = this.getMenu().getElementsByTagName("div");
-        for (var i = 0; i < items.length; i++) {
-          var item = items[i];
-          if (item.isMenuItem)
-            this.clearImage(item);
-        }
-      },
-      clear: function() {
-        var m = this.getMenu();
-        clearNodes(m);
-        this._setMinWidth();
-        this.hasItems = false;
-      },
-      destroy: function() {
-        this.parentElement = null;
-        this.menu.context = null;
-        this.menu.onmouseover = null;
-        this.menu.onmouseout = null;
-        this.menu.onclick = null;
-        if (isMSIE)
-          this.menu.outerHTML = null;
-        this.parentMenu = null;
-        this.onshow = null;
-        this.onhide = null;
-        this.properties = null;
-        this.timeout = null;
-        this.menu = null;
-        this.shim = null;
-      },
-      display: function(e) {
-        if (!this.getParent())
-          CustomEvent.fireAll('body_clicked', null);
-        menuSort = true;
-        this._dullMenu();
-        this._toggleMenuItems("not_sortable", this.getProperty('sortable'));
-        this._toggleMenuItems("not_filterable", this.getProperty('filterable'));
-        this.setFiringObject(this._getElement(e));
-        e = this._getRealEvent(e);
-        var menu = this.getMenu();
-        if (this._isEmpty(menu))
-          return;
-        menu.style.left = "0";
-        menu.style.top = "0";
-        this.parentElement.appendChild(menu);
-        if (this.getProperty("top") > 0 && ((this.getProperty("left") > 0) || (this.getProperty("right") > 0))) {
-          menu.style.visibility = 'hidden';
-          menu.style.display = 'block';
-          this.moveMenuToXY(e, this.getProperty("left"), this.getProperty("top"), this.getProperty("right"));
-        } else if (this.getParent()) {
-          var x = this._getElement(e);
-          menu.style.visibility = 'hidden';
-          menu.style.display = 'block';
-          this.moveMenuToParent(e, x);
-        } else {
-          var x = this._getElement(e);
-          menu.style.visibility = 'hidden';
-          menu.style.display = 'block';
-          this.moveMenuToCursor(e);
-        }
+    }
+    return null;
+  },
+  setImage: function(item, img) {
+    if (item && img) {
+      item.style.backgroundImage = "url(" + this.docRoot + img + ")";
+      item.style.backgroundRepeat = "no-repeat";
+    }
+  },
+  setChecked: function(item) {
+    if (item)
+      this.setImage(item, "images/checked.pngx");
+  },
+  clearImage: function(item) {
+    if (item) {
+      item.style.backgroundImage = "";
+      item.style.backgroundRepeat = "";
+    }
+  },
+  setDisabled: function(item) {
+    if (!item)
+      return;
+    this._dullItem(item);
+  },
+  setEnabled: function(item) {
+    if (!item)
+      return;
+    this._undullItem(item);
+  },
+  setHidden: function(item) {
+    if (!item)
+      return;
+    this._hideItem(item);
+  },
+  setVisible: function(item) {
+    if (!item)
+      return;
+    this._showItem(item);
+  },
+  setLabel: function(item, label) {
+    if (item)
+      item.innerHTML = label;
+  },
+  setHideOnlySelf: function(hideSelf) {
+    this.hideOnlySelf = hideSelf;
+  },
+  clearSelected: function() {
+    var items = this.getMenu().getElementsByTagName("div");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.isMenuItem)
+        this.clearImage(item);
+    }
+  },
+  clear: function() {
+    var m = this.getMenu();
+    clearNodes(m);
+    this._setMinWidth();
+    this.hasItems = false;
+  },
+  destroy: function() {
+    this.parentElement = null;
+    this.menu.context = null;
+    this.menu.onmouseover = null;
+    this.menu.onmouseout = null;
+    this.menu.onclick = null;
+    if (isMSIE)
+      this.menu.outerHTML = null;
+    this.parentMenu = null;
+    this.onshow = null;
+    this.onhide = null;
+    this.properties = null;
+    this.timeout = null;
+    this.menu = null;
+    this.shim = null;
+  },
+  display: function(e) {
+    if (!this.getParent())
+      CustomEvent.fireAll('body_clicked', null);
+    menuSort = true;
+    this._dullMenu();
+    this._toggleMenuItems("not_sortable", this.getProperty('sortable'));
+    this._toggleMenuItems("not_filterable", this.getProperty('filterable'));
+    this.setFiringObject(this._getElement(e));
+    e = this._getRealEvent(e);
+    var menu = this.getMenu();
+    if (this._isEmpty(menu))
+      return;
+    menu.style.left = "0";
+    menu.style.top = "0";
+    this.parentElement.appendChild(menu);
+    if (this.getProperty("top") > 0 && ((this.getProperty("left") > 0) || (this.getProperty("right") > 0))) {
+      menu.style.visibility = 'hidden';
+      menu.style.display = 'block';
+      this.moveMenuToXY(e, this.getProperty("left"), this.getProperty("top"), this.getProperty("right"));
+    } else if (this.getParent()) {
+      var x = this._getElement(e);
+      menu.style.visibility = 'hidden';
+      menu.style.display = 'block';
+      this.moveMenuToParent(e, x);
+    } else {
+      var x = this._getElement(e);
+      menu.style.visibility = 'hidden';
+      menu.style.display = 'block';
+      this.moveMenuToCursor(e);
+    }
+    gActiveContext = this;
+    showObject(menu);
+    this._showShim(menu);
+    if (ie5) {
+      for (var i = 0; i < menu.childNodes.length; i++) {
+        var item = menu.childNodes[i];
+        addClassName(item, "fix-for-ie");
+        removeClassName(item, "fix-for-ie");
+      }
+    }
+  },
+  hide: function() {
+    gActiveContext = "";
+    this._hideShim();
+    hideObject(this.getMenu());
+    if (this.getMenu().parentNode)
+      this.getMenu().parentNode.removeChild(this.getMenu());
+    if (this.onhide)
+      this.onhide();
+    CustomEvent.fire('refresh.event');
+  },
+  hideAll: function() {
+    var m = this;
+    while (m) {
+      m.hide();
+      m = m.getParent();
+    }
+  },
+  execute: function(e) {
+    var x = this._getElement(e);
+    if (x.isMenuItem && !x.disabled) {
+      if (x.getAttribute("label") == "true") {
+        this._getRealEvent(e).cancelBubble = true;
+        return;
+      }
+      if (x.getAttribute("target")) {
+        window.open(x.getAttribute("url"), x.getAttribute("target"));
+      } else if (x.getAttribute("href")) {
+        var expression = x.getAttribute("href");
         gActiveContext = this;
-        showObject(menu);
-        this._showShim(menu);
-        if (ie5) {
-          for (var i = 0; i < menu.childNodes.length; i++) {
-            var item = menu.childNodes[i];
-            addClassName(item, "fix-for-ie");
-            removeClassName(item, "fix-for-ie");
-          }
+        eval(expression);
+      } else if (x.getAttribute("func_set") == "true") {
+        x.func();
+      } else {
+        window.location = x.getAttribute("url");
+      }
+      if (this.trackSelected) {
+        this.clearSelected();
+        this.setChecked(x);
+      }
+    }
+    if (x.subMenu)
+      x.subMenu.hideAll();
+    else
+      this.hideAll();
+    return false;
+  },
+  menuLowLight: function(e) {
+    var x = this._getElement(e);
+    this._handleTimeout(false, x);
+    if (!x.isMenuItem)
+      return;
+    if (!x.subMenu || x.subMenu.getMenu().style.display == 'none')
+      this._disableItem(x);
+    window.status = '';
+    CustomEvent.fire('refresh.event');
+  },
+  menuHighLight: function(e) {
+    var x = this._getElement(e);
+    this._handleTimeout(true, x);
+    if (!x.isMenuItem)
+      return;
+    this._hideAllSubs(x.parentNode);
+    this._enableItem(x);
+    if (x.subMenu) {
+      x.subMenu.setParent(this);
+      x.subMenu.display(e);
+    }
+  },
+  moveMenuToXY: function(e, left, top, right) {
+    var menu = this.getMenu();
+    if (right)
+      left = right - menu.offsetWidth;
+    var offsetTop = ie5 ? this.parentElement.scrollTop + top : window.pageYOffset + top;
+    var offsetLeft = ie5 ? this.parentElement.scrollLeft + left : window.pageXOffset + left;
+    this.moveMenu(top, left, 0, 0, offsetTop, offsetLeft);
+  },
+  moveMenuToCursor: function(e) {
+    var offsetTop = 0;
+    var offsetLeft = 0;
+    if (isTouchDevice) {
+      offsetTop = e.pageY;
+      offsetLeft = e.pageX;
+    } else {
+      var offsets = this._getScrollOffsets(this.parentElement);
+      offsetTop = offsets.top + e.clientY;
+      offsetLeft = offsets.left + e.clientX;
+    }
+    this.moveMenu(e.clientY, e.clientX, 0, 0, offsetTop, offsetLeft);
+  },
+  moveMenuToParent: function(e, firingObject) {
+    var parent = this.getParent().getMenu();
+    var offsetTop = grabOffsetTop(firingObject) - parent.scrollTop;
+    var offsetLeft = grabOffsetLeft(parent);
+    this.moveMenu(offsetTop, offsetLeft, firingObject.offsetHeight, parent.offsetWidth, offsetTop, offsetLeft);
+  },
+  moveMenu: function(top, left, height, width, offsetTop, offsetLeft) {
+    var menu = this.getMenu();
+    menu.style.overflowY = "visible";
+    menu.setAttribute('gsft_has_scroll', false);
+    if (menu.getAttribute('gsft_width'))
+      menu.style.width = menu.getAttribute('gsft_width') + "px";
+    if (menu.getAttribute('gsft_height'))
+      menu.style.height = menu.getAttribute('gsft_height') + "px";
+    var leftPos;
+    var viewport = new WindowSize();
+    if ((left + width + menu.offsetWidth) > viewport.width)
+      leftPos = offsetLeft - menu.offsetWidth;
+    else
+      leftPos = offsetLeft + width;
+    var scrollOffsets = this._getScrollOffsets(this.parentElement);
+    var scrollTop = scrollOffsets.top;
+    var scrollLeft = scrollOffsets.left;
+    if (leftPos < scrollLeft)
+      leftPos = scrollLeft;
+    menu.style.left = leftPos + "px";
+    var direction = 'down';
+    var clip = 0;
+    if ((top + menu.offsetHeight) > viewport.height) {
+      var bottomClip = menu.offsetHeight - (viewport.height - top);
+      var topClip = menu.offsetHeight - top + height;
+      if (topClip < bottomClip) {
+        direction = 'up';
+        clip = topClip;
+      } else
+        clip = bottomClip;
+    }
+    var topPos;
+    if (direction == 'up')
+      topPos = offsetTop + height - menu.offsetHeight;
+    else
+      topPos = offsetTop;
+    if (topPos < scrollTop) {
+      topPos = scrollTop;
+    }
+    if ((topPos - scrollTop + menu.offsetHeight) > viewport.height)
+      clip = (topPos - scrollTop + menu.offsetHeight) - viewport.height;
+    menu.style.top = topPos + "px";
+    if (clip > 0) {
+      if (!menu.getAttribute('gsft_width')) {
+        menu.setAttribute('gsft_width', menu.offsetWidth);
+        menu.setAttribute('gsft_height', menu.offsetHeight);
+      }
+      menu.setAttribute('gsft_has_scroll', true);
+      menu.style.overflowY = "auto";
+      var w = menu.offsetWidth + 18;
+      menu.style.width = w + "px";
+      var h = menu.offsetHeight - clip - 4;
+      menu.style.height = h + "px";
+    }
+  },
+  _getScrollOffsets: function(e) {
+    var offsets = {};
+    if (e.nodeName.toUpperCase() == "BODY") {
+      offsets.top = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      offsets.left = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
+    } else {
+      offsets.top = e.scrollTop;
+      offsets.left = e.scrollLeft;
+    }
+    return offsets;
+  },
+  getFiringObject: function() {
+    return this.eventObject;
+  },
+  getID: function() {
+    return this.id;
+  },
+  getMenu: function() {
+    if (!this.menu) {
+      this.menu = contextMenus[this.getID()];
+      if (!this.menu) {
+        this._createMenu();
+      }
+      this._setMenuAttrs();
+      this._setMinWidth();
+    }
+    return this.menu;
+  },
+  getParent: function() {
+    return this.parentMenu;
+  },
+  getProperty: function(c) {
+    if (this.properties)
+      return this.properties[c];
+    else
+      return "";
+  },
+  getTableName: function() {
+    return this.tableName;
+  },
+  setFiringObject: function(e) {
+    this.eventObject = e;
+  },
+  setID: function(id) {
+    this.id = id;
+  },
+  setOnShow: function(onshow) {
+    this.onshow = onshow;
+  },
+  setOnHide: function(oh) {
+    this.onhide = oh;
+  },
+  setBeforeHide: function(beforeHide) {
+    this.beforehide = beforeHide;
+  },
+  setParent: function(m) {
+    this.parentMenu = m;
+  },
+  setProperty: function(c, v) {
+    this.properties[c] = v;
+  },
+  setTableName: function(name) {
+    this.tableName = name;
+  },
+  setTimeout: function(t) {
+    this.timeout = t;
+  },
+  setTrackSelected: function(flag) {
+    this.trackSelected = flag;
+  },
+  _createMenu: function() {
+    this.menu = document.createElement("div");
+    this.menu.name = this.menu.id = this.getID();
+    contextMenus[this.getID()] = this.menu;
+  },
+  _disableItem: function(item) {
+    if (item && !item.disabled) {
+      removeClassName(item, "context_menu_hover");
+    }
+  },
+  _dullMenu: function() {
+    var items = this.getMenu().childNodes;
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      this._disableItem(item);
+    }
+  },
+  _enableItem: function(item) {
+    if (item && !item.disabled) {
+      addClassName(item, "context_menu_hover");
+    }
+  },
+  _getElement: function(e) {
+    e = this._getRealEvent(e);
+    var x = ie5 ? e.srcElement : e.target;
+    try {
+      if (!x.isMenuItem && x.parentNode.isMenuItem)
+        x = x.parentNode;
+    } catch (err) {}
+    return x;
+  },
+  _getRealEvent: function(e) {
+    if (typeof e == 'undefined') e = window.event;
+    return e;
+  },
+  _handleTimeout: function(lght, firingObject) {
+    if (this.getProperty("timeout") > 0) {
+      if (lght) {
+        clearTimeout(this.timeout);
+      } else {
+        if (!firingObject.subMenu || firingObject.subMenu != gActiveContext)
+          this.timeout = setTimeout('contextHide()', this.getProperty("timeout"));
+      }
+    }
+  },
+  _hideAllSubs: function(el) {
+    var list = el.getElementsByTagName("div");
+    for (var i = 0; i < list.length; i++) {
+      var element = list[i];
+      if (element.subMenu) {
+        var subMenu = element.subMenu.getMenu();
+        this._hideAllSubs(element.subMenu.getMenu());
+        element.subMenu._hideShim();
+        hideObject(subMenu);
+        this._disableItem(element);
+      }
+    }
+  },
+  _setMenuAttrs: function() {
+    this.menu.context = this;
+    this.menu.className = "context_menu";
+    this.menu.style.display = "none";
+    this.menu.style.zIndex = (this.getParent() ? GwtContextMenu.zIndex + 1 : GwtContextMenu.zIndex);
+    this.menu.onmouseover = this.menuHighLight.bind(this);
+    this.menu.onmouseout = this.menuLowLight.bind(this);
+    if ("ontouchstart" in window && (typeof FastButton != 'undefined'))
+      new FastButton(this.menu, this.execute.bind(this));
+    else
+      this.menu.onclick = this.execute.bind(this);
+  },
+  _setMinWidth: function() {
+    var widther = document.createElement("div");
+    widther.style.width = "120px";
+    widther.style.height = "1px";
+    widther.style.overflow = "hidden";
+    this.menu.appendChild(widther);
+  },
+  _showShim: function(menu) {
+    if (this._hasTabs() && !ie5)
+      return;
+    var shim = this._getShim();
+    if (!shim) {
+      shim = cel("iframe");
+      shim.id = this.getID() + "_shim";
+      shim.className = "popup";
+      shim.style.width = "1px";
+      shim.style.height = "1px";
+      shim.scrolling = "no";
+      shim.src = "javascript:false;";
+      this.parentElement.appendChild(shim);
+      this.shim = shim;
+    }
+    shim.style.zIndex = this.getMenu().style.zIndex - 1;
+    shim.style.left = grabOffsetLeft(this.getMenu()) + "px";
+    shim.style.top = grabOffsetTop(this.getMenu()) + "px";
+    var zWidth = this.getMenu().offsetWidth;
+    var zHeight = this.getMenu().offsetHeight;
+    if (!ie5) {
+      zWidth -= 4;
+      zHeight -= 4;
+    }
+    if (menu.getAttribute('gsft_has_scroll'))
+      zWidth -= 18;
+    shim.style.width = zWidth + "px";
+    shim.style.height = zHeight + "px";
+    showObject(shim);
+  },
+  _hideShim: function() {
+    var shim = this._getShim();
+    if (shim)
+      hideObject(shim);
+  },
+  _getShim: function() {
+    if (this.shim)
+      return this.shim;
+    var shimName = this.getID() + "_shim";
+    return gel(shimName);
+  },
+  _hasTabs: function() {
+    if (gel('TabSystem1'))
+      return true;
+    return false;
+  },
+  _toggleMenuItems: function(attr, enabled) {
+    var items = this.getMenu().childNodes;
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.getAttribute(attr) == "true") {
+        if (enabled) {
+          this._undullItem(item);
+        } else {
+          this._dullItem(item);
         }
-      },
-      hide: function() {
-        gActiveContext = "";
-        this._hideShim();
-        hideObject(this.getMenu());
-        if (this.getMenu().parentNode)
-          this.getMenu().parentNode.removeChild(this.getMenu());
-        if (this.onhide)
-          this.onhide();
-        CustomEvent.fire('refresh.event');
-      },
-      hideAll: function() {
-        var m = this;
-        while (m) {
-          m.hide();
-          m = m.getParent();
-        }
-      },
-      execute: function(e) {
-        var x = this._getElement(e);
-        if (x.isMenuItem && !x.disabled) {
-          if (x.getAttribute("label") == "true") {
-            this._getRealEvent(e).cancelBubble = true;
-            return;
-          }
-          if (x.getAttribute("target")) {
-            window.open(x.getAttribute("url"), x.getAttribute("target"));
-          } else if (x.getAttribute("href")) {
-            var expression = x.getAttribute("href");
-            gActiveContext = this;
-            eval(expression);
-          } else if (x.getAttribute("func_set") == "true") {
-            x.func();
-          } else {
-            window.location = x.getAttribute("url");
-          }
-          if (this.trackSelected) {
-            this.clearSelected();
-            this.setChecked(x);
-          }
-        }
-        if (x.subMenu)
-          x.subMenu.hideAll();
-        else
-          this.hideAll();
+      }
+    }
+  },
+  _dullItem: function(item) {
+    item.disabled = "disabled";
+    item.style.color = "#cccccc";
+    removeClassName(item, "context_menu_hover");
+  },
+  _undullItem: function(item) {
+    item.disabled = "";
+    item.style.color = "";
+  },
+  _hideItem: function(item) {
+    item.style.display = 'none';
+  },
+  _showItem: function(item) {
+    item.style.display = '';
+  },
+  _isEmpty: function(menu) {
+    if (!menu)
+      return true;
+    if (!menu.firstChild)
+      return true;
+    return false;
+  },
+  _updateURL: function(d, label, url) {
+    if (typeof GlideTransactionScope != 'undefined') {
+      GlideTransactionScope.appendTransactionScope(function(name, value) {
+        url += "&" + name + "=" + value;
+      });
+      return url;
+    }
+    if (typeof g_form != 'undefined') {
+      this.dmap = this.dmap || {};
+      this.dmap[label] = d;
+      $(g_form.getFormElement()).observe('glidescope:initialized', function(e) {
+        e.memo.gts.appendTransactionScope(function(name, value) {
+          var _d = this.dmap[label];
+          var _url = _d.getAttribute("url");
+          _url += "&" + name + "=" + value;
+          _d.setAttribute("url", _url);
+        }.bind(this));
+      }.bind(this));
+    }
+    return url;
+  },
+  z: function() {}
+});
+GwtContextMenu.zIndex = 1100;
+
+function displayContextMenu(e, name, filterable) {
+  if (!getMenuByName(name))
+    return;
+  var contextMenu = getMenuByName(name).context;
+  contextMenu.setProperty('sortable', true);
+  contextMenu.setProperty('filterable', filterable);
+  contextMenu.display(e);
+}
+
+function contextShow(e, tableName, timeoutValue, ttop, lleft, rright) {
+  var frameWindow = null;
+  try {
+    frameWindow = window.frameElement;
+    if (frameWindow && frameWindow.id == "dialog_frame" && frameWindow.noContext == true)
+      return true;
+  } catch (err) {}
+  if (shouldSkipContextMenu(e))
+    return true;
+  e = getRealEvent(e);
+  menuTable = tableName;
+  var name = tableName;
+  if (name && name.substring(0, 8) != "context_")
+    name = "context_" + name;
+  if (document.readyState && document.readyState != "complete" && document.readyState != "interactive" && typeof window.g_hasCompleted == "undefined") {
+    jslog("Ignored context menu show for " + name + " because document was not ready");
+    return false;
+  }
+  window.g_hasCompleted = true;
+  if (getMenuByName(name)) {
+    var contextMenu = getMenuByName(name).context;
+    contextMenu.setProperty('timeout', timeoutValue);
+    contextMenu.setProperty('top', ttop);
+    contextMenu.setProperty('left', lleft);
+    contextMenu.setProperty('right', rright);
+    contextMenu.display(e);
+    if (contextMenu.onshow)
+      contextMenu.onshow();
+  }
+  return false;
+}
+
+function contextQuestionLabel(e, sys_id, type) {
+  if (shouldSkipContextMenu(e))
+    return true;
+  e = getRealEvent(e);
+  var name = "context_question_label";
+  menuTable = "not_important";
+  menuField = "not_important";
+  rowSysId = sys_id;
+  addQuestionActionItems(rowSysId, type);
+  if (getMenuByName(name)) {
+    var contextMenu = getMenuByName(name).context;
+    contextMenu.setProperty('sysparm_sys_id', sys_id);
+    contextMenu.display(e);
+  }
+  return false;
+}
+
+function addQuestionActionItems(id, type) {
+  var jr = new GlideAjax("AJAXJellyRunner", "AJAXJellyRunner.do");
+  jr.addParam('template', 'variable_context.xml');
+  jr.addParam('sysparm_catalog_id', g_form.getUniqueValue());
+  jr.addParam('sysparm_variable_id', id);
+  jr.addParam('sysparm_variable_type', type);
+  jr.addParam('sysparm_contextual_security', g_form.hasAttribute('contextual_security'));
+  jr.setWantRequestObject(true);
+  var response = jr.getXMLWait();
+  if (!response)
+    return;
+  var html = response.responseText;
+  html.evalScripts(true);
+  return gcm;
+}
+
+function shouldSkipContextMenu(e) {
+  if (e.ctrlKey && trustCtrlKeyResponse())
+    return true;
+  return false;
+}
+
+function trustCtrlKeyResponse() {
+  return isMacintosh || !isSafari;
+}
+
+function contextTimeout(e, tableName, waitCount) {
+  var name = "context_" + tableName;
+  if (!getMenuByName(name))
+    return;
+  var contextMenu = getMenuByName(name).context;
+  if (typeof waitCount == "undefined")
+    waitCount = 500;
+  contextMenu.setProperty("timeout", waitCount);
+  var hideParam;
+  if (contextMenu.hideOnlySelf == true)
+    hideParam = '"' + name + '"';
+  contextMenu.setTimeout(setTimeout('contextHide(' + hideParam + ')', waitCount));
+}
+
+function getMenuByName(name) {
+  return contextMenus[name];
+}
+
+function getRowID(e) {
+  var id = null;
+  var cell = e.srcElement;
+  if (cell == null)
+    cell = e.target;
+  var row = cell.parentNode;
+  var id = row.id;
+  if (id == null || id.length == 0)
+    id = row.parentNode.id;
+  return id;
+}
+
+function contextHide(name) {
+  if (!gActiveContext)
+    return;
+  if (typeof name != "undefined" && gActiveContext.getID() != name)
+    return;
+  if (gActiveContext.beforehide) {
+    if (gActiveContext.beforehide() == false)
+      return;
+  }
+  gActiveContext.hideAll();
+}
+
+function elementAction(e, event, gcm) {
+  var type = e.getAttribute("type");
+  var choice = e.getAttribute("choice");
+  var id = e.id;
+  var fName = id.substring(id.indexOf('.') + 1);
+  var tableName = fName.substring(0, fName.indexOf('.'));
+  var haveAccess = $("personalizer_" + tableName);
+  if (typeof(g_user) != 'undefined') {
+    var count = 1;
+    if (!gcm)
+      gcm = addActionItems(fName, tableName, type, choice);
+    if (gcm)
+      return contextShow(event, gcm.getID(), -1, 0, 0);
+  }
+  return true;
+}
+
+function addActionItems(id, table, type, choice) {
+  var jr = new GlideAjax("AJAXJellyRunner", "AJAXJellyRunner.do");
+  jr.addParam('template', 'element_context.xml');
+  jr.addParam('sysparm_id', id);
+  jr.addParam('sysparm_table', table);
+  jr.addParam('sysparm_type', type);
+  jr.addParam('sysparm_choice', choice);
+  jr.addParam('sysparm_contextual_security', g_form.hasAttribute('contextual_security'));
+  jr.setWantRequestObject(true);
+  var response = jr.getXMLWait();
+  if (!response)
+    return;
+  var html = response.responseText;
+  html.evalScripts(true);
+  return gcm;
+}
+Event.observe(window, 'unload', clearMenus, false);
+
+function clearMenus() {
+  for (av in contextMenus) {
+    if (contextMenus[av]) {
+      var c = contextMenus[av].context;
+      if (c) {
+        c.destroy();
+      }
+      contextMenus[av] = null;
+    }
+  }
+  for (var keys in shortcuts) {
+    if (shortcuts[keys])
+      shortcuts[keys].clear();
+  }
+  shortcuts = null;
+};
+/*! RESOURCE: /scripts/accessibility_tabindex.js */
+addLoadEvent(function() {
+  $(document).on('keydown', '*[tabindex], .glide_ref_item_link', function(event) {
+    if (event.keyCode != Event.KEY_RETURN)
+      return;
+    var element = event.element();
+    if (!element.hasAttribute('tabindex'))
+      return;
+    if (element.click)
+      element.click();
+    event.stop();
+  });
+  if (typeof jQuery != 'undefined') {
+    jQuery('[click-on-enter]').on('keydown', function(event) {
+      var keyCode = event.keyCode || event.which;
+      if (keyCode != 13)
+        return;
+      var $this = jQuery(this);
+      setTimeout(function() {
+        $this.trigger('click');
+      }, 200);
+    });
+  }
+});;
+/*! RESOURCE: /scripts/classes/event/GwtObservable.js */
+var GwtObservable = Class.create({
+  initialize: function() {
+    this.events = {};
+  },
+  on: function(name, func) {
+    if (!func || typeof func != 'function')
+      return;
+    this.events = this.events || {};
+    if (!this.events[name])
+      this.events[name] = [];
+    this.events[name].push(func);
+  },
+  forward: function(name, element, func) {
+    GwtObservable.prototype.on.call(this, name, func);
+    Event.observe(element, name, function(e) {
+      this.fireEvent(e.type, this, e);
+    }.bind(this));
+  },
+  un: function(name, func) {
+    if (!this.events[name])
+      return;
+    var i = this.events[name].indexOf(func);
+    if (i !== -1)
+      this.events[name].splice(i, 1);
+  },
+  unAll: function(name) {
+    if (this.events[name])
+      delete this.events[name];
+  },
+  isFiring: function() {
+    return this._isFiring;
+  },
+  fireEvent: function() {
+    if (this.suppressEvents === true)
+      return true;
+    this.events = this.events || {};
+    var args = $A(arguments);
+    var name = args.shift();
+    var eventList = this.events[name];
+    if (!eventList)
+      return true;
+    var event = eventList.slice();
+    this._isFiring = true;
+    for (var i = 0, l = event.length; i < l; i++) {
+      var ev = event[i];
+      if (ev == null)
+        continue;
+      if (ev.apply(this, args) === false) {
+        this._isFiring = false;
         return false;
-      },
-      menuLowLight: function(e) {
-        var x = this._getElement(e);
-        this._handleTimeout(false, x);
-        if (!x.isMenuItem)
-          return;
-        if (!x.subMenu || x.subMenu.getMenu().style.display == 'none')
-          this._disableItem(x);
-        window.status = '';
-        CustomEvent.fire('refresh.event');
-      },
-      menuHighLight: function(e) {
-        var x = this._getElement(e);
-        this._handleTimeout(true, x);
-        if (!x.isMenuItem)
-          return;
-        this._hideAllSubs(x.parentNode);
-        this._enableItem(x);
-        if (x.subMenu) {
-          x.subMenu.setParent(this);
-          x.subMenu.display(e);
-        }
-      },
-      moveMenuToXY: function(e, left, top, right) {
-        var menu = this.getMenu();
-        if (right)
-          left = right - menu.offsetWidth;
-        var offsetTop = ie5 ? this.parentElement.scrollTop + top : window.pageYOffset + top;
-        var offsetLeft = ie5 ? this.parentElement.scrollLeft + left : window.pageXOffset + left;
-        this.moveMenu(top, left, 0, 0, offsetTop, offsetLeft);
-      },
-      moveMenuToCursor: function(e) {
-        var offsetTop = 0;
-        var offsetLeft = 0;
-        if (isTouchDevice) {
-          offsetTop = e.pageY;
-          offsetLeft = e.pageX;
-        } else {
-          var offsets = this._getScrollOffsets(this.parentElement);
-          offsetTop = offsets.top + e.clientY;
-          offsetLeft = offsets.left + e.clientX;
-        }
-        this.moveMenu(e.clientY, e.clientX, 0, 0, offsetTop, offsetLeft);
-      },
-      moveMenuToParent: function(e, firingObject) {
-        var parent = this.getParent().getMenu();
-        var offsetTop = grabOffsetTop(firingObject) - parent.scrollTop;
-        var offsetLeft = grabOffsetLeft(parent);
-        this.moveMenu(offsetTop, offsetLeft, firingObject.offsetHeight, parent.offsetWidth, offsetTop, offsetLeft);
-      },
-      moveMenu: function(top, left, height, width, offsetTop, offsetLeft) {
-        var menu = this.getMenu();
-        menu.style.overflowY = "visible";
-        menu.setAttribute('gsft_has_scroll', false);
-        if (menu.getAttribute('gsft_width'))
-          menu.style.width = menu.getAttribute('gsft_width') + "px";
-        if (menu.getAttribute('gsft_height'))
-          menu.style.height = menu.getAttribute('gsft_height') + "px";
-        var leftPos;
-        var viewport = new WindowSize();
-        if ((left + width + menu.offsetWidth) > viewport.width)
-          leftPos = offsetLeft - menu.offsetWidth;
+      }
+    }
+    this._isFiring = false;
+    return true;
+  },
+  toString: function() {
+    return 'GwtObservable';
+  }
+});;
+/*! RESOURCE: /scripts/classes/event/CustomEventManager.js */
+var CustomEventManager = Class.create(GwtObservable, {
+  trace: false,
+  initialize: function($super) {
+    $super();
+  },
+  observe: function(eventName, fn) {
+    if (this.trace)
+      jslog("$CustomEventManager observing: " + eventName);
+    this.on(eventName, fn);
+  },
+  fire: function(eventName, args) {
+    if (this.trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    return this.fireEvent.apply(this, arguments);
+  },
+  fireTop: function(eventName, args) {
+    if (this.trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    this.fireEvent.apply(this, arguments);
+    var t = getTopWindow();
+    if (t != null && window != t)
+      t.CustomEvent.fireEvent(eventName, args);
+  },
+  fireAll: function(eventName, args) {
+    if (this.trace)
+      jslog("$CustomEventManager firing: " + eventName + " args: " + arguments.length);
+    var t = getTopWindow();
+    if (t == null) {
+      this.fireEvent.apply(this, arguments);
+      return;
+    }
+    t.CustomEvent.fireEvent(eventName, args);
+    for (var i = 0; i < t.length; i++) {
+      try {
+        if (!t[i])
+          continue;
+        if (t[i].CustomEvent && typeof t[i].CustomEvent.fireEvent == "function")
+          t[i].CustomEvent.fireEvent(eventName, args);
+      } catch (e) {}
+    }
+  },
+  toString: function() {
+    return 'CustomEventManager';
+  }
+});
+window.NOW = window.NOW || {};
+window.NOW.CustomEvent = new CustomEventManager();
+if (typeof CustomEvent !== "undefined") {
+  CustomEvent.observe = NOW.CustomEvent.observe.bind(NOW.CustomEvent);
+  CustomEvent.fire = NOW.CustomEvent.fire.bind(NOW.CustomEvent);
+  CustomEvent.fireTop = NOW.CustomEvent.fireTop.bind(NOW.CustomEvent);
+  CustomEvent.fireAll = NOW.CustomEvent.fireAll.bind(NOW.CustomEvent);
+  CustomEvent.on = NOW.CustomEvent.on.bind(NOW.CustomEvent);
+  CustomEvent.un = NOW.CustomEvent.un.bind(NOW.CustomEvent);
+  CustomEvent.unAll = NOW.CustomEvent.unAll.bind(NOW.CustomEvent);
+  CustomEvent.forward = NOW.CustomEvent.forward.bind(NOW.CustomEvent);
+  CustomEvent.isFiring = NOW.CustomEvent.isFiring.bind(NOW.CustomEvent);
+  CustomEvent.fireEvent = NOW.CustomEvent.fireEvent.bind(NOW.CustomEvent);
+} else {
+  window.CustomEvent = NOW.CustomEvent;
+};
+/*! RESOURCE: /scripts/classes/GlideClientCache.js */
+var GlideClientCacheEntry = Class.create({
+  initialize: function(value) {
+    this.value = value;
+    this.bump();
+  },
+  bump: function() {
+    this.stamp = new Date().getTime();
+  }
+});
+var GlideClientCache = Class.create({
+  _DEFAULT_SIZE: 50,
+  initialize: function(maxEntries) {
+    if (maxEntries)
+      this.maxEntries = maxEntries;
+    else
+      this.maxEntries = this._DEFAULT_SIZE;
+    this._init('default');
+  },
+  _init: function(stamp) {
+    this._cache = new Object();
+    this._stamp = stamp;
+  },
+  put: function(key, value) {
+    var entry = new GlideClientCacheEntry(value);
+    this._cache[key] = entry;
+    this._removeEldest();
+  },
+  get: function(key) {
+    var entry = this._cache[key];
+    if (!entry)
+      return null;
+    entry.bump();
+    return entry.value;
+  },
+  stamp: function(stamp) {
+    if (stamp == this._stamp)
+      return;
+    this._init(stamp);
+  },
+  ensureMaxEntries: function(max) {
+    jslog("Cache resize to " + max);
+    if (this.maxEntries < max)
+      this.maxEntries = max;
+  },
+  _removeEldest: function() {
+    var count = 0;
+    var eldest = null;
+    var eldestKey = null;
+    for (key in this._cache) {
+      count++;
+      var current = this._cache[key];
+      if (eldest == null || eldest.stamp > current.stamp) {
+        eldestKey = key;
+        eldest = current;
+      }
+    }
+    if (count <= this.maxEntries)
+      return;
+    if (eldest != null)
+      delete this._cache[key];
+  }
+});;
+/*! RESOURCE: /scripts/classes/ajax/GlideURL.js */
+var GlideURL = Class.create({
+  initialize: function(contextPath) {
+    this.contextPath = '';
+    this.params = new Object();
+    this.encodedString = '';
+    this.encode = true;
+    this.setFromString(contextPath ? contextPath : '');
+    if (typeof GlideTransactionScope != 'undefined')
+      GlideTransactionScope.appendTransactionScope(this.addParam.bind(this));
+  },
+  setFromCurrent: function() {
+    this.setFromString(window.location.href);
+  },
+  setFromString: function(href) {
+    var pos = href.indexOf('?');
+    if (pos < 0) {
+      this.contextPath = href;
+      return;
+    }
+    this.contextPath = href.slice(0, pos);
+    var hashes = href.slice(pos + 1).split('&');
+    var i = hashes.length;
+    while (i--) {
+      var pos = hashes[i].indexOf('=');
+      this.params[hashes[i].substring(0, pos)] = hashes[i].substring(++pos);
+    }
+  },
+  getContexPath: function() {
+    return this.contextPath;
+  },
+  getContextPath: function() {
+    return this.contextPath;
+  },
+  setContextPath: function(c) {
+    this.contextPath = c;
+  },
+  getParam: function(p) {
+    return this.params[p];
+  },
+  getParams: function() {
+    return this.params;
+  },
+  addParam: function(name, value) {
+    this.params[name] = value;
+    return this;
+  },
+  addToken: function() {
+    if (typeof g_ck != 'undefined' && g_ck != "")
+      this.addParam('sysparm_ck', g_ck);
+    return this;
+  },
+  deleteParam: function(name) {
+    delete this.params[name];
+  },
+  addEncodedString: function(s) {
+    if (!s)
+      return;
+    if (s.substr(0, 1) != "&")
+      this.encodedString += "&";
+    this.encodedString += s;
+    return this;
+  },
+  getQueryString: function(additionalParams) {
+    qs = this._getParamsForURL(this.params);
+    qs += this._getParamsForURL(additionalParams);
+    qs += this.encodedString;
+    if (qs.length == 0)
+      return "";
+    return qs.substring(1);
+  },
+  _getParamsForURL: function(params) {
+    if (!params)
+      return '';
+    var url = '';
+    for (var n in params) {
+      var p = params[n] || '';
+      url += '&' + n + '=' + (this.encode ? this._encodeUriQuery(p + '') : p);
+    }
+    return url;
+  },
+  _encodeUriQuery: function(val) {
+    return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':');
+  },
+  getURL: function(additionalParams) {
+    var url = this.contextPath;
+    var qs = this.getQueryString(additionalParams);
+    if (qs)
+      url += "?" + qs;
+    return url;
+  },
+  setEncode: function(b) {
+    this.encode = b;
+  },
+  toString: function() {
+    return 'GlideURL';
+  }
+});
+GlideURL.refresh = function() {
+  window.location.replace(window.location.href);
+};;
+/*! RESOURCE: /scripts/ga_batch/js_includes_batchedga.js */
+/*! RESOURCE: /scripts/ga_batch/batchedGlideAjax.js */
+window.NOW.batchedGlideAjax = function batchedGlideAjax(toProcess) {
+  var batchGA = new GlideAjax("AJAXXMLHttpAggregator");
+  batchGA.disableRunInBatch();
+
+  function batchErrorHandler(onCompletionFn) {
+    return function(error) {
+      console.log("BatchedGlideAjax: Got error", error);
+      toProcess.forEach(function(ga) {
+        handleChildResponseError({
+          status: 500,
+          glideAjax: ga,
+          error: "Batch failed"
+        });
+      });
+      if (onCompletionFn)
+        onCompletionFn([]);
+    }
+  }
+
+  function batchResponseHandler(onCompletionFn) {
+    return function(response) {
+      console.log("BatchedGlideAjax: Got response", response);
+      if (!response || !response.responseXML) {
+        batchErrorHandler(onCompletionFn)(response);
+        return;
+      }
+      var doc = response.responseXML.documentElement;
+      if (!doc || !doc.childNodes) {
+        batchErrorHandler(onCompletionFn)(response);
+        return;
+      }
+      var unprocessedGas = processIndividualResponses(Array.prototype.slice.apply(doc.childNodes));
+      if (onCompletionFn)
+        onCompletionFn(unprocessedGas);
+    }
+  }
+
+  function processIndividualResponses(nodes) {
+    var processedIndicies = [];
+    nodes.forEach(function(node) {
+      var response = responseNode(node);
+      try {
+        if (response.succeeded)
+          handleChildResponseSuccess(response);
         else
-          leftPos = offsetLeft + width;
-        var scrollOffsets = this._getScrollOffsets(this.parentElement);
-        var scrollTop = scrollOffsets.top;
-        var scrollLeft = scrollOffsets.left;
-        if (leftPos < scrollLeft)
-          leftPos = scrollLeft;
-        menu.style.left = leftPos + "px";
-        var direction = 'down';
-        var clip = 0;
-        if ((top + menu.offsetHeight) > viewport.height) {
-          var bottomClip = menu.offsetHeight - (viewport.height - top);
-          var topClip = menu.offsetHeight - top + height;
-          if (topClip < bottomClip) {
-            direction = 'up';
-            clip = topClip;
-          } else
-            clip = bottomClip;
+          handleChildResponseError(response);
+      } catch (e) {
+        console.warn("BatchedGlideAjax: Error processing child response", response, ":", e);
+      } finally {
+        processedIndicies.push(response.queueIndex);
+      }
+    });
+    return toProcess.filter(function(ga, idx) {
+      return processedIndicies.indexOf(idx) < 0;
+    });
+  }
+
+  function responseNode(node) {
+    var processorIdx = ~~node.getAttribute("sysparm_processor_index");
+    if (processorIdx < 0 || processorIdx >= toProcess.length) {
+      console.error("BatchedGlideAjax: Processor index " + processorIdx + " out of bounds for batch queue", toProcess);
+      return null;
+    }
+    var ga = toProcess[processorIdx];
+    var status = ~~node.getAttribute("status");
+    var error = node.getAttribute("error");
+    var answer = node.getAttribute("answer");
+    var responseDocument = null;
+    return {
+      queueIndex: processorIdx,
+      status: status,
+      error: error,
+      answer: answer,
+      glideAjax: ga,
+      succeeded: status >= 200 && status < 300,
+      get responseDocument() {
+        if (responseDocument == null) {
+          responseDocument = document.implementation.createDocument("", "", null);
+          var clonedNode = responseDocument.importNode(node, true);
+          responseDocument.appendChild(clonedNode);
         }
-        var topPos;
-        if (direction == 'up')
-          topPos = offsetTop + height - menu.offsetHeight;
-        else
-          topPos = offsetTop;
-        if (topPos < scrollTop) {
-          topPos = scrollTop;
-        }
-        if ((topPos - scrollTop + menu.offsetHeight) > viewport.height)
-          clip = (topPos - scrollTop + menu.offsetHeight) - viewport.height;
-        menu.style.top = topPos + "px";
-        if (clip > 0) {
-          if (!menu.getAttribute('gsft_width')) {
-            menu.setAttribute('gsft_width', menu.offsetWidth);
-            menu.setAttribute('gsft_height', menu.offsetHeight);
-          }
-          menu.setAttribute('gsft_has_scroll', true);
-          menu.style.overflowY = "auto";
-          var w = menu.offsetWidth + 18;
-          menu.style.width = w + "px";
-          var h = menu.offsetHeight - clip - 4;
-          menu.style.height = h + "px";
-        }
-      },
-      _getScrollOffsets: function(e) {
-        var offsets = {};
-        if (e.nodeName.toUpperCase() == "BODY") {
-          offsets.top = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-          offsets.left = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
-        } else {
-          offsets.top = e.scrollTop;
-          offsets.left = e.scrollLeft;
-        }
-        return offsets;
-      },
-      getFiringObject: function() {
-        return this.eventObject;
-      },
-      getID: function() {
-        return this.id;
-      },
-      getMenu: function() {
-        if (!this.menu) {
-          this.menu = contextMenus[this.getID()];
-          if (!this.menu) {
-            this._createMenu();
-          }
-          this._setMenuAttrs();
-          this._setMinWidth();
-        }
-        return this.menu;
-      },
-      getParent: function() {
-        return this.parentMenu;
-      },
-      getProperty: function(c) {
-        if (this.properties)
-          return this.properties[c];
-        else
-          return "";
-      },
-      getTableName: function() {
-        return this.tableName;
-      },
-      setFiringObject: function(e) {
-        this.eventObject = e;
-      },
-      setID: function(id) {
-        this.id = id;
-      },
-      setOnShow: function(onshow) {
-        this.onshow = onshow;
-      },
-      setOnHide: function(oh) {
-        this.onhide = oh;
-      },
-      setBeforeHide: function(beforeHide) {
-        this.beforehide = beforeHide;
-      },
-      setParent: function(m) {
-        this.parentMenu = m;
-      },
-      setProperty: function(c, v) {
-        this.properties[c] = v;
-      },
-      setTableName: function(name) {
-        this.tableName = name;
-      },
-      setTimeout: function(t) {
-        this.timeout = t;
-      },
-      setTrackSelected: function(flag) {
-        this.trackSelected = flag;
-      },
-      _createMenu: function() {
-        this.menu = document.createElement("div");
-        this.menu.name = this.menu.id = this.getID();
-        contextMenus[this.getID()] = this.menu;
-      },
-      _disableItem: function(item) {
-        if (item && !item.disabled) {
-          removeClassName(item, "context_menu_hover");
-        }
-      },
-      _dullMenu: function() {
-        var items = this.getMenu().childNodes;
-        for (var i = 0; i < items.length; i++) {
-          var item = items[i];
-          this._disableItem(item);
-        }
-      },
-      _enableItem: function(item) {
-        if (item && !item.disabled) {
-          addClassName(item, "context_menu_hover");
-        }
-      },
-      _getElement: function(e) {
-        e = this._getRealEvent(e);
-        var x = ie5 ? e.srcElement : e.target;
-        try {
-          if (!x.isMenuItem && x.parentNode.isMenuItem)
-            x = x.parentNode;
-        } catch (err) {}
-        return x;
-      },
-      _getRealEvent: function(e) {
-        if (typeof e == 'undefined') e = window.event;
-        return e;
-      },
-      _handleTimeout: function(lght, firingObject) {
-        if (this.getProperty("timeout") > 0) {
-          if (lght) {
-            clearTimeout(this.timeout);
-          } else {
-            if (!firingObject.subMenu || firingObject.subMenu != gActiveContext)
-              this.timeout = setTimeout('contextHide()', this.getProperty("timeout"));
-          }
-        }
-      },
-      _hideAllSubs: function(el) {
-        var list = el.getElementsByTagName("div");
-        for (var i = 0; i < list.length; i++) {
-          var element = list[i];
-          if (element.subMenu) {
-            var subMenu = element.subMenu.getMenu();
-            this._hideAllSubs(element.subMenu.getMenu());
-            element.subMenu._hideShim();
-            hideObject(subMenu);
-            this._disableItem(element);
-          }
-        }
-      },
-      _setMenuAttrs: function() {
-        this.menu.context = this;
-        this.menu.className = "context_menu";
-        this.menu.style.display = "none";
-        this.menu.style.zIndex = (this.getParent() ? GwtContextMenu.zIndex + 1 : GwtContextMenu.zIndex);
-        this.menu.onmouseover = this.menuHighLight.bind(this);
-        this.menu.onmouseout = this.menuLowLight.bind(this);
-        if ("ontouchstart" in window && (typeof FastButton != 'undefined'))
-          new FastButton(this.menu, this.execute.bind(this));
-        else
-          this.menu.onclick = this.execute.bind(this);
-      },
-      _setMinWidth: function() {
-        var widther = document.createElement("div");
-        widther.style.width = "120px";
-        widther.style.height = "1px";
-        widther.style.overflow = "hidden";
-        this.menu.appendChild(widther);
-      },
-      _showShim: function(menu) {
-        if (this._hasTabs() && !ie5)
-          return;
-        var shim = this._getShim();
-        if (!shim) {
-          shim = cel("iframe");
-          shim.id = this.getID() + "_shim";
-          shim.className = "popup";
-          shim.style.width = "1px";
-          shim.style.height = "1px";
-          shim.scrolling = "no";
-          shim.src = "javascript:false;";
-          this.parentElement.appendChild(shim);
-          this.shim = shim;
-        }
-        shim.style.zIndex = this.getMenu().style.zIndex - 1;
-        shim.style.left = grabOffsetLeft(this.getMenu()) + "px";
-        shim.style.top = grabOffsetTop(this.getMenu()) + "px";
-        var zWidth = this.getMenu().offsetWidth;
-        var zHeight = this.getMenu().offsetHeight;
-        if (!ie5) {
-          zWidth -= 4;
-          zHeight -= 4;
-        }
-        if (menu.getAttribute('gsft_has_scroll'))
-          zWidth -= 18;
-        shim.style.width = zWidth + "px";
-        shim.style.height = zHeight + "px";
-        showObject(shim);
-      },
-      _hideShim: function() {
-        var shim = this._getShim();
-        if (shim)
-          hideObject(shim);
-      },
-      _getShim: function() {
-        if (this.shim)
-          return this.shim;
-        var shimName = this.getID() + "_shim";
-        return gel(shimName);
-      },
-      _hasTabs: function() {
-        if (gel('TabSystem1'))
+        return responseDocument;
+      }
+    };
+  }
+
+  function handleChildResponseError(response) {
+    var errorObject = {
+      status: response.status,
+      statusText: response.error,
+      error: response.error,
+      description: response.error,
+      responseText: response.error
+    };
+    var ga = response.glideAjax;
+    if (ga.errorCallbackFunction)
+      setTimeout(function() {
+        ga.errorCallbackFunction(errorObject, ga.callbackArgs)
+      }, 0);
+  }
+
+  function handleChildResponseSuccess(response) {
+    var ga = response.glideAjax;
+    if (!ga.callbackFunction)
+      return;
+    if (ga.wantAnswer) {
+      var answer = response.answer;
+      setTimeout(function() {
+        ga.callbackFunction(answer, ga.callbackArgs);
+      }, 0);
+    } else {
+      var requestObject = {
+        responseXML: response.responseDocument,
+        status: status
+      };
+      setTimeout(function() {
+        ga.callbackFunction(requestObject, ga.callbackArgs)
+      }, 0);
+    }
+  }
+
+  function addParamsToBatch(params, index) {
+    var param;
+    if (!params)
+      return;
+    for (param in params) {
+      if (!params.hasOwnProperty(param))
+        continue;
+      batchGA.addParam(index + '.' + param, params[param]);
+    }
+  }
+
+  function addCustomQueryStringToBatch(qs, index) {
+    if (!qs)
+      return;
+    if (qs.startsWith('?'))
+      qs = qs.substring(1);
+    var params = qs.split('&');
+    params.forEach(function(param) {
+      var nameValuePair = param.split('=');
+      var name = decodeURIComponent(nameValuePair[0]);
+      var value = decodeURIComponent(nameValuePair[1]);
+      batchGA.addParam(index + '.' + name, value);
+    });
+  }
+  return {
+    execute: function(unprocessedCallback) {
+      toProcess.forEach(function(ga, idx) {
+        addParamsToBatch(ga.params, idx);
+        addParamsToBatch(ga.additionalProcessorParams, idx);
+        addCustomQueryStringToBatch(ga.postString, idx);
+      });
+      batchGA.addParam("sysparm_aggregation_size", toProcess.length);
+      batchGA.setErrorCallback(batchErrorHandler(unprocessedCallback));
+      batchGA.getXML(batchResponseHandler(unprocessedCallback));
+    }
+  }
+};;
+/*! RESOURCE: /scripts/ga_batch/glideAjaxBatchQueue.js */
+window.NOW.GlideAjaxBatchRequestQueue = (function() {
+  var queue = [];
+  var startProcessingTimeout;
+  var MAX_TIME_IN_QUEUE = window.NOW.batch_glide_ajax_requests_max_time_in_queue || 50;
+  if (MAX_TIME_IN_QUEUE < 0)
+    MAX_TIME_IN_QUEUE = 50;
+
+  function processQueue() {
+    clearProcessingTimeout();
+    var toProcess = queue.slice(0);
+    if (toProcess.length == 0)
+      return;
+    var batchGa = window.NOW.batchedGlideAjax(toProcess);
+    batchGa.execute(function requeueUnprocessed(unprocessedGas) {
+      queue = unprocessedGas.concat(queue);
+      processQueue();
+    });
+    queue.length = 0;
+  }
+
+  function clearProcessingTimeout() {
+    if (startProcessingTimeout) {
+      clearTimeout(startProcessingTimeout);
+      startProcessingTimeout = undefined;
+    }
+  }
+  return {
+    enqueue: function(glideAjax) {
+      queue.push(glideAjax);
+      if (!startProcessingTimeout)
+        startProcessingTimeout = setTimeout(processQueue, MAX_TIME_IN_QUEUE);
+    },
+    processQueue: processQueue
+  }
+})();;;
+/*! RESOURCE: /scripts/classes/ajax/GlideAjax.js */
+var GlideAjax = Class.create(GlideURL, {
+  URL: "xmlhttp.do",
+  initialize: function initialize($super, processor, url) {
+    var u = this.URL;
+    if (url)
+      u = url;
+    $super(u);
+    this.setProcessor(processor);
+    this.callbackFunction;
+    this.callbackArgs;
+    this.additionalProcessorParams;
+    this.errorCallbackFunction;
+    this.wantRequestObject = false;
+    this.setScope("global");
+    this.setWantSessionMessages(true);
+    if (typeof GlideTransactionScope != 'undefined')
+      GlideTransactionScope.appendTransactionScope(this.addParam.bind(this), true);
+    this.runRequestInBatch = window.NOW.batch_glide_ajax_requests;
+  },
+  disableRunInBatch: function() {
+    this.runRequestInBatch = false;
+  },
+  getProcessor: function() {
+    return this.processor;
+  },
+  getAnswer: function() {
+    if (!(this.requestObject && this.requestObject.responseXML))
+      return null;
+    return this.requestObject.responseXML.documentElement.getAttribute("answer");
+  },
+  setProcessor: function(p) {
+    this.processor = p;
+    this.addParam("sysparm_processor", p);
+  },
+  setQueryString: function(qs) {
+    this.queryString = qs;
+  },
+  preventLoadingIcon: function() {
+    this._preventLoadingIcon = true;
+  },
+  preventCancelNotification: function() {
+    this._suppressCancelNotification = true;
+  },
+  getXMLWait: function(additionalParams) {
+    this.addParam("sysparm_synch", "true");
+    this.additionalProcessorParams = additionalParams;
+    this.async = false;
+    var sw = new StopWatch();
+    this._makeRequest();
+    var m = "*** WARNING *** GlideAjax.getXMLWait - synchronous function - processor: " + this.processor
+    sw.jslog(m);
+    if (window.console && window.console.log)
+      console.log("%c " + m, 'background: darkred; color: white;');
+    if (this.requestObject.status != 200)
+      this._handleError();
+    return this._responseReceived();
+  },
+  getXML: function(callback, additionalParams, responseParams) {
+    this.wantAnswer = false;
+    this._getXML0(callback, additionalParams, responseParams);
+  },
+  getXMLAnswer: function(callback, additionalParams, responseParams) {
+    this.wantAnswer = true;
+    this._getXML0(callback, additionalParams, responseParams);
+  },
+  _getXML0: function(callback, additionalParams, responseParams) {
+    this.callbackFunction = callback;
+    this.callbackArgs = responseParams;
+    this.additionalProcessorParams = additionalParams;
+    this.async = true;
+    setTimeout(function() {
+      this._makeRequest();
+    }.bind(this), 0);
+  },
+  _makeRequest: function() {
+    this.requestObject = this._getRequestObject();
+    if (this.requestObject == null)
+      return null;
+    if (!GlideAjax.want_session_messages)
+      this.setWantSessionMessages(false);
+    var refUrl = this._buildReferringURL();
+    if (refUrl != "") {
+      this.addParam('ni.nolog.x_referer', 'ignore');
+      this.addParam('x_referer', refUrl);
+    }
+    if (typeof g_autoRequest != 'undefined' && 'true' == g_autoRequest)
+      this.addParam('sysparm_auto_request', g_autoRequest);
+    this.postString = this.getQueryString(this.additionalProcessorParams);
+    if (this.queryString) {
+      if (this.postString)
+        this.postString += "&";
+      this.postString += this.queryString;
+    }
+    if (this._isEligibleForBatching())
+      this._enqueueBatchRequest();
+    else
+      this._sendRequest();
+    return this.requestObject;
+  },
+  _isEligibleForBatching: function() {
+    return this.async &&
+      this.runRequestInBatch &&
+      window.NOW.batch_glide_ajax_requests &&
+      this.contextPath === this.URL;
+  },
+  _enqueueBatchRequest: function() {
+    if (window.NOW && window.NOW.GlideAjaxBatchRequestQueue)
+      window.NOW.GlideAjaxBatchRequestQueue.enqueue(this);
+    else {
+      console.warn("GlideAjaxBatchRequestQueue not available, falling back to immediate dispatch");
+      console.debug("Add scripts/ga_batch/js_includes_batchga.js to your page to enable batching");
+      this._sendRequest();
+    }
+  },
+  _sendRequest: function() {
+    this._showLoading();
+    if (this.async)
+      this.requestObject.onreadystatechange = this._processReqChange.bind(this);
+    CustomEvent.fireTop("request_start", document);
+    this.requestObject.open("POST", this.contextPath, this.async);
+    this.requestObject.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    if (typeof g_ck != 'undefined' && g_ck != "")
+      this.requestObject.setRequestHeader('X-UserToken', g_ck);
+    try {
+      this.requestObject.send(this.postString);
+    } catch (e) {}
+    if (!this.async || (this.callbackFunction == null))
+      this._hideLoading();
+  },
+  _processReqChange: function() {
+    if (this.requestObject.readyState != 4)
+      return;
+    this.requestObject.onreadystatechange = function() {};
+    this._hideLoading();
+    if (!this._errorCheck()) {
+      this._responseReceived();
+      return;
+    }
+    try {
+      this._handleError();
+    } catch (e) {
+      jslog("GlideAjax error: " + e);
+    }
+  },
+  _errorCheck: function() {
+    this._cancelErrorXML = this._getCancelError();
+    return this._getResponseCode() != 200 || this._wasCanceled();
+  },
+  _handle401Error: function() {
+    if (getTopWindow().loggingOut)
+      return false;
+    var sessionLoggedIn = this.requestObject.getResponseHeader("X-SessionLoggedIn");
+    if ("true" != sessionLoggedIn) {
+      if (window.confirm(new GwtMessage().getMessage("ajax_session_timeout_goto_login_confirm"))) {
+        getTopWindow().location.href = "/navpage.do";
+        return true;
+      }
+    } else {
+      var allowResubmit = this.requestObject.getResponseHeader("X-UserToken-AllowResubmit");
+      if ("true" == allowResubmit) {
+        var autoResubmit = this.requestObject.getResponseHeader("X-AutoResubmit");
+        if ("true" == autoResubmit) {
+          this._sendRequest();
           return true;
-        return false;
-      },
-      _toggleMenuItems: function(attr, enabled) {
-        var items = this.getMenu().childNodes;
-        for (var i = 0; i < items.length; i++) {
-          var item = items[i];
-          if (item.getAttribute(attr) == "true") {
-            if (enabled) {
-              this._undullItem(item);
-            } else {
-              this._dullItem(item);
-            }
-          }
         }
-      },
-      _dullItem: function(item) {
-          item.d
+        if (window.confirm(new GwtMessage().getMessage("ajax_session_timeout_resubmit_request_confirm"))) {
+          this._sendRequest();
+          return true;
+        }
+      } else {
+        if ("true" == sessionLoggedIn)
+          return false;
+        var msg = new GwtMessage().getMessage("ajax_session_timeout_refresh_screen");
+        if (!msg)
+          msg = "Your session has expired. Click OK to continue.";
+        if (window.confirm(msg)) {
+          getTopWindow().location.href = "/navpage.do";
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+  _handleError: function() {
+    var responseCode = this._getResponseCode();
+    if (responseCode == 401) {
+      var requestedToken = this.requestObject.getResponseHeader("X-UserToken-Request");
+      var respondedToken = this.requestObject.getResponseHeader("X-UserToken-Response");
+      if (requestedToken && respondedToken && requestedToken != respondedToken)
+        CustomEvent.fireAll("ck_updated", respondedToken);
+      var handleTimeOut = this.requestObject.getResponseHeader("X-HandleTimeOut");
+      if ("true" == handleTimeOut)
+        if (this._handle401Error())
+          return;
+    } else if (responseCode == 404 && this._outOfScope()) {
+      var err_options = {
+        text: "Access to Script Include " + this.processor + " blocked from scope: " + (this.getParam("sysparm_scope") ? this.getParam("sysparm_scope") : "global"),
+        type: "system",
+        attributes: {
+          type: "error"
+        }
+      };
+      if (typeof GlideUI != 'undefined')
+        GlideUI.get().fire(new GlideUINotification(err_options));
+    } else if (this._wasCanceled() && this.callbackFunction && !this._getSuppressCancelNotification()) {
+      var err_options = {
+        text: this._getCancelErrorText(),
+        type: "system",
+        attributes: {
+          type: "error"
+        }
+      };
+      if (typeof GlideUI != 'undefined')
+        GlideUI.get().fire(new GlideUINotification(err_options));
+    }
+    if (this.errorCallbackFunction)
+      this.errorCallbackFunction(this.requestObject, this.callbackArgs);
+  },
+  _getRequestObject: function() {
+    var req = null;
+    if (window.XMLHttpRequest)
+      req = new XMLHttpRequest();
+    else if (window.ActiveXObject)
+      req = new ActiveXObject("Microsoft.XMLHTTP");
+    return req;
+  },
+  _getResponseCode: function() {
+    return this.requestObject.status;
+  },
+  _wasCanceled: function() {
+    if (!this._cancelErrorXML)
+      return false;
+    var answer = this._cancelErrorXML.getAttribute('transaction_canceled');
+    return answer == 'true';
+  },
+  _getSuppressCancelNotification: function() {
+    if (this._suppressCancelNotification)
+      return true;
+    if (this._cancelErrorXML) {
+      var suppress = this._cancelErrorXML.getAttribute("suppress_notification");
+      if (suppress && suppress == 'true')
+        return true;
+    }
+    return false;
+  },
+  _getCancelErrorText: function() {
+    if (this._cancelErrorXML) {
+      var cancelMessage = this._cancelErrorXML.getAttribute('cancel_message');
+      if (cancelMessage)
+        return cancelMessage;
+    }
+    return "Information could not be downloaded from the server because the transaction was canceled.";
+  },
+  _getCancelError: function() {
+    var xml = this.requestObject.responseXML;
+    if (!xml) {
+      var responseText = this.requestObject.responseText;
+      var errorPattern = /<xml?[^>]*id="transaction_canceled_island"?[^>]*>/;
+      var matches = responseText.match(errorPattern);
+      if (!matches)
+        return false;
+      xml = loadXML(matches[0]);
+    }
+    return xml.documentElement;
+  },
+  _outOfScope: function() {
+    var callerScope = this.getParam("sysparm_scope") ? this.getParam("sysparm_scope") : "global";
+    var isAppScope = callerScope != "global";
+    return isAppScope && this.requestObject.responseXML.documentElement.getAttribute("error").indexOf("HTTP Processor class not found") == 0;
+  },
+  _responseReceived: function() {
+    lastActivity = new Date();
+    CustomEvent.fireTop("request_complete", document);
+    this._fireUINotifications();
+    this._showSessionNotifications();
+    if (this.callbackFunction) {
+      if (this.wantAnswer)
+        this.callbackFunction(this.getAnswer(), this.callbackArgs);
+      else
+        this.callbackFunction(this.requestObject, this.callbackArgs);
+    }
+    if (this.wantRequestObject)
+      return this.requestObject;
+    return this.requestObject ? this.requestObject.responseXML : null;
+  },
+  _showLoading: function() {
+    if (!this._preventLoadingIcon)
+      CustomEvent.fireAll("ajax.loading.start", this);
+  },
+  _hideLoading: function() {
+    if (!this._preventLoadingIcon && window.CustomEvent)
+      CustomEvent.fireAll("ajax.loading.end", this);
+  },
+  _buildReferringURL: function() {
+    var path = location.pathname;
+    var args = location.search;
+    if (path.substring(path.length - 1) == '/') {
+      if (args)
+        return args;
+      return "";
+    }
+    return path.substring(path.lastIndexOf('/') + 1) + args;
+  },
+  _fireUINotifications: function() {
+    if (!this.requestObject || !this.requestObject.responseXML)
+      return;
+    var notifications = this.requestObject.responseXML.getElementsByTagName('ui_notifications');
+    if (!notifications || notifications.length == 0)
+      return;
+    var spans = notifications[0].childNodes;
+    for (var i = 0; i < spans.length; i++) {
+      var span = spans[i];
+      if (typeof GlideUI != 'undefined')
+        GlideUI.get().fire(new GlideUINotification({
+          xml: span
+        }));
+    }
+    $(document).fire('glide-notification:clear', {
+      spans: spans
+    });
+  },
+  _showSessionNotifications: function() {
+    if (!this.requestObject || !this.requestObject.responseXML)
+      return;
+    var notifications = this.requestObject.responseXML.getElementsByTagName('session_notifications');
+    if (!notifications || notifications.length == 0)
+      return;
+    var spans = notifications[0].childNodes;
+    for (var i = 0; i < spans.length; i++) {
+      var span = spans[i];
+      var type = span.getAttribute("data-type");
+      if (typeof GlideUI != 'undefined') {
+        if (type !== 'nav')
+          GlideUI.get().addOutputMessage({
+            msg: span.getAttribute("data-text"),
+            type: type
+          });
+      }
+    }
+  },
+  setScope: function(scope) {
+    if (scope) {
+      this.addParam('sysparm_scope', scope);
+    }
+    return this;
+  },
+  setErrorCallback: function(callback) {
+    this.errorCallbackFunction = callback;
+  },
+  setWantRequestObject: function(want) {
+    this.wantRequestObject = want;
+  },
+  setWantSessionMessages: function(want) {
+    this.addParam('sysparm_want_session_messages', want);
+  },
+  toString: function() {
+    return "GlideAjax";
+  }
+});
+GlideAjax.disableSessionMessages = function() {
+  GlideAjax.want_session_messages = false;
+};
+GlideAjax.enableSessionMessages = function() {
+  GlideAjax.want_session_messages = true;
+};
+GlideAjax.enableSessionMessages();;
+/*! RESOURCE: /scripts/doctype/GwtNavFilterDoctype.js */
+var GwtNavFilter = {
+  cachedElements: {},
+  clearText: function() {
+    this.text = '';
+  },
+  filter: function(text, favoritesOnly) {
+    if (!text && favoritesOnly) {
+      this._clearFilter();
+      CustomEvent.fire('favorites.show');
+      return;
+    }
+    this.favoritesOnly = favoritesOnly;
+    this.timers = {};
+    this.m = text;
+    var sw = new StopWatch();
+    if (!this.text)
+      this._saveUserPreferences();
+    this.text = this._cleanupText(text);
+    if (!this.text)
+      this._clearFilter();
+    else
+      this._filter();
+    this.timers['total'] = sw.getTime();
+  },
+  _cleanupText: function(text) {
+    var answer = text.toLowerCase();
+    if (answer == "**")
+      return "";
+    if (answer.indexOf("*") == 0)
+      answer = answer.substring(1);
+    return answer;
+  },
+  _clearFilter: function() {
+    this._showAppsCollapsed();
+    this._restoreUserPreferences();
+  },
+  _filter: function() {
+    this.displayed = {};
+    var sw = new StopWatch();
+    this._matchApps();
+    this.timers['matchApps'] = sw.getTime();
+    sw = new StopWatch();
+    this._matchModules();
+    this.timers['matchModules'] = sw.getTime();
+  },
+  _matchApps: function() {
+    var apps = this._getApps();
+    for (var id in apps) {
+      if (this._textMatch(apps[id]) && !this.favoritesOnly)
+        this._showAppAndModules(id);
+      else
+        this._hideAppAndModules(id);
+    }
+  },
+  _matchModules: function() {
+    var modules = this._getModules();
+    var category = '';
+    var categoryparent = '';
+    this.timers['module count'] = modules.length;
+    for (var i = 0, n = modules.length; i < n; i++) {
+      var module = modules[i];
+      var id = module.getAttribute('moduleid');
+      if (this.displayed[id])
+        continue;
+      if (this.favoritesOnly) {
+        if ($j(module).find(".icon-star").length == 0)
+          continue;
+      }
+      var label = module.getAttribute('modulename');
+      var type = module.getAttribute('moduletype');
+      var parent = module.getAttribute('moduleparent');
+      if (categoryparent != parent) {
+        category = '';
+        categoryparent = parent;
+      }
+      if (type == 'SEPARATOR') {
+        var categoryElem = this._findByClass(module.childNodes, 'nav_menu_header');
+        if (categoryElem) {
+          category = this._getInnerText(categoryElem);
+          if (this.favoritesOnly)
+            module.style.display = '';
+        }
+      } else if (this._textMatch(label) || this._textMatch(category)) {
+        this._showModule(module);
+      }
+    }
+  },
+  _findByClass: function(nodes, classname) {
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes.item(i);
+      if (node.className.indexOf(classname) != -1)
+        return node;
+    }
+    return null;
+  },
+  _textMatch: function(label) {
+    return label && label.toLowerCase().indexOf(this.text) > -1;
+  },
+  _getApps: function() {
+    if (this.appList)
+      return this.appList;
+    var sw = new StopWatch();
+    this.appList = new Object();
+    var apps = document.getElementsByTagName("label");
+    for (var i = 0, n = apps.length; i != n; i++) {
+      var app = apps[i];
+      var appid = app.getAttribute('for');
+      if (!appid)
+        continue;
+      if (app.id == "div.perspectives")
+        continue;
+      var t = this._getInnerText(app);
+      this.appList[appid] = t;
+    }
+    this.timers["getApps"] = sw.getTime();
+    return this.appList;
+  },
+  _getModules: function() {
+    if (!this.modList) {
+      var sw = new StopWatch();
+      this.modList = [];
+      var rows = document.getElementsByTagName("li");
+      for (var i = 0, n = rows.length; i != n; i++) {
+        var row = rows[i];
+        var parent = row.getAttribute('moduleparent');
+        if (!parent || (parent == 'perspectives'))
+          continue;
+        this.modList.push(row);
+      }
+      this.timers['getModules'] = sw.getTime();
+    }
+    return this.modList;
+  },
+  _showAppsCollapsed: function() {
+    var apps = this._getApps();
+    for (var id in apps) {
+      var appDiv = this._getCachedElement('div.' + id);
+      if (!appDiv)
+        continue;
+      showObject(appDiv);
+    }
+    var rows = document.getElementsByTagName("li");
+    for (var i = 0; i < rows.length; i++) {
+      var module = rows[i];
+      module.style.display = '';
+      if (module.getAttribute('moduletype') == 'SEPARATOR') {
+        var id = module.getAttribute('moduleid');
+        var tr = this._getCachedElement("children." + id);
+        if (tr)
+          tr.style.display = '';
+        var span = this._getCachedElement(id);
+        if (span) {
+          span.style.height = 'auto';
+          showObject(span);
+          var img = this._getCachedElement('img.' + id);
+          if (!img)
+            continue;
+          img.src = "images/arrow_reveal.gifx";
+        }
+      }
+    }
+  },
+  _showModulesForApp: function(span, displayed) {
+    var trs = span.getElementsByTagName("li");
+    for (var i = 0, n = trs.length; i != n; i++) {
+      trs[i].style.display = '';
+      var id = trs[i].getAttribute('moduleid');
+      if (displayed && id)
+        this.displayed[id] = 1;
+    }
+  },
+  _saveUserPreferences: function() {
+    var sw = new StopWatch();
+    this.expandedSeparators = {};
+    var apps = this._getApps();
+    this.expandedApps = {};
+    for (var id in apps) {
+      var span = this._getCachedElement('app_' + id);
+      if ($j(span).height())
+        this.expandedApps[id] = 1;
+    }
+    var modules = this._getModules();
+    for (var i = 0, n = modules.length; i < n; i++) {
+      var module = modules[i];
+      var type = module.getAttribute('moduletype');
+      if (type != 'SEPARATOR')
+        continue;
+      var id = module.getAttribute('moduleid');
+      var tr = module.getElementsByTagName('ul')[0];
+      if (!tr)
+        continue;
+      if ($j(tr).css('display') != 'none')
+        this.expandedSeparators[id] = 1;
+    }
+    this.timers["saveUserPreferences"] = sw.getTime();
+  },
+  _getCachedElement: function(id) {
+    var element = this.cachedElements[id];
+    if (element)
+      return element;
+    element = gel(id);
+    this.cachedElements[id] = element;
+    return element;
+  },
+  _restoreUserPreferences: function() {
+    var apps = this._getApps();
+    for (var id in apps) {
+      var div = this._getCachedElement('div.' + id);
+      var input = this._getCachedElement(id);
+      if (this.expandedApps[id]) {
+        input.checked = true
+      } else {
+        input.checked = false;
+      }
+      $j(input).trigger('change');
+    }
+    var colImg = isTextDirectionRTL() ? "images/arrow_rtl_hide.gifx" : "images/arrow_hide.gifx";
+    var expImg = "images/arrow_reveal.gifx";
+    var modules = this._getModules();
+    for (var i = 0, n = modules.length; i < n; i++) {
+      var module = modules[i];
+      var id = module.getAttribute('moduleid');
+      var type = module.getAttribute('moduletype');
+      if (type != 'SEPARATOR')
+        continue;
+      var tr = this._getCachedElement("children." + id);
+      var span = this._getCachedElement(id);
+      var img = this._getCachedElement('img.' + id);
+      if (this.expandedSeparators[id]) {
+        if (tr)
+          tr.style.display = '';
+        if (span) {
+          showObject(span);
+          span.style.height = 'auto';
+        }
+        if (img)
+          img.src = expImg;
+      } else {
+        if (tr)
+          tr.style.display = '';
+        if (span) {
+          hideObject(span);
+          span.style.height = 'auto';
+        }
+        if (img)
+          img.src = colImg;
+      }
+    }
+  },
+  _showAppAndModules: function(id) {
+    this._showApp(id);
+    var span = this._getCachedElement('app_' + id);
+    this._showModulesForApp(span, true);
+  },
+  _showApp: function(id) {
+    if (this.displayed[id])
+      return;
+    var app = this._getCachedElement('div.' + id);
+    if (!app)
+      return;
+    app.style.display = '';
+    this.displayed[id] = 1;
+    var checkbox = app.nextSibling;
+    checkbox.checked = true;
+    $j(checkbox).trigger('change');
+  },
+  _hideAppAndModules: function(id) {
+    var e = this._getCachedElement('div.' + id);
+    if (!e)
+      return;
+    e.style.display = "none";
+    e = this._getCachedElement(id);
+    e.checked = false;
+    $j(e).trigger('change');
+    var app = this._getCachedElement('app_' + id);
+    $j(app).find('li').each(function(index, elem) {
+      elem.style.display = 'none';
+    });
+  },
+  _showModule: function(module) {
+    var id = module.getAttribute('moduleid');
+    if (id) {
+      if (this.displayed[id])
+        return;
+      this.displayed[id] = 1;
+    }
+    module.style.display = '';
+    if (module.getAttribute('moduletype') == 'SEPARATOR') {
+      var tr = this._getCachedElement("children." + id);
+      if (tr)
+        tr.style.display = '';
+      var span = this._getCachedElement('app_' + id);
+      showObject(span);
+      span.style.height = 'auto';
+      span.setAttribute('data-open', 'true');
+      var img = this._getCachedElement('img_' + id);
+      if (img)
+        img.src = img.getAttribute('data-expanded');
+    }
+    var container = module.getAttribute('modulecontainer');
+    if (container) {
+      var row = this._getCachedElement('module.' + container);
+      this._showModule(row);
+      return;
+    }
+    var app = module.getAttribute('moduleparent');
+    if (app)
+      this._showApp(app);
+  },
+  _getInnerText: function(node) {
+    return node.textContent || node.innerText;
+  },
+  type: 'GwtNavFilter'
+};
+/*! RESOURCE: /scripts/doctype/navigator.js */
+$j(function($) {
+  'use strict';
+  $(document).on("click", "LABEL.nav_menu", function() {
+    var id = $(this).attr('for');
+    var input = $('#' + id);
+    id = "menu." + id + ".expanded";
+    setTimeout(function() {
+      if (input.prop('checked'))
+        setPreference(id, "true");
+      else
+        deletePreference(id);
+    }, 0);
+  });
+  $('input[type=checkbox]').each(function() {
+    var self = $(this);
+    var appContainer = $('#app_' + this.id);
+    if (self.prop('checked'))
+      appContainer.addClass('opened');
+    self.change(function() {
+      var el = $(this);
+      if (el.prop('checked')) {
+        appContainer.addClass('opened');
+      } else
+        appContainer.removeClass('opened');
+    });
+  });
+  var previousTerm = '';
+  var highlighted_mod;
+  var f = $("#filter");
+  f.on("keyup", function(evt) {
+    navFilterKeyUp(this.value, '', evt)
+  });
+  f.on("focus", function(evt) {
+    navFilterFocus(this, '', evt)
+  });
+  f.on("blur", function(evt) {
+    navFilterBlur(this, '', evt)
+  });
+  $("#nav_filter_controls").on("click", function(evt) {
+    resetNavFilter();
+    navFilterKeyUp('', '');
+  });
+
+  function navFilterBlur(input, msg) {
+    unhighlightModule();
+    var val = input.value;
+    if (!val)
+      previousTerm = '';
+  }
+
+  function navFilterFocus(input, msg) {
+    var val = input.value;
+    if (!val || (val === msg)) {
+      input.value = '';
+      previousTerm = '';
+    } else
+      previousTerm = val;
+    setTimeout(function() {
+      input.select();
+    }, 10);
+  }
+
+  function navFilterKeyUp(val, msg, evt) {
+    if (val === msg)
+      val = '';
+    var s = $("#nav_filter_controls")[0];
+    if (!val || val === '')
+      s.style.visibility = "hidden";
+    else
+      s.style.visibility = "visible";
+    if (evt && val !== '') {
+      if (evt.keyCode === 40) {
+        if (!highlighted_mod)
+          focusFirstVisibleModule();
+        else
+          focusNextVisibleModule(highlighted_mod);
+        return;
+      }
+      if (evt.keyCode === 38) {
+        if (highlighted_mod)
+          focusPreviousVisibleModule(highlighted_mod);
+        return;
+      }
+      if (evt.keyCode === 13) {
+        if (highlighted_mod)
+          runModule(highlighted_mod, evt.shiftKey);
+        return;
+      }
+      if (evt.keyCode === 27) {
+        if (val === previousTerm)
+          previousTerm = '';
+        restoreFilterText(msg);
+        return;
+      }
+    }
+    unhighlightModule();
+    var win = getTopWindow();
+    try {
+      if (typeof win.navFilterExtension === "function" && win.navFilterExtension(val, msg))
+        return;
+    } catch (e) {
+      jslog("Error in UI Script navFilterExtension - " + e);
+    }
+    win = win.$('gsft_main');
+    if (!win)
+      win = {};
+    if (val.endsWith('.form')) {
+      restoreFilterText(msg);
+      val = val.toLowerCase().replace(/ /g, '');
+      win.src = getCancelableLink(val.replace('.form', '.do?sys_id=-1'));
+    } else if (val.endsWith('.list')) {
+      restoreFilterText(msg);
+      val = val.toLowerCase().replace(/ /g, '');
+      win.src = getCancelableLink(val.replace('.list', '_list.do'));
+    } else if (val.endsWith('.FORM')) {
+      val = val.replace(/ /g, '');
+      restoreFilterText(msg);
+      var url = new GlideURL(val.toLowerCase().replace('.form', '.do?sys_id=-1'));
+      window.open(url.getURL());
+    } else if (val.endsWith('.LIST')) {
+      val = val.replace(/ /g, '');
+      restoreFilterText(msg);
+      var url = new GlideURL(val.toLowerCase().replace('.list', '_list.do'));
+      window.open(url.getURL());
+    } else if (val.endsWith('_list.do')) {
+      restoreFilterText(msg);
+      val = val.toLowerCase().replace(/ /g, '');
+      win.src = val;
+    } else if (val.endsWith('.do')) {
+      restoreFilterText(msg);
+      val = val.toLowerCase().replace(/ /g, '');
+      win.src = val + "?sys_id=-1";
+    } else {
+      GwtNavFilter.filter(val, jQuery('#navigator_favorite_switcher').hasClass('icon-star'));
+      if (val === '')
+        unhighlightModule();
+      else
+        focusFirstVisibleModule();
+    }
+  }
+  CustomEvent.observe("favorites.toggle", function() {
+    if (f.val())
+      navFilterKeyUp(f.val());
+  });
+
+  function unhighlightModule() {
+    if (highlighted_mod) {
+      gel(highlighted_mod).style.backgroundColor = "";
+      highlighted_mod = undefined;
+    }
+  }
+
+  function focusFirstVisibleModule() {
+    var mods = document.getElementsByTagName("li");
+    for (var i = 0; i < mods.length; i++) {
+      var mod = mods[i];
+      if (mod.getAttribute("name") !== "nav.module" || mod.getAttribute("moduletype") === "MENU_LIST" || mod.getAttribute("moduletype") === "SEPARATOR")
+        continue;
+      if (mod.style.display !== "none") {
+        highlightMod(mod);
+        highlighted_mod = mod.id;
+        break;
+      }
+    }
+  }
+
+  function focusNextVisibleModule(hl) {
+    var mods = document.getElementsByTagName("li");
+    var found = false;
+    for (var i = 0; i < mods.length; i++) {
+      var mod = mods[i];
+      if (!found && mod.id === hl) {
+        found = true;
+        continue;
+      }
+      if (!found)
+        continue;
+      if (mod.getAttribute("name") !== "nav.module" || mod.getAttribute("moduletype") === "MENU_LIST" || mod.getAttribute("moduletype") === "SEPARATOR")
+        continue;
+      if (mod.style.display !== "none") {
+        if (hl !== "")
+          gel(hl).style.backgroundColor = "";
+        highlightMod(mod);
+        highlighted_mod = mod.id;
+        break;
+      }
+    }
+  }
+
+  function focusPreviousVisibleModule(hl) {
+    var mods = document.getElementsByTagName("li");
+    var foundhighlighted = false;
+    var foundcandidate = false;
+    var candidate;
+    for (var i = 0; i < mods.length; i++) {
+      var mod = mods[i];
+      if (!foundhighlighted && mod.id !== hl &&
+        mod.getAttribute("name") === "nav.module" &&
+        mod.getAttribute("moduletype") !== "MENU_LIST" &&
+        mod.getAttribute("moduletype") !== "SEPARATOR" &&
+        mod.style.display !== "none") {
+        candidate = mod;
+        foundcandidate = true;
+      }
+      if (!foundhighlighted && mod.id === hl) {
+        foundhighlighted = true;
+        if (foundcandidate) {
+          highlightMod(candidate);
+          highlighted_mod = candidate.id;
+        } else
+          highlighted_mod = undefined;
+        gel(hl).style.backgroundColor = "";
+        break;
+      }
+    }
+  }
+
+  function highlightMod(mod) {
+    var td = mod.firstChild;
+    if (typeof g_mod_highlight_color !== "undefined")
+      mod.style.backgroundColor = g_mod_highlight_color;
+    else
+      mod.style.backgroundColor = "#eee";
+  }
+
+  function runModule(hl, newWindow) {
+    var $mod = $(gel(hl));
+    var a = $mod.find('A')[0];
+    var target = a.getAttribute("target");
+    var cancelable = a.getAttribute("data-cancelable");
+    var href = a.getAttribute('href');
+    if (newWindow)
+      target = "_blank";
+    if (cancelable === 'true')
+      href = getCancelableLink(href);
+    if (target === "" || target === "gsft_main") {
+      var mod = $mod[0];
+      mod.style.backgroundColor = "";
+      highlighted_mod = undefined;
+      var win = getTopWindow();
+      win = win.$('gsft_main');
+      if (!win)
+        win = {};
+      win.src = href;
+    } else
+      window.open(href);
+  }
+
+  function getCancelableLink(link) {
+    if (g_cancelPreviousTransaction) {
+      var nextChar = link.indexOf('?') > -1 ? '&' : '?';
+      link += nextChar + "sysparm_cancelable=true";
+    }
+    return link;
+  }
+
+  function restoreFilterText(msg) {
+    var f = gel('filter');
+    if (previousTerm !== "") {
+      f.value = previousTerm;
+      navFilterKeyUp(previousTerm, msg);
+    } else {
+      previousTerm = '';
+      f.value = '';
+      navFilterKeyUp('', msg);
+    }
+  }
+
+  function resetNavFilter() {
+    var e = gel('filter');
+    e.value = e.defaultValue;
+    var s = gel('nav_filter_controls');
+    s.style.visibility = "hidden";
+    previousTerm = "";
+  }
+});
+$j(function($) {
+  "use strict";
+  $(window).bind('collapse_all', function() {
+    switchCheckedState(false);
+    setUserPrefAllCollapsed();
+  });
+  $(window).bind('expand_all', function() {
+    switchCheckedState(true);
+    setUserPrefAllExpanded();
+  });
+  $(window).bind('toggle_auto_favorite', function() {
+    toggleAutoFavorite();
+  });
+
+  function switchCheckedState(checked) {
+    var t = $(".nav-wrapper input[type=checkbox]:not(#perspectives)").each(function() {
+      $(this).prop('checked', checked);
+      $(this).trigger('change');
+    });
+  }
+
+  function setUserPrefAllExpanded() {
+    var menuItems = getAllMenuItems();
+    if (menuItems.length)
+      batchSetPreference(menuItems.join('=true;') + '=true');
+  }
+
+  function setUserPrefAllCollapsed() {
+    var menuItems = getAllMenuItems();
+    if (menuItems.length)
+      batchDeletePreference(menuItems.join(';'));
+  }
+
+  function getAllMenuItems() {
+    return $.map($('label.nav_menu').not('#div\\.perspectives'), function(elem) {
+      return 'menu.' + $(elem).attr('for') + '.expanded';
+    });
+  }
+
+  function toggleAutoFavorite() {
+    window.autoSaveFavoritePreference = !window.autoSaveFavoritePreference;
+    setPreference('glide.ui.nav.auto_favorite', window.autoSaveFavoritePreference.toString());
+  }
+  document.on('click', 'img.section_toggle, span.section_toggle', function(evt, element) {
+    var id = element.getAttribute("data-id");
+    var e = $('#app_' + id);
+    var ex = e[0].getAttribute('data-open');
+    ex = ex === 'true';
+    ex = !ex;
+    e[0].setAttribute('data-open', ex);
+    e.css({
+      visibility: '',
+      display: '',
+      height: ''
+    });
+    var img = $j("#img_" + id);
+    if (ex)
+      img.addClass(img.attr('data-expanded')).removeClass(img.attr('data-collapsed'));
+    else
+      img.addClass(img.attr('data-collapsed')).removeClass(img.attr('data-expanded'));
+    setPreference("collapse.section." + id, (!ex).toString());
+  });
+  CustomEvent.fire('nav.loaded');
+  if (g_cancelPreviousTransaction) {
+    document.on('click', '.menu[data-cancelable="true"]', function(evt, element) {
+      if (!evt.isLeftClick())
+        return;
+      setTimeout(function(origValue) {
+        this.setAttribute('href', origValue);
+      }.bind(element, element.getAttribute('href')), 10);
+      var nextChar = element.href.indexOf('?') > -1 ? '&' : '?';
+      element.href += nextChar + "sysparm_cancelable=true";
+    });
+  }
+  if (window.g_accessibility) {
+    $('input[type=checkbox]').each(function(index, el) {
+      $(el).focus(function() {
+        var id = $(this).attr('id');
+        $(document.getElementById('div.' + id)).addClass('focus');
+      }).blur(function() {
+        var id = $(this).attr('id');
+        $(document.getElementById('div.' + id)).removeClass('focus');
+      }).keypress(function(e) {
+        if (e.which !== 13)
+          return;
+        var prop = $(this).prop('checked');
+        $(this).prop('checked', !prop);
+        $(this).trigger('change');
+      });
+    });
+  }
+  if (typeof g_ck !== 'undefined')
+    CustomEvent.observe("ck_updated", function(ck) {
+      g_ck = ck;
+    });
+  runAfterAllLoaded();
+
+  function batchSetPreference(valueStr, func) {
+    var u = getActiveUser();
+    if (u) {
+      var values = valueStr.split(';');
+      var value = [];
+      for (var i = 0; i < values.length; i++) {
+        value = values[i].split('=');
+        u.setPreference(value[0], value[1]);
+      }
+    }
+    var url = new GlideAjax('UserPreference');
+    url.addParam('sysparm_type', 'batch_set');
+    url.addParam('sysparm_value', valueStr);
+    url.getXML(func);
+  }
+
+  function batchDeletePreference(nameStr) {
+    var u = getActiveUser();
+    if (u) {
+      var names = nameStr.split(';');
+      for (var i = 0; i < names.length; i++) {
+        u.deletePreference(names[i]);
+      }
+    }
+    var url = new GlideAjax('UserPreference');
+    url.addParam('sysparm_type', 'batch_delete');
+    url.addParam('sysparm_value', nameStr);
+    url.getXML();
+  }
+});;
+/*! RESOURCE: /scripts/doctype/navigator_favorites.js */
+$j(function($) {
+  'use strict';
+  var favoritesPreference = window.favoritesPreference;
+  var inFavoritesMode = false;
+  $(".nav-app.submenu").each(function() {
+    if ($(this).attr('id') != "app_perspectives") {
+      $(this).attr("hasFavorites", "false");
+    }
+  });
+  for (var i = 0; i < favoritesPreference.length; i++) {
+    var $module = $(document.getElementById('module.' + favoritesPreference[i]));
+    $module.parents('.nav-app.submenu').attr('hasFavorites', 'true');
+    $module.children(".navigator-favorite-star").removeClass("icon-star-empty").addClass("icon-star").attr('aria-pressed', 'true');
+  }
+  $(document).on("click", ".navigator-favorite-star", function() {
+    toggleFavorite($(this));
+    if (inFavoritesMode) {
+      $(this).parent().hide();
+    }
+  });
+  $(document).on("click", ".navigator .nav_menu_header", function() {
+    var $fav = $(this).prev('.navigator-favorite-star');
+    if ($fav.hasClass("icon-star") || !window.autoSaveFavoritePreference)
+      return;
+    toggleFavorite($fav);
+  });
+  $("#navigator_favorite_switcher").click(function() {
+    inFavoritesMode = !inFavoritesMode;
+    if (inFavoritesMode) {
+      favoritesMode(true);
+      $(this).removeClass("icon-star-empty").addClass("icon-star").attr('aria-pressed', 'true');
+    } else {
+      favoritesMode(false);
+      $(this).removeClass("icon-star").addClass("icon-star-empty").attr('aria-pressed', 'false');
+    }
+    CustomEvent.fire("favorites.toggle");
+  });
+  CustomEvent.observe("favorites.show", function() {
+    favoritesMode(true);
+  });
+
+  function favoritesMode(active) {
+    if (active) {
+      $("body.navigator").attr("favorites_mode", true);
+      $(".app_module[modulename='separator']").hide();
+    } else {
+      $("body.navigator").attr("favorites_mode", false);
+      $(".app_module[modulename='separator']").show();
+      $(".app_module").show();
+    }
+    var group = $(".nav-app[hasFavorites]");
+    $.each(group, function() {
+      var $app = $(this);
+      if ($app.attr("hasFavorites") === "true") {
+        if (active) {
+          $app.children().each(function() {
+            var $module = $(this);
+            if ($module.attr('moduletype') == 'SEPARATOR') {
+              $module.show();
+              $module.children('.section_toggle, hr').hide();
+              $module.children('ul.separator-children').attr('data-open', 'true');
+            }
+            $(".icon-star-empty", $module).parent().hide();
+          });
+          $app.addClass("opened");
+        } else {
+          $app.children().each(function() {
+            var $module = $(this);
+            $(".icon-star-empty", $module).parent().show();
+            $module.children(".section_toggle, hr").show();
+          });
+        }
+        return true;
+      }
+      var id = $app.attr('id');
+      var appId = id.substring(id.indexOf("_", 0) + 1, id.length);
+      var selector = '#app_' + appId + ', #' + appId + ', #div\\.' + appId;
+      $(selector)[(active ? 'hide' : 'show')]();
+    });
+  }
+
+  function toggleFavorite($element) {
+    var $fav = $element;
+    var $app = $fav.parents(".submenu");
+    var module = $element.parent().attr("moduleid");
+    var index = favoritesPreference.indexOf(module);
+    if ($fav.hasClass('icon-star-empty')) {
+      $fav.removeClass('icon-star-empty').addClass('icon-star').attr('aria-pressed', 'true');
+      $app.attr("hasFavorites", "true");
+      if (index == -1)
+        favoritesPreference.push(module);
+    } else {
+      $fav.removeClass('icon-star').addClass('icon-star-empty').attr('aria-pressed', 'false');
+      $app.attr("hasFavorites", "false");
+      $app.children().each(function() {
+        if ($(".navigator-favorite-star", this).hasClass("icon-star")) {
+          $app.attr("hasFavorites", "true");
+          return false;
+        }
+      });
+      if (index != -1)
+        favoritesPreference.splice(index, 1);
+    }
+    setPreference("ng.navigator_favorites", JSON.stringify(favoritesPreference));
+  }
+});;
+/*! RESOURCE: /scripts/doctype/navigator_menu.js */
+$j(function($) {
+  $('#perspective_switcher').click(function(e) {
+    if (gActiveContext) {
+      contextHide();
+      return;
+    }
+    var saveFavoriteLabel = function() {
+      var label = getMessage('Automatically Add Favorites');
+      if (window.autoSaveFavoritePreference)
+        label += ' <span class="icon-check" style="padding-left: 10px;"></span>';
+      return label;
+    }();
+    var gcm = new GwtContextMenu("context_perspectives_menu");
+    gcm.clear();
+    $('a[parent_id=perspectives]').each(function(index, item) {
+      var name = item.innerHTML;
+      if (item.href.split("=")[1] == "All")
+        gcm.addHref(name, "window.location = '" + item.href + "'");
+      else
+        gcm.addHref(name, "window.location = '" + item.href + "'");
+    });
+    gcm.addLine();
+    gcm.addHref(saveFavoriteLabel, '$j(window).trigger("toggle_auto_favorite")');
+    gcm.addHref(getMessage('Refresh Navigator Title'), 'window.location = "navigator_change.do"');
+    gcm.addHref(getMessage('Collapse all applications'), '$j(window).trigger("collapse_all")');
+    gcm.addHref(getMessage('Expand all applications'), '$j(window).trigger("expand_all")');
+    contextShow(e, gcm.getID(), -1, 0, 0);
+    e.stopPropagation();
+  })
+  $('body').click(function(evt) {
+    CustomEvent.fireAll('body_clicked', evt);
+  })
+  CustomEvent.observe("body_clicked", contextMenuHide);
+});
+/*! RESOURCE: /scripts/doctype/html_class_setter.js */
+(function() {
+  if (window.NOW.htmlClassSetterInitialized)
+    return;
+  window.NOW.htmlClassSetterInitialized = true;
+  var df = window.NOW.dateFormat;
+  var shortDateFormat = window.NOW.shortDateFormat;
+  var $h = $j('HTML');
+  $j(function() {
+    if (!df)
+      return;
+    CustomEvent.observe('timeago_set', function(timeAgo) {
+      df.timeAgo = timeAgo;
+      df.dateBoth = false;
+      setDateClass();
+    });
+    CustomEvent.observe('shortdates_set', function(trueFalse) {
+      shortDateFormat = trueFalse;
+      setDateClass();
+    });
+    CustomEvent.observe('date_both', function(trueFalse) {
+      df.dateBoth = trueFalse;
+      df.timeAgo = false;
+      setDateClass();
+    })
+  });
+
+  function setDateClass() {
+    $h.removeClass('date-timeago');
+    $h.removeClass('date-calendar');
+    $h.removeClass('date-calendar-short');
+    $h.removeClass('date-both');
+    if (df.dateBoth) {
+      $h.addClass('date-both');
+      if (shortDateFormat)
+        $h.addClass('date-calendar-short');
+      else
+        $h.addClass('date-calendar');
+    } else if (df.timeAgo)
+      $h.addClass('date-timeago');
+    else {
+      if (shortDateFormat)
+        $h.addClass('date-calendar-short');
+      else
+        $h.addClass('date-calendar');
+    }
+  }
+  setDateClass();
+  var toggleTemplate = function(trueFalse) {
+    var bool = (typeof trueFalse !== "undefined") ? trueFalse : !window.NOW.templateToggle;
+    window.NOW.templateToggle = bool;
+    setPreference('glide.ui.templateToggle', bool);
+    setTemplateToggle();
+    if (CustomEvent.events.templateToggle.length > 1)
+      CustomEvent.un('templateToggle', toggleTemplate);
+  };
+  CustomEvent.observe('templateToggle', toggleTemplate);
+  CustomEvent.observe('compact', function(trueFalse) {
+    window.NOW.compact = trueFalse;
+    setCompact();
+  });
+  CustomEvent.observe('cc_listv3_tablerow_striped', function(bool) {
+    if (bool) {
+      $j('.table-container table.list-grid').addClass('table-striped');
+    } else {
+      $j('.table-container table.list-grid').removeClass('table-striped');
+    }
+  });
+
+  function setTemplateToggle() {
+    if (window.NOW.templateToggle)
+      $h.addClass('templates');
+    else
+      $h.removeClass('templates');
+  }
+  setTemplateToggle();
+
+  function setCompact() {
+    try {
+      var modalDiv = window.top.document.getElementById("settings_modal");
+    } catch (e) {}
+    if (modalDiv)
+      modalDiv = modalDiv.childNodes[0];
+    var $pH;
+    if (parent.$j)
+      $pH = parent.$j('HTML');
+    if (window.NOW.compact) {
+      $h.addClass('compact');
+      if ($pH)
+        $pH.addClass('compact');
+      if (modalDiv && modalDiv.className.indexOf(' compact') == -1)
+        modalDiv.className += ' compact';
+    } else {
+      $h.removeClass('compact');
+      if ($pH)
+        $pH.removeClass('compact');
+      if (modalDiv && modalDiv.className.indexOf(' compact') > -1)
+        modalDiv.className = modalDiv.className.replace(" compact", "");
+    }
+  }
+  setCompact();
+  CustomEvent.observe('tabbed', function(trueFalse) {
+    window.NOW.tabbed = trueFalse;
+    setTabbed();
+  });
+
+  function setTabbed() {
+    if (window.NOW.tabbed)
+      $h.addClass('tabbed');
+    else
+      $h.removeClass('tabbed');
+  }
+  setTabbed();
+
+  function setListTableWrap() {
+    if (window.NOW.listTableWrap)
+      $j('HTML').removeClass('list-nowrap-whitespace');
+    else
+      $j('HTML').addClass('list-nowrap-whitespace');
+  }
+  setListTableWrap();
+  CustomEvent.observe('table_wrap', function(trueFalse) {
+    window.NOW.listTableWrap = trueFalse;
+    setListTableWrap();
+    CustomEvent.fire('calculate_fixed_headers');
+  });
+})();
+
+function printList(maxRows) {
+  var mainWin = getMainWindow();
+  if (mainWin && mainWin.CustomEvent && mainWin.CustomEvent.fire && mainWin.CustomEvent.fire("print", maxRows) === false)
+    return false;
+  var veryLargeNumber = "999999999";
+  var print = true;
+  var features = "resizable=yes,scrollbars=yes,status=yes,toolbar=no,menubar=yes,location=no";
+  if (isChrome && isMacintosh)
+    features = "";
+  var href = "";
+  var frame = top.gsft_main;
+  if (!frame)
+    frame = top;
+  if (frame.document.getElementById("printURL") != null) {
+    href = frame.document.getElementById("printURL").value;
+    href = printListURLDecode(href);
+  }
+  if (!href) {
+    if (frame.document.getElementById("sysparm_total_rows") != null) {
+      var mRows = parseInt(maxRows);
+      if (mRows < 1)
+        mRows = 5000;
+      var totalrows = frame.document.getElementById("sysparm_total_rows").value;
+      if (parseInt(totalrows) > parseInt(mRows))
+        print = confirm(getMessage("Printing large lists may affect system performance. Continue?"));
+    }
+    var formTest;
+    var f = 0;
+    var form;
+    while ((formTest = frame.document.forms[f++])) {
+      if (formTest.id == 'sys_personalize_ajax') {
+        form = formTest;
+        break;
+      }
+    }
+    if (!form)
+      form = frame.document.forms['sys_personalize'];
+    if (form && form.sysparm_referring_url) {
+      href = form.sysparm_referring_url.value;
+      if (href.indexOf("?sys_id=-1") != -1 && !href.startsWith('sys_report_template')) {
+        alert(getMessage("Please save the current form before printing."));
+        return false;
+      }
+      if (isMSIE) {
+        var isFormPage = frame.document.getElementById("isFormPage");
+        if (isFormPage != null && isFormPage.value == "true")
+          href = href.replace(/javascript%3A/gi, "_javascript_%3A");
+      }
+      href = printListURLDecode(href);
+    } else
+      href = document.getElementById("gsft_main").contentWindow.location.href;
+  }
+  if (href.indexOf("?") < 0)
+    href += "?";
+  else
+    href += "&";
+  href = href.replace("partial_page=", "syshint_unimportant=");
+  href = href.replace("sysparm_media=", "syshint_unimportant=");
+  href += "sysparm_stack=no&sysparm_force_row_count=" + veryLargeNumber + "&sysparm_media=print";
+  if (print) {
+    if (href != null && href != "") {
+      win = window.open(href, "Printer_friendly_format", features);
+      win.focus();
+    } else {
+      alert("Nothing to print");
+    }
+  }
+
+  function printListURLDecode(href) {
+    href = href.replace(/@99@/g, "&");
+    href = href.replace(/@88@/g, "@99@");
+    href = href.replace(/@77@/g, "@88@");
+    href = href.replace(/@66@/g, "@77@");
+    return href;
+  }
+}
+
+function clearCacheSniperly() {
+  var aj = new GlideAjax("GlideSystemAjax");
+  aj.addParam("sysparm_name", "cacheFlush");
+  aj.getXML(clearCacheDone);
+}
+
+function clearCacheDone() {
+  window.status = "Cache flushed";
+};
+/*! RESOURCE: /scripts/classes/util/StopWatch.js */
+var StopWatch = Class.create({
+  MILLIS_IN_SECOND: 1000,
+  MILLIS_IN_MINUTE: 60 * 1000,
+  MILLIS_IN_HOUR: 60 * 60 * 1000,
+  initialize: function(started) {
+    this.started = started || new Date();
+  },
+  getTime: function() {
+    var now = new Date();
+    return now.getTime() - this.started.getTime();
+  },
+  restart: function() {
+    this.initialize();
+  },
+  jslog: function(msg, src, date) {
+    if (window.jslog) {
+      jslog('[' + this.toString() + '] ' + msg, src, date);
+      return;
+    }
+    if (window.console && window.console.log)
+      console.log('[' + this.toString() + '] ' + msg);
+  },
+  toString: function() {
+    return this.formatISO(this.getTime());
+  },
+  formatISO: function(millis) {
+    var hours = 0,
+      minutes = 0,
+      seconds = 0,
+      milliseconds = 0;
+    if (millis >= this.MILLIS_IN_HOUR) {
+      hours = parseInt(millis / this.MILLIS_IN_HOUR);
+      millis = millis - (hours * this.MILLIS_IN_HOUR);
+    }
+    if (millis >= this.MILLIS_IN_MINUTE) {
+      minutes = parseInt(millis / this.MILLIS_IN_MINUTE);
+      millis = millis - (minutes * this.MILLIS_IN_MINUTE);
+    }
+    if (millis >= this.MILLIS_IN_SECOND) {
+      seconds = parseInt(millis / this.MILLIS_IN_SECOND);
+      millis = millis - (seconds * this.MILLIS_IN_SECOND);
+    }
+    milliseconds = parseInt(millis);
+    return doubleDigitFormat(hours) + ":" + doubleDigitFormat(minutes) + ":" + doubleDigitFormat(seconds) +
+      "." + tripleDigitFormat(milliseconds);
+  },
+  type: "StopWatch"
+});;;

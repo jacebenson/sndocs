@@ -1,45 +1,4 @@
 /*! RESOURCE: /scripts/js_includes_customer.js */
-/*! RESOURCE: TBC - Resize List Collectors */
-function resizeListCollectors(_names, _height, _width, _showSearch, _showPreview) {
-  var listNames = [];
-  if (typeof _names === 'string')
-    listNames.push(_names);
-  else
-    listNames = _names.slice(0);
-  var height = (typeof _height === 'undefined') ? '100' : _height.toString();
-  var width = (typeof _width === 'undefined') ? '250' : _width.toString();
-  var showSearch = (typeof _showSearch === 'undefined') ? false : _showSearch;
-  var showPreview = (typeof _showPreview === 'undefined') ? false : _showPreview;
-  listNames.forEach(function(entry) {
-    try {
-      var leftBucket = $(entry + '_select_0');
-      var rightBucket = $(entry + '_select_1');
-      if (leftBucket) {
-        if (height) {
-          leftBucket.style.height = height + 'px';
-          rightBucket.style.height = height + 'px';
-        }
-        if (width) {
-          leftBucket.style.width = width + 'px';
-          rightBucket.style.width = width + 'px';
-        }
-        var preview = $(entry + 'recordpreview');
-        preview.up('td').setAttribute('colSpan', '3');
-        if (!showPreview)
-          preview.style.display = 'none';
-        if (showSearch) {
-          $(entry + '_select_0_search_row').style.width = width + 'px';
-          $(entry + '_select_1_search_row').style.width = width + 'px';
-        } else {
-          $(entry + '_select_0_search_row').style.display = 'none';
-          $(entry + '_select_1_search_row').style.display = 'none';
-        }
-      }
-    } catch (e) {
-      alert('ex:' + e);
-    }
-  });
-}
 /*! RESOURCE: ScrumReleaseImportGroupDialog */
 var ScrumReleaseImportGroupDialog = Class.create();
 ScrumReleaseImportGroupDialog.prototype = {
@@ -216,48 +175,6 @@ ScrumReleaseImportGroupDialog.prototype = {
     }
   }
 };
-/*! RESOURCE: TBC - Dynamic Window Title */
-addLoadEvent(doWait);
-
-function doWait() {
-  if (document.readyState !== "complete")
-    setTimeout(function() {
-      doWait();
-    }, 500);
-  else
-    doSomething();
-}
-
-function doSomething() {
-  if (window.top.location.toString().indexOf("service-now.com/ess/") > -1)
-    return;
-  var title = top.window.document.title.replace(' | TBConsulting', '');
-  var instanceName = window.location.host;
-  instanceName = instanceName.split(".", 1);
-  instanceName = instanceName[0].substring(3).toUpperCase();
-  if (instanceName == '')
-    return;
-  instanceName += ' | ';
-  var windowName = top.window.name.toLowerCase();
-  switch (windowName) {
-    case "workflow":
-      title = "Workflow Editor";
-      break;
-    case "show_workflow_context":
-      title = "Running Workflow(s)";
-      break;
-    case "super_bsm_map":
-      title = "BSM Map";
-      break;
-    case "super_schema":
-      title = "Schema Map";
-      break;
-    default:
-      break;
-  }
-  if (title.indexOf(instanceName) != 0)
-    top.document.title = instanceName + title;
-}
 /*! RESOURCE: PpmIntGroupSprintCreationHandler */
 var PpmIntGroupSprintCreationHandler = Class.create({
   initialize: function(gr) {
@@ -444,6 +361,76 @@ var PpmIntGroupSprintCreationHandler = Class.create({
   },
   type: "PpmIntGroupSprintCreationHandler"
 });
+/*! RESOURCE: Pending Approval icon in header */
+function approval_icon(icon, title, color, current_color, has_pending, number) {
+  if (typeof jQuery === 'function' && typeof top.$j === 'function') {
+    if (window.name == 'gsft_main') {
+      jQuery(document).ready(function() {
+        var top = window.top;
+        icon = getTopWindow().document.getElementById("approval_icon");
+        var user = g_user.userID;
+        var app_check = new GlideAjax('chk_pending_approvals');
+        app_check.addParam('sysparm_name', 'pending_approvals');
+        app_check.addParam('sysparm_user_id', user);
+        app_check.getXML(answer_parse);
+
+        function answer_parse(response) {
+          number = response.responseXML.documentElement.getAttribute("answer");
+          if (number > 0) {
+            has_pending = true;
+          }
+          if (icon) {
+            getTopWindow().document.getElementById("approval_icon").remove();
+          }
+          var isUI16 = top.$j('.navpage-header-content').length > 0;
+          var widgetHtml;
+          if (isUI16) {
+            if (has_pending == true) {
+              widgetHtml = '<div class="navpage-header-content apr_icon", id="approval_icon">' +
+                '<button data-placement="auto" class="btn btn-icon icon-checkbox-checked"' +
+                ' title="You have pending approvals" data-original-title="You have pending approvals" onclick="window.open(\'/sysapproval_approver_list.do?sysparm_view=ess&sysparm_query=approver=javascript:getMyApprovals()^state=requested\', \'_blank\');"' +
+                'style="color:; margin-left: 0px; margin-right: 10px;";>' +
+                '<span class="sr-only">You have pending approvals</span>' +
+                '<a class="badge badge-danger" style="color: white; background: red; position: absolute; top: 5px; margin-left: -5px;">' + number + '</a>' +
+                '</button>' +
+                '</div>';
+              top.$j('.icon-cog').parents('div.navpage-header-content').first().before(widgetHtml);
+            } else {
+              widgetHtml = '<div class="navpage-header-content apr_icon", id="approval_icon">' +
+                '<button data-placement="auto" class="btn btn-icon icon-checkbox-checked"' +
+                ' title="Approvals" data-original-title="Approvals" onclick="window.open(\'/sysapproval_approver_list.do?sysparm_view=ess&sysparm_query=approver=javascript:getMyApprovals()^state=requested\', \'_blank\');"' +
+                'style="color:";>' +
+                '<span class="sr-only">Approvals</span>' +
+                '</button></div>';
+              top.$j('.icon-cog').parents('div.navpage-header-content').first().before(widgetHtml);
+            }
+          } else {
+            if (has_pending == 'true') {
+              widgetHtml = '<span id="approval_icon" ' +
+                'style="visibility: visible; display: inline-block; zoom: 1; vertical-align: middle;"' + 'style="color:red";>' +
+                '<span tabindex="0" onclick="window.open(\'/sysapproval_approver_list.do?sysparm_view=ess&sysparm_query=approver=javascript:getMyApprovals()^state=requested\', \'_blank\');"' +
+                ' class="icon-checkbox-checked sn-tooltip-basic apr_icon"' +
+                ' style="color: red; cursor: pointer; font-size: 20px; border: 0;"' +
+                ' title="You have pending Approvals"><span class="sr-only">' + title +
+                '</span></span></span>';
+              top.$j('#nav_header_stripe_decorations_left').append(widgetHtml);
+            } else {
+              widgetHtml = '<span id="approval_icon" ' +
+                'style="visibility: visible; display: inline-block; zoom: 1; vertical-align: middle;"' + 'style="color:";>' +
+                '<span tabindex="0" onclick="window.open(\'/sysapproval_approver_list.do?sysparm_view=ess&sysparm_query=approver=javascript:getMyApprovals()^state=requested\', \'_blank\');"' +
+                ' class="icon-checkbox-checked sn-tooltip-basic apr_icon"' +
+                ' style="cursor: pointer; font-size: 20px; border: 0;"' +
+                ' title="Approvals"><span class="sr-only">' + title +
+                '</span></span></span>';
+              top.$j('#nav_header_stripe_decorations_left').append(widgetHtml);
+            }
+          }
+        }
+      });
+    }
+  }
+}
+approval_icon();
 /*! RESOURCE: Validate Client Script Functions */
 function validateFunctionDeclaration(fieldName, functionName) {
   var code = g_form.getValue(fieldName);
@@ -605,6 +592,28 @@ ProjectTaskUtil._decodeActualEndDateState = function(result) {
   }
   return workEndState;
 };
+/*! RESOURCE: SNC auto refresh iframes for Chrome */
+if (isChrome) {
+  try {
+    if (!window.self.frameElement) {
+      if (window.addLateLoadEvent) {
+        addLateLoadEvent(function() {
+          reloadFrameForChrome($('gsft_nav'));
+          reloadFrameForChrome($('gsft_main'));
+
+          function reloadFrameForChrome(iframe) {
+            if (!iframe)
+              return;
+            Event.observe(iframe, 'load', function() {
+              if (iframe.contentWindow.location.href != iframe.src && iframe.contentWindow.location.href.indexOf("blank") >= 0)
+                iframe.contentWindow.location.href = iframe.src;
+            });
+          }
+        });
+      }
+    }
+  } catch (e) {}
+}
 /*! RESOURCE: ScrumTaskDialog */
 var ScrumTaskDialog = Class.create(GlideDialogWindow, {
   initialize: function() {
@@ -770,438 +779,6 @@ var ScrumTaskDialog = Class.create(GlideDialogWindow, {
     return map;
   }
 });
-/*! RESOURCE: snd_ui16_developer_patch */
-if (!window.top.hasOwnProperty('snd_ui16_developer_patch')) {
-  jslog('snd_ui16_developer_patch loading in top window.');
-  (function(t) {
-    var i;
-    t.snd_ui16_developer_patch = null;
-    i = setInterval(function() {
-      if (typeof t.jQuery === 'function') {
-        t.jQuery.getScript('/snd_ui16_developer_patch.jsdbx');
-        clearInterval(i);
-      }
-    }, 500);
-  })(window.top);
-} else if (window.top.snd_ui16_developer_patch != null) {} else if (window == window.top) {
-  (function($, window) {
-    var config = {
-      navigator_context: {
-        active: "true" == "true",
-      },
-      picker_width: {
-        active: "true" == "true",
-        max_width: parseInt("300", 10) || 300,
-        min_width: parseInt("30", 10) || 60,
-        load_timeout: parseInt("2000", 10) || 2000,
-        max_search_width: parseInt("", 10) || 150
-      },
-      picker_icon: {
-        active: "true" == "true",
-        domain_table: "" || "domain"
-      },
-      profile_menu: {
-        active: "true" == "true",
-        check_impersonation: "true" == "true",
-      }
-    };
-    $.fn.snd_ui16dp_menu = (function() {
-      var menus = {},
-        loaded = false;
-
-      function getMenuPosition($menu, mouse, direction, scrollDir) {
-        var win = $(window)[direction](),
-          scroll = $(window)[scrollDir](),
-          menu = $menu[direction](),
-          position = mouse + scroll;
-        if (mouse + menu > win && menu < mouse) position -= menu;
-        return position;
-      }
-
-      function closeAll() {
-        for (var id in menus) {
-          $(id).hide();
-        }
-      }
-      return function(settings) {
-        menus[settings.menu_id] = true;
-        if (!loaded) {
-          $(document).click(function() {
-            closeAll();
-          });
-          $('iframe').on('load', function() {
-            $(this).contents().on('click', function() {
-              closeAll();
-            });
-          });
-          loaded = true;
-        }
-        return this.each(function() {
-          $(this).on(settings.event || 'click', settings.selector, function(e) {
-            var $menu;
-            closeAll();
-            if (e.ctrlKey) return;
-            $menu = $(settings.menu_id);
-            $menu.data("invokedOn", $(e.target))
-              .show()
-              .css({
-                position: "absolute",
-                left: getMenuPosition($menu, e.clientX, 'width', 'scrollLeft'),
-                top: getMenuPosition($menu, e.clientY, 'height', 'scrollTop')
-              })
-              .off('click')
-              .on('click', 'a', function(e) {
-                $menu.hide();
-                var $invokedOn = $menu.data("invokedOn");
-                var $selectedMenu = $(e.target);
-                settings.callback.call(this, $invokedOn, $selectedMenu);
-              });
-            return false;
-          });
-        });
-      };
-    })();
-
-    function isUI16() {
-      if (!window.top.angular) return false;
-      var a = window.top.angular.element('overviewhelp').attr('page-name');
-      return a == 'ui16' || a == 'helsinki';
-    }
-
-    function createContextMenu(id, items) {
-      var menu, i;
-      menu = '<ul id="' + id + '" class="dropdown-menu" role="menu" ' +
-        'style="display: none; z-index: 999;">';
-      for (i = 0; i < items.length; i++) {
-        if (items[i] === '-') {
-          menu += '<li class="divider"></li>';
-        } else {
-          menu += '<li><a href="#" tabindex="-1">' + items[i] + '</a></li>';
-        }
-      }
-      menu += '</ul>';
-      $('body').append(menu);
-    }
-
-    function navigatorPatch() {
-      if (!userHasRole('teamdev_configure_instance')) {
-        return;
-      }
-      createContextMenu('snd_ui16dp_navigator_module_menu', [
-        'Edit module'
-      ]);
-      $('#gsft_nav').snd_ui16dp_menu({
-        event: 'contextmenu',
-        selector: 'a[data-id]',
-        menu_id: "#snd_ui16dp_navigator_module_menu",
-        callback: function(invokedOn, selectedMenu) {
-          var id = invokedOn.attr('data-id'),
-            url = '/sys_app_module.do';
-          if (!id) {
-            jslog('No data id.');
-            return;
-          }
-          if (selectedMenu.text() == 'Edit module') {
-            if (invokedOn.hasClass('nav-app')) {
-              url = '/sys_app_application.do';
-            }
-            jslog('snd_ui16_developer_patch opening navigation module');
-            openLink(url + '?sys_id=' + id);
-          } else {
-            jslog('Unknown item selected.');
-          }
-        }
-      });
-      jslog('snd_ui16_developer_patch navigator patch applied');
-    }
-
-    function pickerWidthPatch(offset) {
-      var max_w = config.picker_width.max_width,
-        min_w = config.picker_width.min_width,
-        pickers = $('.navpage-pickers .selector:has(select)'),
-        nav_w,
-        logo_w,
-        float_w,
-        diff,
-        size;
-      if (!pickers.length) {
-        jslog('snd_ui16_developer_patch picked width patch failed. No pickers found.');
-        return;
-      }
-      $('.navpage-pickers').css('display', '');
-      pickers.css('width', '');
-      nav_w = $('header.navpage-header').width();
-      logo_w = $('div.navbar-header').outerWidth();
-      float_w = $('div.navbar-right').outerWidth();
-      diff = nav_w - logo_w - float_w - (offset || 0);
-      size = 100 + (diff / pickers.length);
-      size = size > max_w ? max_w : size;
-      if (size < min_w) {
-        $('.navpage-pickers').css('display', 'none');
-        jslog('snd_ui16_developer_patch pickers hidden as less than minimum width (' + size + ' < ' + min_w + ')');
-      } else {
-        pickers.css('width', size);
-        jslog('snd_ui16_developer_patch picker width patch applied (diff: ' + diff + '; size: ' + size + ')');
-      }
-    }
-
-    function patchIcon(name, className, items, callback) {
-      var id = 'snd_ui16dp_' + name + '_menu',
-        icon;
-      createContextMenu(id, items);
-      icon = $('.' + className + ' span.label-icon');
-      if (icon.length) {
-        icon.snd_ui16dp_menu({
-          menu_id: "#" + id,
-          callback: callback
-        }).css('cursor', 'pointer');
-        jslog('snd_ui16_developer_patch icon picker patch applied to ' + name + ' picker.');
-      } else {
-        jslog('snd_ui16_developer_patch icon picker patch unable to find ' + name + ' picker.');
-      }
-    }
-
-    function pickerIconPatch() {
-      var is_admin = userHasRole(),
-        domain_table = config.picker_icon.domain_table,
-        callback,
-        items;
-      items = [];
-      items.push('View Current');
-      items.push('Create New');
-      items.push('-');
-      items.push('View All');
-      items.push('View In Progress');
-      if (is_admin) items.push('View Retrieved');
-      items.push('-');
-      items.push('Refresh');
-      if (is_admin) items.push('Import from XML');
-      callback = function(invokedOn, selectedMenu) {
-        switch (selectedMenu.text()) {
-          case 'View Current':
-            var sys_id = $('#update_set_picker_select').val();
-            if (sys_id) {
-              sys_id = sys_id.split(':').pop();
-              openLink('/sys_update_set.do?sys_id=' + sys_id);
-            }
-            break;
-          case 'Create New':
-            openLink('/sys_update_set.do?sys_id=-1');
-            break;
-          case 'View All':
-            openLink('sys_update_set_list.do');
-            break;
-          case 'View In Progress':
-            openLink('sys_update_set_list.do?sysparm_query=state%3Din%20progress');
-            break;
-          case 'View Retrieved':
-            openLink('sys_remote_update_set_list.do');
-            break;
-          case 'Import from XML':
-            var url = 'upload.do';
-            url += '?';
-            url += 'sysparm_referring_url=sys_remote_update_set_list.do';
-            url += '&';
-            url += 'sysparm_target=sys_remote_update_set';
-            openLink(url);
-            break;
-          case 'Refresh':
-            refreshPickers();
-            break;
-          default:
-            jslog('Unknown item selected.');
-        }
-      };
-      patchIcon('updateset', 'concourse-update-set-picker', items, callback);
-      items = [];
-      items.push('View Current');
-      items.push('Create New');
-      items.push('-');
-      items.push('View All');
-      items.push('App Manager');
-      items.push('-');
-      items.push('Refresh');
-      callback = function(invokedOn, selectedMenu) {
-        switch (selectedMenu.text()) {
-          case 'View Current':
-            var sys_id = $('#application_picker_select').val();
-            if (sys_id) {
-              sys_id = sys_id.split(':').pop();
-              openLink('/sys_scope.do?sys_id=' + sys_id);
-            }
-            break;
-          case 'Create New':
-            openLink('$sn_appcreator.do');
-            break;
-          case 'View All':
-            openLink('sys_scope_list.do');
-            break;
-          case 'App Manager':
-            openLink('$myappsmgmt.do');
-            break;
-          case 'Refresh':
-            refreshPickers();
-            break;
-          default:
-            jslog('Unknown item selected.');
-        }
-      };
-      patchIcon('application', 'concourse-application-picker', items, callback);
-      if (userHasRole('domain_admin')) {
-        items = [];
-        items.push('View Current');
-        items.push('Create New');
-        items.push('-');
-        items.push('View All');
-        items.push('Domain Map');
-        items.push('-');
-        items.push('Refresh');
-        callback = function(invokedOn, selectedMenu) {
-          switch (selectedMenu.text()) {
-            case 'View Current':
-              var sys_id = $('#domain_picker_select').val();
-              if (sys_id) {
-                sys_id = sys_id.split(':').pop();
-                if (sys_id == 'global') {
-                  alert('The global domain does not exist as a domain record.');
-                } else {
-                  openLink('/' + domain_table + '.do?sys_id=' + sys_id);
-                }
-              }
-              break;
-            case 'Create New':
-              openLink(domain_table + '.do?sys_id=-1');
-              break;
-            case 'View All':
-              openLink(domain_table + '_list.do');
-              break;
-            case 'Domain Map':
-              openLink('domain_hierarchy.do?sysparm_stack=no&sysparm_attributes=record=domain,parent=parent,title=name,description=description,baseid=javascript:getPrimaryDomain();');
-              break;
-            case 'Refresh':
-              refreshPickers();
-              break;
-            default:
-              jslog('Unknown item selected.');
-          }
-        };
-        patchIcon('domain', 'concourse-domain-picker', items, callback);
-      }
-    }
-
-    function profileMenuPatch() {
-      var impersonate_item;
-
-      function addUnimpersonateItem() {
-        impersonate_item.parent().after('<li><a href="snd_ui16dp_unimpersonate.do"' +
-          ' target="gsft_main">Unimpersonate</a>');
-        jslog('snd_ui16_developer_patch user menu patch applied.');
-      }
-      impersonate_item = $('#user_info_dropdown').next('ul').find('[sn-modal-show="impersonate"]');
-      if (impersonate_item) {
-        if (config.profile_menu.check_impersonation) {
-          $.ajax({
-            url: '/snd_ui16dp.do?action=getImpersonationDetails',
-            type: 'GET',
-            dataType: 'JSON'
-          }).done(function(data) {
-            if (data.result && data.result.is_impersonating) {
-              addUnimpersonateItem();
-            } else {
-              jslog('snd_ui16_developer_patch confirmed user is not impersonating.');
-            }
-          }).fail(function() {
-            jslog('snd_ui16_developer_patch failed to check impersonation details.');
-          });
-        } else {
-          addUnimpersonateItem();
-        }
-      }
-    }
-
-    function openLink(target) {
-      jslog('snd_ui16_developer_patch opening target: ' + target);
-      var frame = $('#gsft_main');
-      if (frame.length) {
-        frame[0].src = target;
-      } else {
-        jslog('> gsftMain frame not found.');
-      }
-    }
-
-    function refreshPickers() {
-      var injector = angular.element('body').injector();
-      try {
-        injector.get('snCustomEvent').fire('sn:refresh_update_set');
-      } catch (e) {}
-      try {
-        injector.get('applicationService').getApplicationList();
-      } catch (e) {}
-      try {
-        injector.get('domainService').getDomainList();
-      } catch (e) {}
-    }
-
-    function patch() {
-      var interval;
-      if (config.navigator_context.active) {
-        navigatorPatch();
-      }
-      if (config.picker_width.active) {
-        $('.navpage-pickers').removeClass('hidden-md');
-        setTimeout(function() {
-          pickerWidthPatch();
-          interval = setInterval(function() {
-            pickerWidthPatch();
-          }, 1000);
-          setTimeout(function() {
-            clearInterval(interval);
-          }, config.picker_width.load_timeout);
-        }, config.picker_width.load_timeout);
-        angular.element(window).on('resize', function() {
-          pickerWidthPatch();
-        });
-        $('input#sysparm_search').focus(function() {
-          pickerWidthPatch(config.picker_width.max_search_width);
-        });
-        $('input#sysparm_search').blur(function() {
-          setTimeout(function() {
-            pickerWidthPatch();
-          }, 500);
-        });
-      }
-      if (config.picker_icon.active) {
-        pickerIconPatch();
-      }
-      if (config.profile_menu.active) {
-        profileMenuPatch();
-      }
-    }
-
-    function userHasRole(role) {
-      var roles = (',' + window.NOW.user.roles + ','),
-        is_admin = roles.indexOf(',admin,') > -1;
-      if (roles) {
-        return is_admin || roles.indexOf(',' + role + ',') > -1;
-      }
-      return is_admin;
-    }
-    $(document).ready(function() {
-      try {
-        if (!isUI16()) {
-          window.snd_ui16_developer_patch = false;
-          jslog('snd_ui16_developer_patch ignored. Not UI16.');
-        } else {
-          jslog('Running snd_ui16_developer_patch...');
-          patch();
-          window.snd_ui16_developer_patch = true;
-        }
-      } catch (e) {
-        jslog('SND Developer Patch UI16 mod failure: ' + e);
-      }
-    });
-  })(jQuery, window);
-}
 /*! RESOURCE: tm_AssignDefect */
 var tm_AssignDefect = Class.create({
   initialize: function(gr) {
@@ -1340,27 +917,6 @@ var tm_AssignDefect = Class.create({
   },
   type: "tm_AssignDefect"
 });
-/*! RESOURCE: TBC - Mask Birthday */
-function maskBirthday(value, _g_form, _element) {
-  var bday = value + '';
-  var element = _element || null;
-  var g_form = _g_form || null;
-  if (element)
-    g_form.hideErrorBox(element);
-  var digitOnlyRE = /\D/g;
-  var cleanDate = bday.replace(digitOnlyRE, '');
-  if (cleanDate.length != 4) {
-    if (element) {
-      g_form.clearValue(element);
-      g_form.showErrorBox(element, 'Date must be in MM/DD format');
-    }
-    return '';
-  }
-  var formattedDate = cleanDate.substring(0, 2) + '/' + cleanDate.substring(2, 4);
-  if (element && value != formattedDate)
-    g_form.setValue(element, formattedDate);
-  return (bday != formattedDate) ? formattedDate : value;
-}
 /*! RESOURCE: tm_AddToTestPlanHandler */
 var tm_AddToTestPlanHandler = Class.create({
   initialize: function(gr) {
@@ -1650,34 +1206,64 @@ addLoadEvent(function() {
     showUIActionContext(evt);
   });
 });
-/*! RESOURCE: TBC - Service Portal Functions */
-function getAttachmentCount() {
-  var length;
+/*! RESOURCE: IT Outage Calendar */
+addLoadEvent(function() {
   try {
-    length = angular.element("#sc_cat_item").scope().attachments.length;
-  } catch (e) {
-    length = -1;
-  }
-  return length;
-}
-
-function validateEmail(newValue, _g_form, _element) {
-  var email = newValue + '';
-  var regEx = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-  var element = _element || null;
-  var g_form = _g_form || null;
-  if (element)
-    g_form.hideFieldMsg(element);
-  try {
-    if (!regEx.test(email)) {
-      if (element)
-        g_form.showFieldMsg(element, 'Please enter a valid email address', 'error');
-      return false;
+    if (g_user.hasRole('itil')) {
+      var Outage = "<img src='change_this_week.jpg' width='15' height='15' style='margin-right: 5px;' /><a target='gsft_main' href='/sys_report_template.do?jvar_report_id=1f0653066f26ce00716d9eff6f3ee428&sysparm_calstyle=u_potential_impact_to_revenue' style='margin-right: 20px; font-size: 100%; color: #000;text-decoration: underline;'>IT Outage Calendar</a>";
+      $('textsearch').insert({
+        before: Outage
+      });
     }
-  } catch (ex) {
-    return false;
+  } catch (e) {}
+});
+/*! RESOURCE: Banner Links */
+document.addEventListener("DOMContentLoaded", function(event) {
+  var theWindow = getTopWindow().window.location;
+  var theURL = theWindow.href;
+  var theLinkElement = getTopWindow().document.querySelector("a[class~=headerlink]");
+  if (jQuery(theLinkElement).length == 0) {
+    var theStyle = "float: right; padding:0px;font-size: 1.3rem; margin: 5px 0px 0px 0px;" +
+      "width: auto; height: 2px; text-align: center;" +
+      "color: white";
+    var linkDivOpen = '<div><span style="' + theStyle + '">';
+    var linkDivClose = "</span></div>";
+    var Outage = "<a target='_self' href='/sys_report_template.do?jvar_report_id=1f0653066f26ce00716d9eff6f3ee428&sysparm_calstyle=u_potential_impact_to_revenue' id='essLink' class='headerlink' style='color: inherit;text-decoration: none; padding:8px;margin-right:10px'><span class='btn btn-icon icon-calendar' style='font-size: 20px;' />IT Outage Calendar</a>";
+    var portal = "<a target='_self' href='/myserviceportal?sysparm_domain_restore=false&sysparm_stack=no' id='sneLink' class='headerlink' style='color: inherit;text-decoration: none; padding:8px;'><span class='btn btn-icon icon-lightbulb' style='font-size: 20px;' />My Service Portal</a>";
+    var theHeaderElement = getTopWindow().document.querySelector(".nav.navbar-right");
+    jQuery(linkDivOpen + portal + linkDivClose).insertAfter(theHeaderElement);
+    if (g_user.hasRoles()) {
+      jQuery(linkDivOpen + Outage + linkDivClose).insertAfter(theHeaderElement);
+    }
   }
-  return true;
+});
+/*! RESOURCE: Banner Links */
+document.addEventListener("DOMContentLoaded", function(event) {
+  var theWindow = getTopWindow().window.location;
+  var theURL = theWindow.href;
+  if (theURL.indexOf('nav_to.do?') != -1 || theURL.indexOf('navpage.do') != -1 || theURL == baseURL) {
+    var theLinkElement = getTopWindow().document.querySelector("a[class~=headerlink]");
+    if (g_user.hasRoles() && jQuery(theLinkElement).length == 0) {
+      var theStyle = "float: right; padding:0px;font-size: 1.3rem; margin: 5px 0px 0px 0px;" +
+        "width: auto; height: 2px; text-align: center;" +
+        "color: white";
+      var linkDivOpen = '<div><span style="' + theStyle + '">';
+      var linkDivClose = "</span></div>";
+      var Outage = "<a target='_self' href='/sys_report_template.do?jvar_report_id=1f0653066f26ce00716d9eff6f3ee428&sysparm_calstyle=u_potential_impact_to_revenue' id='essLink' class='headerlink' style='color: inherit;text-decoration: none; padding:8px;margin-right:10px'><span class='btn btn-icon icon-calendar' style='font-size: 20px;' />IT Outage Calendar</a>";
+      var portal = "<a target='_self' href='/myserviceportal?sysparm_domain_restore=false&sysparm_stack=no' id='sneLink' class='headerlink' style='color: inherit;text-decoration: none; padding:8px;'><span class='btn btn-icon icon-lightbulb' style='font-size: 20px;' />My Service Portal</a>";
+      var theHeaderElement = getTopWindow().document.querySelector(".nav.navbar-right");
+      jQuery(linkDivOpen + Outage + linkDivClose).insertAfter(theHeaderElement);
+      jQuery(linkDivOpen + portal + linkDivClose).insertAfter(theHeaderElement);
+    }
+  }
+});
+/*! RESOURCE: Hide Add to Dashboard */
+window.addEventListener('load', reportVisitorStyle());
+
+function reportVisitorStyle() {
+  window.onload = function() {
+    document.getElementById('add_to_homepage').style.display = 'none';
+  };
 }
 /*! RESOURCE: AddMembersFromGroup */
 var AddMembersFromGroup = Class.create(GlideDialogWindow, {
@@ -1872,39 +1458,6 @@ function validateStartEndDate(startDateField, endDateField, processErrorMsg) {
     return false;
   }
   return true;
-}
-/*! RESOURCE: TBC - Mask Phone */
-function maskPhone(value, _g_form, _element, _style) {
-  var phone = value + '';
-  var style = _style || '-';
-  var element = _element || null;
-  var g_form = _g_form || null;
-  var length = 10;
-  if (element)
-    g_form.hideErrorBox(element);
-  var digitOnlyRE = /\D/g;
-  var cleanPhone = phone.replace(digitOnlyRE, '');
-  if (cleanPhone.length == 11 && cleanPhone[0] == '1')
-    cleanPhone = cleanPhone.substring(1);
-  var formattedPhone = '';
-  if (style == '(')
-    formattedPhone = '(' + cleanPhone.substring(0, 3) + ') ' + cleanPhone.substring(3, 6) + '-' + cleanPhone.substring(6, 10);
-  else if (style == '.')
-    formattedPhone = cleanPhone.substring(0, 3) + '.' + cleanPhone.substring(3, 6) + '.' + cleanPhone.substring(6, 10);
-  else
-    formattedPhone = cleanPhone.substring(0, 3) + '-' + cleanPhone.substring(3, 6) + '-' + cleanPhone.substring(6, 10);
-  if (cleanPhone.length < length) {
-    if (element) {
-      g_form.setValue(element, '');
-      g_form.showErrorBox(element, 'Phone must be at least ' + length + ' digits');
-    }
-    return '';
-  }
-  if (cleanPhone.length > 10)
-    formattedPhone += ' x' + cleanPhone.substring(10);
-  if (element && value != formattedPhone)
-    g_form.setValue(element, formattedPhone);
-  return (phone != formattedPhone) ? formattedPhone : value;
 }
 /*! RESOURCE: AddTeamMembers */
 var AddTeamMembers = Class.create(GlideDialogWindow, {
@@ -2221,6 +1774,17 @@ var ScrumAddSprints = Class.create({
   },
   type: "ScrumAddSprints"
 });
+/*! RESOURCE: Portal Link */
+addLoadEvent(function() {
+  try {
+    if (g_user.hasRole('itil')) {
+      var portal = "<img src='change_assigned_group.jpg' width='15' height='15' style='margin-right: 5px;' /><a target='_self' href='/wsi_portal/home.do' style='margin-right: 20px; font-size: 100%; color: #000;text-decoration: underline;'>IT Service Portal</a>";
+      $('textsearch').insert({
+        before: portal
+      });
+    }
+  } catch (e) {}
+});
 /*! RESOURCE: pdb_HighchartsConfigBuilder */
 var HighchartsBuilder = {
   getChartConfig: function(chartOptions, tzOffset) {
@@ -2480,6 +2044,35 @@ ScrumCloneReleaseTeamDialog.prototype = {
     }
   }
 };
+/*! RESOURCE: EvtMgmtPriorityOverride */
+function normalizePriority(columnName) {
+  var regexComma = /,/g;
+  var index = getIndexByColumn(columnName);
+  jQuery("tbody.list2_body tr.list_row:not([smart-priority-override])").each(function() {
+    var row = jQuery(this);
+    var cell = jQuery(row.find("td:not(.list_decoration_cell)")[index]);
+    var value = cell.text();
+    if (!value)
+      return;
+    value = value.replace(regexComma, "");
+    var priority = parseInt(parseInt(value) / 1000);
+    cell.text(priority);
+    row.attr("smart-priority-override", "true");
+  });
+}
+
+function getIndexByColumn(name) {
+  var index = -1;
+  jQuery("thead th.list_header_cell").each(function(idx) {
+    var curr = jQuery(this);
+    if (curr.attr('name') === name) {
+      if (index == -1) {
+        index = idx;
+      }
+    }
+  });
+  return index;
+}
 /*! RESOURCE: PmClientDateAndDurationHandler */
 var PmClientDateAndDurationHandler = Class.create();
 PmClientDateAndDurationHandler.prototype = {
