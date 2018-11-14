@@ -1722,6 +1722,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713186",
         "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/2/scripts/",
         "date": "2018-10-08"
+      },{
+        "number": "3",
+        "name": "London Patch 3",
+        "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-3.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715680",
+        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
+        "date": "2018-11-14"
       }
     ],
       "features": [

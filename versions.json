@@ -49,15 +49,15 @@
     "7": "https://spartan.service-now.com",
     "8": "https://pgaamerica.service-now.com",
     "9": "https://volvocars.service-now.com",
-    "10": "https://petsmart.service-now.com",
+    "10": "https://wusm.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://simplyfit.service-now.com",
+    "8a": "https://southwest.service-now.com",
     "8b": "https://smarttech.service-now.com",
     "9a": "https://umuc.service-now.com",
     "9b": "https://tesla.service-now.com",
-    "9c": "https://graham.service-now.com"
+    "9c": "https://yale.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -65,25 +65,26 @@
     "2": "https://moneysupermarket.service-now.com",
     "3": "https://vector.service-now.com",
     "4": "https://pnmac.service-now.com",
-    "5": "https://utsinsearchprod.service-now.com",
-    "6": "https://turnertest.service-now.com",
+    "5": "https://wdpr.service-now.com",
+    "6": "https://zetupprod.service-now.com",
     "7": "https://xpologistics.service-now.com",
     "8": "https://wittel.service-now.com",
-    "9": "https://uoadev.service-now.com",
+    "9": "https://zumtobelprod.service-now.com",
     "10": "https://wgu.service-now.com",
-    "3a": "https://economie.service-now.com",
+    "3a": "https://bournemouth.service-now.com",
     "3b": "https://watts.service-now.com"
   },
   "london": {
-    "0": "https://uoft.service-now.com",
-    "1": "https://utas1.service-now.com",
-    "2": "https://voeazul.service-now.com"
+    "0": "https://ucsdservicedesk.service-now.com",
+    "1": "https://viawest.service-now.com",
+    "2": "https://zillow.service-now.com",
+    "3": "https://blizzarddev.service-now.com"
   },
   "madrid": {},
   "newyork": {},
   "orlando": {},
   "paris": {},
   "undefined": {
-    "0": "https://businessnatixis.service-now.com"
+    "0": "https://sandbox.service-now.com"
   }
 }
