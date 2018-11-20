@@ -819,7 +819,7 @@
         "number": "0",
         "url": "",
         "date": "2014-05-06",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/eureka/0/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/eureka/0/scripts/"
       },
       {
         "name": "Eureka Patch 1",
@@ -990,7 +990,7 @@
         "name": "Fuji Patch 13",
         "url": "https://web.archive.org/web/20161118225629/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_13",
         "date": "2016-05-04",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/fuji/13/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/fuji/13/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=3909ed674f4f56047b0cb85e0210c7c6"
       }
     ],
@@ -1087,7 +1087,7 @@
         "name": "Geneva Patch 11",
         "url": "https://web.archive.org/web/20181120162331/https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-11.html",
         "date": "2017-02-23",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/geneva/11/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/geneva/11/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=40edbe82db093e400e3dfb651f9619e3"
       }
     ],
@@ -1138,7 +1138,7 @@
         "url": "https://web.archive.org/web/20181120161703/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-5.html",
         "date": "2016-09-21",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0597668",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/5/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/5/scripts/"
       },
       {
         "number": "6",
@@ -1167,7 +1167,7 @@
         "url": "https://web.archive.org/web/20181120155824/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-9.html",
         "date": "2017-02-14",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621356",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/9/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/9/scripts/"
       },
       {
         "number": "9a",
@@ -1188,7 +1188,7 @@
         "url": "https://web.archive.org/web/20181120161907/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-11.html",
         "date": "2017-06-09",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623092",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/11/scripts/"
       },
       {
         "number": "11b",
@@ -1196,14 +1196,14 @@
         "url": "",
         "date": "2017-06-09",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623092",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/11b/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/11b/scripts/"
       },
       {
         "number": "12",
         "name": "Helsinki Patch 12",
         "url": "https://web.archive.org/web/20181120161944/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-12.html",
         "date": "2017-08-24",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/12/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0634662"
       },
       {
@@ -1211,7 +1211,7 @@
         "name": "Helsinki Patch 12a",
         "url": "",
         "date": "2017-08-24",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/helsinki/12a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/helsinki/12a/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=60f52e17dbb407800e3dfb651f9619e1"
       }
     ],
@@ -1236,7 +1236,7 @@
         "url": "https://web.archive.org/web/20170706084639/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
         "date": "2017-01-13",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598954",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/1/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/1/scripts/"
       },
       {
         "number": "2",
@@ -1251,7 +1251,7 @@
         "url": "https://web.archive.org/web/20170706040346/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-3.html",
         "date": "2017-02-28",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621511",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/3/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/3/scripts/"
       },
       {
         "number": "3a",
@@ -1264,7 +1264,7 @@
         "name": "Istanbul Patch 4",
         "url": "https://web.archive.org/web/20170706082716/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-4.html",
         "date": "2017-03-27",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/4/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/4/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0621819"
       },
       {
@@ -1272,7 +1272,7 @@
         "name": "Istanbul Patch 5",
         "url": "https://web.archive.org/web/20170706041858/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html",
         "date": "2017-04-20",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/5/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/5/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622081"
       },
       {
@@ -1280,7 +1280,7 @@
         "name": "Istanbul Patch 6",
         "url": "https://web.archive.org/web/20181120154750/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-6.html",
         "date": "2017-06-05",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/6/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/6/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622599"
       },
       {
@@ -1289,7 +1289,7 @@
         "url": "",
         "date": "Unknown",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=fc6b7e6cdb93b6c05a4af85e0f9619a7",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/6a/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/6a/scripts/"
       },
       {
         "number": "6b",
@@ -1303,7 +1303,7 @@
         "name": "Istanbul Patch 7",
         "url": "https://web.archive.org/web/20181120154755/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-7.html",
         "date": "2017-07-06",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/7/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/7/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623231"
       },
       {
@@ -1311,7 +1311,7 @@
         "name": "Istanbul Patch 8",
         "url": "https://web.archive.org/web/20181120154755/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html",
         "date": "2017-07-28",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/8/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/8/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623642"
       },
       {
@@ -1319,7 +1319,7 @@
         "name": "Istanbul Patch 9",
         "url": "https://web.archive.org/web/20181120154759/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9.html",
         "date": "2017-08-31",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/9/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623814"
       },
       {
@@ -1327,7 +1327,7 @@
         "name": "Istanbul Patch 9a",
         "url": "https://web.archive.org/web/20181120154803/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-9a-HF-1-PO.html",
         "date": "2017-08-31",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/9a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/9a/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=4756441cdbfd4340bf55f7fcbf961929"
       },
       {
@@ -1335,7 +1335,7 @@
         "name": "Istanbul Patch 10",
         "url": "https://web.archive.org/web/20181120155041/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-10.html",
         "date": "2017-10-25",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/10/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0635465"
       },
       {
@@ -1344,7 +1344,7 @@
         "url": "",
         "date": "2017-12-12",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=9e29b0aedbb6c340bd7ef47e0f961981",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10a/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/10a/scripts/"
       },
       {
         "number": "10b",
@@ -1352,7 +1352,7 @@
         "url": "",
         "date": "2018-01-08",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=bbff91cadbd7c7444837f3231f961930",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10b/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/10b/scripts/"
       },
       {
         "number": "10c",
@@ -1360,7 +1360,7 @@
         "url": "",
         "date": "2018-02-05",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662330",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/10c/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/10c/scripts/"
       },
       {
         "number": "11",
@@ -1368,7 +1368,7 @@
         "url": "https://web.archive.org/web/20181120155053/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-11.html",
         "date": "2018-02-16",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0598935",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/11/scripts/"
       },
       {
         "number": "11a",
@@ -1376,7 +1376,7 @@
         "url": "",
         "date": "2018-04-13",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682452",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11a/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/11a/scripts/"
       },
       {
         "number": "11b",
@@ -1384,7 +1384,7 @@
         "url": "",
         "date": "2018-04-09",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684024",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11b/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/11b/scripts/"
       },
       {
         "number": "11c",
@@ -1392,7 +1392,7 @@
         "url": "",
         "date": "2018-09-28",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=b68b1fafdbf39340e0e80b55ca9619f9",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/istanbul/11c/scripts/"
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/istanbul/11c/scripts/"
       }
     ],
     "features": [
@@ -1413,7 +1413,7 @@
         "name": "Jakarta Patch 1",
         "url": "https://web.archive.org/web/20181120154131/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623601",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/1/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/1/scripts/",
         "date": "2017-07-31"
       },
       {
@@ -1421,7 +1421,7 @@
         "name": "Jakarta Patch 2",
         "url": "https://web.archive.org/web/20181120154136/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-2.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0634632",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/2/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/2/scripts/",
         "date": "2017-08-18"
       },
       {
@@ -1429,14 +1429,14 @@
         "name": "Jakarta Patch 3",
         "url": "https://web.archive.org/web/20181120154138/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623769",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/3/scripts/",
         "date": "2017-09-13"
       },
       {
         "number": "3a",
         "name": "Jakarta Patch 3a",
         "url": "https://web.archive.org/web/20181120154151/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-3a-hf-1-PO.html",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/3a/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
         "date": "2017-11-13"
       },
@@ -1444,7 +1444,7 @@
         "number": "3b",
         "name": "Jakarta Patch 3b",
         "url": "",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/3b/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/3b/scripts/",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=27fa9e45dbb50f80bf55f7fcbf9619a2",
         "date": "2017-12-06"
       },
@@ -1453,7 +1453,7 @@
         "name": "Jakarta Patch 4",
         "url": "https://web.archive.org/web/20181120154311/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623601",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/4/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/4/scripts/",
         "date": "2017-10-06"
       },
       {
@@ -1461,7 +1461,7 @@
         "name": "Jakarta Patch 5",
         "url": "https://web.archive.org/web/20181120154315/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/5/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/5/scripts/",
         "date": "2017-11-02"
       },
       {
@@ -1469,7 +1469,7 @@
         "name": "Jakarta Patch 6",
         "url": "https://web.archive.org/web/20181120154319/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/6/scripts/",
         "date": "2017-11-30"
       },
       {
@@ -1477,7 +1477,7 @@
         "name": "Jakarta Patch 6a",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=6e50210edbd7c7444837f3231f96191d",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/6a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/6a/scripts/",
         "date": "2018-01-02"
       },
       {
@@ -1485,7 +1485,7 @@
         "name": "Jakarta Patch 7",
         "url": "https://web.archive.org/web/20181120154320/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/7/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/7/scripts/",
         "date": "2018-01-05"
       },
       {
@@ -1493,7 +1493,7 @@
         "name": "Jakarta Patch 8",
         "url": "https://web.archive.org/web/20181120154323/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-8.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/8/scripts/",
         "date": "2018-02-26"
       },
       {
@@ -1501,7 +1501,7 @@
         "name": "Jakarta Patch 8a",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682388",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/8a/scripts/",
         "date": "2018-02-26"
       },
       {
@@ -1509,7 +1509,7 @@
         "name": "Jakarta Patch 8b",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684026",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/8b/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/8b/scripts/",
         "date": "2018-04-05"
       },
       {
@@ -1517,7 +1517,7 @@
         "name": "Jakarta Patch 9",
         "url": "https://web.archive.org/web/20181120154326/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-9.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685869",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/9/scripts/",
         "date": "2018-05-17"
       },
       {
@@ -1525,7 +1525,7 @@
         "name": "Jakarta Patch 9a",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690897",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/9a/scripts/",
         "date": "2018-07-03"
       },
       {
@@ -1533,7 +1533,7 @@
         "name": "Jakarta Patch 9b",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692125",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9b/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/9b/scripts/",
         "date": "2018-07-26"
       },
       {
@@ -1541,7 +1541,7 @@
         "name": "Jakarta Patch 9c",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0694713",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/9c/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/9c/scripts/",
         "date": "2018-09-11"
       },
       {
@@ -1549,7 +1549,7 @@
         "name": "Jakarta Patch 10",
         "url": "https://web.archive.org/web/20181120154329/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-10.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692612",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/jakarta/10/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/jakarta/10/scripts/",
         "date": "2018-09-13"
       }
     ],
@@ -1581,7 +1581,7 @@
         "name": "Kingston Patch 0",
         "url": "https://web.archive.org/web/20180527202058/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/0/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/0/scripts/",
         "date": "2017-11-16"
       },
       {
@@ -1589,7 +1589,7 @@
         "name": "Kingston Patch 1",
         "url": "https://web.archive.org/web/20181120153710/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-1.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0662222",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/1/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/1/scripts/",
         "date": "2018-01-11"
       },
       {
@@ -1597,7 +1597,7 @@
         "name": "Kingston Patch 2",
         "url": "https://web.archive.org/web/20181120153715/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-2.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/2/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/2/scripts/",
         "date": "2018-02-01"
       },
       {
@@ -1605,7 +1605,7 @@
         "name": "Kingston Patch 3",
         "url": "https://web.archive.org/web/20181120153718/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-3.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/3/scripts/",
         "date": "2018-03-08"
       },
       {
@@ -1613,7 +1613,7 @@
         "name": "Kingston Patch 3a",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682450",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3a/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/3a/scripts/",
         "date": "2018-03-08"
       },
       {
@@ -1621,7 +1621,7 @@
         "name": "Kingston Patch 3b",
         "url": "",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0684018",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/3b/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/3b/scripts/",
         "date": "2018-04-05"
       },
       {
@@ -1629,7 +1629,7 @@
         "name": "Kingston Patch 4",
         "url": "https://web.archive.org/web/20181120153721/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0683279",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/4/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/4/scripts/",
         "date": "2018-04-13"
       },
       {
@@ -1637,7 +1637,7 @@
         "name": "Kingston Patch 5",
         "url": "https://web.archive.org/web/20181120153835/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-5.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685497",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/5/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/5/scripts/",
         "date": "2018-05-03"
       },
       {
@@ -1645,42 +1645,42 @@
         "name": "Kingston Patch 6",
         "url": "https://web.archive.org/web/20181120153839/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-6.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0687472",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/6/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/6/scripts/",
         "date": "2018-05-30"
       },{
         "number": "7",
         "name": "Kingston Patch 7",
         "url": "https://web.archive.org/web/20181120153842/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-7.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690216",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/7/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/7/scripts/",
         "date": "2018-06-21"
       },{
         "number": "8",
         "name": "Kingston Patch 8",
         "url": "https://web.archive.org/web/20181120153914/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-8.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692610",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/8/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/8/scripts/",
         "date": "2018-06-21"
       },{
         "number": "9",
         "name": "Kingston Patch 9",
         "url": "https://web.archive.org/web/20181120153848/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713018",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/9/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/9/scripts/",
         "date": "2018-09-28"
       },{
         "number": "10",
         "name": "Kingston Patch 10",
         "url": "https://web.archive.org/web/20181120153911/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-10.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715314",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/10/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/10/scripts/",
         "date": "2018-10-23"
       },{
         "number": "11",
         "name": "Kingston Patch 11",
         "url": "https://web.archive.org/web/20181120152528/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-11.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715314",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/kingston/11/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/11/scripts/",
         "date": "2018-10-23"
       }
     ],
@@ -1713,28 +1713,28 @@
         "name": "London Patch 0",
         "url": "https://web.archive.org/web/20181120153316/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
         "date": "2018-07-27"
       },{
         "number": "1",
         "name": "London Patch 1",
         "url": "https://web.archive.org/web/20181120153319/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/1/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/1/scripts/",
         "date": "2018-09-05"
       },{
         "number": "2",
         "name": "London Patch 2",
         "url": "https://web.archive.org/web/20181120153322/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-2.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713186",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/2/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/2/scripts/",
         "date": "2018-10-08"
       },{
         "number": "3",
         "name": "London Patch 3",
         "url": "https://web.archive.org/web/20181120153325/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-3.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715680",
-        "git": "https://gitlab.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
         "date": "2018-11-14"
       }
     ],
