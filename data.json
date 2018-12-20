@@ -1682,6 +1682,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715314",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/11/scripts/",
         "date": "2018-10-23"
+      },{
+        "number": "12",
+        "name": "Kingston Patch 12",
+        "url": "https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0720478",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/12/scripts/",
+        "date": "2018-12-20"
       }
     ],
     "features": [
@@ -1736,6 +1743,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715680",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
         "date": "2018-11-14"
+      },{
+        "number": "4",
+        "name": "London Patch 4",
+        "url": "https://web.archive.org/web/20181220153957/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-4.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0717900",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/4/scripts/",
+        "date": "2018-12-20"
       }
     ],
       "features": [

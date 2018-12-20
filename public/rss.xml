@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 28 Nov 2018 20:49:36 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 20 Dec 2018 15:45:57 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Wed, 28 Nov 2018 20:49:36 GMT</pubDate>
+        <pubDate>Thu, 20 Dec 2018 15:45:57 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -53,6 +53,12 @@
             <link>https://web.archive.org/web/20181120153325/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-3.html</link>
             <guid isPermaLink="false">London Patch 3</guid>
             <pubDate>Wed, 14 Nov 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 4]]></title>
+            <link>https://web.archive.org/web/20181220153957/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-4.html</link>
+            <guid isPermaLink="false">London Patch 4</guid>
+            <pubDate>Thu, 20 Dec 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
@@ -141,6 +147,12 @@
             <link>https://web.archive.org/web/20181120152528/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-11.html</link>
             <guid isPermaLink="false">Kingston Patch 11</guid>
             <pubDate>Tue, 23 Oct 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kingston Patch 12]]></title>
+            <link>https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html</link>
+            <guid isPermaLink="false">Kingston Patch 12</guid>
+            <pubDate>Thu, 20 Dec 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Jakarta]]></title>
