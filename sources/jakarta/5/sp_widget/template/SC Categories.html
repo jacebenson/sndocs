@@ -1,0 +1,16 @@
+<div ng-class="::{'hidden-xs' : options.hide_xs}" class="panel panel-{{::options.color}} b">
+  <div class="panel-heading">
+    <h1 class="h4 panel-title">
+      <span ng-if="::options.glyph">
+        <fa name="{{::options.glyph}}" />
+      </span>{{::options.title}}</h1>
+  </div>
+  <div class="list-group no-radius alt" role="list">
+    <sp-category-list-item ng-repeat="cat in data.categories"
+                           ng-if="options.category_layout == 'Flat' && cat.count > 0 || options.category_layout == 'Nested'"
+                           category="cat"
+                           omit-badges="options.omit_badges"
+                           page="options.page"
+                           level="0"></sp-category-list-item>
+  </div>
+</div>

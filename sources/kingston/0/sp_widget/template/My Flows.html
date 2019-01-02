@@ -1,0 +1,11 @@
+<div class="panel panel-default">
+	<div class="panel-heading">
+    <h2 class="h4 panel-title">My Flows</h2>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item"
+        ng-repeat="sess in c.data.sessions">
+      <a ng-href="?id=pi_flow&session_id={{::sess.id}}">{{::sess.flow}} ({{::sess.state}})</a>
+    </li>
+  </ul>
+</div>

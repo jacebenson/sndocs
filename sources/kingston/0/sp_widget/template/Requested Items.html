@@ -1,0 +1,24 @@
+<div class="panel panel-{{c.options.color}} b" ng-if="always_show || data.list.length">
+  <div class="panel-heading">
+    <h2 class="panel-title">{{::c.data.title}}</h2>
+  </div>
+  <div class="list-group">
+    <div ng-repeat="item in data.list" class="block list-group-item" >
+      <a ng-click="onClick($event, item, item.url, {})" href="javascript:void(0)" >
+        <span ng-if="data.image_field" class="pull-left thumb-sm avatar m-r">
+          <img ng-src="{{item.image_field}}" alt="..." class="img-circle">
+        </span>
+        <div >
+          <div ng-class="{'l-h-40': !item.secondary_fields.length}">{{item.display_field}}</div>
+          <small class="block text-muted m-b-xs" ng-repeat="f in item.secondary_fields">
+            <span ng-if="!$first"> • </span>
+            <span ng-switch="f.type" title="{{::f.label}}">
+              <span ng-switch-when="glide_date"><sn-time-ago timestamp="::f.value" /></span>
+              <span ng-switch-when="glide_date_time"><sn-time-ago timestamp="::f.value" /></span>
+              <span ng-switch-default="">{{f.display_value}}</span>
+            </span>
+          </small>
+        </div>
+      </a>
+      <sp-widget widget="item.stageWidget" options="{onload_expand_request_item_stages:c.options.auto_expand_request_item_stages}"></sp-widget>
+</div>

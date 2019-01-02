@@ -1,0 +1,71 @@
+.category-widget {
+	border: 1px solid $panel-inner-border;
+  
+  .category-list {
+    .fa {
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .l-h-1_6x {
+      line-height: 1.6em;
+    }
+    a:focus {
+    	outline-offset: 3px !important;
+		}
+  }
+  
+  .list-group-item {
+    &:hover {
+      background-color: lighten($panel-primary-heading-bg, 45%);
+    }
+    padding-right: 10px;
+  }
+  
+  .sub-category-list {
+    margin: 0 -15px;
+    padding: 0px 15px;
+    background-color: $gray-lighter;
+    margin-top: 10px;
+    margin-bottom: -10px;
+    
+    .list-group-item {
+      background-color: $gray-lighter;
+      padding-right: 0px;
+    }
+  }
+  
+  .no-indent {
+   padding-left: 0px; 
+  }
+}
+.panel-primary .badge {
+  background-color: $panel-primary-heading-bg;
+  color: $panel-primary-text;
+}
+.panel-default .badge {
+  background-color: $panel-default-heading-bg;
+  color: $panel-default-text;
+}
+.panel-success .badge {
+  background-color: $panel-success-heading-bg;
+  color: $panel-success-text;
+}
+.panel-info .badge {
+  background-color: $panel-info-heading-bg;
+  color: $panel-info-text;
+}
+.panel-warning .badge {
+  background-color: $panel-warning-heading-bg;
+  color: $panel-warning-text;
+}
+.panel-danger .badge {
+  background-color: $panel-danger-heading-bg;
+  color: $panel-danger-text;
+}
+.category-list .badge {
+  text-align: right;
+}
+
+.text-default {
+    color: $text-muted;
+}

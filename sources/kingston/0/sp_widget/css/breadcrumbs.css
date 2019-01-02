@@ -1,0 +1,20 @@
+.nav {
+  li {
+    padding: 10px 7px;
+
+    > span {
+      > a {
+          display: inline;
+      }
+
+      > i {
+          padding-left: 15px;
+      }
+    }
+  }
+}
+
+.a-disabled {
+  cursor: default;
+  color: inherit;
+}

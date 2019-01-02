@@ -1,0 +1,22 @@
+<div ng-if="!data.service || data.outages.length > 0" class="panel panel-{{options.color}} b">
+  <div class="panel-heading">
+    <h2 class="panel-title">${Current Status}<span ng-if="data.serviceDisplay"> - {{data.serviceDisplay}}</span></h2>
+  </div>
+
+  <div class="panel-body">
+    <div ng-if="!standalone && !data.service" class="hidden-xs">${We constantly monitor our services and their related components.} ${If there is ever a service interruption, a notification will be posted to this page.} ${If you are experiencing problems not listed on this page, you can submit a request for service.}</div>
+
+    <div ng-if="data.outages.length == 0" class="col-xs-12 bs-callout bs-callout-success">
+      <div ng-if="!data.service">${No system is reporting an issue}</div>
+    </div>
+    <div ng-if="data.outages.length > 0" ng-repeat="outage in data.outages" class="col-xs-12 bs-callout bs-callout-{{outage.type}}">
+      <a ng-if="!data.service" style="color:inherit" ng-href="?id=service_status&service={{outage.serviceID}}">{{outage.typeDisplay}} - {{outage.ci}} (${started {{outage.begin}}})
+        <div ng-if="options.show_outage_details == 'true' && outage.details" ng-bind-html="outage.details" class="sp-outage-details"></div>
+      </a>
+      <span ng-if="data.service" style="color:inherit">{{outage.typeDisplay}} - {{outage.ci}} (${started {{outage.begin}}})
+        <div ng-if="options.show_outage_details == 'true' && outage.details" ng-bind-html="outage.details" class="sp-outage-details"></div>
+      </span>
+    </div>
+    <div ng-if="::standalone"><a href="?id=services_status" aria-label="${More information, open current status page}">${More information...}</a></div>
+  </div>
+</div>

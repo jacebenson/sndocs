@@ -1,0 +1,81 @@
+// Margin between form fields
+$fd-ff-margin: 0 !default;
+
+// UI Action container styles
+$fd-ui-actions-margin: 30px 0px; !default;
+$fd-ui-actions-text-align: center !default;
+
+// Margin between UI Actions
+$fd-uia-margin: 10px !default;
+
+// UI Action styles
+$fd-uia-border-radius: 8px !default;
+$fd-uia-border: 3px solid #C4D0D6 !default;
+$fd-uia-background: #fff !default;
+$fd-uia-padding: 5px 20px !default;
+$fd-uia-color: #000 !default;
+$fd-uia-min-height: 40px !default;
+$fd-uia-min-width: 40px !default;
+$fd-uia-font-size: 18px !default;
+
+// UI Action hover styles
+$fd-uia-background-hover: #F9FDFF; !default;
+$fd-uia-border-hover: 3px solid #C4D0D6 !default;
+$fd-uia-color-hover: #000 !default;
+
+// Primary UI Action styles
+$fd-uia-primary-background: #da1a40 !default;
+$fd-uia-primary-border: 3px solid #da1a40 !default;
+$fd-uia-primary-color: #fff !default;
+
+// Primary UI Action hover styles
+$fd-uia-primary-background-hover: #fd3056 !default;
+$fd-uia-primary-border-hover: 3px solid #da1a40 !default;
+$fd-uia-primary-color-hover: #fff !default;
+
+.pi-form-decorated {
+  
+  fd-field {
+    margin: $fd-ff-margin;
+    position: relative;
+    display: block;
+  }
+  
+  .fd-ui-actions {
+    text-align: $fd-ui-actions-text-align;
+    margin: $fd-ui-actions-margin;
+  }
+  
+  .fd-ui-action {
+    display: inline-block;
+    margin: $fd-uia-margin;
+    color: $fd-uia-color;
+    font-size: $fd-uia-font-size;
+  }
+  
+  .fd-ui-action button {
+    cursor: pointer;
+    border: $fd-uia-border;
+    border-radius: $fd-uia-border-radius;
+    background: $fd-uia-background;
+    padding: $fd-uia-padding;
+    min-height: $fd-uia-min-height;
+    min-width: $fd-uia-min-width;
+  }
+  
+  .fd-ui-action button:hover {
+    background-color: $fd-uia-background-hover;
+  }
+  
+  .fd-uia-primary button {
+    background: $fd-uia-primary-background;
+    border: $fd-uia-primary-border;
+    color: $fd-uia-primary-color;
+  }
+  
+  .fd-uia-primary button:hover {
+    background: $fd-uia-primary-background-hover;
+    border: $fd-uia-primary-border-hover;
+    color: $fd-uia-primary-color-hover;
+  }
+}

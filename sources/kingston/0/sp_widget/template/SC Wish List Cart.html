@@ -1,0 +1,10 @@
+<div ng-if="options.wishlistTemplate">
+	<div ng-include="options.wishlistTemplate"></div>
+</div>
+
+<div ng-if="!options.wishlistTemplate">
+  <div class="alert alert-danger" role="alert">
+    <strong>${Error}: </strong>
+    ${Please provide a Wish List template to render.}
+  </div>
+</div>

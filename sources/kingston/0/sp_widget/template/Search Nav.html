@@ -1,0 +1,14 @@
+<h2 class="sr-only">${Search Categories}</h2>
+
+<div role="list" class="list-group">
+	  <a role="link" ng-class="{active: !data.t}" class="list-group-item" 
+       ng-href="?id=search&q={{data.q}}" aria-label="${All search results}">
+	    <i class="fa fa-chevron-right"/><span class="m-l-sm">${All}</span>
+  	</a>
+	  <a role="link" ng-repeat="source in data.searchSources | orderBy:'order'"
+	     ng-href="?id=search&t={{source.id}}&q={{data.q}}"
+	     ng-class="{active: data.t==source.id}"
+	     class="list-group-item" aria-label="{{source.name}} ${Search results}">
+	  	<i class="fa fa-chevron-right"/><span class="m-l-sm">{{source.name}}</span>
+  	</a>
+</div>

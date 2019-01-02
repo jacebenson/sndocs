@@ -1,0 +1,1 @@
+action.setRedirectURL("export_assessment.do?sysparm_sys_id=" + current.sys_id);

@@ -1,0 +1,93 @@
+a.question-tag {
+    color: #39739d;
+    background-color: #e1ecf4;
+    border: 1px solid #e1ecf4;
+    display: inline-block;
+    margin: 4px 4px 4px 0;
+    border-radius: 0;
+    text-align: center;
+    line-height: 1;
+    padding: .4em .5em;
+  	font-size: .9em;
+}
+
+.list-header {
+  border-bottom: 1px solid #ddd;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.list-header > h3 {
+  display: inline-block;
+  float: left;
+  margin-top: 0px;
+  margin-left: 15px;
+}
+
+.question {
+  display: flex;
+  margin-left: -15px;
+  margin-right: -15px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.stats-container {
+  flex: 0 0 auto;
+  width: 55px;
+  height: 100%;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.summary {
+  flex: 1 1 auto;
+}
+
+.stats-container {
+  padding-top: 6px;
+}
+
+.stat {
+  padding: 1px;
+}
+
+.stat-count {
+  display: block;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.stat-label {
+  text-align: center;
+}
+
+.empty-state-content {
+  margin-top: 30px;
+  
+  .fa-comments {
+    color: $gray-light;
+    font-size: 80px;
+    display: block;
+    text-align: center;
+  }
+  
+  h3 {
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  
+  p {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .btn {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px;
+    max-width: 100%;
+    margin-bottom: 35px;
+  }
+}

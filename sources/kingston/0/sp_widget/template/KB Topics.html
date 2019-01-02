@@ -1,0 +1,10 @@
+<div class="panel panel-{{options.color}} b">
+  <div class="panel-heading">
+	<h4 class="panel-title">${Topics}</h4>
+  </div>
+  <div class="panel-body">
+    <div ng-repeat="a in data.topics" class="m-b">
+      <a href="?id=kb_topic&kb_topic={{::a.value}}">{{::a.label}}</a>
+    </div>
+  </div>
+</div>

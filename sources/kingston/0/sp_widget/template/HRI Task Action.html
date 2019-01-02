@@ -1,0 +1,170 @@
+<div ng-class="::{'hidden-xs' : options.hide_xs}" ng-init="init(user.sys_id)">
+	<script src="scripts/jquery.signaturepad.min.js"></script>
+  <!-- Show skip button for optional HR tasks -->
+	<div ng-show="data.task.optional==true">
+			<button type="button" class="btn btn-default btn-m skip" ng-click="skipTask(data.task.sys_id);">${Skip}</button>
+		</div>
+  <!-- Skip button ends-->
+ 	<div id="documentFrame" class="panel panel-{{::options.color}} b" ng-show="data.task.hr_task_type == 'credential' || data.task.hr_task_type == 'e_signature' || data.task.hr_task_type == 'sign_document'">
+		<div ng-show="data.task.hr_task_type == 'credential' || data.task.hr_task_type == 'e_signature' || data.isPdfTemplate == true">
+      <div class="header">
+      	<!-- IE fixes - Hiding pop over window button -->
+				<i ng-show="!isIE()" class="fa fa-expand hidden-xs" ng-click="showDoc = !showDoc" style="float:right; font-size:large; margin:10px;">
+				<!-- IE fixes ends -->
+      	</i>
+			</div>
+			<!-- Using IFrame because of IE issues -->
+        	<iframe src="{{data.attachmentUrl}}" type="application/pdf" style="width:100%;height:700px" class="animate hidden-xs"></iframe>
+			<a ng-if="data.attachmentUrl" ng-href="{{data.attachmentUrl}}" class="visible-xs pdf-link" target="_blank">
+				<i class="fa fa-hand-o-right"></i>
+				${Click here to open document}
+			</a>  
+    </div>
+    <div id='content_id' ng-bind-html="documentBody" ng-show="data.task.hr_task_type == 'sign_document' && data.isPdfTemplate == false">
+    </div>
+    
+		<div ng-show="!data.task.finished" class="pop-footer" ng-class="{'signFooter': data.task.hr_task_type == 'e_signature' || data.task.hr_task_type == 'sign_document'}" style="padding: 20px 20px 50px 20px; text-align: right; background-color:#DCDCDC;">
+			<span ng-if="data.task.hr_task_type == 'e_signature' || data.task.hr_task_type == 'sign_document'">
+				<div class="sigPad">
+					<script>
+						$('canvas.pad').attr('width', parseInt($('canvas.pad').css('width')));
+						$('canvas.pad').attr('height', parseInt($('canvas.pad').css('height')));
+						var sigPad = $('.sigPad').signaturePad({drawOnly : true, lineColour : '#fff'});
+					</script>
+					<span class="animated">
+						<div class="sig sigWrapper" style="display: block;">
+							<canvas width="580" class="pad" height="250"></canvas>
+							<input type="hidden" name="output" class="output" />
+						</div>
+						<div class="disclaimer">
+							${Drawing in the above box will constitute your eSignature and will have the same legal impact as signing a printed version of this document}.
+						</div>
+						<button class="btn btn-primary btn-lg" ng-click="saveSignature(data.task.sys_id, data.user_id);">${Accept}</button>
+						<button style="margin-left:15px; margin-right: 30px;" class="clearButton btn btn-default btn-lg" href="#clear" ng-click="clearCanvas();">${Clear}</button>
+					</span>
+				</div>
+			</span>
+			<span ng-if="data.task.hr_task_type == 'credential'" style="padding: 20px 20px 50px 20px; text-align: right;">
+				${Your password}:
+				<input type="password" id="password" ng-model="data.password" class="form-control" style="display:inline-block; width:120px; height:45px; margin-right:20px;" />
+				<button type="button" style="margin-left:15px; margin-right: 30px;" class="btn btn-primary btn-lg" id="agree-button" ng-click="authenticateUser(data.task.sys_id, data.user_id, data.user_name);">${Yes, I agree}</button>
+			</span>
+		</div>
+	</div>
+	<div class="panel panel-{{::options.color}} b" ng-if="data.task.hr_task_type == 'url' || data.task.hr_task_type == 'view_video'" style="padding: 20px;">
+		<div id="task_link" style="padding:0px 20px 20px 20px;">
+			<h4>{{data.task.short_description}}</h4>
+      <p ng-if="data.task.description">{{data.task.description}}</p>
+			<p class="disclaimer" style="text-align: left;">${Click on the Completed button to mark task as complete}.</p>
+			<a ng-if="data.task.hr_task_type == 'url'" ng-href="{{data.task.url}}" ng-click="clickOnTaskLink();" target="_blank" style="font-size:large;">
+				<i class="fa fa-hand-o-right"></i>
+				${Click here to open link}
+			</a>
+		</div>
+    <div ng-if="data.task.hr_task_type == 'view_video'">
+    	<iframe style="width: 100%; height: 500px;" ng-src="{{url}}" frameborder="0" allowFullScreen="true">
+    	</iframe>     
+    </div>
+		<div class="pop-footer" style="padding: 20px 20px 20px 20px; text-align: right;">
+			<button type="button" class="btn btn-primary btn-lg" ng-disabled="disableFinishButton && data.task.hr_task_type == 'url'" ng-click="iHaveFinished(data.task.sys_id, data.user_id);">${Completed}</button>
+		</div>
+	</div>
+
+  <div ng-if="data.task.hr_task_type == 'hr_service'||data.task.hr_task_type == 'submit_catalog_item'||data.task.hr_task_type == 'submit_order_guide'">
+  	<div>
+      <sp-widget widget="data.hrCatItemWidget"></sp-widget>
+    </div>
+    <div id="updating" ng-show="showUpdating">
+      <img src="images/loading_anim4.gif" />
+    </div>
+  </div> 
+  
+   <div class="panel panel-{{::options.color}} b" ng-if="data.task.hr_task_type == 'mark_when_complete'" style="padding: 20px;">
+     <div id="task_link" style="padding:20px 20px 50px 20px;">
+       <h4>{{data.task.short_description}}</h4>
+       <p ng-if="data.task.description">{{data.task.description}}</p>
+       <p class="disclaimer" style="text-align: left;">${Click on the Completed button to mark task as complete}.</p>
+     </div>
+		<div class="pop-footer" style="padding: 20px 20px 50px 20px; text-align: right;">
+			<button type="button" class="btn btn-primary btn-lg" ng-click="iHaveFinished(data.task.sys_id, data.user_id);">${Completed}</button>
+		</div>
+  </div>  
+  
+  <div ng-if="data.task.hr_task_type == 'take_survey'">
+  	<div>
+      <sp-widget widget="data.takeSurveyWidget"></sp-widget>
+    </div>
+    <div id="updating" ng-show="showUpdating">
+      <img src="images/loading_anim4.gif" />
+    </div>
+  </div> 
+  
+  <div class="panel panel-{{::options.color}} b" ng-if="data.task.hr_task_type == 'upload_documents'" style="padding: 20px;">
+     <div id="task_link" style="padding:0px 20px 50px 20px;">
+       <h4>{{data.task.short_description}}</h4>
+       <p ng-if="data.task.description">{{data.task.description}}</p>
+       <p class="disclaimer" style="text-align: left;">${Click on the Completed button to mark task as complete}.</p>
+    	 <div>
+        <sp-widget widget="data.attachmentWidget"></sp-widget>
+      </div> 
+    </div>
+		<div class="pop-footer" style="padding: 20px 20px 50px 20px; text-align: right;">
+			<button type="button" class="btn btn-primary btn-lg" ng-disabled="disableFinishButton" ng-click="iHaveFinished(data.task.sys_id, data.user_id);">${Completed}</button>
+		</div>
+  </div>  
+
+	<!-- popover window -->
+	<div id="docPop" class="animated" ng-show="showDoc">
+		<div class="container inner">
+			<div class="pop-header">
+				<span class="close-cross" ng-click="hidePop();">&times;
+				</span>
+			</div>
+			
+      <object id="docFrame" data="{{data.attachmentUrl}}" class="animate hidden-xs" type="application/pdf" style="width:100%;">
+				<embed src="{{data.attachmentUrl}}" type="application/pdf" />
+				<param name="view" value="Fit" />
+          </object>
+			<a ng-if="data.attachmentUrl" ng-href="{{data.attachmentUrl}}" class="visible-xs pdf-link" target="_blank">
+				<i class="fa fa-hand-o-right"></i>
+				${Click here to open document}
+			</a>
+
+			<div class="pop-footer" style="padding: 20px 20px 50px 20px; text-align: right;">
+				<span ng-if="data.task.hr_task_type == 'e_signature'">
+					<div class="sigPad">
+						<script>
+							$('canvas.pad').attr('width', parseInt($('canvas.pad').css('width')));
+							$('canvas.pad').attr('height', parseInt($('canvas.pad').css('height')));
+							var sigPad2 = $('.sigPad').signaturePad({drawOnly : true, lineColour : '#fff'});
+						</script>
+						<span ng-show="showSigPad" class="animated">
+							<div class="sig sigWrapper" style="display: block;">
+								<canvas width="780" class="pad" height="250"></canvas>
+								<input type="hidden" name="output" class="output" />
+							</div>
+							<div class="disclaimer">
+								${Drawing in the above box will constitute your eSignature and will have the same legal impact as signing a printed version of this document}.
+							</div>
+							<button class="btn btn-primary btn-lg" ng-click="saveSignature(data.task.sys_id, data.user_id);">${Accept}</button>
+							<button style="margin-left:15px; margin-right: 30px;" class="clearButton btn btn-default btn-lg" href="#clear" ng-click="clearCanvas();">${Clear}</button>
+						</span>
+						<button class="btn btn-primary btn-lg hidden-xs" ng-click="toggleSigPad();">${Signature Pad}</button>
+						<button style="margin-left:15px;" type="button" class="btn btn-default btn-lg hidden-xs" ng-click="hidePop();">${Cancel}</button>
+					</div>
+				</span>
+				<span ng-if="data.task.hr_task_type == 'credential'" style="padding: 20px 20px 50px 20px; text-align: right;">
+					${Your password}:
+					<input type="password" id="password" ng-model="data.password" class="form-control" style="display:inline-block; width:120px; height:45px; margin-right:20px;" />
+					<button type="button" class="btn btn-primary btn-lg" id="agree-button" ng-click="authenticateUser(data.task.sys_id, data.user_id, data.user_name);">${Yes, I agree}</button>
+					<button style="margin-left:15px;" type="button" class="btn btn-default btn-lg hidden-xs" ng-click="hidePop();">${Cancel}</button>
+				</span>
+			</div>
+		</div>
+
+		<div id="updating" ng-show="showUpdating">
+			<img src="images/loading_anim4.gif" />
+		</div>
+	</div>
+	<!-- popover window -->
+</div>

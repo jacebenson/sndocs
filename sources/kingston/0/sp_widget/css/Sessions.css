@@ -1,0 +1,11 @@
+.no-border {
+  border-width: 0 !important;
+}
+
+.panel-body {
+  padding-bottom: 0;
+}
+
+.avatar-container {
+  cursor: default;
+}

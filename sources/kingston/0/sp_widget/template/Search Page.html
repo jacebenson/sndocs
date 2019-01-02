@@ -1,0 +1,34 @@
+<div>
+  <div class="panel panel-default">
+    <div ng-if="data.results.length==0">
+      <div class="panel-heading"><h2 class="h4 panel-title">${No results}</h2></div>
+      <div class="panel-body wrapper break-word">
+        <p>${Your search - <b>{{data.q}}</b> - did not match any documents}</p>
+        <div ng-if="options.show_did_you_mean && data.suggestions.length > 0">
+          ${Did you mean:}
+          <ul>
+            <li ng-repeat="term in ::data.suggestions track by $index">
+              <a ng-click="search(term)">{{::term}}</a>
+            </li>
+          </ul>
+        </div>
+        <p ng-if="options.show_did_you_mean && data.suggestions.length > 0">${Other suggestions}:</p>
+        <p ng-if="!options.show_did_you_mean || data.suggestions.length == 0">${Suggestions}:</p>
+        <ul>
+          <li>${Make sure all words are spelled correctly}</li>
+          <li>${Try different, more general, or fewer keywords}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div ng-if="data.results.length>0" class="panel-heading break-word">
+      <h2 class="h4 panel-title">${Search results for '{{data.q}}'}</h2>
+    </div>
+
+    <div role="list" >
+      <div role="listitem" ng-repeat="item in data.results | orderBy:'score':true | limitTo:data.limit" class="panel-body b-b ">
+        <div ng-include="item.templateID"></div>
+      </div>
+    </div>
+  </div>
+</div>

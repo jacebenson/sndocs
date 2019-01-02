@@ -1,0 +1,53 @@
+.scrollpane {
+  max-height: 70vh;
+  margin: -15px;
+  overflow-y: scroll;
+}
+
+.avatar-card {
+  height: 32px;
+  position: relative;
+}
+
+.avatar-wrapper {
+  position: absolute;
+  width: 32px;
+  height: 100%;
+  padding-right: 5px;
+}
+
+.avatar-name {
+  height: 100%;
+  position: absolute;
+  left: 37px;
+  line-height: 1;
+}
+
+.user {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 8px;
+}
+
+.user-last {
+  border-bottom: none;
+}
+
+.section {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-family: inherit;
+  font-size: 18px;
+  background-color: #eee;
+}
+
+#btn_meeting_host{
+	position:absolute;
+	top:-45px;
+	right:50px;
+}
+
+#btn_meeting_host > i{
+	display:inline-block;
+}
+
+

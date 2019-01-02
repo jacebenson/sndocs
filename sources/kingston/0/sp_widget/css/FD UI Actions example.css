@@ -1,0 +1,15 @@
+.fd-actions-example {
+  
+   button {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+     width: 100%;
+    }
+  
+  .btn-group-vertical {
+    width: 100%;
+  }
+  
+}

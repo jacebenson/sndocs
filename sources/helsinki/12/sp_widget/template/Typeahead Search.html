@@ -1,0 +1,18 @@
+<form method="get" action="?">
+  <input type="hidden" name="id" value="search"/>
+  <input type="hidden" name="t" value="{{data.searchType}}"/>
+  <div class="input-group input-group-{{::c.options.size}}">
+    <!-- uses ui.bootstrap.typeahead -->
+    <input name="q" type="text" placeholder="{{::c.options.title}}" ng-model="c.selectedState"
+           ng-model-options="{debounce: 250}" autocomplete="off"
+           uib-typeahead="item as item.label for item in c.getResults($viewValue)"
+           typeahead-focus-first="false"
+           typeahead-on-select="c.onSelect($item, $model, $label)"
+           typeahead-template-url="sp-typeahead.html" class="form-control input-typeahead">
+    <span class="input-group-btn">
+      <button name="search" type="submit" class="btn btn-{{::c.options.color}}">
+    	<i ng-if="::c.options.glyph" class="fa fa-{{::c.options.glyph}}"></i>
+      </button>
+    </span>
+  </div>
+</form>

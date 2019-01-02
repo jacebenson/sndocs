@@ -1,0 +1,51 @@
+<div ng-if="data.canRead" class="panel b">
+  <div class="panel-heading bg-primary">
+    <div ng-init="spSearch.targetRequests()">
+      <sp-c-link target="form" table="data.table" id="data.sys_id"/>
+    </div>
+    <span ng-if="data.agent" >
+      ${Agent working on this {{data.tableLabel}}}:
+      <div>{{data.agent}}</div>
+    </span>
+    <span ng-if="!data.agent && data.agentPossible" >${Your request has been submitted}</span>
+    <span ng-if="!data.agentPossible">${{{data.tableLabel}} record details}</span>
+  </div>
+
+  <div class="panel-body">
+    <div ng-if="data.fields.length > 0">
+      <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-6 m-b break-word" ng-repeat="field in data.fields" 
+             ng-if="field.value && (field.type != 'decimal' || field.type == 'decimal' && field.value != 0)" >
+          <label class="m-n">{{field.label}}</label>
+          <span ng-switch="field.type">
+            <div ng-switch-when="glide_date_time" title="{{field.display_value}}">
+              <sn-time-ago timestamp="::field.value" />
+            </div>
+            <div ng-switch-default >{{field.display_value}}</div>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="data.variables.length > 0" ng-init="c.variable_toggle = true">
+      <button class="h4 options-btn" ng-click="c.variable_toggle = !c.variable_toggle" aria-expanded="{{c.variable_toggle}}" aria-controls="variables-toggle">
+        <span style="font-size: 12px;" class="glyphicon" ng-class="c.variable_toggle ? 'glyphicon-chevron-down' : 'glyphicon-chevron-up'"></span>
+        ${Options}
+      </button>
+      
+      <div ng-if="c.variable_toggle" id="variables-toggle" aria-hidden="{{!c.variable_toggle}}">
+        <hr role="presentation">
+        <div class="m-b break-word" ng-repeat="variable in data.variables | filter:{visible_summary:true}">
+          <label class="m-n">{{variable.label}}</label>
+          <div>{{variable.display_value}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div ng-if="data.agentPossible && !data.agent && options.pickup_msg" class="panel-footer">
+    <div id="ticket_fields_footer" class="text-center text-muted" style="font-style: italic;" ng-bind-html="data.pickupMsg">
+    </div>
+  </div>
+
+</div>

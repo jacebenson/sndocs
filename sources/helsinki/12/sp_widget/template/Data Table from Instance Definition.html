@@ -1,0 +1,6 @@
+<div>
+  <div class="alert alert-danger" ng-if="data.invalid_table">
+    ${Table not defined} '{{data.table_label}}'
+  </div>
+  <sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
+</div>

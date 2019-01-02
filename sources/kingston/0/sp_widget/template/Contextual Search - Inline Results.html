@@ -1,0 +1,62 @@
+<sp-panel ng-if="cxs.response" class="cxs-results-panel" ng-class = "::{'sp-cxs-a11y': c.data.isA11yEnabled}">
+  <div class="cxs-results-title-bar" ng-click="cxs.config.allow_expand_collapse.value && toggleExpandCollapse()"
+       ng-attr-aria-expanded="{{cxs.config.allow_expand_collapse.value ? !cxs.display.collapsed : true}}"
+       ng-attr-aria-disabled="{{cxs.config.allow_expand_collapse.value ? false : true}}">
+     <span class="cxs-results-title">
+       {{cxs.config.results_header_text.display_value}}&nbsp;
+       <i ng-class="['cxs-ec-chevron','fa',{'fa-chevron-down': cxs.display.collapsed, 'fa-chevron-up': !cxs.display.collapsed}]" ng-if="cxs.config.allow_expand_collapse.value"></i>
+    </span>
+  </div>
+  <div ng-show="!cxs.display.result_detail && cxs.display.results && !cxs.display.collapsed" class="cxs-results">
+    <div ng-repeat="result in cxs.display.results" class="m-b">
+      <ng-include src="getResultTemplate(result)" />
+    </div>
+    <div class="row cxs-results-button-bar col-md-12" ng-if="hasMoreResults()">
+      <button class="btn btn-default margin-bottom" ng-click="getMoreResults()" aria-label = "${Shows more search results}">${Show more}</button>
+    </div>
+    <!-- Display message if no Search Results returned -->
+    <div ng-if="(!cxs.display.results || cxs.display.results.length == 0)">
+      ${No matching results found for {{cxs.response.request.query.freetext}}}
+    </div>
+  </div>
+  <!-- Display Search Result Detail -->
+  <div ng-if="cxs.display.result_detail && !cxs.display.collapsed"  class="cxs-individual-result">
+    <div><ng-include src="'cxs-detail-header'" /></div>
+    <div class="row col-md-12 cxs-record">
+  		<ng-include src="getDetailTemplate()" />
+	</div>
+  </div>
+</sp-panel>
+<!-- Start - Accessibility specific DOM -->
+<div ng-if="::c.data.isA11yEnabled" class = "cxs-results-panel cxs-aria-status"
+     ng-class="(c.data.isA11yEnabled && !cxs.response) ? 'cxs-results-panel cxs-aria-status' : 'sr-only'">
+  {{cxs.ariaStatus}}
+</div>
+<!-- 
+	if we use any of the angular expression for 2 way binding in this live region,
+	then screen readers are not reading correctly. so going to raw mode
+	JAWS : reading angular expressions
+	Voiceover : After usage of some time ( 5 to 10 min) , stops reading the content.
+-->
+	<div id='sp_cxs_aria_status' aria-live="assertive" aria-atomic = "true">
+	</div>
+<!--End - Accessibility specific DOM -->
+<style>
+@media screen and (max-width: 992px) {
+  div.cxs-result-icon.col-md-1 {
+    display: none;
+  }
+  .cxs-wide-action {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  span.cxs-result-icon {
+  	display: none;
+  }
+    .cxs-narrow-action {
+    display: none;
+  }
+}
+</style>

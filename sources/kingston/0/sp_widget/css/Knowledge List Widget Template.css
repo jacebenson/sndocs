@@ -1,0 +1,35 @@
+.kb-list-item{
+  border-bottom: none;
+  border-top: none; 
+}
+small{
+  font-size:93%; 
+}
+.secondary-info{
+  color:$text-muted;
+  padding-top: 3px;
+}
+.main_text a{
+  display:block; 
+}
+.dot{
+  padding:5px; 
+}
+.kb-rating-stars{
+  font-size: 12px;
+  display: inline-flex;
+  margin-top: -6px;
+
+  .glyphicon{
+    line-height: 0; 
+  }
+  .glyphicon-star:before{
+    color: #ffca1f;
+  }
+  .glyphicon-star-empty{
+    color: #BDC0C4;
+  }
+  .rating-stars [role="button"] {
+    cursor: text;
+  }
+}

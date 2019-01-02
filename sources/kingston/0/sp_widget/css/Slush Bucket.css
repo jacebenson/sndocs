@@ -1,0 +1,26 @@
+.as-sortable-placeholder {
+  background-color: #eee;
+}
+
+.slush-scrollable {
+  height: 240px;
+  overflow-y: scroll;
+  overflow-x:hidden;
+}
+
+.panel  > .list-group:last-child .list-group-item:last-child {
+	border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-radius: 0;
+}
+
+.used {
+	max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+}
+
+.available > .list-group-item {
+	transition: all 1s;
+}

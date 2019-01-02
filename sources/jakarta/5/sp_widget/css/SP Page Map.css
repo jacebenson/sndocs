@@ -1,0 +1,14 @@
+.page-map {
+  margin-top: .5em;
+  margin-bottom: .5em;
+  border: 1px solid #ddd;
+  width:100%;
+  height:120px;
+  background-color: white;
+}
+
+.designer-link {
+  margin-top: .5em;
+  margin-bottom: .5em;
+  padding-left: 8px;  
+}

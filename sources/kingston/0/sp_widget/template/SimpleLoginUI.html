@@ -1,0 +1,16 @@
+<div>
+  <div ng-if="c.externalLoginURL" class="iframeDiv">
+    <iframe ng-src={{c.externalLoginURL}}></iframe>
+  </div>
+
+  <div ng-if="!c.externalLoginURL" class="list-group list-group-sm">
+      <div class="list-group-item">
+        <label for="username" class="sr-only ng-binding">${User name}</label>
+        <input id="username" name="username" autocapitalize="off" class="form-control no-border ng-pristine ng-valid ng-empty ng-touched" type="text" placeholder="${User name}" autofocus="true" ng-model="c.username" ng-change="c.onUsernameChange()" role="textbox" aria-invalid="false">
+       </div>
+       <div class="list-group-item">
+        <label for="password" class="sr-only ng-binding">${Password}</label>
+        <input id="password" name="password" class="form-control no-border ng-pristine ng-untouched ng-valid ng-empty" type="password" placeholder="${Password}" ng-model="c.password" role="textbox" ng-change="c.onPasswordChange()" aria-invalid="false">
+       </div>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<div class='mn-container' id='cab_meeting_notes' tabindex="0" ng-focus="focusEditor()">
+  <div ng-if="canEditMeetingNotes()">
+    <textarea id="cab_meeting_notes_txt" ui-tinymce="tinymceConfig" ng-model="editor.workingCopy"></textarea>
+  </div>
+  <div class="mn-static-notes" ng-if="!canEditMeetingNotes()" ng-bind-html="rs.cab_meeting.record.meeting_notes.display_value"></div>
+  <div class="row mn-footer" ng-if="canEditMeetingNotes()">
+		<span aria-live="polite" id='cab_meeting_notes_notification' class="noSelect fade-in-out pull-left" ng-show="showNotification">{{notificationMsg}}</span>
+		<input type='button' ng-click="shareMeetingNotes()" class="btn btn-sm btn-default pull-right" value="${Share}"
+             ng-disabled="isSharingNotesInProgress || editor.concurrentUpdate || !editor.workingCopy || editor.workingCopy.length == 0 || editor.workingCopy != editor.savedCopy || agendaDecisions.length > 0" />
+  </div>
+</div>

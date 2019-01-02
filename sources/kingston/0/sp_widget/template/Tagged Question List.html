@@ -1,0 +1,63 @@
+<div class="panel panel-default">
+  <div ng-if="data.noQuestionsExist" class="panel-body">
+    <div class="empty-state-content">
+      <span class="fa fa-comments" aria-label="${Question icon}"></span>
+      <h3>${No questions have been asked yet}</h3>
+      <p>${Once questions are asked, they will show up here. You can be the first!}</p>
+      <a href="?id=sqanda_new_question" class="btn btn-primary">${Ask a Question}</a>
+    </div>
+  </div>
+  
+  <div ng-if="!data.noQuestionsExist" class="panel-body">
+    <div class="list-header">
+      <h3 ng-if="c.mode == 'tag'">${Tagged Questions} | {{::data.msgs[data.sort]}} | {{::data.tagName}}</h3>
+      <h3 ng-if="c.mode == 'favorites'">${My Favorite Tags} | {{::data.msgs[data.sort]}}</h3>
+      <h3 ng-if="c.mode == 'all'">${Questions} | {{::data.msgs[data.sort]}}</h3>
+      <ul class="nav nav-tabs pull-right" style="margin-bottom: -1px;">
+        <li role="presentation" ng-class="{'active': data.sort==='newest'}"><a ng-href="?id=sqa_tagged_questions&sort=newest{{c.getSysIDParam()}}">{{::data.msgs.newest}}</a></li>
+        <li role="presentation" ng-class="{'active': data.sort==='top'}"><a ng-href="?id=sqa_tagged_questions&sort=top{{c.getSysIDParam()}}">{{::data.msgs.top}}</a></li>
+        <li role="presentation" ng-class="{'active': data.sort==='unanswered'}"><a ng-href="?id=sqa_tagged_questions&sort=unanswered{{c.getSysIDParam()}}">{{::data.msgs.unanswered}}</a></li>
+      </ul>
+      <div class="spacer" style="clear: both;"></div>
+    </div>
+    <ul class="question-list">
+      <li ng-repeat="question in data.questions" class="question light-border-bottom padder-b">
+        <div class="stats-container">
+          <div class="stat">
+            <span class="stat-count">{{question.votes}}</span>
+            <div ng-if="question.votes === 1" class="stat-label">${Vote}</div>
+            <div ng-if="question.votes !== 1" class="stat-label">${Votes}</div>
+          </div>
+          <div class="stat">
+            <span class="stat-count">{{question.answer_count}}</span>
+            <div ng-if="question.answer_count === 1" class="stat-label">${Answer}</div>
+            <div ng-if="question.answer_count !== 1" class="stat-label">${Answers}</div>
+          </div>
+        </div>
+        <div class="summary">
+          <h4><a ng-href="?id=kb_social_qa_question&sys_id={{question.sys_id}}">{{question.question}}</a></h4>
+          <sp-html-content model="question.question_details"></sp-html-content>
+          <div role="list">
+             <span role="listitem" ng-repeat="tag in question.tags" >
+              	<a ng-href="?id=sqa_tagged_questions&sys_id={{tag.sys_id}}" class="question-tag">{{tag.name}}</a>
+             </span>
+            <div class="pull-right">
+              <sn-time-ago timestamp="question.sys_created_on"></sn-time-ago> &middot; <a ng-href="?id=user_profile&sys_id={{question.profile.document.sys_id}}">{{question.profile.name}}</a> <sn-avatar class="m-l-xs hidden-xs" primary="question.profile.document.sys_id"></sn-avatar>
+            </div>
+          </div>
+        </div>
+      </li>
+      <div ng-if="data.questions.length == 0" class="m-t alert alert-info" role="alert">
+        <span ng-if="c.mode == 'all'">${There are currently no {{data.sort}} questions to display}</span>
+        <span ng-if="c.mode == 'favorites'">${There are currently no {{data.sort}} questions with your favorite tags}</span>
+        <span ng-if="c.mode == 'tag'">${There are currently no {{data.sort}} questions tagged with "{{c.capitalize(data.tagName)}}"}</span>
+      </div>
+    </ul>
+    <nav ng-if="data.page > 1 || data.hasNextPage">
+      <ul class="pager">
+        <li><a ng-if="data.page > 1" ng-href="?id=sqa_tagged_questions{{c.getSysIDParam()}}&sort={{data.sort}}&page={{data.page - 1}}">${Previous}</a></li>
+        <li><a ng-if="data.hasNextPage" ng-href="?id=sqa_tagged_questions{{c.getSysIDParam()}}&sort={{data.sort}}&page={{data.page + 1}}">${Next}</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+.stats-panel .stat-row {
+  padding-bottom: 15px;
+  &:last-child {
+    padding: 0;
+  }
+}
+
+.fa {
+  width: 15px;
+}
+
+.related-question {
+  padding-bottom: 15px;
+}
+
+
+.bottom-margin-small {
+  margin-bottom: 10px;
+}

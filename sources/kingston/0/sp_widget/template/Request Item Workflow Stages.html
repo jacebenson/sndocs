@@ -1,0 +1,11 @@
+<div ng-if="data.error">
+  <h3>
+    {{::data.error}}
+  </h3>
+</div>
+<div ng-if="!data.error">
+  <div ng-include="'ritm_stage_icons_bar'" ng-if="data.renderer == 'Legacy' || data.renderer == 'SCReqItemRenderer' || data.renderer == 'Linear' || data.renderer == 'Main flow' || data.renderer == 'Workflow-driven'">
+  </div>
+  <div ng-if="data.renderer == 'SimpleProgressBar'" ng-include="'ritm_stage_progress_bar'">
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div ng-class="['panel', 'panel-{{::c.options.color}}', 'b', 'spw-announcements-root', '{{::c.wid}}', {'accessibility-off': c.accessibilityOff}]">
+  <div class="panel-heading">
+    <h2 class="h4 panel-title" aria-label="{{::c.options.title}}"><span ng-if="c.options.glyph" aria-label="{{::c.getCleanGlyphName()}} glyph"><fa name="{{::c.options.glyph}}"/></span>${{{::c.options.title}}}</h2>
+  </div>
+  <ul ng-if="::(c.totalAnnouncements > 0)" class="list-group" style="max-height: none; overflow-y: auto;" tabindex="-1">
+    <li ng-class="['list-group-item', {'can-expand': a.canExpand, expanded: a.expanded}]" ng-repeat="a in c.announcements">
+      <div class="details" ng-init="c.linkSetup(a)">
+        <div class="title" data-aid="{{::a.id}}">
+          <div ng-if="a.linkType !== 'title'" ng-bind="::a.title" data-ellipsis></div>
+        	<a ng-if="a.linkType === 'title'" ng-bind="::a.title" ng-href="{{::a.targetLink}}" target="{{::a.linkTarget}}" aria-label="{{::a.title}}" tabindex="0" data-ellipsis></a>
+          <span class="glyphicon glyphicon-menu-down" aria-hidden="true" ng-click="c.toggleDetails(a)" aria-label="{{a.expanded ? 'Show details' : 'Hide details'}}" tabindex="0"></span>
+        </div>
+        <p ng-if="::a.summary" ng-bind="::a.summary"></p>
+        <a class="info-link" ng-if="a.linkType === 'normal'" ng-bind="::a.targetLinkText" ng-href="{{::a.targetLink}}" target="{{a.linkTarget}}" aria-label="{{a.targetLinkText}}" tabindex="{{a.expanded ? 0 : -1}}"></a>
+      </div>
+    </li>
+  </ul>
+  <div ng-if="::(c.totalAnnouncements === 0)" class="empty-state-content panel-body">
+    <p>${No information available}</p>
+  </div>
+  <div class="panel-footer" ng-if="c.totalPages > 1">
+    <div ng-if="::c.options.paginate" class="btn-toolbar m-r pull-left">
+      <div class="btn-group">
+        <a ng-disabled="c.currentPage === 1" href="javascript:void(0)" ng-click="c.currentPage === 1 ? null : c.goToPage(c.currentPage - 1)" class="btn btn-default"  aria-label="${Previous page}" role="button"><i class="fa fa-chevron-left"></i></a>
+      </div>
+      <div ng-if="c.totalPages > 1 && c.totalPages < 3" class="btn-group">
+        <a ng-repeat="i in c.getNumArray(c.totalPages) track by $index" ng-click="c.goToPage($index + 1)" href="javascript:void(0)" ng-class="{active: ($index + 1) === c.currentPage}" type="button" class="btn btn-default" aria-label="${Page} {{$index + 1}}" role="button">{{$index + 1}}</a>
+      </div>
+      <div class="btn-group">
+        <a ng-disabled="c.currentPage === c.totalPages" href="javascript:void(0)" ng-click="c.currentPage === c.totalPages ? null : c.goToPage(c.currentPage + 1)" class="btn btn-default" aria-label="${Next page}" role="button"><i class="fa fa-chevron-right"></i></a>
+      </div>
+    </div>
+    <div ng-if="::c.options.paginate" class="m-t-xs panel-title pull-left">${{{c.getPageInfo()}}}</div>
+    <div ng-if="::(!c.options.paginate)" class="m-t-xs panel-title pull-left no-margin">${First {{::c.totalAnnouncements}} of {{::c.totalRecords}}}</div>
+    <a ng-if="::(c.options.view_all_page && !c.isViewAllPage())" ng-class="['pull-right', {'push-margin': c.options.paginate}]" ng-href="?id={{::c.options.view_all_page}}" role="link">${View all}</a>
+    <span class="clearfix"></span>
+  </div>
+</div>

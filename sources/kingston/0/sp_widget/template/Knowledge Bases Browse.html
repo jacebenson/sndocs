@@ -1,0 +1,175 @@
+<div class="kb-browse-{{c.data.instanceid}} kb-browse-block">
+  <div class="kb-browse-section self-clear col-xs-12">
+    <span aria-live="assertive" class="sr-only ng-binding" role="alert">{{c.notity_subscription}}</span>
+    <div class="kb-browse-title">
+      <div class="kb-header-block">
+        <h3 class="kb-header hidden-xs" ng-class="{'vertical-divider': c.data.canCreateArticle || c.data.canPostQuestion}">
+          {{::c.options.title}}
+        </h3> 
+        <h4 class="kb-header hidden-md hidden-lg hidden-sm visible-xs" ng-class="{'vertical-divider': c.data.canCreateArticle || c.data.canPostQuestion}">
+          {{::c.options.title}}
+        </h4> 
+      </div>
+      <div class="kb-action-btns" ng-if="c.data.canCreateArticle || c.data.canPostQuestion">
+        <a class="btn btn-default hidden-xs action-btns" role="button" ng-if="c.data.canPostQuestion" href="{{::c.options.post_question_url}}">{{::c.options.post_question_label}}</a>
+        <button  type="button" class="btn btn-default dropdown-toggle action-btns" ng-class="{'visibile-xs':c.data.canCreateArticle || c.data.canPostQuestion, 'hidden-lg hidden-md hidden-sm':!c.data.canCreateArticle}" data-toggle="dropdown" aria-label="{{::c.action_menu}}">
+          <span class="glyphicon glyphicon-option-horizontal menu-padding"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" ng-if="c.data.canCreateArticle || c.data.canPostQuestion">
+          <li ng-if="c.data.canCreateArticle"><a target="_blank" href="{{::options.create_article_url}}">{{::c.options.create_article_label}}</a></li>
+          <li class="hidden-md hidden-lg hidden-sm visible-xs" ng-if="c.data.canPostQuestion"><a href="{{::c.options.post_question_url}}">{{::c.options.post_question_label}}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="kb-browse-content self-clear">
+      <div class="kb-browse-tiles" ng-class="c.data.result.length > 3 ? 'kb-browse-tiles-more' : c.data.result.length > 2 ? 'kb-browse-tiles-3' : c.data.result.length > 1 ? 'kb-browse-tiles-2' : 'kb-browse-tiles-1'">
+        <div class="kb-tile-block col-xs-6 col-sm-6 col-md-3" role="group" ng-class="{'kb-tile-block-more':c.data.result.length > 4,'kb-tile-block-4':c.data.result.length == 4,'kb-tile-block-3':c.data.result.length == 3,'kb-tile-block-2':c.data.result.length == 2,'kb-tile-block-1':c.data.result.length == 1,'kb-hidden-tile kb-hide-me':$index > 3}"
+             data-ng-repeat="item in c.data.result | orderBy : c.options.order_by : c.options.order_reverse">
+          <div class="kb-tile panel panel-{{::options.color}}">
+            <div>
+              <a class="subscribe-link sublink_{{item.sys_id}}" ng-focus="c.updateSubText(item,0)" ng-blur="c.updateSubText(item,1)" ng-if="c.data.canSuscribe" href="javascript:void(0)" ng-click="c.updateSubscription(item)">
+                <div class="kb-subscribe">               
+                  <span ng-if="item.subscribed" class="unsub-icon"><i class="fa fa-check-circle" aria-hidden="true"></i><span data-hover="${Unsubscribe}" aria-label="${Unsubscribe knowledge base} {{item.title}}" class="unsub-text unsub_{{item.sys_id}}">
+                    <span>${Subscribed}</span>
+                    </span>
+                  </span>
+                  <span ng-if="!item.subscribed" class="sub-icon"><i class="fa fa-circle-o" aria-hidden="true"></i><span class="sub-text" aria-label="${Subscribe knowledge base} {{item.title}}">${Subscribe}</span></span>
+                </div>
+              </a>
+              <div class="kb-top" ng-class="{'kb-top-pad':!c.data.canSuscribe}">
+                <a href="?id=kb_search&kb_knowledge_base={{item.sys_id}}" aria-label="{{c.getKBLabel(item.title,item.article_count,item.questions_count,item.enable_socialqa)}}" class="kb-tile-link">
+                  <div class="kb-center">
+                    <div class="link-icon">
+                      <img alt="" src="default_knowledge_base.svg" aria-hidden="true" data-ng-if="!item.icon"/>
+                      <img alt="" data-ng-src="{{item.icon}}.iix" aria-hidden="true" data-ng-if="item.icon"/>
+                    </div>
+                    <div ng-if="!c.isFirefox" class="link-text" title="${knowledge base}">
+                      <h5>{{item.title}}</h5>
+                    </div>
+                    <div ng-if="c.isFirefox" class="link-text" title="${knowledge base}">
+                      <h5 ng-if="item.title.length < 27">{{item.title}}</h5>
+                      <h5 ng-if="item.title.length > 26" class="big-title" ng-bind="c.trimTitle(item.title)"></h5>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="kb-bottom panel-footer" ng-if="item.article_count || item.article_count == 0 || (item.enable_socialqa && (item.questions_count || item.questions_count == 0))">
+              <div class="kb-details">
+                <span title="${Article}" aria-label="{{item.article_count}} ${Articles}"><span class="kb-summary"><i class="fa fa-file-text" aria-hidden="true"></i><span class="kb-count">{{item.article_count}}</span></span></span>
+                <span title="${Social Q&A}" aria-label="{{item.questions_count}} ${Questions}" ng-if="item.enable_socialqa"><span class="kb-summary"><i class="fa fa-question-circle" aria-hidden="true"></i><span class="kb-count">{{item.questions_count}}</span></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="kb-show-more self-clear col-xs-12" data-ng-if="c.data.result ? c.data.result.length > 4 : false">
+      <a href="javascript:void(0)" aria-label="${Show More Knowledge Bases}" class="show_more" data-ng-click="c.toggleKbTiles('more')" data-ng-if="c.showMoreLink">${Show All} 
+        &nbsp;<i class="fa fa-plus" aria-hidden="true"></i>
+      </a>
+      <a href="javascript:void(0)" aria-label="${Show Less Knowledge Bases}" class="show_less" data-ng-click="c.toggleKbTiles('less')" data-ng-if="!c.showMoreLink">${Show Less} 
+        &nbsp;<i class="fa fa-minus" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+</div>
+<style>
+
+  .kb-browse-{{c.data.instanceid}} .kb-browse-tiles{
+    display: table;
+    margin: 0 auto;
+  }
+  .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-more{
+    display: block;
+    margin: 0 50px;
+  }
+  /*---------------------------- */
+  .kb-browse-{{c.data.instanceid}} .kb-tile-block {
+    padding: 0 10px;
+    width:250px;
+  }
+  .kb-browse-{{c.data.instanceid}} .kb-tile-block-more {
+    padding: 0 10px;
+    width:25%;
+  }
+  @media screen and (max-width: 1200px){
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles{
+      margin: 0 50px;
+      display: flex;
+      margin: 0 auto;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-more{
+      display: block;
+      margin: 0 150px;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-2{
+      display: table;
+      margin: 0 auto;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-1{
+      display: table;
+      margin: 0 auto;
+    }
+    /*---------------------------- */
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block {
+      padding: 0 10px;
+      width:50%
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-2{
+      width:250px;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-1{
+      width:250px;
+    }
+  }
+  @media screen and (max-width: 798px){
+
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles{
+      display: table;
+      margin: 0 auto;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-3{
+      display: block;
+      margin: 0 auto;
+    }
+    /*---------------------------- */
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block {
+      padding: 0 10px;
+      width:50%;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-2{
+      width:250px;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-1{
+      width:250px;
+    }
+  }
+  @media screen and (max-width: 546px){
+
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-3{
+      display: block;
+      margin: 0 auto;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-2{
+      display: flex;
+      margin: 0 auto;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-browse-tiles-1{
+      display: table;
+      margin: 0 auto;
+    }
+    /*---------------------------- */
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block {
+      padding: 0 4px;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-2{
+      width:50%;
+    }
+    .kb-browse-{{c.data.instanceid}} .kb-tile-block-1{
+      width:250px;
+    }
+  }
+
+
+</style>

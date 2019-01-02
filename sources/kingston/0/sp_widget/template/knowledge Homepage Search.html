@@ -1,0 +1,46 @@
+<div class="kb-banner-{{c.data.instanceid}}">
+  <div class="cm-main-search">
+    <div class="cm-welcome-msg hidden-sm hidden-xs">
+      <h1>
+        {{::options.title}}
+      </h1>
+    </div>
+    <div class="cm-search-box">
+      <div class="banner-search">
+        <i ng-if="::c.options.glyph" class="icon fa fa-{{::c.options.glyph}}" aria-hidden="true"></i>
+        <form id="kb_home_search_form" method="get" action="?" class="ng-pristine ng-valid" role="form" _lpchecked="1">
+          <input name="id" value="kb_search" type="hidden"/>
+          <input name="query" ng-model="c.keyword" type="text" aria-label="${Enter text and press enter}" placeholder="{{::options.placeholder}}" class="form-control">
+        </form>
+      </div>
+    </div>
+    <div class="cm-community-summary hidden-sm hidden-xs">
+      <div class="summary">{{$root.kb_count}} ${Knowledge Bases}</div>
+      <div class="summary">{{$root.articles_count}} ${Articles}</div>
+      <div class="summary">{{$root.socialqa_count}} ${Q&amp;A}</div>
+    </div>
+  </div>
+</div>
+<style>
+  .kb-banner-{{c.data.instanceid}} .cm-main-search {
+    height: 225px;
+  }
+  .kb-banner-{{c.data.instanceid}} .cm-search-box{
+    width: 55%;
+  }
+  @media screen and (max-width: 992px){
+    .kb-banner-{{c.data.instanceid}} .cm-main-search{
+      height: inherit;
+      margin:0 -25px;
+    }
+    .kb-banner-{{c.data.instanceid}} .cm-search-box{
+      width:100%;
+      padding:20px;
+    }
+  }
+  @media screen and (max-width: 640px){
+    .kb-banner-{{c.data.instanceid}} .cm-main-search{
+      margin:0 -15px;
+    }
+  }
+</style>

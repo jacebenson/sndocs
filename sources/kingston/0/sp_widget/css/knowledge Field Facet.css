@@ -1,0 +1,136 @@
+.panel{
+  border-radius: 0 0 0 0;
+  border: 1px solid #DDDDDD;
+  border-top: 0px;
+  margin-bottom: 0px;
+}
+.panel-heading{
+  margin-bottom:0px;
+  padding:8px 15px;
+}
+.panel-title{
+  color: #3A3F51;
+  font-size: 13px;
+  font-weight: 600;
+  a{
+    color: #3A3F51;
+  }
+}
+.remove-bottom-border{
+  border-bottom:0px;
+}
+.float-left{
+  float:right;
+}
+.toggle-icon{
+  font-size: 18px;
+  display:inline-flex;
+  margin-top: 3px;
+}
+.clear-all{
+  z-index:100;
+  position: absolute;
+  padding-right: 10px;
+  right: 45px;
+}
+.invalid-field{
+  color:$brand-danger;
+  padding: 0 15px;
+  padding-bottom:10px; 
+}
+.kb-facet-filter-block{
+  line-height: 1.5;
+}
+.facet-search{
+  padding: 10px; 
+  border-bottom: 1px solid #DDDDDD;
+}
+.form-control{
+  height:24px;
+}
+.facet-template{
+  overflow: hidden;
+}
+.facet-field-padding{
+  padding: 2px 0 0 15px;
+}
+.facet-scroll{
+  overflow-y: auto; 
+}
+.checkbox{
+  margin-top:0;
+  margin-bottom:0;
+}
+.check-icon{
+  color:$link-color;
+}
+.facet-dropdown{
+  margin-right:15px; 
+}
+ul ,li{
+  list-style:none; 
+}
+li{
+  position: relative;
+  padding: 2px 0px;
+  background-color: #fff;
+}
+ul{
+  margin: 0px 10px 0px -25px; 
+}
+.filter-groups{
+  margin-bottom:20px; 
+}
+.facet-title{
+  padding:10px 16px 0px 16px; 
+}
+.cat-facet-title{
+  padding:10px 16px 0px 16px; 
+  border-top:1px solid #eeeeee; 
+}
+.rating-stars{
+  font-size: 11px; 
+}
+.glyphicon-star:before{
+  color: #ffca1f;
+}
+.glyphicon-star-empty{
+  color: #BDC0C4;
+}
+a.active,.checkbox-label.active{
+  color:#000;
+}
+a:hover,a:focus,.checkbox-label:hover,.checkbox-label:focus{
+  color:#000;
+}
+.show-this{
+  display : block !important;
+}
+.checkbox-label{
+  color:$link-color;
+}
+.check-icon {
+  display:none;
+}
+.float-right{
+  float:right;
+  padding-right: 7px;
+}
+
+input[type='text']{
+  height: 24px;
+}
+.show-more {
+  text-align: center;
+  display: block;
+  height: 40px;
+  padding-top: 9px;
+}
+.kb-name-elips{
+  display: -webkit-box;
+  line-height: 1.4;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

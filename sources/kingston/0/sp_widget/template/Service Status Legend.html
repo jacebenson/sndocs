@@ -1,0 +1,27 @@
+<div class="panel panel-{{::options.color}} b" aria-hidden="true">
+  <div class="panel-heading">
+    <label class="panel-title">${Legend}</label>
+  </div>
+  <div class="panel-body">
+    <div class="col-xs-12">
+      <div class="col-xs-2"><i class="fa fa-check-circle" tooltips tooltip-template="{{::data.noIssuesMsg}}"></i></div>
+      <div class="col-xs-10">{{::data.noIssuesMsg}}</div>
+    </div>
+    <div class="col-xs-12">
+      <div class="col-xs-2"><i class="fa fa-info-circle" tooltips tooltip-template="{{::data.maintenanceMsg}}"></i></div>
+      <div class="col-xs-10">{{::data.maintenanceMsg}}</div>
+    </div>
+    <div class="col-xs-12">
+      <div class="col-xs-2"><i class="fa fa-minus-circle" tooltips tooltip-template="{{::data.degradationMsg}}"></i></div>
+      <div class="col-xs-10">{{::data.degradationMsg}}</div>
+    </div>
+    <div class="col-xs-12">
+      <div class="col-xs-2"><i class="fa fa-exclamation-circle" tooltips tooltip-template="{{::data.outageMsg}}"></i></div>
+      <div class="col-xs-10">{{::data.outageMsg}}</div>
+    </div>
+    <div class="col-xs-12">
+      <div class="col-xs-2"><i class="fa fa-plus-circle" tooltips tooltip-template="{{::data.multipleMsg}}"></i></div>
+      <div class="col-xs-10">{{::data.multipleMsg}}</div>
+    </div>
+  </div>
+</div>

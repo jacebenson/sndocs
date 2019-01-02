@@ -1,0 +1,27 @@
+<div class="panel panel-{{c.options.color}} b" ng-if="c.always_show ||c.data.list.length">
+  <div class="panel-heading" >
+    <h4 class="panel-title">{{c.options.title}}</h4>
+    <i class="fa fa-filter" aria-hidden="true" tabindex="0" ng-click="c.showFilter = !myreq.showFilter;" title="Show filters for {{c.options.title}}"></i>
+    <div ng-show="c.showFilter">
+      <input ng-model="c.filterText" sn-focus="c.showFilter" style="color: grey; width: 100%; margin-top: .5em;" placeholder="{{data.filterMsg}}">
+    </div>
+  </div>
+  <div class="list-group" style="max-height: none; overflow-y: auto;">
+    <div class="list-group-item" ng-repeat="item in c.data.list | filter:c.filterText" >
+      <a  ng-click="c.onClick($event, item, item.url, {})" href="javascript:void(0)"> 
+        <div ng-class="{'l-h-40': !item.secondary_fields.length}">{{item.display_field}}</div>
+        <small class="text-muted" ng-repeat="f in item.secondary_fields">
+          <span ng-if="!$first"> • </span>
+          <span ng-switch="f.type" title="{{::f.label}}">
+            <span ng-switch-when="glide_date"><sn-time-ago timestamp="::f.value" /></span>
+            <span ng-switch-when="glide_date_time"><sn-time-ago timestamp="::f.value" /></span>
+            <span ng-switch-default="">{{f.display_value}}</span>
+          </span>
+        </small>
+      </a>
+    </div>
+  </div>
+  <div class="panel-footer" ng-if="c.options.maximum_entries && c.data.count > c.options.maximum_entries">
+    <h4 class="panel-title">${First {{c.options.maximum_entries}} of {{c.data.count}} shown}</h4>
+  </div>
+</div>

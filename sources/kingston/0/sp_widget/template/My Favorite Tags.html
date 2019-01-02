@@ -1,0 +1,36 @@
+<div ng-if="!data.userIsGuest" class="panel panel-default b">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a ng-if="data.tags.length" href="?id=sqa_tagged_questions&sys_id=-1">${My Favorite Tags}</a>
+      <span ng-if="!data.tags.length">${My Favorite Tags}</span>
+    </h4>
+  </div>
+   
+  <div ng-if="data.tags.length > 0" class="panel-body">
+	<div role="list" ng-if="!c.editMode">
+      <span role="listitem" ng-repeat="tag in data.tags">
+      	<a ng-href="?id=sqa_tagged_questions&sys_id={{tag.sys_id}}" class="question-tag">{{tag.name}}</a>
+      </span>
+    </div>
+    <div ng-if="c.editMode">
+      <sp-tag-list ng-model="c.tagList" init-items="data.tags" prohibit-new-tag="true"></sp-tag-list>
+    </div>
+    <div class="m-t-sm">
+      <a ng-if="!c.editMode && !c.saveMsg" href="javascript:void(0)" ng-click="c.toggleEditMode()" role="button">${Edit tags lower}</a>
+      <a ng-if="!c.editMode && c.saveMsg" href="javascript:void(0)" ng-click="c.toggleEditMode()" role="button">${{{c.saveMsg}}}</a>
+      <a ng-if="c.editMode && !c.saving" href="javascript:void(0)" ng-click="c.toggleEditMode()" role="button">${Save tags}</a>
+      <a ng-if="c.editMode && c.saving" href="javascript:void(0)">${Saving tags...}</a>
+    </div>
+  </div>
+    
+  <!-- Empty State -->  
+  <div ng-if="data.tags.length == 0" class="panel-body empty-state-content">
+    <p>${Favorite tags let you follow or participate in questions you care about}</p>
+    <p>${Type your favorite tags here}</p>
+	<sp-tag-list ng-model="c.tagList" init-items="data.tags" prohibit-new-tag="true" type-tag-name-msg="c.data.typeTagNameMsg"></sp-tag-list>
+    <div class="m-t-sm">
+      <a ng-if="!c.saving && c.tagList !== ''" ng-class="{'disabled': c.tagList === ''}" href="javascript:void(0)" ng-click="c.toggleEditMode()">${Save tags}</a>
+      <a ng-if="false && c.saving" href="javascript:void(0)" class="btn btn-primary">${Saving tags...}</a>
+    </div>
+  </div>
+</div>

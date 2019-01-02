@@ -1,0 +1,22 @@
+<div class="clock">
+    <div class="square">
+      <svg viewBox="0 0 100 100">
+        <g transform="translate(50,50)" class="{{c.darkness}}" >
+          <circle class="clock-face" r="48" />
+          <line ng-repeat="minor in c.minors track by $index" class="minor"
+            y1="42" y2="45" ng-attr-transform="rotate({{360 * $index / c.minors.length}})" />
+          <line ng-repeat="major in c.majors track by $index" class="major"
+            y1="35" y2="46" ng-attr-transform="rotate({{360 * $index / c.majors.length}})" />
+          <line class="hour" y1="2" y2="-20"
+            ng-attr-transform="rotate({{30 * c.date.hours() + c.date.minutes() / 2}})" />
+          <line class="minute" y1="4" y2="-30"
+            ng-attr-transform="rotate({{6 * c.date.minutes() + c.date.seconds() / 10}})" />
+          <g ng-attr-transform="rotate({{6 * c.date.seconds()}})">
+            <line stroke="{{::c.options.c_color}}" class="second" y1="10" y2="-38" />
+            <line stroke="{{::c.options.c_color}}" class="second-counterweight" y1="10" y2="2" />
+          </g>
+        </g>
+      </svg>
+    </div>
+  <div class="text-center text-muted m-t-sm">{{::c.options.title}}</div>
+</div>

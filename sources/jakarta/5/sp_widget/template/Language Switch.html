@@ -1,0 +1,14 @@
+<div class="panel panel-{{::c.options.color}} b" ng-if="c.data.count > 0">
+  <div class="panel-heading">
+    <h4 class="panel-title">${Language}</h4>
+  </div>  
+  <div class="panel-body">
+  	<sn-record-picker table="'sys_language'" display-field="'name'" value-field="'id'" field="c.language" default-query="'active=true'"></sn-record-picker> 
+  </div>      
+  <div class="panel-footer clearfix">
+    <div class="pull-left">
+      ${Current Language}: {{data.current}}
+    </div>
+		<button class="btn btn-default pull-right" ng-click="c.changed()">${Apply}</button>  
+  </div>
+</div>

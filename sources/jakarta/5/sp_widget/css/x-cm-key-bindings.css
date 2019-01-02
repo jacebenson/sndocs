@@ -1,0 +1,20 @@
+dt, dd {
+	display: inline;
+}
+
+dd {
+  padding-left: .5em;
+}
+
+dt {
+	color: black;
+}
+
+h4 {
+  margin-bottom: 5px;
+}
+
+.key-bindings {
+  min-width: 20em;
+  padding-left: 1em;
+}

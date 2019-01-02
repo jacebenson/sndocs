@@ -1,0 +1,127 @@
+<div tabindex="0" ng-if="item" id="current-agenda-item-widget" class="panel panel-default"
+     role="region" aria-label="${Current Agenda Item Widget}">
+    <div class="panel-heading heading widget-heading" ng-class="{'heading-inactive': !isViewingCurrent()}">
+        <span aria-hidden="true">${Current Agenda Item}</span>
+        <button ng-if="isCABManager() && isMeetingInProgress()" ng-click="confirmEndMeeting()" class="pull-right btn btn-sm btn-primary">${End meeting}</button>
+    </div>
+    <div class="panel-body current-item">
+        <div class="row info-row">
+            <div ng-class="{'agenda-item-halo': isViewingCurrent()}">
+                <div id="current_agenda_item"
+                     role="group"
+                     ng-attr-aria-label="{{getCurrentAgendaAriaLabel(item.task.display_value)}}"
+                     ng-if="item.task.record"
+                     class="agenda-item agenda-item-big"
+                     ng-click="setViewAgendaItem(item)">
+                    <div ng-if="item.task.record" class="col-xs-9 agenda-item-detail">
+                        <div>
+                            <div class="tasknumber">{{item.task.display_value}}</div>
+                            <div class="description"><sn-cab-line-clamp text="{{item.task.record.short_description.display_value}}" max-lines="2" /></div>
+                            <table class="agenda-task-detail">
+                                <tr>
+                                    <td>${Assignment group}</td>
+                                    <td class="single-line-clamp">{{item.task.record.assignment_group.display_value}}</td>
+                                </tr>
+                                <tr>
+                                    <td>${Assigned to}</td>
+                                    <td class="single-line-clamp">{{item.task.record.assigned_to.display_value}}</td>
+                                </tr>
+                                <tr>
+                                    <td>${State}</td>
+                                    <td>{{item.task.record.state.display_value}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="agenda-link-control">
+                            <div>
+                                <span ng-if="isCABManager()">
+                                    <a href="javascript:void(0)"
+                                       id="current_agenda_action_pause"
+                                       role="button"
+                                       ng-if="timer.running"
+                                       ng-click="pauseAgendaItem($event)">${Pause}</a>
+                                    <a href="javascript:void(0)"
+                                       id="current_agenda_action_resume"
+                                       role="button"
+                                       ng-if="!timer.running"
+                                       ng-click="resumeAgendaItem($event)">${Resume}</a>
+                                    <a href="javascript:void(0)"
+                                       id = "current_agenda_action_next"
+                                       role="button"
+                                       ng-if="hasNextItem() && !approval.requiresApproval"
+                                       ng-click="nextAgendaItem($event)">${Next}</a>
+                                    <a href="javascript:void(0)"
+                                       id = "current_agenda_action_next"
+                                       role="button"
+                                       ng-if="hasNextItem() && approval.requiresApproval"
+                                       ng-click="confirmNextAgendaItem($event)">${Next}</a>
+                                    <a href="javascript:void(0)"
+                                       role="button"
+                                       id = "current_agenda_action_finish"
+                                       ng-if="!hasNextItem() && approval.requiresApproval"
+                                       ng-click="confirmFinishAgenda($event)">${Finish}</a>
+                                    <a href="javascript:void(0)"
+                                       id = "current_agenda_action_finish"
+                                       role="button"
+                                       ng-if="!hasNextItem() && !approval.requiresApproval"
+                                       ng-click="finishAgenda($event)">${Finish}</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3 donutprogress">
+                        <div ng-if="item.state.value != 'paused'" class="agenda-item-current-timer">
+                            <div style="width: 46px; margin: 0 auto;">
+                                <sn-donut-timer x-aria-parent-label="${Current Agenda item}" name="{{item.sys_id.value}}" duration="{{item.alotted_time.value_ms}}" elapsed="{{item.elapsed_time.value_ms}}" size="46px"></sn-donut-timer>
+                            </div>
+                            <div class="scheduled-time" role="group" ng-attr-aria-label="{{getAriaScheduledTime(item.alotted_time.value_ms)}}">
+                                <div>${Scheduled}</div>
+                                <div>{{item.alotted_time.value_ms/1000/60 | number: 0}}&nbsp;${minutes}</div>
+                            </div>
+                        </div>
+                        <div ng-if="item.state.value == 'paused'" class="agenda-item-current-timer">
+                            <div style="position: relative; width: 46px; height: 46px; margin: 0 auto;">
+                                <div class="timer-paused-centered">
+                                	<div class="paused-timer-scaled-text">${Paused}</div>
+                                </div>
+                                <div class="timer-paused">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="agenda-approval-control">
+                            <div ng-if="approval.requiresUserApproval || lastApproval.requiredUserApproval">
+                                <button id = 'current_agenda_action_approve' ng-class="['btn', 'btn-sm', 'btn-agenda', {
+                                                  'btn-primary': approval.requiresUserApproval,
+                                                  'agenda-btn-previous-click': (!approval.requiresUserApproval && lastApproval.approved)
+                                                  }]"
+                                    ng-disabled="!approval.requiresUserApproval || lastApproval.requestMade" style="display: block;" ng-click="confirmApprove()">${Approve}</button>
+                              
+                                <button id = 'current_agenda_action_reject' ng-class="['btn', 'btn-sm', 'btn-agenda', {
+                                                  'btn-default': approval.requiresUserApproval,
+                                                  'agenda-btn-previous-click': (!approval.requiresUserApproval && lastApproval.rejected)
+                                                  }]"
+                                    ng-disabled="!approval.requiresUserApproval || lastApproval.requestMade" style="display: block; margin-top: 5px;" ng-click="confirmReject()">${Reject}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="!item.task.record"
+                     id="current_agenda_item"
+                     role="group"
+                     aria-label="${Current Agenda Change not accessible}"
+                     class="agenda-item agenda-item-small">
+                    <div class="col-xs-9 agenda-task-detail">
+                        <span>
+                            <div style="padding-top: 22px;">${You do not have permission to view}</div>
+                        </span>
+                    </div>
+                    <div class="col-xs-3"  class="mindonutprogress">
+                        <div style="height: 100%; width: 46px; margin: 0 auto;">
+                            <sn-donut-timer name="{{item.sys_id.value}}" duration="{{item.alotted_time.value_ms}}" size="46px"></sn-donut-timer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

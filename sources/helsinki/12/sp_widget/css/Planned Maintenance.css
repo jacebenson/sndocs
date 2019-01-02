@@ -1,0 +1,30 @@
+.bs-callout {
+  margin: 10px 0 !important;
+  padding: 20px !important;
+  border-left-style: solid;
+  border-left-width: 10px;
+}
+
+.bs-callout-outage {
+  background-color: #fdf7f7;
+  border-color: #d9534f;
+}
+
+.bs-callout-degradation {
+  background-color: #fcf8f2;
+  border-color: #f0ad4e;
+}
+
+.bs-callout-planned {
+  background-color: #f4f8fa;
+  border-color: #5bc0de;
+}
+
+.bs-callout-success {
+  background-color: #ebf1e8;
+  border-color: #5cb85c;
+}
+
+.tooltip-inner {
+    width: 150px;
+}

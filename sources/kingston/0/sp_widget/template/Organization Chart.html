@@ -1,0 +1,8 @@
+<div>
+    <sn-record-picker field="c.user" table="'sys_user'" display-field="'name'" value-field="'sys_id'" 
+                    display-fields="'email'" search-fields="'name'" page-size="100" >
+    </sn-record-picker>
+    <div id="org_chart" class="org-chart"></div>
+    <button name="zoomin" ng-click="c.zoomIn()" class="btn btn-primary"><span><i class="fa fa-search-plus"></i></span></button>  
+    <button name="zoomout" ng-click="c.zoomOut()" class="btn btn-primary"><span><i class="fa fa-search-minus"></i></span></button>  
+</div>

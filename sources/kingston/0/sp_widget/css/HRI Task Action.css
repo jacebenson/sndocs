@@ -1,0 +1,205 @@
+/* Signature pad */
+.sigPad {
+	margin: 0;
+	padding: 0;
+	margin: auto;
+	width: 580px;
+  height: 250px;
+	max-width: 100%;
+}
+
+.pad {
+	cursor: url("images/pen.cur"), crosshair;
+	cursor: url("images/pen.cur") 16 16, crosshair;
+	width: 580px;
+    height: 250px;
+    max-width: 100%;
+	border-radius: 4px;
+    border:1px solid #BDC3C7;
+}
+
+.sigWrapper.current {
+	border-color: #C7C6C6;
+	background-color: white;
+  height: 250px;
+	border-radius: 4px;
+}
+
+.disclaimer {
+	font-weight: 200;
+	font-size: 12px;
+	text-align: center;
+	margin: 3px 0 10px 0;
+	text-shadow: 1px 1px 1px rgb(255, 255, 255);
+}
+/* signature pad */
+
+.signFooter {
+	height:400px;
+}
+/* document processing popup window starts */
+#docPop {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 200;
+	background-color: rgba(58, 63, 81, 0.7);
+}
+
+#docPop.show-offer-letter {
+	background-color: rgba(58, 63, 81, 1);
+}
+
+#docPop .inner {
+	position: absolute;
+	background-color: #e6e6e6;
+	color: #000000;
+	top: 55px;
+	left: 0px;
+	padding: 0;
+	right: 0;
+	bottom: 10px;
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+	border-radius: 3px;
+}
+
+#task_link {
+/*	border: 1px solid #ccc;
+	background-color: white;
+	border-radius: 5px;
+	padding: 50px;
+	margin: 20px;
+	text-align: left;*/
+}
+
+#docPop .inner.task_link {
+	top: 120px;
+	bottom: auto;
+	width: 800px;
+	max-width: 100%;
+}
+
+#docPop .inner.task_link a {
+	display: block;
+	text-align: center;
+	font-size: 120%;
+	font-weight: 300;
+	margin-top: 20px;
+}
+
+#docPop .inner iframe#docFrame {
+	width: 100%;
+	height: 50%;
+	background-color: #ffffff;
+	border: none;
+}
+
+#updating {
+	position: absolute;
+	z-index: 130;
+	background-color: rgba(255, 255, 255, 0.89);
+	border: 1px solid #ccc;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	text-align: center;
+	padding: 30%;
+}
+
+.animated {
+	-webkit-transition: all linear 0.5s;
+	transition: all linear 0.5s;
+}
+
+.animated.ng-hide {
+	opacity: 0;
+}
+
+div.pop-header {
+	padding: 10px;
+	text-align: right;
+	background-color: white;
+	border-bottom: 1px solid #d0d0d0;
+	border-radius: 3px;
+}
+
+.close-cross {
+	font-size: 44px;
+	line-height: 18px;
+	opacity: 0.4;
+	filter: alpha(opacity = 20);
+	font-weight: 200;
+}
+
+.close-cross:hover {
+	color: #000000;
+	opacity: 0.7;
+	cursor: pointer;
+}
+/* document processing popup window ends */
+
+.media-left i {
+	font-size: 18px;
+	margin-top: 3px;
+}
+
+.media-note {
+	font-size: 90%;
+	color: #b1b1b1;
+	font-weight: 200;
+}
+
+.skip {
+  float: right;
+  margin-top: -40px;
+}
+
+.container {
+  width: 100%
+}
+
+.col-sm-9  {
+  width: 100%
+}
+
+.col-sm-3  {
+  width: 100%
+}
+
+docPop.@media (max-width: 768px) {
+    .sigPad {
+	    width: 322px!important;
+    }
+    
+    canvas.pad {
+    	width: 320px!important;
+        height: 150px!important;
+    }
+    
+    .pdf-link {
+      display: block;
+      margin: 30px 0 0;
+      font-size: 18px;
+      text-align: center;
+    }
+  
+  	#docPop .inner.task_link {
+      top: 50px;
+	}
+  
+    #task_link {
+        padding: 20px;
+        margin-bottom: 20px;
+    }  
+  	
+    #agree-button {
+     	margin-top: 20px; 
+    }
+  
+  	.fa.fa-comments-o {
+     	font-size: 150%; 
+    }
+}

@@ -1,0 +1,40 @@
+.option {
+ margin-top: 5px;
+ border-radius: 4px 4px 0 0;
+ border: 1px solid #ddd;
+ padding: 5px;
+}
+
+.option-new {
+background: #f0f3f4;
+}
+
+.panel-body {
+padding: 0px 5px 5px 5px;
+}
+
+.panel-title {
+margin-top: 5px;
+}
+
+.remove-wrp {
+height: 5px;
+}
+
+.we20-choices {
+  vertical-align: top;
+}
+
+.we20-choices textarea {
+  resize: none;
+}
+
+@media  (min-width: 992px) {
+	.modal-lg {
+		width: 990px;
+	}
+}
+
+.empty-state {
+padding: 10px;
+}

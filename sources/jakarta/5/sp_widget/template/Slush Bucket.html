@@ -1,0 +1,52 @@
+<div>
+	<h4>Demo use of ng-sortable</h4>
+  <div class="row">
+
+    <div class="col-sm-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">${Available}</h4>
+        </div>
+        <div class="available list-group slush-scrollable" 
+             as-sortable="c.availableAs" 
+             ng-model="c.data.all">
+          <div ng-repeat="item in c.data.all | filter:c.search" 
+               as-sortable-item 
+               ng-dblclick="c.onDblClick(item)"
+               ng-class="{used: item.used}"
+               class="list-group-item">
+            <div as-sortable-item-handle>
+              <span>{{item.name.display_value}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">${Selected}</h4>
+        </div>
+        <div class="list-group slush-scrollable" as-sortable="c.selectedAs" ng-model="c.selected">
+          <div ng-repeat="item in c.selected" 
+               as-sortable-item
+               ng-dblclick="c.onSelDblClick(item)"
+               class="list-group-item">
+            <div as-sortable-item-handle>
+              <span>{{item.name.display_value}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+  <div>
+    Drag from one bucket to the other<br/>
+    Double click moves from one to the other<br/>
+    Rearrange Selected by dragging<br/>
+    Supports touch<br/>
+    Data is list of sp_dependeny items
+  </div>
+
+</div>

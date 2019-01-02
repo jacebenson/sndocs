@@ -1,0 +1,17 @@
+<div ng-if="!data.service || data.outages.length > 0" class="panel panel-{{options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title">${Planned Maintenance}<span ng-if="data.serviceDisplay"> - {{data.serviceDisplay}}</span></h4>
+  </div>
+
+  <div class="panel-body">
+	<div ng-if="!data.service">${We publish information on planned service availability below.} ${This includes events occuring over the next 5 days.}</div>
+
+	<div ng-if="data.outages.length == 0" class="col-xs-12 bs-callout bs-callout-success">
+		${No service maintenance is planned over the next 5 days}
+	</div>
+	<div ng-if="data.outages.length > 0" ng-repeat="outage in data.outages" class="col-xs-12 bs-callout bs-callout-{{outage.type}}">
+		<a ng-if="!data.service" style="color:inherit" ng-href="?id=service_status&service={{outage.serviceID}}">${Planned maintenance} - {{outage.ci}}, ${service will be unavailable {{outage.begin}} to {{outage.end}}}</a>
+		<span ng-if="data.service" style="color:inherit">${Planned maintenance} - {{outage.ci}}, ${service will be unavailable {{outage.begin}} to {{outage.end}}}</span>
+	</div>
+  </div>
+</div>

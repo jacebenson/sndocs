@@ -1,0 +1,47 @@
+<div class="panel b" >
+  <div class="panel-heading bg-primary">
+    <div ng-init="spSearch.targetRequests()">
+      <sp-c-link target="form" table="data.table" id="data.sys_id"/>
+    </div>
+    <h4 class="panel-title">${Estimated completion} {{data.completion}}</h4>
+  </div>
+
+  <div class="panel-body">
+    <div ng-if="data.fields.length > 0">
+      <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-6 m-b" ng-repeat="field in data.fields" 
+             ng-if="field.value && (field.type != 'decimal' || field.type == 'decimal' && field.value != 0)" >
+          <label class="m-n">{{field.label}}</label>
+          <span ng-switch="field.type">
+            <div ng-switch-when="glide_date_time" title="{{field.display_value}}">
+              <sn-time-ago timestamp="::field.value" />
+            </div>
+            <div ng-switch-default >{{field.display_value}}</div>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="data.variables.length > 0" ng-init="variable_toggle=true">
+      <h4 ng-click="variable_toggle = !variable_toggle" style="cursor: pointer;">
+        <span style="font-size: 12px;" class="glyphicon" 
+              ng-class="{'glyphicon-chevron-down': !variable_toggle, 'glyphicon-chevron-up': variable_toggle}"></span>
+        ${Options}
+      </h4>
+      
+      <div ng-if="variable_toggle">
+        <hr>
+        <div class="m-b" ng-repeat="variable in data.variables">
+          <label class="m-n">{{variable.label}}</label>
+          <div>{{variable.display_value}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div ng-if="data.agentPossible && !data.agent && options.pickup_msg" class="panel-footer">
+    <div id="ticket_fields_footer" class="text-center text-muted" ng-bind-html="options.pickup_msg" style="font-style: italic;">
+    </div>
+  </div>
+
+</div>

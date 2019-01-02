@@ -1,0 +1,27 @@
+<div>
+  <h4 ng-if="data.error">{{data.error}}</h4>
+  <div ng-init="spSearch.targetCatalog()">
+    <h4 class="m-t-none">{{data.category}}</h4>
+    <div class="row">      
+      <div class="col-sm-6 col-md-4" ng-if="!data.items.length && !data.error">
+        ${No items in category}
+      </div>
+      <div class="col-sm-6 col-md-4" ng-repeat="item in data.items">
+        <div class="panel panel-{{::options.color}} b">
+          <a target="{{item.target}}" ng-href="{{getItemHREF(item)}}" ng-click="onClick($event, item)" class="panel-body block">
+            <div class="overflow-100">
+              <h4 class="m-t-none m-b-xs">{{item.name}}<span ng-if="item.content_type == 'external'"> ➚</span></h4>
+              <img ng-src="{{item.picture}}" ng-if="item.picture" class="m-r-sm m-b-sm item-image pull-left" />
+              <div class="text-muted item-short-desc">{{item.short_description}}</div>
+            </div>
+          </a>
+          <div class="panel-footer">
+            <a ng-if="item.sys_class_name != 'sc_cat_item_content' || item.content_type == 'kb' || item.content_type == 'literal'" href="?id={{item.page}}&sys_id={{item.sys_id}}" class="pull-left text-muted">${View Details}</a>
+            <a ng-if="item.sys_class_name == 'sc_cat_item_content' && item.content_type == 'external'" href="{{item.url}}" target="_blank" class="pull-left text-muted">${View Details}</a>
+            <span ng-if="data.showPrices && item.price != '$0.00'" class="pull-right item-price font-bold">{{item.price}}</span> &nbsp;
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

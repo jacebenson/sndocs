@@ -1,0 +1,14 @@
+.simple-ul h3 {
+  border-bottom: 1px solid #ccc;
+  font-weight: 300;
+  font-size: 20px;
+  padding-bottom: 10px;
+}
+
+.simple-ul ul {
+  list-style: none;
+}
+
+.simple-ul li {
+  padding: 10px 0;
+}

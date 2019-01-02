@@ -1,0 +1,17 @@
+<div ng-if="data.articles.length > 0" class="panel panel-{{::options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title">{{::data.title}}</h4>
+  </div>
+
+  <div class="panel-body">
+    <div ng-repeat="a in data.articles" style="margin-bottom: 1em;">
+      <a href="?id=kb_article&sys_id={{::a.sys_id}}">{{::a.short_description}}</a>
+      <div>
+        <span title="{{::a.published_display}}">
+          <glyph sn-char="calendar" />
+          <sn-day-ago date="a.published"/>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

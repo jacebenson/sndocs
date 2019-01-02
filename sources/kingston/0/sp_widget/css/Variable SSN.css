@@ -1,0 +1,15 @@
+.ssn {
+  display: inline;
+}
+
+.ssn.area {
+  width: 4em;
+}
+
+.ssn.group {
+  width: 3em;
+}
+
+.ssn.serial {
+  width: 5em;
+}

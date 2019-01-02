@@ -1,0 +1,11 @@
+<div class="list-group">
+  <a ng-class="{active: !data.t}" class="list-group-item" ng-href="?id=search&q={{data.q}}">
+    <i class="fa fa-chevron-right"/><span class="m-l-sm">${All}</span>
+  </a>
+  <a ng-repeat="source in data.searchSources | orderBy:'order'"
+     ng-href="?id=search&t={{source.id}}&q={{data.q}}"
+     ng-class="{active: data.t==source.id}"
+     class="list-group-item">
+  	<i class="fa fa-chevron-right"/><span class="m-l-sm">{{source.name}}</span>
+  </a>
+</div>

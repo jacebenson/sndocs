@@ -1,0 +1,45 @@
+<div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+    	<h4 class="panel-title">${Question Stats}</h4>
+    </div>
+    <div class="panel-body stats-panel">
+      <div class="stat-row">
+        <div class="fa fa-clock-o"></div>
+        <span class="stat-description">${Asked} <sn-time-ago timestamp="data.question.sys_created_on"></sn-time-ago></span>
+      </div>
+      <div class="stat-row">
+        <div class="fa fa-star"></div>
+        <span ng-if="data.question.subscribers != 1" class="stat-description">${{{data.question.subscribers}} Subscribers}</span>
+        <span ng-if="data.question.subscribers == 1" class="stat-description">${{{data.question.subscribers}} Subscriber}</span>
+      </div>
+      <div class="stat-row">
+        <div class="fa fa-eye"></div>
+        <span ng-if="data.question.views == 1" class="stat-description">${{{data.question.views}} View}</span>
+        <span ng-if="data.question.views != 1" class="stat-description">${{{data.question.views}} Views}</span>
+      </div>
+    </div>
+  </div>
+  <div ng-repeat="tag in data.tags" ng-if="tag.questions.length > 0" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">${{{c.capitalize(tag.name)}} Questions}</h4>
+    </div>
+    <div class="panel-body">
+      <div class="related-question" ng-repeat="question in tag.questions">
+        <a ng-href="?id=kb_social_qa_question&sys_id={{question.sys_id}}">{{question.question}}</a>
+      </div>
+      <a class="see-more text-muted" ng-href="?id=sqa_tagged_questions&sys_id={{tag.sys_id}}">${See more related questions}</a>
+    </div>
+  </div>
+  <div ng-if="data.recentQuestions.length > 0" class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">${Recent Questions}</h4>
+    </div>
+    <div class="panel-body">
+      <div class="related-question" ng-repeat="question in data.recentQuestions">
+        <a ng-href="?id=kb_social_qa_question&sys_id={{question.sys_id}}">{{question.question}}</a>
+      </div>
+      <a class="text-muted" ng-href="?id=sqa_tagged_questions">${See more recent questions}</a>
+    </div>
+  </div>
+</div>

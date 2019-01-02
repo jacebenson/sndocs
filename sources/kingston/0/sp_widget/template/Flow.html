@@ -1,0 +1,20 @@
+<div>
+  <div ng-if="!c.isLoading()">
+    <div ng-if="c.data.screen.type == 'widget'">
+      <sp-widget widget="c.data.screen.widget"></sp-widget>
+    </div>
+    <div ng-if="c.data.screen.type == 'form'">
+      <h1>{{c.data.screen.name}}</h1>
+      <sp-model form-model="c.data.screen.form" mandatory="true"></sp-model>
+    </div>
+    
+    <div ng-if="c.getActionsVisible()" class="actions">
+      <button type="button"
+              class="btn btn-default center-block"
+              ng-click="c.submit()">Next</button>
+    </div>
+  </div>
+  <div ng-show="c.isLoading()">
+    <sp-widget widget="c.data.loadingWidget"></sp-widget>
+  </div>
+</div>

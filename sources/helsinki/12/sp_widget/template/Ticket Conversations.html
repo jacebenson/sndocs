@@ -1,0 +1,109 @@
+<div>
+  <div ng-if="!data.canRead">
+    ${Requested record not found}
+  </div>
+
+  <div ng-if="data.canRead && data.hasReadableJournalField" class="panel panel-{{options.color}} b ticket_conversation" >
+    <div class="panel-heading">
+
+      <h4 class="panel-title">
+        <div class="pull-right">
+          <sp-attachment-button ng-if="data.canWrite && data.canAttach"></sp-attachment-button>
+          <a href="javascript:void(0)" class="panel-button" ng-show="isNative" ng-click="scanBarcode()" title="{{data.scanBarcodeMsg}}">
+            <span class="glyphicon glyphicon-barcode"></span>
+          </a>
+
+          <a href="javascript:void(0)" ng-show="data.showLocationIcon" class="panel-button" ng-click="checkInLocation()" title="{{data.checkInLocMsg}}">
+            <span class="glyphicon glyphicon-globe"></span>
+          </a>
+
+        </div>
+        {{data.ticketTitle}}
+      </h4>
+
+    </div>
+
+    <div class="panel-body">
+      <div>
+        <form ng-submit="postEntry(data.journalEntry)" id="sand">
+          <div ng-show="data.primaryJournalField" class="input-group">
+            <textarea ng-keypress="keyPress($event)" sn-resize-height="trim" rows="1" id="post-input" class="form-control no-resize" ng-model='data.journalEntry' placeholder="{{placeholder}}" autocomplete="off" ng-change="userTyping(data.journalEntry)" />
+            <span class="journal-field-indicator" ng-style="{'background-color': data.useSecondaryJournalField ? data.secondaryJournalField.color : data.primaryJournalField.color}"></span>
+            <span class="input-group-btn" style="vertical-align: top">
+              <input type="submit" class="btn btn-primary" value="{{data.btnLabel}}" ng-disabled="data.isPosting || data.journalEntry.length == 0"/>
+            </span>
+          </div>
+          <div ng-if="data.secondaryJournalField && data.secondaryJournalField.can_write">
+            <label class="pull-right"><input type="checkbox" ng-model="data.useSecondaryJournalField"/> {{::data.secondaryJournalField.label}}</label>
+          </div>
+        </form>
+        <ul class="list-group m-b-none">
+          <li class="list-group-item user-typing m-t" ng-repeat="u in typing">${{{::u.user_display_name}} is typing}</li>
+        </ul>
+        <ul class="list-group m-b-none m-t" ng-if="msg">
+          <li class="list-group-item user-typing">{{msg}}</li>
+        </ul>
+        <div class="timeline-container">
+		<ul class="timeline">
+          
+          <li class="timeline-item" ng-class="{'timeline-inverted': e.user_sys_id == data.stream.user_sys_id} " ng-repeat="e in data.mergedEntries">
+            <div class="timeline-badge">
+              <sn-avatar primary="e.user_sys_id" class="avatar-large" show-presence="false" enable-context-menu="false"></sn-avatar>
+            </div>
+            <div class="timeline-panel">
+              <div class="timeline-panel-inner" style="border-color: {{::getFieldColor(e.element)}}">
+                <div class="timeline-heading">
+                  <h4 class="timeline-title">{{::e.name}}</h4>
+                  <p>
+                    <small class="text-muted">
+                      <span class="glyphicon glyphicon-time " />
+                      <sn-time-ago timestamp="::e.sys_created_on" />
+                    </small>
+                  </p>
+                </div>
+                <div class="timeline-body">
+                  <p ng-if="e.element != 'attachment'" ng-bind-html="::e.value"></p>
+                  <div ng-if="e.element == 'attachment'">
+                    <a target="_blank" href="/sys_attachment.do?view=true&sys_id={{e.attachment.sys_id}}" title="{{dataViewMsg}}" >
+                      <img ng-if="e.attachment.thumbnail_path" alt="" ng-src="/{{e.attachment.path}}?t=medium" class="img-responsive"/>
+                    </a>
+                    <div>
+                      <a href="/sys_attachment.do?sys_id={{e.attachment.sys_id}}" target="_blank" title="{{dataViewMsg}}"><strong>{{e.attachment.file_name}}</strong></a><br/>
+                      {{e.attachment.size}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="timeline-item timeline-inverted">
+            <div class="timeline-badge">
+              <sn-avatar primary="data.stream.user_sys_id" class="avatar-large" show-presence="false" enable-context-menu="false"></sn-avatar>
+            </div>
+            <div class="timeline-panel timeline-panel-first-item">
+              <div class="timeline-heading">
+                <h4 class="timeline-title">{{data.stream.user_full_name}}</h4>
+                <p>
+                  <small class="text-muted">
+                    <span class="glyphicon glyphicon-time " />
+                    <sn-time-ago timestamp="data.created_on" />
+                  </small>
+                </p>
+              </div>
+              <div class="timeline-body">
+                <p>{{data.number}} ${Created}</p>
+              </div>
+            </div>
+          </li>
+          <li class="timeline-start">
+            <div class="timeline-badge success">
+              ${Start}
+            </div>
+          </li>
+        	</ul>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>

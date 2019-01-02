@@ -1,0 +1,1 @@
+SNC.DiscoveryAccelerator.triggerNextAutomation(current.sys_id);

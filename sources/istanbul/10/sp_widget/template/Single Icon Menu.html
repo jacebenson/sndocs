@@ -1,0 +1,13 @@
+<div class="row">
+  <div class="col-sm-6 col-md-3 text-center" ng-repeat="item in data.items">
+    <a class="block padder-v" href="{{item.href}}">
+      <span ng-if="item.glyph" class="fa-stack fa-3x">
+        <i class="fa fa-circle text-{{::item.color}} fa-stack-2x"></i>
+        <i class="fa fa-{{::item.glyph}} fa-stack-1x fa-inverse"></i>
+      </span>
+      <h4 class="m-t-sm">{{::item.label}}</h4>
+      <p class="text-muted">{{::data.short_description}}</p>
+    </a>
+  </div>
+</div>
+

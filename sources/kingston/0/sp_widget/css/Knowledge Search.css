@@ -1,0 +1,36 @@
+.kb-search-block{
+  padding : 2px 0px 10px 0px;
+}
+input[type='text']{
+  height: 2.4em;
+}
+button{
+  height: inherit;
+  font-size: 14px; 
+}
+.filter-icon{
+    display: inline-flex;
+    padding-right: 10px;
+    padding-top: 7px;
+}
+.filter-size{
+	font-size: 18px;
+}
+.selected-filter-color{
+	color :$link-color;
+}
+.filter-color{
+	color: $text-color;
+}
+.check-position {
+	  font-size: 10px;
+    padding-top: 6px;
+    margin-left: -5px;
+}
+.no-pad {
+	padding-left :0px !important;
+  padding-right : 0px !important;
+}
+.pad-bottom {
+	padding-bottom : 10px;
+}

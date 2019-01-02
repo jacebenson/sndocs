@@ -1,0 +1,98 @@
+<script language="javascript" ng-if="data.redirectTarget" ng-init="c.redirect(data.redirectTarget)"></script>
+<now-message key="Choose" value="${Choose}"/>
+<now-message key="Invalid URL" value="${Invalid URL}"/>
+<now-message key="Please fill all the fields with valid responses" value="${Please fill all the fields with valid responses}"/>
+<now-message key="You must complete the required signature" value="${You must complete the required signature}"/>
+<now-message key="All mandatory fields must be filled before submission" value="${All mandatory fields must be filled before submission}"/>
+<now-message key="Something went wrong. Please try again later." value="${Something went wrong. Please try again later.}"/>
+
+<!-- Spacing from top; just for mobile -->
+<div class="sps-panel-spacer hidden-xs" />
+
+<!-- Inline error messages visible on both layouts -->
+<div class="row" ng-if="data.showInlineError && data.inlineErrorMessage && data.inlineErrorMessage.length">
+	<div class="col-md-10 col-md-offset-1 col-sm-12">
+		<div class="alert alert-danger" ng-repeat="msg in data.inlineErrorMessage track by $index">{{::msg}}</div>
+	</div>
+</div>
+
+<div ng-if="!data.redirectTarget && !c.invalidSurvey">
+
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1 col-sm-12">
+			<div class="panel panel-default">
+
+				<!-- Survey Intro page -->
+				<div class="wrapper-md text-center intro-text" ng-if="c.state == -1">
+					<div class="wrapper-sm">
+						<div class="outer-circle">   
+                            <span class = "intro-icon-assessment survey-icon glyphicon icon-article-document"
+                                  ng-if="(data.evaluation_method == 'assessment' || data.evaluation_method == 'attestation_v2' || data.evaluation_method == 'risk_assessment')"></span>
+                            <span ng-if="(data.evaluation_method == 'survey' || data.evaluation_method == 'quiz')" class="survey-icon glyphicon icon-form"></span>
+						</div>
+					</div>
+					<div class="wrapper-sm">
+						<h3 class="title-label">{{::data.title}}</h3>
+						<div ng-if="data.trigger_id" style="font-size:15px;">
+                          {{::data.evaluation_method_display}} ${is in reference to} <a href="?id=ticket&table={{::data.trigger_table}}&sys_id={{::data.trigger_id}}">{{::data.trigger_display}}</a>
+						</div>
+						<div ng-if="data.trigger_desc" style="font-size:15px;">
+							{{::data.trigger_desc}}
+						</div>
+						<div ng-if="data.introduction" style="font-size:15px;">
+							<div ng-bind-html="::data.introduction"></div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-xs-12 col-sm-6 col-sm-offset-3">
+							<div class="wrapper-lg">
+								<button class="btn btn-primary btn-block btn-lg" ng-click="c.startSurvey()">${Get Started}</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Begin mobile-only -->
+				<div class="visible-xs">
+					<sp-survey-form c="c" data="data" pagination="'question'" is-mobile="true"></sp-survey-form>
+				</div>
+				<!-- End mobile only -->
+
+				<!-- Begin desktop only -->
+				<div class="hidden-xs">
+					<sp-survey-form c="c" data="data" pagination="data.pagination"></sp-survey-form>
+				</div>
+				<!-- End desktop only -->
+
+				<div class="sp-message-dialog" id="sign-auth-modal" style="display:none;position:fixed;top:10%">
+					<div class="modal-dialog modal-sm">
+						<div class="modal-content">
+							<form ng-submit="c.checkLogin()">
+								<div class="modal-header">
+									<button type="button" class="close" ng-click="c.hideSignatureAuthModal()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title">${Signature Authentication}</h4>
+								</div>
+								<div class="modal-body">
+									<div ng-if="c.signAuthFailure" class="alert alert-danger text-center">${Invalid credentials}</div>
+									<div class="row wrapper-xs">
+										<div class="col-xs-4"><label class="wrapper-xs" for="sign-auth-username">${Username}</label></div>
+										<div class="col-xs-8"><input ng-model="data.signature.username" class="form-control" id="sign-auth-username" type="text" name="sign-auth-username" disabled="true" /></div>
+									</div>
+									<div class="row wrapper-xs">
+										<div class="col-xs-4"><label class="wrapper-xs" for="sign-auth-password">${Password}</label></div>
+										<div class="col-xs-8"><input class="form-control" id="sign-auth-password" type="password" name="sign-auth-password" /></div>
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button class="btn btn-primary" ng-click="c.checkLogin()">${OK}</button>
+									<button class="btn btn-default" ng-click="c.hideSignatureAuthModal()">${Cancel}</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

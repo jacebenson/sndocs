@@ -1,0 +1,10 @@
+<div ng-if="data.service" class="panel panel-{{::c.options.color}} b">
+  <div class="panel-heading">
+    <h4 class="panel-title">{{::c.data.serviceDisplay}} <span class="text-muted">(${last 90 days})</span></h4>    
+  </div>
+  <div class="panel-body">
+    <div class="description">${Color bar indicators flow left to right, from oldest to most recent status}</div>
+    <div ng-repeat="day in ::c.data.days" class="day" ng-class="{'multiple-issues': (day.count > 0)}" ng-style="::{'background-color': day.color}" tooltips tooltip-template="{{::day.msg}} {{::day.date}}">
+    </div>
+  </div>
+</div>

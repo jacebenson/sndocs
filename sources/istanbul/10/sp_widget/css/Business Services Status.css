@@ -1,0 +1,63 @@
+/* Status Icons */
+.fa-check-circle {
+  color: #5cb85c;
+}
+
+.fa-plus-circle {
+  color: #6E4CDD;
+}
+
+.fa-exclamation-circle {
+  color: #BB0000;
+}
+
+.fa-minus-circle{
+  color: #f0ad4e;
+}
+
+.fa-info-circle {
+  color: #5bc0de;
+}
+
+.disabled {
+  color: #ccc;
+}
+
+.panel-heading {
+  position: relative;
+}
+
+.panel-body {
+  padding-top: 5px;
+  padding-bottom: 0px;
+}
+
+.status-hr {
+  padding-top: 2px;
+  text-align: center;
+  font-size:13px;
+}
+
+.status-column {
+  padding: 5px;
+  text-align: center;
+
+  i {
+    padding-left: 3px;
+  }
+
+}
+
+.service {
+  cursor: pointer;
+
+  .fa {
+    padding: 0px 15px 0px px;
+    font-size: 18px;    
+  }
+}
+
+.subscribed {
+  color: $text-mutted;
+  white-space: nowrap;
+}

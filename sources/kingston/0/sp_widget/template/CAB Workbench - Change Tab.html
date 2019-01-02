@@ -1,0 +1,44 @@
+    <div class="panel panel-default" role="region" tabindex="0"
+         ng-attr-aria-label="{{getTabWidgetAriaLabel(c.change.number.display_value)}}">
+		<div class="panel-heading heading widget-heading" ng-class="{'meeting-not-started': !c.change}">
+			<div ng-if="c.change" class="change-desc-wrap title">
+				<span>{{c.change.number.display_value}} -
+				<b>{{c.change.short_description.display_value}}</b></span>
+			</div>
+			<span ng-if="c.change" class="pull-right">
+				<div class="btn-group" role="tablist" aria-label="${Current Change tabs group}">
+					<button class="btn btn-primary btn-sm"
+                        role="tab"
+                        ng-attr-tabindex="{{$first? 0 : -1}}"
+                        ng-attr-id="current-change-tab-{{$index}}"
+                        ng-attr-aria-controls="current-change-tab-panel-{{$index}}"
+                        ng-attr-aria-selected="{{t.id == c.showing? 'true' : 'false'}}"
+                        ng-keydown="navigateTabbar($event, $index)"
+						ng-repeat="t in c.data.tabs"
+						ng-class="{'focus-tab': t.id == c.showing}"
+						ng-click = "onTabClick(t.id, $index)"
+            			uib-tooltip="{{t.tooltip}}"
+                        tooltip-enable="t.tooltip"
+                        tooltip-placement="bottom"
+                        tooltip-append-to-body="true">
+						<span class="glyphicon glyphicon-{{t.icon_class}}"></span>
+            			<span ng-if="t.tooltip" class="sr-only">{{t.tooltip}}</span>
+					</button>
+				</div>
+			</span>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+	<div class="panel-body tab-body">
+		<div ng-repeat="t in c.data.tabs"
+             ng-attr-id="current-change-tab-panel-{{$index}}"
+             role="tabpanel"
+			ng-show="t.id == c.showing">
+			<div class="row">
+				<div class="col-xs-{{::w.col_span}} cols"
+				ng-repeat="w in t.cols">
+				<sp-widget ng-if="w.widget_data" widget="w.widget_data"></sp-widget>
+			</div>
+		</div>
+	</div>
+</div>

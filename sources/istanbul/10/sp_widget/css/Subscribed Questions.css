@@ -1,0 +1,12 @@
+.list-group {
+	max-height: none; 
+  overflow-y: auto;
+}
+
+.question-votes, .question-answers {
+	padding-left: 4px;
+}
+
+.question-profile {
+	white-space: nowrap;
+}

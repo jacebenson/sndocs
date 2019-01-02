@@ -1,0 +1,54 @@
+<div ng-show="c.visible">
+  <div class="kb-facet-block_{{options.instanceid}} hidden-xs hidden-sm" ng-class="$root.showFacet ? 'show-this' : 'show-not'" ng-cloak>
+    <span aria-live="assertive" class="sr-only ng-binding" role="alert">{{c.notity_noresults}}</span>
+    <div class="panel panel-{{::options.color}}"  id="panel_{{::data.instanceid}}" ng-class="{'remove-bottom-border':c.collapse}">
+      <div class="panel-heading" role="button" data-toggle="collapse" data-target="#collapse_{{::data.instanceid}}" aria-controls="#collapse_{{::data.instanceid}}">   
+        <span class="panel-title">
+          <a href="javascript:void(0);" aria-label="{{::options.title}} ${Facet Collapse}">
+            <span ng-if="::options.glyph"><fa name="{{::options.glyph}}" />
+            </span>{{::options.title}}
+          </a>
+        </span>
+        <span class="float-left">
+          <a href="javascript:void(0);" class="clear-all" ng-show="c.clear" ng-click="c.clearSelections($event)">${Clear}</a>
+          <span class="toggle-icon"><i class="fa" id="collapse_icon_{{::data.instanceid}}" ng-class="{'fa-minus-square-o':!c.collapse,'fa-plus-square-o':c.collapse}" aria-hidden="true"></i></span>
+        </span>
+      </div>
+      <div class="collapse" ng-class="::{'in' : !$root.isMobile}" id="collapse_{{::data.instanceid}}">
+        <div class="facet-template" ng-cloak ng-if="c.data.template">
+          <div ng-include="c.data.template" />
+        </div>
+        <div ng-if="!c.valid_field" class="invalid-field">${Error} : {{c.error_text}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+   
+  @media only screen and (max-width: 991px) {
+    .kb-facet-block_{{options.instanceid}}  .facet-field-padding {
+      padding: 9px 0 0 15px;
+      border-bottom : 1px solid #DDDDDD;
+      min-height : 40px;
+    }
+  }
+  @media only screen and (max-width: 991px) {
+    .kb-facet-block_{{options.instanceid}}  .check-icon {
+      float : right;
+      font-size: 18px;
+      display: inline-flex;
+      padding-right : 15px;
+      padding-top : 2px;
+      display:block;
+    }
+
+  }
+  @media only screen and (min-width: 991px) { 
+    .kb-facet-block_{{options.instanceid}}  .facet-detail{
+      max-height: 215px; 
+      padding-top : 5px;
+      padding-bottom : 5px;
+    }
+    
+  }
+</style>

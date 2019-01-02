@@ -1,0 +1,10 @@
+var script = "var gr = new GlideRecord('ecc_queue');";
+script    += "gr.initialize();";
+script    += "gr.setValue( 'agent',  'mid.server.*'  );";
+script    += "gr.setValue( 'source', 'upgradeNow'    );";
+script    += "gr.setValue( 'topic',  'SystemCommand' );";
+script    += "gr.setValue( 'queue',  'output'        );";
+script    += "gr.setValue( 'state',  'ready'         );";
+script    += "gr.setValue( 'priority', '0'           );";
+script    += "gr.insert();";
+GlideRunScriptJob.scheduleScript(script);
