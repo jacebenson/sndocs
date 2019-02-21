@@ -1689,6 +1689,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0720478",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/12/scripts/",
         "date": "2018-12-20"
+      },{
+        "number": "13",
+        "name": "Kingston Patch 13",
+        "url": "https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/13/scripts/",
+        "date": "2018-12-20"
       }
     ],
     "features": [
@@ -1750,6 +1757,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0717900",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/4/scripts/",
         "date": "2018-12-20"
+      },{
+        "number": "5",
+        "name": "London Patch 5",
+        "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723003",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/5/scripts/",
+        "date": "2019-02-21"
       }
     ],
       "features": [
@@ -1771,5 +1785,38 @@
         "Assessments and Surveys updates",
         "List v3 not recommended"
       ]
-    }
+    },
+    {
+      "name": "Madrid",
+      "url": "https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
+      "date": "2019-01-31",
+      "patches": [
+        {
+          "number": "0",
+          "name": "Madrid Patch 0",
+          "url": "https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713586",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/0/scripts/",
+          "date": "2018-02-21"
+        }
+      ],
+        "features": [
+          "Antivirus Scanning",
+          "Instance Security Center",
+          "Embedded Approvals in Email",
+          "Assessment and Survey: Question Bank",
+          "Embedded Survey in Email",
+          "ATF: Tests for UI Pages / UI Macros",
+          "ATF: Parameterized tests",
+          "ATF: Quick Start Tests",
+          "Change Rest API",
+          "Decision Tables",
+          "Agent Workspace",
+          "Document Viewer",
+          "Service Portal: Multiple catalog support",
+          "Service Portal: Multiple knowledge support",
+          "Service Portal: 2FA",
+          "Admins can roll back a clone for up to seven days"
+        ]
+      }
 ]

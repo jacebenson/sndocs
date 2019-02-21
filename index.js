@@ -53,7 +53,12 @@ config.instances.map(function (instance) {
     }
   });
 });
-
+fs.writeFile('./versions.json', JSON.stringify(versions, '', '  '), function (err) {
+  if (err) {
+    return console.log(err);
+  }
+});
+createSources();
 /**
  * This function adds to the ./versions.json
  * @param {JS} obj - Obj used to give all requirements to fx
@@ -101,9 +106,9 @@ function addToVersions (obj) {
         versions[family][patch] = url;
       }
     }
-    if (counter === config.instances.length) {
-      createSources();
-    }
+    //if (counter === config.instances.length) {
+    //  createSources();
+    //}
   } catch (err) {
     console.log(err);
   }
@@ -112,11 +117,7 @@ function addToVersions (obj) {
 function createSources () {
   // console.log(JSON.stringify(versions, '', '  '))
   console.log('starting to create files');
-  fs.writeFile('./versions.json', JSON.stringify(versions, '', '  '), function (err) {
-    if (err) {
-      return console.log(err);
-    }
-  });
+
   // check for directories...
   // ./sources/family/patch
   // ./docs/family/patch

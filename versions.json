@@ -37,7 +37,7 @@
     "10c": "https://msg.service-now.com",
     "11a": "https://walmart.service-now.com",
     "11b": "https://vub.service-now.com",
-    "11c": "https://wpcoprod.service-now.com"
+    "11c": "https://coherent.service-now.com"
   },
   "jakarta": {
     "1": "https://upgrade.service-now.com",
@@ -48,16 +48,16 @@
     "6": "https://veritas.service-now.com",
     "7": "https://spartan.service-now.com",
     "8": "https://hearstet.service-now.com",
-    "9": "https://volvocars.service-now.com",
-    "10": "https://uwstest.service-now.com",
+    "9": "https://didatasydprod.service-now.com",
+    "10": "https://wilburellis.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
-    "8a": "https://simplyfit.service-now.com",
+    "8a": "https://datapipeprod.service-now.com",
     "8b": "https://davita.service-now.com",
     "9a": "https://trinityprod.service-now.com",
     "9b": "https://tesla.service-now.com",
-    "9c": "https://yale.service-now.com"
+    "9c": "https://transuniondev.service-now.com"
   },
   "kingston": {
     "0": "https://logicalissmc.service-now.com/",
@@ -66,24 +66,28 @@
     "3": "https://vector.service-now.com",
     "4": "https://nasatest.service-now.com",
     "5": "https://wdpr.service-now.com",
-    "6": "https://wipros.service-now.com",
-    "7": "https://vfc.service-now.com",
-    "8": "https://wittel.service-now.com",
-    "9": "https://rsac.service-now.com",
-    "10": "https://xpologistics.service-now.com",
-    "11": "https://unimelb.service-now.com",
-    "12": "https://ucmerced.service-now.com",
+    "6": "https://thehartford.service-now.com",
+    "7": "https://iogi.service-now.com",
+    "8": "https://businessnatixis.service-now.com",
+    "9": "https://thermofisherit.service-now.com",
+    "10": "https://walmartglobal.service-now.com",
+    "11": "https://saicito.service-now.com",
+    "12": "https://wittel.service-now.com",
+    "13": "https://ucmerced.service-now.com",
     "3a": "https://bournemouth.service-now.com",
     "3b": "https://watts.service-now.com"
   },
   "london": {
     "0": "https://ucsdservicedesk.service-now.com",
-    "1": "https://viawest.service-now.com",
-    "2": "https://zillow.service-now.com",
-    "3": "https://zetupprod.service-now.com",
-    "4": "https://wwttest.service-now.com"
+    "1": "https://tvglobo.service-now.com",
+    "2": "https://lonestar.service-now.com",
+    "3": "https://wrightstate.service-now.com",
+    "4": "https://petsmart.service-now.com",
+    "5": "https://ustglobal.service-now.com"
   },
-  "madrid": {},
+  "madrid": {
+    "0": "https://signon.service-now.com"
+  },
   "newyork": {},
   "orlando": {},
   "paris": {},

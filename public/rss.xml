@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 20 Dec 2018 15:45:57 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Feb 2019 14:27:13 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Thu, 20 Dec 2018 15:45:57 GMT</pubDate>
+        <pubDate>Thu, 21 Feb 2019 14:27:13 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -24,6 +24,18 @@
         <itunes:image href="https://sndocs.jacebenson.com/favicon.png"/>
         <itunes:category text="Technology">
         </itunes:category>
+        <item>
+            <title><![CDATA[Madrid]]></title>
+            <link>https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="false">Madrid</guid>
+            <pubDate>Thu, 31 Jan 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 0]]></title>
+            <link>https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="false">Madrid Patch 0</guid>
+            <pubDate>Wed, 21 Feb 2018 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[London]]></title>
             <link>https://web.archive.org/web/20181120153316/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html</link>
@@ -59,6 +71,12 @@
             <link>https://web.archive.org/web/20181220153957/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-4.html</link>
             <guid isPermaLink="false">London Patch 4</guid>
             <pubDate>Thu, 20 Dec 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 5]]></title>
+            <link>https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html</link>
+            <guid isPermaLink="false">London Patch 5</guid>
+            <pubDate>Thu, 21 Feb 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
@@ -152,6 +170,12 @@
             <title><![CDATA[Kingston Patch 12]]></title>
             <link>https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html</link>
             <guid isPermaLink="false">Kingston Patch 12</guid>
+            <pubDate>Thu, 20 Dec 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Kingston Patch 13]]></title>
+            <link>https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html</link>
+            <guid isPermaLink="false">Kingston Patch 13</guid>
             <pubDate>Thu, 20 Dec 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
