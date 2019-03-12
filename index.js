@@ -65,7 +65,7 @@ createSources();
  * obj.buildTag - glide-helsinki-03-16-2016__patch12a-08-25-2017
  * obj.url - https://example.service-now.com
  */
-function addToVersions (obj) {
+function addToVersions(obj) {
   try {
     console.log(obj.buildTag + ': ' + obj.url);
     var url = obj.url;
@@ -106,15 +106,15 @@ function addToVersions (obj) {
         versions[family][patch] = url;
       }
     }
-    //if (counter === config.instances.length) {
-    //  createSources();
-    //}
+    if (counter === config.instances.length-1) {
+      createSources();
+    }
   } catch (err) {
     console.log(err);
   }
 }
 
-function createSources () {
+function createSources() {
   // console.log(JSON.stringify(versions, '', '  '))
   console.log('starting to create files');
 
@@ -140,7 +140,7 @@ function createSources () {
   }
 }
 
-function downloadEndpoints (obj) {
+function downloadEndpoints(obj) {
   config.endpoints.map(function (file) {
     var justFile = file.split('/');
     justFile = justFile[justFile.length - 1];

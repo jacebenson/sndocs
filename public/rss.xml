@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 21 Feb 2019 14:27:13 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 12 Mar 2019 14:24:36 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Thu, 21 Feb 2019 14:27:13 GMT</pubDate>
+        <pubDate>Tue, 12 Mar 2019 14:24:36 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -35,6 +35,12 @@
             <link>https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html</link>
             <guid isPermaLink="false">Madrid Patch 0</guid>
             <pubDate>Wed, 21 Feb 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 1]]></title>
+            <link>https://web.archive.org/web/20190312142201/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-1.html</link>
+            <guid isPermaLink="false">Madrid Patch 1</guid>
+            <pubDate>Mon, 12 Mar 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[London]]></title>
@@ -77,6 +83,12 @@
             <link>https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html</link>
             <guid isPermaLink="false">London Patch 5</guid>
             <pubDate>Thu, 21 Feb 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 6]]></title>
+            <link>https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html</link>
+            <guid isPermaLink="false">London Patch 6</guid>
+            <pubDate>Tue, 12 Mar 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
