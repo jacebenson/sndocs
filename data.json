@@ -1692,10 +1692,17 @@
       },{
         "number": "13",
         "name": "Kingston Patch 13",
-        "url": "https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html",
-        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623762",
+        "url": "https://web.archive.org/web/20190221135942/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-13.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723544",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/13/scripts/",
         "date": "2018-12-20"
+      },{
+        "number": "14",
+        "name": "Kingston Patch 14",
+        "url": "https://web.archive.org/web/20190318012140/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-14.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0727920",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14/scripts/",
+        "date": "2019-03-14"
       }
     ],
     "features": [
