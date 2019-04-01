@@ -1774,7 +1774,7 @@
       },{
         "number": "6",
         "name": "London Patch 6",
-        "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
+        "url": "https://web.archive.org/web/20190312142351/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723018",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6/scripts/",
         "date": "2019-03-12"
