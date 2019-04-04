@@ -6478,648 +6478,179 @@
     t.LocalsExpression = "LocalsExpression";
     t.NGValueParameter = "NGValueParameter";
     t.prototype = {
-      ast: function(a) {
-        this.text =
-          a;
-        this.tokens = this.lexer.lex(a);
-        a = this.program();
-        0 !== this.tokens.length && this.throwError("is an unexpected token", this.tokens[0]);
-        return a
-      },
-      program: function() {
-        for (var a = [];;)
-          if (0 < this.tokens.length && !this.peek("}", ")", ";", "]") && a.push(this.expressionStatement()), !this.expect(";")) return {
-            type: t.Program,
-            body: a
+        ast: function(a) {
+          this.text =
+            a;
+          this.tokens = this.lexer.lex(a);
+          a = this.program();
+          0 !== this.tokens.length && this.throwError("is an unexpected token", this.tokens[0]);
+          return a
+        },
+        program: function() {
+          for (var a = [];;)
+            if (0 < this.tokens.length && !this.peek("}", ")", ";", "]") && a.push(this.expressionStatement()), !this.expect(";")) return {
+              type: t.Program,
+              body: a
+            }
+        },
+        expressionStatement: function() {
+          return {
+            type: t.ExpressionStatement,
+            expression: this.filterChain()
           }
-      },
-      expressionStatement: function() {
-        return {
-          type: t.ExpressionStatement,
-          expression: this.filterChain()
-        }
-      },
-      filterChain: function() {
-        for (var a = this.expression(); this.expect("|");) a = this.filter(a);
-        return a
-      },
-      expression: function() {
-        return this.assignment()
-      },
-      assignment: function() {
-        var a = this.ternary();
-        if (this.expect("=")) {
-          if (!Dd(a)) throw ea("lval");
-          a = {
-            type: t.AssignmentExpression,
+        },
+        filterChain: function() {
+          for (var a = this.expression(); this.expect("|");) a = this.filter(a);
+          return a
+        },
+        expression: function() {
+          return this.assignment()
+        },
+        assignment: function() {
+          var a = this.ternary();
+          if (this.expect("=")) {
+            if (!Dd(a)) throw ea("lval");
+            a = {
+              type: t.AssignmentExpression,
+              left: a,
+              right: this.assignment(),
+              operator: "="
+            }
+          }
+          return a
+        },
+        ternary: function() {
+          var a = this.logicalOR(),
+            b, d;
+          return this.expect("?") && (b = this.expression(), this.consume(":")) ? (d = this.expression(), {
+            type: t.ConditionalExpression,
+            test: a,
+            alternate: b,
+            consequent: d
+          }) : a
+        },
+        logicalOR: function() {
+          for (var a = this.logicalAND(); this.expect("||");) a = {
+            type: t.LogicalExpression,
+            operator: "||",
             left: a,
-            right: this.assignment(),
-            operator: "="
-          }
-        }
-        return a
-      },
-      ternary: function() {
-        var a = this.logicalOR(),
-          b, d;
-        return this.expect("?") && (b = this.expression(), this.consume(":")) ? (d = this.expression(), {
-          type: t.ConditionalExpression,
-          test: a,
-          alternate: b,
-          consequent: d
-        }) : a
-      },
-      logicalOR: function() {
-        for (var a = this.logicalAND(); this.expect("||");) a = {
-          type: t.LogicalExpression,
-          operator: "||",
-          left: a,
-          right: this.logicalAND()
-        };
-        return a
-      },
-      logicalAND: function() {
-        for (var a = this.equality(); this.expect("&&");) a = {
-          type: t.LogicalExpression,
-          operator: "&&",
-          left: a,
-          right: this.equality()
-        };
-        return a
-      },
-      equality: function() {
-        for (var a = this.relational(), b; b = this.expect("==", "!=", "===", "!==");) a = {
-          type: t.BinaryExpression,
-          operator: b.text,
-          left: a,
-          right: this.relational()
-        };
-        return a
-      },
-      relational: function() {
-        for (var a = this.additive(), b; b = this.expect("<", ">", "<=", ">=");) a = {
-          type: t.BinaryExpression,
-          operator: b.text,
-          left: a,
-          right: this.additive()
-        };
-        return a
-      },
-      additive: function() {
-        for (var a = this.multiplicative(), b; b = this.expect("+", "-");) a = {
-          type: t.BinaryExpression,
-          operator: b.text,
-          left: a,
-          right: this.multiplicative()
-        };
-        return a
-      },
-      multiplicative: function() {
-        for (var a = this.unary(), b; b = this.expect("*", "/", "%");) a = {
-          type: t.BinaryExpression,
-          operator: b.text,
-          left: a,
-          right: this.unary()
-        };
-        return a
-      },
-      unary: function() {
-        var a;
-        return (a = this.expect("+", "-", "!")) ? {
-          type: t.UnaryExpression,
-          operator: a.text,
-          prefix: !0,
-          argument: this.unary()
-        } : this.primary()
-      },
-      primary: function() {
-        var a;
-        this.expect("(") ? (a = this.filterChain(), this.consume(")")) : this.expect("[") ? a = this.arrayDeclaration() : this.expect("{") ? a = this.object() : this.selfReferential.hasOwnProperty(this.peek().text) ? a = sa(this.selfReferential[this.consume().text]) : this.options.literals.hasOwnProperty(this.peek().text) ? a = {
-          type: t.Literal,
-          value: this.options.literals[this.consume().text]
-        } : this.peek().identifier ? a = this.identifier() : this.peek().constant ? a = this.constant() : this.throwError("not a primary expression",
-          this.peek());
-        for (var b; b = this.expect("(", "[", ".");) "(" === b.text ? (a = {
-          type: t.CallExpression,
-          callee: a,
-          arguments: this.parseArguments()
-        }, this.consume(")")) : "[" === b.text ? (a = {
-          type: t.MemberExpression,
-          object: a,
-          property: this.expression(),
-          computed: !0
-        }, this.consume("]")) : "." === b.text ? a = {
-          type: t.MemberExpression,
-          object: a,
-          property: this.identifier(),
-          computed: !1
-        } : this.throwError("IMPOSSIBLE");
-        return a
-      },
-      filter: function(a) {
-        a = [a];
-        for (var b = {
+            right: this.logicalAND()
+          };
+          return a
+        },
+        logicalAND: function() {
+          for (var a = this.equality(); this.expect("&&");) a = {
+            type: t.LogicalExpression,
+            operator: "&&",
+            left: a,
+            right: this.equality()
+          };
+          return a
+        },
+        equality: function() {
+          for (var a = this.relational(), b; b = this.expect("==", "!=", "===", "!==");) a = {
+            type: t.BinaryExpression,
+            operator: b.text,
+            left: a,
+            right: this.relational()
+          };
+          return a
+        },
+        relational: function() {
+          for (var a = this.additive(), b; b = this.expect("<", ">", "<=", ">=");) a = {
+            type: t.BinaryExpression,
+            operator: b.text,
+            left: a,
+            right: this.additive()
+          };
+          return a
+        },
+        additive: function() {
+          for (var a = this.multiplicative(), b; b = this.expect("+", "-");) a = {
+            type: t.BinaryExpression,
+            operator: b.text,
+            left: a,
+            right: this.multiplicative()
+          };
+          return a
+        },
+        multiplicative: function() {
+          for (var a = this.unary(), b; b = this.expect("*", "/", "%");) a = {
+            type: t.BinaryExpression,
+            operator: b.text,
+            left: a,
+            right: this.unary()
+          };
+          return a
+        },
+        unary: function() {
+          var a;
+          return (a = this.expect("+", "-", "!")) ? {
+            type: t.UnaryExpression,
+            operator: a.text,
+            prefix: !0,
+            argument: this.unary()
+          } : this.primary()
+        },
+        primary: function() {
+          var a;
+          this.expect("(") ? (a = this.filterChain(), this.consume(")")) : this.expect("[") ? a = this.arrayDeclaration() : this.expect("{") ? a = this.object() : this.selfReferential.hasOwnProperty(this.peek().text) ? a = sa(this.selfReferential[this.consume().text]) : this.options.literals.hasOwnProperty(this.peek().text) ? a = {
+            type: t.Literal,
+            value: this.options.literals[this.consume().text]
+          } : this.peek().identifier ? a = this.identifier() : this.peek().constant ? a = this.constant() : this.throwError("not a primary expression",
+            this.peek());
+          for (var b; b = this.expect("(", "[", ".");) "(" === b.text ? (a = {
             type: t.CallExpression,
-            callee: this.identifier(),
-            arguments: a,
-            filter: !0
-          }; this.expect(":");) a.push(this.expression());
-        return b
-      },
-      parseArguments: function() {
-        var a = [];
-        if (")" !== this.peekToken().text) {
-          do a.push(this.filterChain()); while (this.expect(","))
-        }
-        return a
-      },
-      identifier: function() {
-        var a = this.consume();
-        a.identifier || this.throwError("is not a valid identifier", a);
-        return {
-          type: t.Identifier,
-          name: a.text
-        }
-      },
-      constant: function() {
-        return {
-          type: t.Literal,
-          value: this.consume().value
-        }
-      },
-      arrayDeclaration: function() {
-        var a = [];
-        if ("]" !== this.peekToken().text) {
-          do {
-            if (this.peek("]")) break;
-            a.push(this.expression())
-          } while (this.expect(","))
-        }
-        this.consume("]");
-        return {
-          type: t.ArrayExpression,
-          elements: a
-        }
-      },
-      object: function() {
-        var a = [],
-          b;
-        if ("}" !== this.peekToken().text) {
-          do {
-            if (this.peek("}")) break;
-            b = {
-              type: t.Property,
-              kind: "init"
-            };
-            this.peek().constant ? (b.key = this.constant(), b.computed = !1, this.consume(":"), b.value = this.expression()) : this.peek().identifier ? (b.key = this.identifier(), b.computed = !1, this.peek(":") ? (this.consume(":"), b.value = this.expression()) : b.value = b.key) : this.peek("[") ? (this.consume("["), b.key = this.expression(), this.consume("]"), b.computed = !0, this.consume(":"),
-              b.value = this.expression()) : this.throwError("invalid key", this.peek());
-            a.push(b)
-          } while (this.expect(","))
-        }
-        this.consume("}");
-        return {
-          type: t.ObjectExpression,
-          properties: a
-        }
-      },
-      throwError: function(a, b) {
-        throw ea("syntax", b.text, a, b.index + 1, this.text, this.text.substring(b.index));
-      },
-      consume: function(a) {
-        if (0 === this.tokens.length) throw ea("ueoe", this.text);
-        var b = this.expect(a);
-        b || this.throwError("is unexpected, expecting [" + a + "]", this.peek());
-        return b
-      },
-      peekToken: function() {
-        if (0 === this.tokens.length) throw ea("ueoe",
-          this.text);
-        return this.tokens[0]
-      },
-      peek: function(a, b, d, c) {
-        return this.peekAhead(0, a, b, d, c)
-      },
-      peekAhead: function(a, b, d, c, f) {
-        if (this.tokens.length > a) {
-          a = this.tokens[a];
-          var e = a.text;
-          if (e === b || e === d || e === c || e === f || !(b || d || c || f)) return a
-        }
-        return !1
-      },
-      expect: function(a, b, d, c) {
-        return (a = this.peek(a, b, d, c)) ? (this.tokens.shift(), a) : !1
-      },
-      selfReferential: {
-        "this": {
-          type: t.ThisExpression
+            callee: a,
+            arguments: this.parseArguments()
+          }, this.consume(")")) : "[" === b.text ? (a = {
+            type: t.MemberExpression,
+            object: a,
+            property: this.expression(),
+            computed: !0
+          }, this.consume("]")) : "." === b.text ? a = {
+            type: t.MemberExpression,
+            object: a,
+            property: this.identifier(),
+            computed: !1
+          } : this.throwError("IMPOSSIBLE");
+          return a
         },
-        $locals: {
-          type: t.LocalsExpression
-        }
-      }
-    };
-    Gd.prototype = {
-      compile: function(a, b) {
-        var d = this,
-          c = this.astBuilder.ast(a);
-        this.state = {
-          nextId: 0,
-          filters: {},
-          expensiveChecks: b,
-          fn: {
-            vars: [],
-            body: [],
-            own: {}
-          },
-          assign: {
-            vars: [],
-            body: [],
-            own: {}
-          },
-          inputs: []
-        };
-        X(c, d.$filter);
-        var f = "",
-          e;
-        this.stage = "assign";
-        if (e = Ed(c)) this.state.computing = "assign", f = this.nextId(), this.recurse(e, f), this.return_(f), f = "fn.assign=" + this.generateFunction("assign", "s,v,l");
-        e = Cd(c.body);
-        d.stage = "inputs";
-        q(e, function(a, b) {
-          var c = "fn" + b;
-          d.state[c] = {
-            vars: [],
-            body: [],
-            own: {}
-          };
-          d.state.computing = c;
-          var e = d.nextId();
-          d.recurse(a, e);
-          d.return_(e);
-          d.state.inputs.push(c);
-          a.watchId = b
-        });
-        this.state.computing =
-          "fn";
-        this.stage = "main";
-        this.recurse(c);
-        f = '"' + this.USE + " " + this.STRICT + '";\n' + this.filterPrefix() + "var fn=" + this.generateFunction("fn", "s,l,a,i") + f + this.watchFns() + "return fn;";
-        f = (new Function("$filter", "ensureSafeMemberName", "ensureSafeObject", "ensureSafeFunction", "getStringValue", "ensureSafeAssignContext", "ifDefined", "plus", "text", f))(this.$filter, Ua, Ea, td, wg, Jb, Eg, Bd, a);
-        this.state = this.stage = void 0;
-        f.literal = Fd(c);
-        f.constant = c.constant;
-        return f
-      },
-      USE: "use",
-      STRICT: "strict",
-      watchFns: function() {
-        var a = [],
-          b = this.state.inputs,
-          d = this;
-        q(b, function(b) {
-          a.push("var " + b + "=" + d.generateFunction(b, "s"))
-        });
-        b.length && a.push("fn.inputs=[" + b.join(",") + "];");
-        return a.join("")
-      },
-      generateFunction: function(a, b) {
-        return "function(" + b + "){" + this.varsPrefix(a) + this.body(a) + "};"
-      },
-      filterPrefix: function() {
-        var a = [],
-          b = this;
-        q(this.state.filters, function(d, c) {
-          a.push(d + "=$filter(" + b.escape(c) + ")")
-        });
-        return a.length ? "var " + a.join(",") + ";" : ""
-      },
-      varsPrefix: function(a) {
-        return this.state[a].vars.length ? "var " + this.state[a].vars.join(",") +
-          ";" : ""
-      },
-      body: function(a) {
-        return this.state[a].body.join("")
-      },
-      recurse: function(a, b, d, c, f, e) {
-        var g, h, k = this,
-          l, m, n;
-        c = c || w;
-        if (!e && x(a.watchId)) b = b || this.nextId(), this.if_("i", this.lazyAssign(b, this.computedMember("i", a.watchId)), this.lazyRecurse(a, b, d, c, f, !0));
-        else switch (a.type) {
-          case t.Program:
-            q(a.body, function(b, c) {
-              k.recurse(b.expression, void 0, void 0, function(a) {
-                h = a
-              });
-              c !== a.body.length - 1 ? k.current().body.push(h, ";") : k.return_(h)
-            });
-            break;
-          case t.Literal:
-            m = this.escape(a.value);
-            this.assign(b, m);
-            c(m);
-            break;
-          case t.UnaryExpression:
-            this.recurse(a.argument, void 0, void 0, function(a) {
-              h = a
-            });
-            m = a.operator + "(" + this.ifDefined(h, 0) + ")";
-            this.assign(b, m);
-            c(m);
-            break;
-          case t.BinaryExpression:
-            this.recurse(a.left, void 0, void 0, function(a) {
-              g = a
-            });
-            this.recurse(a.right, void 0, void 0, function(a) {
-              h = a
-            });
-            m = "+" === a.operator ? this.plus(g, h) : "-" === a.operator ? this.ifDefined(g, 0) + a.operator + this.ifDefined(h, 0) : "(" + g + ")" + a.operator + "(" + h + ")";
-            this.assign(b, m);
-            c(m);
-            break;
-          case t.LogicalExpression:
-            b = b || this.nextId();
-            k.recurse(a.left, b);
-            k.if_("&&" === a.operator ? b : k.not(b), k.lazyRecurse(a.right, b));
-            c(b);
-            break;
-          case t.ConditionalExpression:
-            b = b || this.nextId();
-            k.recurse(a.test, b);
-            k.if_(b, k.lazyRecurse(a.alternate, b), k.lazyRecurse(a.consequent, b));
-            c(b);
-            break;
-          case t.Identifier:
-            b = b || this.nextId();
-            d && (d.context = "inputs" === k.stage ? "s" : this.assign(this.nextId(), this.getHasOwnProperty("l", a.name) + "?l:s"), d.computed = !1, d.name = a.name);
-            Ua(a.name);
-            k.if_("inputs" === k.stage || k.not(k.getHasOwnProperty("l", a.name)), function() {
-              k.if_("inputs" === k.stage ||
-                "s",
-                function() {
-                  f && 1 !== f && k.if_(k.not(k.nonComputedMember("s", a.name)), k.lazyAssign(k.nonComputedMember("s", a.name), "{}"));
-                  k.assign(b, k.nonComputedMember("s", a.name))
-                })
-            }, b && k.lazyAssign(b, k.nonComputedMember("l", a.name)));
-            (k.state.expensiveChecks || Lb(a.name)) && k.addEnsureSafeObject(b);
-            c(b);
-            break;
-          case t.MemberExpression:
-            g = d && (d.context = this.nextId()) || this.nextId();
-            b = b || this.nextId();
-            k.recurse(a.object, g, void 0, function() {
-              k.if_(k.notNull(g), function() {
-                f && 1 !== f && k.addEnsureSafeAssignContext(g);
-                if (a.computed) h =
-                  k.nextId(), k.recurse(a.property, h), k.getStringValue(h), k.addEnsureSafeMemberName(h), f && 1 !== f && k.if_(k.not(k.computedMember(g, h)), k.lazyAssign(k.computedMember(g, h), "{}")), m = k.ensureSafeObject(k.computedMember(g, h)), k.assign(b, m), d && (d.computed = !0, d.name = h);
-                else {
-                  Ua(a.property.name);
-                  f && 1 !== f && k.if_(k.not(k.nonComputedMember(g, a.property.name)), k.lazyAssign(k.nonComputedMember(g, a.property.name), "{}"));
-                  m = k.nonComputedMember(g, a.property.name);
-                  if (k.state.expensiveChecks || Lb(a.property.name)) m = k.ensureSafeObject(m);
-                  k.assign(b, m);
-                  d && (d.computed = !1, d.name = a.property.name)
-                }
-              }, function() {
-                k.assign(b, "undefined")
-              });
-              c(b)
-            }, !!f);
-            break;
-          case t.CallExpression:
-            b = b || this.nextId();
-            a.filter ? (h = k.filter(a.callee.name), l = [], q(a.arguments, function(a) {
-              var b = k.nextId();
-              k.recurse(a, b);
-              l.push(b)
-            }), m = h + "(" + l.join(",") + ")", k.assign(b, m), c(b)) : (h = k.nextId(), g = {}, l = [], k.recurse(a.callee, h, g, function() {
-              k.if_(k.notNull(h), function() {
-                k.addEnsureSafeFunction(h);
-                q(a.arguments, function(a) {
-                  k.recurse(a, k.nextId(), void 0, function(a) {
-                    l.push(k.ensureSafeObject(a))
-                  })
-                });
-                g.name ? (k.state.expensiveChecks || k.addEnsureSafeObject(g.context), m = k.member(g.context, g.name, g.computed) + "(" + l.join(",") + ")") : m = h + "(" + l.join(",") + ")";
-                m = k.ensureSafeObject(m);
-                k.assign(b, m)
-              }, function() {
-                k.assign(b, "undefined")
-              });
-              c(b)
-            }));
-            break;
-          case t.AssignmentExpression:
-            h = this.nextId();
-            g = {};
-            this.recurse(a.left, void 0, g, function() {
-              k.if_(k.notNull(g.context), function() {
-                k.recurse(a.right, h);
-                k.addEnsureSafeObject(k.member(g.context, g.name, g.computed));
-                k.addEnsureSafeAssignContext(g.context);
-                m = k.member(g.context,
-                  g.name, g.computed) + a.operator + h;
-                k.assign(b, m);
-                c(b || m)
-              })
-            }, 1);
-            break;
-          case t.ArrayExpression:
-            l = [];
-            q(a.elements, function(a) {
-              k.recurse(a, k.nextId(), void 0, function(a) {
-                l.push(a)
-              })
-            });
-            m = "[" + l.join(",") + "]";
-            this.assign(b, m);
-            c(m);
-            break;
-          case t.ObjectExpression:
-            l = [];
-            n = !1;
-            q(a.properties, function(a) {
-              a.computed && (n = !0)
-            });
-            n ? (b = b || this.nextId(), this.assign(b, "{}"), q(a.properties, function(a) {
-              a.computed ? (g = k.nextId(), k.recurse(a.key, g)) : g = a.key.type === t.Identifier ? a.key.name : "" + a.key.value;
-              h = k.nextId();
-              k.recurse(a.value,
-                h);
-              k.assign(k.member(b, g, a.computed), h)
-            })) : (q(a.properties, function(b) {
-              k.recurse(b.value, a.constant ? void 0 : k.nextId(), void 0, function(a) {
-                l.push(k.escape(b.key.type === t.Identifier ? b.key.name : "" + b.key.value) + ":" + a)
-              })
-            }), m = "{" + l.join(",") + "}", this.assign(b, m));
-            c(b || m);
-            break;
-          case t.ThisExpression:
-            this.assign(b, "s");
-            c("s");
-            break;
-          case t.LocalsExpression:
-            this.assign(b, "l");
-            c("l");
-            break;
-          case t.NGValueParameter:
-            this.assign(b, "v"), c("v")
-        }
-      },
-      getHasOwnProperty: function(a, b) {
-        var d = a + "." + b,
-          c = this.current().own;
-        c.hasOwnProperty(d) ||
-          (c[d] = this.nextId(!1, a + "&&(" + this.escape(b) + " in " + a + ")"));
-        return c[d]
-      },
-      assign: function(a, b) {
-        if (a) return this.current().body.push(a, "=", b, ";"), a
-      },
-      filter: function(a) {
-        this.state.filters.hasOwnProperty(a) || (this.state.filters[a] = this.nextId(!0));
-        return this.state.filters[a]
-      },
-      ifDefined: function(a, b) {
-        return "ifDefined(" + a + "," + this.escape(b) + ")"
-      },
-      plus: function(a, b) {
-        return "plus(" + a + "," + b + ")"
-      },
-      return_: function(a) {
-        this.current().body.push("return ", a, ";")
-      },
-      if_: function(a, b, d) {
-        if (!0 === a) b();
-        else {
-          var c = this.current().body;
-          c.push("if(", a, "){");
-          b();
-          c.push("}");
-          d && (c.push("else{"), d(), c.push("}"))
-        }
-      },
-      not: function(a) {
-        return "!(" + a + ")"
-      },
-      notNull: function(a) {
-        return a + "!=null"
-      },
-      nonComputedMember: function(a, b) {
-        var d = /[^$_a-zA-Z0-9]/g;
-        return /^[$_a-zA-Z][$_a-zA-Z0-9]*$/.test(b) ? a + "." + b : a + '["' + b.replace(d, this.stringEscapeFn) + '"]'
-      },
-      computedMember: function(a, b) {
-        return a + "[" + b + "]"
-      },
-      member: function(a, b, d) {
-        return d ? this.computedMember(a, b) : this.nonComputedMember(a, b)
-      },
-      addEnsureSafeObject: function(a) {
-        this.current().body.push(this.ensureSafeObject(a),
-          ";")
-      },
-      addEnsureSafeMemberName: function(a) {
-        this.current().body.push(this.ensureSafeMemberName(a), ";")
-      },
-      addEnsureSafeFunction: function(a) {
-        this.current().body.push(this.ensureSafeFunction(a), ";")
-      },
-      addEnsureSafeAssignContext: function(a) {
-        this.current().body.push(this.ensureSafeAssignContext(a), ";")
-      },
-      ensureSafeObject: function(a) {
-        return "ensureSafeObject(" + a + ",text)"
-      },
-      ensureSafeMemberName: function(a) {
-        return "ensureSafeMemberName(" + a + ",text)"
-      },
-      ensureSafeFunction: function(a) {
-        return "ensureSafeFunction(" + a + ",text)"
-      },
-      getStringValue: function(a) {
-        this.assign(a, "getStringValue(" + a + ")")
-      },
-      ensureSafeAssignContext: function(a) {
-        return "ensureSafeAssignContext(" + a + ",text)"
-      },
-      lazyRecurse: function(a, b, d, c, f, e) {
-        var g = this;
-        return function() {
-          g.recurse(a, b, d, c, f, e)
-        }
-      },
-      lazyAssign: function(a, b) {
-        var d = this;
-        return function() {
-          d.assign(a, b)
-        }
-      },
-      stringEscapeRegex: /[^ a-zA-Z0-9]/g,
-      stringEscapeFn: function(a) {
-        return "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4)
-      },
-      escape: function(a) {
-        if (D(a)) return "'" + a.replace(this.stringEscapeRegex, this.stringEscapeFn) +
-          "'";
-        if (ba(a)) return a.toString();
-        if (!0 === a) return "true";
-        if (!1 === a) return "false";
-        if (null === a) return "null";
-        if ("undefined" === typeof a) return "undefined";
-        throw ea("esc");
-      },
-      nextId: function(a, b) {
-        var d = "v" + this.state.nextId++;
-        a || this.current().vars.push(d + (b ? "=" + b : ""));
-        return d
-      },
-      current: function() {
-        return this.state[this.state.computing]
-      }
-    };
-    Hd.prototype = {
-        compile: function(a, b) {
-          var d = this,
-            c = this.astBuilder.ast(a);
-          this.expression = a;
-          this.expensiveChecks = b;
-          X(c, d.$filter);
-          var f, e;
-          if (f = Ed(c)) e = this.recurse(f);
-          f = Cd(c.body);
-          var g;
-          f && (g = [], q(f, function(a, b) {
-            var c = d.recurse(a);
-            a.input = c;
-            g.push(c);
-            a.watchId = b
-          }));
-          var h = [];
-          q(c.body, function(a) {
-            h.push(d.recurse(a.expression))
-          });
-          f = 0 === c.body.length ? w : 1 === c.body.length ? h[0] : function(a, b) {
-            var c;
-            q(h, function(d) {
-              c = d(a, b)
-            });
-            return c
-          };
-          e && (f.assign = function(a, b, c) {
-            return e(a, c, b)
-          });
-          g && (f.inputs = g);
-          f.literal = Fd(c);
-          f.constant = c.constant;
-          return f
+        filter: function(a) {
+          a = [a];
+          for (var b = {
+              type: t.CallExpression,
+              callee: this.identifier(),
+              arguments: a,
+              filter: !0
+            }; this.expect(":");) a.push(this.expression());
+          return b
         },
-        recurse: function(a, b, d) {
-            var c, f, e = this,
-              g;
-            if (a.input) return this.inputs(a.input, a.watchId);
-            switch (a.type) {
-              case t.Literal:
-                return this.val
+        parseArguments: function() {
+          var a = [];
+          if (")" !== this.peekToken().text) {
+            do a.push(this.filterChain()); while (this.expect(","))
+          }
+          return a
+        },
+        identifier: function() {
+          var a = this.consume();
+          a.identifier || this.throwError("is not a valid identifier", a);
+          return {
+            type: t.Identifier,
+            name: a.text
+          }
+        },
+        constant: function() {
+          return {
+            type: t.Literal,
+            value: this.consume().value
+          }
+        },
+        arrayDeclaration: function() {
+            var a = [];
+            if ("]" !== this.peekToken().text) {
+              do {
+                if (this.peek("]")) break;
+                a.push(this.expression())
+              }

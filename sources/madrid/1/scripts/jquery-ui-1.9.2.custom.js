@@ -1517,7 +1517,8 @@
       this.menu.refresh();
       ul.show();
       this._resizeMenu();
-      ul.position($.extend({ of: this.element
+      ul.position($.extend({
+        of: this.element
       }, this.options.position));
       if (this.options.autoFocus) {
         this.menu.next();
@@ -1945,7 +1946,8 @@
       }, this.delay);
     },
     _open: function(submenu) {
-      var position = $.extend({ of: this.active
+      var position = $.extend({
+        of: this.active
       }, this.options.position);
       clearTimeout(this.timer);
       this.element.find(".ui-menu").not(submenu.parents(".ui-menu"))

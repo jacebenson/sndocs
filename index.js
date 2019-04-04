@@ -86,7 +86,7 @@ function addToVersions(obj) {
       versions[family][patch] === 'done'
     ) {
     } else {
-      // console.log('missing stuff\nfamily:' + family + '\npatch:' + patch);
+       console.log('missing stuff\nfamily:' + family + '\npatch:' + patch);
       if (versions && versions[family]) {
         // family exists...
         // console.log('family exists: ' + family);
@@ -97,7 +97,7 @@ function addToVersions(obj) {
           versions[family][patch] = url;
         }
       } else {
-        console.log('creating family: ' + family + ' for ' + url);
+        // console.log('creating family: ' + family + ' for ' + url);
         // family doesn't exist, create it
         versions[family] = {};
         if (typeof patch === 'undefined') {
@@ -106,7 +106,7 @@ function addToVersions(obj) {
         versions[family][patch] = url;
       }
     }
-    if (counter === config.instances.length-1) {
+    if (counter === config.instances.length -1 ) {
       createSources();
     }
   } catch (err) {
@@ -115,7 +115,9 @@ function addToVersions(obj) {
 }
 
 function createSources() {
-  // console.log(JSON.stringify(versions, '', '  '))
+  
+  var versions = require('./versions');
+   console.log(JSON.stringify(versions, '', '  '))
   console.log('starting to create files');
 
   // check for directories...
