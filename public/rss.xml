@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 08 Apr 2019 13:59:30 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 15 Apr 2019 13:34:02 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 08 Apr 2019 13:59:30 GMT</pubDate>
+        <pubDate>Mon, 15 Apr 2019 13:34:02 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -40,6 +40,12 @@
             <title><![CDATA[Madrid Patch 1]]></title>
             <link>https://web.archive.org/web/20190312142201/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-1.html</link>
             <guid isPermaLink="false">Madrid Patch 1</guid>
+            <pubDate>Mon, 12 Mar 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 2]]></title>
+            <link>https://web.archive.org/web/20190415133229/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-2.html</link>
+            <guid isPermaLink="false">Madrid Patch 2</guid>
             <pubDate>Mon, 12 Mar 2018 00:00:00 GMT</pubDate>
         </item>
         <item>

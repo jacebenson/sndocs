@@ -1826,6 +1826,13 @@
           "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0726513",
           "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/1/scripts/",
           "date": "2018-03-12"
+        },{
+          "number": "2",
+          "name": "Madrid Patch 2",
+          "url": "https://web.archive.org/web/20190415133229/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-2.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0744548",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/2/scripts/",
+          "date": "2018-03-12"
         }
       ],
         "features": [
