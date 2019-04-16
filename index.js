@@ -3,8 +3,6 @@
 // SNDocs is the unofficial documentation for Servicenow
 var config = require('./config.json'); /* Load the config.instances, and config.endpoints */
 var request = require('request');
-var xpath = require('xpath');
-var DOM = require('xmldom').DOMParser;
 var fs = require('fs');
 var https = require('https');
 var beautify = require('js-beautify').js_beautify;
@@ -37,19 +35,23 @@ config.instances.map(function (instance) {
         console.error(error);
       }
     } else { // no error
-      var doc = new DOM().parseFromString(response.body);
-      var buildTag = xpath.select('string(//*[local-name() = "build_tag"])', doc);
-      if (instance.indexOf('.') >= 0) {
-        url = 'https://' + instance;
+      var buildTagArr = response.body.toString().split('<build_tag>');
+      if (buildTagArr.length > 1) {
+        var buildTag = buildTagArr[1].split('</')[0];
+        if (instance.indexOf('.') >= 0) {
+          url = 'https://' + instance;
+        } else {
+          url = 'https://' + instance + '.service-now.com';
+        }
+        console.log('BuildTag:   ' + buildTag);
+        console.log('-------------------------' + (counter + 1) + '/' + config.instances.length + '--------------------------');
+        addToVersions({
+          url: url,
+          buildTag: buildTag
+        });
       } else {
-        url = 'https://' + instance + '.service-now.com';
+        console.log(instance + ' does not have a build tag');
       }
-      console.log('BuildTag:   ' + buildTag);
-      console.log('-------------------------' + (counter + 1) + '/' + config.instances.length + '--------------------------');
-      addToVersions({
-        url: url,
-        buildTag: buildTag
-      });
     }
   });
 });
@@ -86,7 +88,7 @@ function addToVersions(obj) {
       versions[family][patch] === 'done'
     ) {
     } else {
-       console.log('missing stuff\nfamily:' + family + '\npatch:' + patch);
+      console.log('missing stuff\nfamily:' + family + '\npatch:' + patch);
       if (versions && versions[family]) {
         // family exists...
         // console.log('family exists: ' + family);
@@ -106,7 +108,8 @@ function addToVersions(obj) {
         versions[family][patch] = url;
       }
     }
-    if (counter === config.instances.length -1 ) {
+    if (counter === config.instances.length) {
+      console.log('createSources Started');
       createSources();
     }
   } catch (err) {
@@ -115,9 +118,9 @@ function addToVersions(obj) {
 }
 
 function createSources() {
-  
+
   var versions = require('./versions');
-   console.log(JSON.stringify(versions, '', '  '))
+  console.log(JSON.stringify(versions, '', '  '))
   console.log('starting to create files');
 
   // check for directories...

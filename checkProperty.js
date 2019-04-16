@@ -1,18 +1,11 @@
-// SNDocs
-// ======
-// SNDocs is the unofficial documentation for Servicenow
 var config = require('./config.json'); /* Load the config.instances, and config.endpoints */
 var request = require('request');
-// var fs = require('fs');
-// var https = require('https');
-// var mkdirp = require('mkdirp');
 var xpath = require('xpath');
 var DOM = require('xmldom').DOMParser;
-var property = 'glide.email.test.user';
+var property = 'glide.sys.default.tz';
 config.instances = config.instances.sort();
 // config.instances.length = 5;
 config.instances.map(function (instance) {
-  config.users.map(function (user) {
     var url = '';
     if (instance.indexOf('.') >= 0) {
       url = 'https://' + instance;
@@ -34,11 +27,7 @@ config.instances.map(function (instance) {
       url: url + '/GetProperty.do?SOAP',
       method: 'POST',
       body: propertyPayload,
-      timeout: 30000,
-      headers: {
-        user: user.name,
-        pass: user.pass
-      }
+      timeout: 30000
     };
 
     request(requestOptions, function (error, response, body) {// eslint-disable-line 
@@ -59,9 +48,9 @@ config.instances.map(function (instance) {
           // console.log(doc);
           var prop = xpath.select('string(//*[local-name() = "property"])', doc);
           console.log(property + ':   ' + prop);
+        } else {
+          console.log(requestOptions.url, response.statusCode);
         }
       }
     });
-
-  });
 });
