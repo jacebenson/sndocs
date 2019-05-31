@@ -108,7 +108,7 @@ function addToVersions(obj) {
         versions[family][patch] = url;
       }
     }
-    if (counter === config.instances.length) {
+    if (counter+3 === config.instances.length) {
       console.log('createSources Started');
       createSources();
     }
