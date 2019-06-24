@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node buildversions.js > output.txt && node download.js > outputdownload.txt && node buildhtml.js",
-    "start": "light-server -s public/ -w 'public/**'",
-    "test": "node test.js"
+    "start": "light-server -s public/ -w 'public/**'"
   },
   "repository": {
     "type": "git",
