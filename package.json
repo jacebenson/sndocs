@@ -4,8 +4,8 @@
   "description": "Download scripts and make html pages for the,.",
   "main": "index.js",
   "scripts": {
-    "download": "node index.js > output.txt",
-    "build": "node app.js",
+    "build": "node buildversions.js > output.txt && node download.js > outputdownload.txt && node buildhtml.js",
+    "start": "light-server -s public/ -w 'public/**'",
     "test": "node test.js"
   },
   "repository": {
@@ -20,8 +20,8 @@
   "homepage": "https://gitlab.com/jacebenson/SNDocs#readme",
   "devDependencies": {
     "async": "^2.6.2",
-    "express": "^4.16.4",
     "js-beautify": "^1.9.0",
+    "light-server": "^2.6.2",
     "mkdirp": "^0.5.1",
     "request": "^2.88.0",
     "rss": "^1.2.2",
