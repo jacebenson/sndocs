@@ -1,6 +1,5 @@
-[![pipeline status](https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg)](https://gitlab.com/jacebenson/sndocs/commits/master)
-
 # SNDocs
+![](screenshot.png)
 
 Downloads scripts and make HTML pages for them.
 
