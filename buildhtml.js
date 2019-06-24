@@ -178,6 +178,7 @@ htmlArr.push('    <meta http-equiv="expires" content="0" />');
 htmlArr.push('    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />');
 htmlArr.push('    <meta http-equiv="pragma" content="no-cache" />');
 htmlArr.push('    <link rel="icon" href="./css/images/favicon.png" />');
+htmlArr.push('    <link rel="canonical" href="https://sndocs.jace.pro"></link>');
 htmlArr.push('</head>');
 htmlArr.push('<body>');
 htmlArr.push('    <header>');
