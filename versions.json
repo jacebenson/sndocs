@@ -78,27 +78,30 @@
     "3a": "https://bournemouth.service-now.com",
     "3b": "https://watts.service-now.com",
     "14b": "https://wittel.service-now.com",
-    "14a": "https://sbictsnprod.service-now.com"
+    "14a": "https://s24prod.service-now.com"
   },
   "london": {
     "0": "https://ucsdservicedesk.service-now.com",
     "1": "https://sephora.service-now.com",
     "2": "https://lonestar.service-now.com",
     "3": "https://strykercorp.service-now.com",
-    "4": "https://united.service-now.com",
-    "5": "https://veritas.service-now.com",
+    "4": "https://rmit.service-now.com",
+    "5": "https://pearson.service-now.com",
     "6": "https://wdpr.service-now.com",
     "7": "https://volvocars.service-now.com",
-    "8": "https://yale.service-now.com",
-    "6a": "https://viawest.service-now.com",
-    "6b": "https://voeazul.service-now.com"
+    "8": "https://welltokinc.service-now.com",
+    "9": "https://thomsonreuters.service-now.com",
+    "6a": "https://veritas.service-now.com",
+    "6b": "https://kelloggprod.service-now.com"
   },
   "madrid": {
     "0": "https://signon.service-now.com",
     "1": "https://wsi.service-now.com",
     "2": "https://zetupprod.service-now.com",
-    "3": "https://williamhill.service-now.com",
-    "4": "https://wayfair.service-now.com"
+    "3": "https://uoadev.service-now.com",
+    "4": "https://vub.service-now.com",
+    "5": "https://williams.service-now.com",
+    "4a": "https://training.service-now.com"
   },
   "newyork": {},
   "orlando": {},

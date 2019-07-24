@@ -1820,6 +1820,13 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723498",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/8/scripts/",
         "date": "2019-05-02"
+      },{
+        "number": "9",
+        "name": "London Patch 9",
+        "url": "https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/9/scripts/",
+        "date": "2019-07-03"
       }
     ],
       "features": [
@@ -1882,6 +1889,20 @@
           "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746737",
           "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4/scripts/",
           "date": "2018-06-13"
+        },{
+          "number": "4a",
+          "name": "Madrid Patch 4a",
+          "url": "",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0753617",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4a/scripts/",
+          "date": "2018-07-09"
+        },{
+          "number": "5",
+          "name": "Madrid Patch 5",
+          "url": "https://web.archive.org/web/20190724040541/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-5.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/5/scripts/",
+          "date": "2018-07-11"
         }
       ],
         "features": [

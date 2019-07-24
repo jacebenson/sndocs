@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 08 Jul 2019 02:25:25 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 24 Jul 2019 04:10:54 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 08 Jul 2019 02:25:25 GMT</pubDate>
+        <pubDate>Wed, 24 Jul 2019 04:10:54 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -59,6 +59,17 @@
             <link>https://web.archive.org/web/20190624180731/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-4.html</link>
             <guid isPermaLink="false">Madrid Patch 4</guid>
             <pubDate>Wed, 13 Jun 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 4a]]></title>
+            <guid isPermaLink="false">Madrid Patch 4a</guid>
+            <pubDate>Mon, 09 Jul 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 5]]></title>
+            <link>https://web.archive.org/web/20190724040541/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-5.html</link>
+            <guid isPermaLink="false">Madrid Patch 5</guid>
+            <pubDate>Wed, 11 Jul 2018 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[London]]></title>
@@ -130,6 +141,12 @@
             <link>https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-8.html</link>
             <guid isPermaLink="false">London Patch 8</guid>
             <pubDate>Thu, 02 May 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[London Patch 9]]></title>
+            <link>https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html</link>
+            <guid isPermaLink="false">London Patch 9</guid>
+            <pubDate>Wed, 03 Jul 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Kingston]]></title>
