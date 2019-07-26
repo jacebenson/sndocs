@@ -103,7 +103,9 @@
     "5": "https://williams.service-now.com",
     "4a": "https://training.service-now.com"
   },
-  "newyork": {},
+  "newyork": {
+    "0": "https://dev74974.service-now.com"
+  },
   "orlando": {},
   "paris": {},
   "trackgiraffe": {

@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 24 Jul 2019 04:10:54 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 26 Jul 2019 15:57:46 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Wed, 24 Jul 2019 04:10:54 GMT</pubDate>
+        <pubDate>Fri, 26 Jul 2019 15:57:46 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -24,6 +24,18 @@
         <itunes:image href="https://sndocs.jacebenson.com/favicon.png"/>
         <itunes:category text="Technology">
         </itunes:category>
+        <item>
+            <title><![CDATA[New York]]></title>
+            <link>https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="false">New York</guid>
+            <pubDate>Fri, 26 Jul 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[New York Patch 0]]></title>
+            <link>https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html</link>
+            <guid isPermaLink="false">New York Patch 0</guid>
+            <pubDate>Fri, 26 Jul 2019 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Madrid]]></title>
             <link>https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html</link>

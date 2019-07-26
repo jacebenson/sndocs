@@ -1923,5 +1923,20 @@
           "Service Portal: 2FA",
           "Admins can roll back a clone for up to seven days"
         ]
-      }
+      },{
+        "name": "New York",
+        "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
+        "date": "2019-07-26",
+        "patches": [
+        {
+          "number": "0",
+          "name": "New York Patch 0",
+          "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748891",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
+          "date": "2019-07-26"
+        }
+        ]
+        
+    }
 ]

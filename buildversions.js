@@ -24,7 +24,10 @@ config.instances.map(function (instance, index) {
     method: 'POST',
     body: config.payload,
     timeout: 60000,
-    rejectUnauthorized: false // added to get around ssl issue found.
+    rejectUnauthorized: false, // added to get around ssl issue found.
+    headers: {
+      Authorization: 'Basic ' + new Buffer("admin" + ":" + "admin").toString('base64')
+    }
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 
     l++;
