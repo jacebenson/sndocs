@@ -1903,6 +1903,13 @@
           "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
           "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/5/scripts/",
           "date": "2018-07-11"
+        },{
+          "number": "6",
+          "name": "Madrid Patch 6",
+          "url": "https://web.archive.org/web/20190812175435/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-6.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0755809",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/6/scripts/",
+          "date": "2018-08-08"
         }
       ],
         "features": [
