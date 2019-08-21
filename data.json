@@ -1943,7 +1943,37 @@
           "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
           "date": "2019-07-26"
         }
+        ],
+        "features": [
+                "Agent Workspace: Landing Pages, List Updates,Slash commands,Response templates",
+                "Agile Dev 2.0: Agile Board Config. columns",
+                "Auth: API for JSON Web Token generation",
+                "ATF: Attachment test steps",
+                "ATF: Parallell testing",
+                "ATF: Mutually exclusive tests",
+                "CSM: Service-aware install base",
+                "Dashboards: Multiple breakdown",
+                "Delegated Dev: Manage Update Sets",
+                "Disco; File-based Discovery",
+                "Event Mgmt: SAP Connector",
+                "Flow Designer: Action 'Add worknote line'",
+                "Flow Designer: Action 'Assoc. Rec. to Email'",
+                "Flow Designer: Action 'Create or Update Record'",
+                "Flow Designer: Dynamic Inputs",
+                "Flow Designer: Export flow as single update set",
+                "Flow Designer: Action 'Get Catalog Variables'",
+                "Flow Designer: Action 'Get Email Header'",
+                "Flow Designer: Action 'Look up email attachments'",
+                "Flow Designer: Action 'Move email attachments to record'",
+                "Flow Designer: Run in foreground",
+                "ITSM Roles",
+                "Remote Tables",
+                "Business Stakeholder role",
+                "Catalog MVRS: Max # of roles",
+                "System Clone: Scheduled recurring clones",
+                "Time card records by day",
+                "VTB: Swimlanes",
+                "VTB: Themes" 
         ]
-        
     }
 ]
