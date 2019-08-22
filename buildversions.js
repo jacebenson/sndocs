@@ -19,7 +19,7 @@ config.instances.map(function (instance, index) {
   } else {
     url = 'https://' + instance + '.service-now.com';
   }
-  var requestOptions = {
+  /*var requestOptions = {
     url: url + '/InstanceInfo.do?SOAP',
     method: 'POST',
     body: config.payload,
@@ -28,6 +28,12 @@ config.instances.map(function (instance, index) {
     headers: {
       Authorization: 'Basic ' + new Buffer("admin" + ":" + "admin").toString('base64')
     }
+  };*/
+  var requestOptions = {
+          url: url + '/stats.do',
+          method: 'GET',
+          timeout: 60000,
+          rejectUnauthorized: false // add to get around ssl issue found
   };
   request(requestOptions, function (error, response, body) {// eslint-disable-line 
     l++;
@@ -44,19 +50,21 @@ config.instances.map(function (instance, index) {
 
       console.log('-----------------------------', l, '/', config.instances.length, '-----------------------------');
       console.log('Instance: ', url);
-      var buildTagArr = response.body.toString().split('<build_tag>');
-      if (buildTagArr.length > 1) {
-        var buildTag = buildTagArr[1].split('</')[0];
+     // var buildTagArr = response.body.toString().split('<build_tag>');
+     var buildTagArr = response.body.toString().split('Build tag: ');
+     
+     if (buildTagArr.length > 1) {
+        var buildTag = buildTagArr[1].split('<br')[0];
         if (instance.indexOf('.') >= 0) {
           url = 'https://' + instance;
         } else {
           url = 'https://' + instance + '.service-now.com';
         }
         console.log('BuildTag:  ' + buildTag);
-        addToVersions({
-          url: url,
-          buildTag: buildTag
-        });
+     //   addToVersions({
+     //     url: url,
+     //     buildTag: buildTag
+     //   });
       } else {
         console.log(instance + ' does not have a build tag');
       }
