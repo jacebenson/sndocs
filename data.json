@@ -1945,7 +1945,7 @@
         }
         ],
         "features": [
-                "Agent Workspace: Landing Pages, List Updates,Slash commands,Response templates",
+                "Agent Workspace: Landing Pages, List Updates,Response templates",
                 "Agile Dev 2.0: Agile Board Config. columns",
                 "Auth: API for JSON Web Token generation",
                 "ATF: Attachment test steps",
@@ -1956,15 +1956,9 @@
                 "Delegated Dev: Manage Update Sets",
                 "Disco; File-based Discovery",
                 "Event Mgmt: SAP Connector",
-                "Flow Designer: Action 'Add worknote line'",
-                "Flow Designer: Action 'Assoc. Rec. to Email'",
-                "Flow Designer: Action 'Create or Update Record'",
+                "Flow Designer: Actions 'Add worknote line', 'Assoc. Rec. to Email', 'Create or Update Record'",
                 "Flow Designer: Dynamic Inputs",
                 "Flow Designer: Export flow as single update set",
-                "Flow Designer: Action 'Get Catalog Variables'",
-                "Flow Designer: Action 'Get Email Header'",
-                "Flow Designer: Action 'Look up email attachments'",
-                "Flow Designer: Action 'Move email attachments to record'",
                 "Flow Designer: Run in foreground",
                 "ITSM Roles",
                 "Remote Tables",
@@ -1973,7 +1967,7 @@
                 "System Clone: Scheduled recurring clones",
                 "Time card records by day",
                 "VTB: Swimlanes",
-                "VTB: Themes" 
+                "Processors are \"deprocated\"" 
         ]
     }
 ]
