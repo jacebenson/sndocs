@@ -512,6 +512,12 @@
     "date": "2011-12-01",
     "patches": [
       {
+        "number": "0",
+        "name": "Aspen Patch 0",
+        "url": "https://www.slideshare.net/SunshineLaLady/aspencustomerwebinar-slideshare120111174354phpapp01?qid=1af6f62c-6c73-4164-bda7-7599dda50cd0&v=&b=&from_search=12",
+        "date": ""
+      },
+      {
         "number": "1",
         "name": "Aspen Patch 1",
         "url": "https://web.archive.org/web/20170513203313/http://wiki.servicenow.com:80/index.php?title=Release:Aspen_Patch_1",
