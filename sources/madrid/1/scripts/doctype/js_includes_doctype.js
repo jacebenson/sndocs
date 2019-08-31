@@ -13506,7 +13506,8 @@ if (typeof CustomEvent !== "undefined") {
       this.menu.refresh();
       ul.show();
       this._resizeMenu();
-      ul.position($.extend({ of: this.element
+      ul.position($.extend({
+        of: this.element
       }, this.options.position));
       if (this.options.autoFocus) {
         this.menu.next();
@@ -13934,7 +13935,8 @@ if (typeof CustomEvent !== "undefined") {
       }, this.delay);
     },
     _open: function(submenu) {
-      var position = $.extend({ of: this.active
+      var position = $.extend({
+        of: this.active
       }, this.options.position);
       clearTimeout(this.timer);
       this.element.find(".ui-menu").not(submenu.parents(".ui-menu"))
@@ -40957,7 +40959,8 @@ var GlideFlow = function(t) {
   r(r.S + r.F * n(21)(function() {
     function t() {}
     return !(Array.of.call(t) instanceof t)
-  }), "Array", { of: function() {
+  }), "Array", {
+    of: function() {
       for (var t = 0, e = arguments.length, n = new("function" == typeof this ? this : Array)(e); e > t;) o(n, t, arguments[t++]);
       return n.length = e, n
     }
@@ -46745,6 +46748,625 @@ TestClient.prototype = {
   },
   type: 'TestClient'
 };;
+/*! RESOURCE: scripts/Uploader.js */
+var Uploader = Class.create({
+  initialize: function(containerName, tableName, sys_id) {
+    this.containerName = containerName;
+    this.height = 20;
+    this._createInput();
+    this.sys_id = sys_id;
+    this.tableName = tableName;
+    this.fieldName;
+    this.callback;
+    Event.observe(window, 'unload', this._reset.bind(this));
+    this.startLoading;
+    this.tempSpot;
+    this.mouseDown = false;
+  },
+  setCallback: function(fDefinition) {
+    this.callback = fDefinition;
+  },
+  setStartLoading: function(fDefinition) {
+    this.startLoading = fDefinition;
+  },
+  setFieldName: function(fieldName) {
+    this.fieldName = fieldName;
+  },
+  setTitle: function(title) {
+    this.input.title = title;
+  },
+  setHeight: function(height) {
+    if (this.height == height)
+      return;
+    this.height = height;
+    this.input.parentNode.removeChild(this.input);
+    delete(this.input);
+    this._createInput();
+  },
+  _createInput: function() {
+    var parent = this.containerName;
+    if (this.tempSpot)
+      parent = this.tempSpot;
+    parent = $(parent);
+    this.input = new Element("input");
+    var input = this.input;
+    input.setAttribute("type", "file");
+    input.className = "upload_input_file";
+    input.name = this.containerName + "_input_file";
+    input.setStyle({
+      display: 'inline',
+      height: this.height + "px",
+      width: this.height + "px",
+      fontSize: this.height + "px",
+      opacity: "0 !important",
+      filter: "alpha(opacity=0) !important",
+      cursor: "pointer !important",
+      zIndex: (isMSIE7) ? "100" : "100 !important"
+    });
+    Event.observe(input, 'change', this._onFileChange.bind(this, input));
+    parent.appendChild(input);
+  },
+  _onFileChange: function(input) {
+    if (this.startLoading)
+      this.startLoading.call();
+    var iframe = this._createIFrame();
+    var form = this._createForm();
+    form.appendChild(this.input);
+    Event.observe(iframe, 'load', this._uploaded.bind(this));
+    form.submit();
+  },
+  _uploaded: function() {
+    var f = this.iframe;
+    var doc = null;
+    if (isMSIE)
+      doc = f.contentWindow.document.XMLDocument ? f.contentWindow.document.XMLDocument : f.contentWindow.document;
+    else
+      doc = f.contentDocument;
+    var root = doc.documentElement;
+    if (this.callback) {
+      var uri = root.getAttribute('attachment_uri');
+      var name = root.getAttribute('file_name');
+      var sys_id = root.getAttribute('sys_id');
+      this.callback.call(this, uri, name, sys_id);
+    }
+    this.form.parentNode.removeChild(this.form);
+    delete this.form;
+    this.form = null;
+    var iframe = this.iframe;
+    this.iframe = null;
+    setTimeout(function() {
+      iframe.parentNode.removeChild(iframe);
+      delete iframe;
+    }, 1000);
+    this._createInput();
+  },
+  _createIFrame: function() {
+    var name = this.containerName + "_iframe";
+    var s = "<iframe src='javascript: false' name='" + name + "'/>";
+    this.iframe = toElement(s);
+    this.iframe.style.display = 'none';
+    this.iframe.style.position = 'absolute';
+    this.iframe.style.left = '-999px';
+    document.body.appendChild(this.iframe);
+    return this.iframe;
+  },
+  _createForm: function() {
+    this.containerName + "_form";
+    var s = "<form method='post' enctype='multipart/form-data' name='" + this.containerName + "' ></form>";
+    var form = toElement(s)
+    this._addInput(form, "sysparm_table", this.tableName);
+    this._addInput(form, "sysparm_xml", "true");
+    if (this.fieldName)
+      this._addInput(form, "sysparm_fieldname", this.fieldName);
+    this._addInput(form, "sysparm_sys_id", this.sys_id);
+    if (typeof g_ck != 'undefined')
+      this._addInput(form, "sysparm_ck", g_ck);
+    form.setAttribute("action", "sys_attachment.do");
+    form.setAttribute("target", this.containerName + "_iframe");
+    form.style.display = 'none';
+    form.style.position = 'absolute';
+    form.style.left = '-999px';
+    this.form = form;
+    document.body.appendChild(this.form);
+    return form;
+  },
+  _addInput: function(form, name, value) {
+    var input = cel("input");
+    input.value = value;
+    input.name = name;
+    form.appendChild(input);
+  },
+  _reset: function() {
+    this.input = null;
+  },
+  moveInputTo: function(elementName) {
+    this.tempSpot = elementName;
+    if (elementName == null)
+      elementName = this.containerName;
+    var input = this.input;
+    var p = input.parentNode;
+    var parent = gel(elementName);
+    if (p == parent)
+      return;
+    input.parentNode.removeChild(input);
+    parent.appendChild(input);
+  },
+  toString: function() {
+    return 'Uploader';
+  }
+});
+
+function toElement(innerHTML) {
+  var div = cel('div');
+  div.innerHTML = innerHTML;
+  var element = div.firstChild;
+  div.removeChild(element);
+  return element;
+};
+/*! RESOURCE: scripts/ImageUploader.js */
+var ImageUploader = Class.create(Uploader, {
+  initialize: function($super, containerName, tableName, sys_id) {
+    $super(containerName, tableName, sys_id);
+  },
+  _onFileChange: function($super, input) {
+    if (!this._isFileNameValid(input.value))
+      return;
+    $super(input);
+  },
+  _isFileNameValid: function(filename) {
+    if (endsWithImageExtension(filename))
+      return true;
+    var message = getMessage('Name is not a recognized image file format');
+    alert(message);
+    return false;
+  }
+});;
+/*! RESOURCE: scripts/OpticsInspector.js */
+var OpticsInspector = Class
+  .create({
+    CATEGORIES: {
+      "sys_script": "BUSINESS RULE",
+      "sys_script_client": "CLIENT SCRIPT",
+      "data_lookup": "DATA LOOKUP",
+      "sys_data_policy2": "DATA POLICY",
+      "ui_policy": "UI POLICY",
+      "wf_context": "WORKFLOW",
+      "request_action": "REQUEST ACTION",
+      "script_engine": "SCRIPT ENGINE",
+      "wf_activity": "WORKFLOW ACTIVITY",
+      "acl": "ACL",
+      "sys_ui_action": "UI ACTION",
+      "reference_qual": "REFERENCE QUALIFIER QUERY",
+      "container_action": "CONTAINER ACTION"
+    },
+    initialize: function() {
+      this.opticsContextStack = new Array();
+      this.tableName = null;
+      this.fieldName = null;
+      this.enabled = false;
+    },
+    pushOpticsContext: function(category, name, sys_id, sourceTable) {
+      if (category == 'sys_script_client')
+        name = "\"" + name + "\"";
+      var context = {
+        "category": category,
+        "name": name,
+        "sys_id": sys_id,
+        "startTime": new Date(),
+        actions: [],
+        type: 'context',
+        "sourceTable": sourceTable || category
+      };
+      if ((typeof g_form !== 'undefined') && g_form.actionStack)
+        g_form.actionStack.push(context);
+      if (this.isInspecting() && category !== 'container_action')
+        this.opticsContextStack.push(context);
+    },
+    popOpticsContext: function() {
+      var context;
+      if ((typeof g_form !== 'undefined') && g_form.actionStack) {
+        context = g_form.actionStack.pop();
+        if (g_form._pushAction)
+          g_form._pushAction(context);
+      }
+      if (this.isInspecting() && this.opticsContextStack.length > 0 && (context && context.category !== 'container_action'))
+        return this.opticsContextStack.pop();
+      return null;
+    },
+    isInspecting: function(tableName, fieldName) {
+      if (this.tableName == null && this.fieldName == null)
+        return false;
+      if (arguments.length == 0)
+        return (this.tableName && this.tableName.length > 0 &&
+          this.fieldName && this.fieldName.length > 0);
+      if (arguments.length == 2)
+        return tableName == this.tableName &&
+          fieldName == this.fieldName;
+      return false;
+    },
+    getTableName: function() {
+      return (this.tableName && this.tableName.length > 0) ? this.tableName :
+        '';
+    },
+    getFieldName: function() {
+      return (this.fieldName && this.fieldName.length > 0) ? this.fieldName :
+        '';
+    },
+    hideWatchIcons: function() {
+      if (isDoctype()) {
+        $$(".icon-debug.watch_icon").each(function(element) {
+          $(element).hide()
+        });
+      } else {
+        $$("img.watch_icon").each(function(element) {
+          $(element).hide()
+        });
+      }
+    },
+    addWatchIcon: function(watchField) {
+      if (!watchField) {
+        return;
+      }
+      var td = $('label.' + watchField);
+      if (!td) {
+        var fieldParts = watchField.split(".");
+        if ((fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0)) {
+          td = $('label_' + fieldParts[1]);
+          if (td && td.tagName !== 'TD') {
+            var tds = td.getElementsByTagName("TD");
+            if (tds && tds.length > 0) {
+              td = tds[0];
+            }
+          }
+          if (!td) {
+            td = $('ni.' + fieldParts[1] + '_label');
+          }
+        }
+      }
+      var icon;
+      if (td) {
+        if (isDoctype()) {
+          var label = td.select('label');
+          if (label.length > 0) {
+            label = label[0];
+          } else {
+            label = td.select('legend');
+            if (label.length > 0) {
+              label = label[0];
+            } else if (td.nodeName == "LABEL") {
+              label = td;
+            }
+          }
+          icon = '<span class="label-icon icon-debug watch_icon" id="' +
+            watchField +
+            '.watch_icon"' +
+            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
+            ' src="images/debug.gifx" ' +
+            ' alt="Field is being watched"' +
+            ' title="Field is being watched"></span>';
+          if (label) {
+            $(label).insert(icon);
+          }
+        } else {
+          if (fieldParts.length === 2 &&
+            fieldParts[1].startsWith("IO:")) {
+            var legend = td.select('legend');
+            if (legend.length > 0) {
+              td = legend[0];
+            }
+          }
+          icon = '<img class="watch_icon" id="' +
+            watchField +
+            '.watch_icon"' +
+            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
+            ' src="images/debug.gifx" ' +
+            ' alt="Field is being watched"' +
+            ' title="Field is being watched" />';
+          td.insert(icon);
+        }
+      }
+    },
+    clearWatchField: function(watchfield) {
+      this.opticsContextStack = new Array();
+      this.tableName = null;
+      this.fieldName = null;
+      this.hideWatchIcons();
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.updateFieldInfo)
+          wndw.updateFieldInfo(null);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+          var wndw = debuggerTools.getJsDebugWindow();
+          if (wndw.updateFieldInfo)
+            wndw.updateFieldInfo(null);
+        }
+      }
+    },
+    setWatchField: function(watchField) {
+      if (!watchField)
+        return;
+      var fieldParts = watchField.split(".");
+      if (!(fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0))
+        return;
+      this.tableName = fieldParts[0];
+      this.fieldName = fieldParts[1];
+      this.hideWatchIcons();
+      var icon = $(watchField + ".watch_icon");
+      if (icon) {
+        icon.show();
+      } else {
+        this.addWatchIcon(watchField);
+      }
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.updateFieldInfo)
+          wndw.updateFieldInfo(watchField);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+          var wndw = debuggerTools.getJsDebugWindow();
+          if (wndw.updateFieldInfo)
+            wndw.updateFieldInfo(watchField);
+        }
+      }
+    },
+    showWatchField: function(watchField) {
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools) {
+        if (!debuggerTools.isDebugPanelVisible())
+          debuggerTools.showFieldWatcher();
+        setWatchField(watchField);
+      } else {
+        debuggerTools = parent.parent.debuggerTools;
+        if (debuggerTools) {
+          if (!debuggerTools.isDebugPanelVisible())
+            debuggerTools.showFieldWatcher();
+          setWatchField(watchField);
+        }
+      }
+    },
+    processClientMessage: function(notification) {
+      var opticsContext = this.opticsContextStack[this.opticsContextStack.length - 1];
+      if (!opticsContext) {
+        jslog("No optics context found");
+        return;
+      }
+      var info = {
+        type: 'CLIENT ',
+        message: notification.message,
+        message_type: "static",
+        category: opticsContext.category,
+        name: opticsContext.name,
+        level: this.opticsContextStack.length,
+        time: getFormattedTime(new Date()),
+        call_trace: this._getCallTrace(this.opticsContextStack),
+        sys_id: opticsContext["sys_id"],
+        sourceTable: opticsContext["sourceTable"]
+      };
+      if (notification["oldvalue"] && notification["newvalue"]) {
+        info.message_type = "change";
+        info.oldvalue = notification["oldvalue"];
+        info.newvalue = notification["newvalue"];
+      }
+      this.process(info);
+    },
+    processServerMessages: function() {
+      var spans = $$('span[data-type="optics_debug"]');
+      for (var i = 0; i < spans.length; i++) {
+        var notification = new GlideUINotification({
+          xml: spans[i]
+        });
+        this.processServerMessage(notification);
+        spans[i].setAttribute("data-attr-processed", "true");
+      }
+    },
+    processServerMessage: function(notification) {
+      if (notification.getAttribute('processed') == "true")
+        return;
+      var info = {
+        type: 'SERVER',
+        category: notification.getAttribute('category'),
+        name: notification.getAttribute('name'),
+        message: notification.getAttribute('message'),
+        message_type: notification.getAttribute('message_type'),
+        oldvalue: notification.getAttribute('oldvalue'),
+        newvalue: notification.getAttribute('newvalue'),
+        level: notification.getAttribute('level'),
+        time: notification.getAttribute('time'),
+        sys_id: notification.getAttribute('sys_id'),
+        sourceTable: notification.getAttribute('sourceTable'),
+        call_trace: this._getCallTrace(eval(notification
+          .getAttribute('call_trace')))
+      };
+      this.process(info);
+    },
+    process: function(notification) {
+      var msg = '<div class="debug_line ' + notification['category'] + '">' + this._getMessage(notification) + '</div>';
+      this._log(msg);
+    },
+    addLine: function() {
+      this._log('<hr class="logs-divider"/>');
+    },
+    openScriptWindow: function(tablename, sysid) {
+      if (tablename && sysid) {
+        if (tablename == "request_action")
+          tablename = "sys_ui_action";
+        var url = "/" + tablename + ".do?sys_id=" + sysid;
+        window.open(url, "tablewindow");
+      }
+    },
+    _log: function(msg) {
+      var debuggerTools = getTopWindow().debuggerTools;
+      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+        var wndw = debuggerTools.getJsDebugWindow();
+        if (wndw.insertJsDebugMsg)
+          wndw.insertJsDebugMsg(msg);
+      } else {
+        if (parent && parent.parent) {
+          debuggerTools = parent.parent.debuggerTools;
+          if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
+            var wndw = debuggerTools.getJsDebugWindow();
+            if (wndw.insertJsDebugMsg)
+              wndw.insertJsDebugMsg(msg);
+          }
+        }
+      }
+    },
+    _getCallTrace: function(contextStack) {
+      var trace = '';
+      var arrows = '<span class="rtl-arrow"> &larr;</span><span class="lrt-arrow">&rarr; </span>';
+      var space = arrows;
+      for (i = 0, maxi = contextStack.length; i < maxi; i++) {
+        var context = contextStack[i];
+        if (i > 0)
+          space = arrows + space;
+        if (context['name'] && context['name'].length > 0)
+          trace += '<div>' + space +
+          this._getCategoryName(context['category']) +
+          '&nbsp;-&nbsp;' + context['name'] + '</div>';
+        else
+          trace += '<div>' + space +
+          this._getCategoryName(context['category']) +
+          '</div>';
+      }
+      if (trace && trace.length > 0)
+        trace = '<div class="call_trace">' + trace + '</div>';
+      return trace;
+    },
+    _getMessage: function(notification) {
+      var notif_type = notification['type'];
+      var legend_title = (notif_type.indexOf('CLIENT') > -1) ? 'Client-side activity' :
+        'Server-side activity';
+      var msg = '<span class="expand-button" onclick="toggleCallTrace(this);">&nbsp;</span>';
+      msg += '<img class="infoIcon" height="16"  width="16" border="0" src="images/info-icon.png" title="' +
+        legend_title + '" alt="' + legend_title + '">';
+      msg += '<span class="log-time ' + notif_type + '">' +
+        notification['time'] + '</span>';
+      msg += '<span class="log-category">' +
+        this.CATEGORIES[notification['category']];
+      if (notification['name'] && notification['name'].length > 0) {
+        if (notification["sys_id"])
+          msg += '&nbsp;-&nbsp;<a data-tablename="' +
+          notification['sourceTable'] +
+          '" data-sys_id="' +
+          notification['sys_id'] +
+          '" onclick="javascript:openScriptWindow(this);">' +
+          notification['name'] + '</a></span>';
+        else
+          msg += '&nbsp;-&nbsp;' + notification['name'] +
+          '</span>';
+      } else
+        msg += '</span>';
+      msg += '<span class="log-value">';
+      if ("request_action" === notification['category']) {
+        msg += 'Value received from client is: <span class="value" title="Value">' +
+          notification['message'] + '</span>';
+      } else if (notification["message_type"] == "change") {
+        msg += '<span>' +
+          notification["oldvalue"] +
+          '</span><span class="rtl-arrow"> &larr; </span><span class="lrt-arrow"> &rarr; </span><span>' +
+          notification["newvalue"] + '</span>';
+      } else {
+        msg += notification['message'];
+      }
+      msg += '</span>';
+      msg += notification['call_trace'];
+      return msg;
+    },
+    _getCategoryName: function(category) {
+      var name = this.CATEGORIES[category];
+      if (name === 'undefined' || name === null)
+        name = category;
+      return name;
+    },
+    _getLevelStr: function(level) {
+      if (level == 'undefined' || level == null || level <= 0)
+        level = 1;
+      var levelStr = '';
+      for (i = 0; i < level; i++)
+        levelStr += '-';
+      return levelStr + '>';
+    },
+    toString: function() {
+      return 'OpticsInspector';
+    }
+  });
+var g_optics_inspect_handler = new OpticsInspector();
+OpticsInspector.WATCH_EVENT = 'glide:ui_notification.optics_debug';
+OpticsInspector.WATCH_EVENT_UI = 'glide:ui_notification.optics_debug_ui';
+OpticsInspector.WATCH_FIELD = 'glide_optics_inspect_watchfield';
+OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_watchfield';
+OpticsInspector.UPDATE_WATCH_FIELD = 'glide_optics_inspect_update_watchfield';
+OpticsInspector.CLEAR_WATCH_FIELD = 'glide_optics_inspect_clear_watchfield';
+OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_show_watchfield';
+OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
+OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
+OpticsInspector.PUT_CS_CONTEXT = 'glide_optics_inspect_put_cs_context';
+OpticsInspector.POP_CS_CONTEXT = 'glide_optics_inspect_pop_cs_context';
+OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
+OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
+OpticsInspector.LOG_MESSAGE = 'glide_optics_inspect_log_message';
+OpticsInspector.WINDOW_OPEN = 'glide_optics_inspect_window_open';
+
+function getClientScriptContextName(name, type) {
+  var csname = null;
+  if (type === "submit")
+    csname = g_event_handlers_onSubmit[name];
+  else if (type === "load")
+    csname = g_event_handlers_onLoad[name];
+  else if (type === "change")
+    csname = g_event_handlers_onChange[name];
+  return csname;
+}
+CustomEvent.observe(OpticsInspector.PUT_CONTEXT, function(category, name, sys_id, sourceTable) {
+  g_optics_inspect_handler.pushOpticsContext(category, name, sys_id, sourceTable);
+});
+CustomEvent.observe(OpticsInspector.POP_CONTEXT, function() {
+  g_optics_inspect_handler.popOpticsContext();
+});
+CustomEvent.observe(OpticsInspector.PUT_CS_CONTEXT, function(name, type) {
+  var csname = getClientScriptContextName(name, type);
+  if (csname)
+    g_optics_inspect_handler.pushOpticsContext("sys_script_client", csname,
+      g_event_handler_ids[name]);
+});
+CustomEvent.observe(OpticsInspector.POP_CS_CONTEXT, function(name, type) {
+  var csname = getClientScriptContextName(name, type);
+  if (csname)
+    g_optics_inspect_handler.popOpticsContext();
+});
+CustomEvent.observe(OpticsInspector.LOG_MESSAGE, function(notification) {
+  if (g_optics_inspect_handler.isInspecting(notification["table"],
+      notification["field"])) {
+    g_optics_inspect_handler.processClientMessage(notification);
+  }
+});
+CustomEvent.observe(OpticsInspector.WATCH_EVENT_UI, function(notification) {
+  g_optics_inspect_handler.process(notification);
+});
+CustomEvent.observe(OpticsInspector.WATCH_EVENT, function(notification) {
+  g_optics_inspect_handler.processServerMessage(notification);
+});
+CustomEvent.observe(OpticsInspector.WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.setWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.SHOW_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.showWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.CLEAR_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.clearWatchField(watchfield);
+});
+CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
+  g_optics_inspect_handler.setWatchField(watchfield);
+  if (window.name !== "jsdebugger") {
+    g_optics_inspect_handler.addLine();
+    g_optics_inspect_handler.processServerMessages();
+  }
+});;
 /*! RESOURCE: scripts/classes/GlideMenu.js */
 var GlideMenu = Class.create();
 GlideMenu.prototype = {
@@ -47533,514 +48155,6 @@ var AJAXTextSearchCompleter = Class.create(AJAXTableCompleter, {
     return width;
   }
 });;
-/*! RESOURCE: scripts/OpticsInspector.js */
-var OpticsInspector = Class
-  .create({
-    CATEGORIES: {
-      "sys_script": "BUSINESS RULE",
-      "sys_script_client": "CLIENT SCRIPT",
-      "data_lookup": "DATA LOOKUP",
-      "sys_data_policy2": "DATA POLICY",
-      "ui_policy": "UI POLICY",
-      "wf_context": "WORKFLOW",
-      "request_action": "REQUEST ACTION",
-      "script_engine": "SCRIPT ENGINE",
-      "wf_activity": "WORKFLOW ACTIVITY",
-      "acl": "ACL",
-      "sys_ui_action": "UI ACTION",
-      "reference_qual": "REFERENCE QUALIFIER QUERY",
-      "container_action": "CONTAINER ACTION"
-    },
-    initialize: function() {
-      this.opticsContextStack = new Array();
-      this.tableName = null;
-      this.fieldName = null;
-      this.enabled = false;
-    },
-    pushOpticsContext: function(category, name, sys_id, sourceTable) {
-      if (category == 'sys_script_client')
-        name = "\"" + name + "\"";
-      var context = {
-        "category": category,
-        "name": name,
-        "sys_id": sys_id,
-        "startTime": new Date(),
-        actions: [],
-        type: 'context',
-        "sourceTable": sourceTable || category
-      };
-      if ((typeof g_form !== 'undefined') && g_form.actionStack)
-        g_form.actionStack.push(context);
-      if (this.isInspecting() && category !== 'container_action')
-        this.opticsContextStack.push(context);
-    },
-    popOpticsContext: function() {
-      var context;
-      if ((typeof g_form !== 'undefined') && g_form.actionStack) {
-        context = g_form.actionStack.pop();
-        if (g_form._pushAction)
-          g_form._pushAction(context);
-      }
-      if (this.isInspecting() && this.opticsContextStack.length > 0 && (context && context.category !== 'container_action'))
-        return this.opticsContextStack.pop();
-      return null;
-    },
-    isInspecting: function(tableName, fieldName) {
-      if (this.tableName == null && this.fieldName == null)
-        return false;
-      if (arguments.length == 0)
-        return (this.tableName && this.tableName.length > 0 &&
-          this.fieldName && this.fieldName.length > 0);
-      if (arguments.length == 2)
-        return tableName == this.tableName &&
-          fieldName == this.fieldName;
-      return false;
-    },
-    getTableName: function() {
-      return (this.tableName && this.tableName.length > 0) ? this.tableName :
-        '';
-    },
-    getFieldName: function() {
-      return (this.fieldName && this.fieldName.length > 0) ? this.fieldName :
-        '';
-    },
-    hideWatchIcons: function() {
-      if (isDoctype()) {
-        $$(".icon-debug.watch_icon").each(function(element) {
-          $(element).hide()
-        });
-      } else {
-        $$("img.watch_icon").each(function(element) {
-          $(element).hide()
-        });
-      }
-    },
-    addWatchIcon: function(watchField) {
-      if (!watchField) {
-        return;
-      }
-      var td = $('label.' + watchField);
-      if (!td) {
-        var fieldParts = watchField.split(".");
-        if ((fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0)) {
-          td = $('label_' + fieldParts[1]);
-          if (td && td.tagName !== 'TD') {
-            var tds = td.getElementsByTagName("TD");
-            if (tds && tds.length > 0) {
-              td = tds[0];
-            }
-          }
-          if (!td) {
-            td = $('ni.' + fieldParts[1] + '_label');
-          }
-        }
-      }
-      var icon;
-      if (td) {
-        if (isDoctype()) {
-          var label = td.select('label');
-          if (label.length > 0) {
-            label = label[0];
-          } else {
-            label = td.select('legend');
-            if (label.length > 0) {
-              label = label[0];
-            } else if (td.nodeName == "LABEL") {
-              label = td;
-            }
-          }
-          icon = '<span class="label-icon icon-debug watch_icon" id="' +
-            watchField +
-            '.watch_icon"' +
-            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
-            ' src="images/debug.gifx" ' +
-            ' alt="Field is being watched"' +
-            ' title="Field is being watched"></span>';
-          if (label) {
-            $(label).insert(icon);
-          }
-        } else {
-          if (fieldParts.length === 2 &&
-            fieldParts[1].startsWith("IO:")) {
-            var legend = td.select('legend');
-            if (legend.length > 0) {
-              td = legend[0];
-            }
-          }
-          icon = '<img class="watch_icon" id="' +
-            watchField +
-            '.watch_icon"' +
-            ' onclick="CustomEvent.fireTop(\'showFieldWatcher\')" ' +
-            ' src="images/debug.gifx" ' +
-            ' alt="Field is being watched"' +
-            ' title="Field is being watched" />';
-          td.insert(icon);
-        }
-      }
-    },
-    clearWatchField: function(watchfield) {
-      this.opticsContextStack = new Array();
-      this.tableName = null;
-      this.fieldName = null;
-      this.hideWatchIcons();
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.updateFieldInfo)
-          wndw.updateFieldInfo(null);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-          var wndw = debuggerTools.getJsDebugWindow();
-          if (wndw.updateFieldInfo)
-            wndw.updateFieldInfo(null);
-        }
-      }
-    },
-    setWatchField: function(watchField) {
-      if (!watchField)
-        return;
-      var fieldParts = watchField.split(".");
-      if (!(fieldParts.length == 2 && fieldParts[0].length > 0 && fieldParts[1].length > 0))
-        return;
-      this.tableName = fieldParts[0];
-      this.fieldName = fieldParts[1];
-      this.hideWatchIcons();
-      var icon = $(watchField + ".watch_icon");
-      if (icon) {
-        icon.show();
-      } else {
-        this.addWatchIcon(watchField);
-      }
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.updateFieldInfo)
-          wndw.updateFieldInfo(watchField);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-          var wndw = debuggerTools.getJsDebugWindow();
-          if (wndw.updateFieldInfo)
-            wndw.updateFieldInfo(watchField);
-        }
-      }
-    },
-    showWatchField: function(watchField) {
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools) {
-        if (!debuggerTools.isDebugPanelVisible())
-          debuggerTools.showFieldWatcher();
-        setWatchField(watchField);
-      } else {
-        debuggerTools = parent.parent.debuggerTools;
-        if (debuggerTools) {
-          if (!debuggerTools.isDebugPanelVisible())
-            debuggerTools.showFieldWatcher();
-          setWatchField(watchField);
-        }
-      }
-    },
-    processClientMessage: function(notification) {
-      var opticsContext = this.opticsContextStack[this.opticsContextStack.length - 1];
-      if (!opticsContext) {
-        jslog("No optics context found");
-        return;
-      }
-      var info = {
-        type: 'CLIENT ',
-        message: notification.message,
-        message_type: "static",
-        category: opticsContext.category,
-        name: opticsContext.name,
-        level: this.opticsContextStack.length,
-        time: getFormattedTime(new Date()),
-        call_trace: this._getCallTrace(this.opticsContextStack),
-        sys_id: opticsContext["sys_id"],
-        sourceTable: opticsContext["sourceTable"]
-      };
-      if (notification["oldvalue"] && notification["newvalue"]) {
-        info.message_type = "change";
-        info.oldvalue = notification["oldvalue"];
-        info.newvalue = notification["newvalue"];
-      }
-      this.process(info);
-    },
-    processServerMessages: function() {
-      var spans = $$('span[data-type="optics_debug"]');
-      for (var i = 0; i < spans.length; i++) {
-        var notification = new GlideUINotification({
-          xml: spans[i]
-        });
-        this.processServerMessage(notification);
-        spans[i].setAttribute("data-attr-processed", "true");
-      }
-    },
-    processServerMessage: function(notification) {
-      if (notification.getAttribute('processed') == "true")
-        return;
-      var info = {
-        type: 'SERVER',
-        category: notification.getAttribute('category'),
-        name: notification.getAttribute('name'),
-        message: notification.getAttribute('message'),
-        message_type: notification.getAttribute('message_type'),
-        oldvalue: notification.getAttribute('oldvalue'),
-        newvalue: notification.getAttribute('newvalue'),
-        level: notification.getAttribute('level'),
-        time: notification.getAttribute('time'),
-        sys_id: notification.getAttribute('sys_id'),
-        sourceTable: notification.getAttribute('sourceTable'),
-        call_trace: this._getCallTrace(eval(notification
-          .getAttribute('call_trace')))
-      };
-      this.process(info);
-    },
-    process: function(notification) {
-      var msg = '<div class="debug_line ' + notification['category'] + '">' + this._getMessage(notification) + '</div>';
-      this._log(msg);
-    },
-    addLine: function() {
-      this._log('<hr class="logs-divider"/>');
-    },
-    openScriptWindow: function(tablename, sysid) {
-      if (tablename && sysid) {
-        if (tablename == "request_action")
-          tablename = "sys_ui_action";
-        var url = "/" + tablename + ".do?sys_id=" + sysid;
-        window.open(url, "tablewindow");
-      }
-    },
-    _log: function(msg) {
-      var debuggerTools = getTopWindow().debuggerTools;
-      if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-        var wndw = debuggerTools.getJsDebugWindow();
-        if (wndw.insertJsDebugMsg)
-          wndw.insertJsDebugMsg(msg);
-      } else {
-        if (parent && parent.parent) {
-          debuggerTools = parent.parent.debuggerTools;
-          if (debuggerTools && debuggerTools.isDebugPanelVisible()) {
-            var wndw = debuggerTools.getJsDebugWindow();
-            if (wndw.insertJsDebugMsg)
-              wndw.insertJsDebugMsg(msg);
-          }
-        }
-      }
-    },
-    _getCallTrace: function(contextStack) {
-      var trace = '';
-      var arrows = '<span class="rtl-arrow"> &larr;</span><span class="lrt-arrow">&rarr; </span>';
-      var space = arrows;
-      for (i = 0, maxi = contextStack.length; i < maxi; i++) {
-        var context = contextStack[i];
-        if (i > 0)
-          space = arrows + space;
-        if (context['name'] && context['name'].length > 0)
-          trace += '<div>' + space +
-          this._getCategoryName(context['category']) +
-          '&nbsp;-&nbsp;' + context['name'] + '</div>';
-        else
-          trace += '<div>' + space +
-          this._getCategoryName(context['category']) +
-          '</div>';
-      }
-      if (trace && trace.length > 0)
-        trace = '<div class="call_trace">' + trace + '</div>';
-      return trace;
-    },
-    _getMessage: function(notification) {
-      var notif_type = notification['type'];
-      var legend_title = (notif_type.indexOf('CLIENT') > -1) ? 'Client-side activity' :
-        'Server-side activity';
-      var msg = '<span class="expand-button" onclick="toggleCallTrace(this);">&nbsp;</span>';
-      msg += '<img class="infoIcon" height="16"  width="16" border="0" src="images/info-icon.png" title="' +
-        legend_title + '" alt="' + legend_title + '">';
-      msg += '<span class="log-time ' + notif_type + '">' +
-        notification['time'] + '</span>';
-      msg += '<span class="log-category">' +
-        this.CATEGORIES[notification['category']];
-      if (notification['name'] && notification['name'].length > 0) {
-        if (notification["sys_id"])
-          msg += '&nbsp;-&nbsp;<a data-tablename="' +
-          notification['sourceTable'] +
-          '" data-sys_id="' +
-          notification['sys_id'] +
-          '" onclick="javascript:openScriptWindow(this);">' +
-          notification['name'] + '</a></span>';
-        else
-          msg += '&nbsp;-&nbsp;' + notification['name'] +
-          '</span>';
-      } else
-        msg += '</span>';
-      msg += '<span class="log-value">';
-      if ("request_action" === notification['category']) {
-        msg += 'Value received from client is: <span class="value" title="Value">' +
-          notification['message'] + '</span>';
-      } else if (notification["message_type"] == "change") {
-        msg += '<span>' +
-          notification["oldvalue"] +
-          '</span><span class="rtl-arrow"> &larr; </span><span class="lrt-arrow"> &rarr; </span><span>' +
-          notification["newvalue"] + '</span>';
-      } else {
-        msg += notification['message'];
-      }
-      msg += '</span>';
-      msg += notification['call_trace'];
-      return msg;
-    },
-    _getCategoryName: function(category) {
-      var name = this.CATEGORIES[category];
-      if (name === 'undefined' || name === null)
-        name = category;
-      return name;
-    },
-    _getLevelStr: function(level) {
-      if (level == 'undefined' || level == null || level <= 0)
-        level = 1;
-      var levelStr = '';
-      for (i = 0; i < level; i++)
-        levelStr += '-';
-      return levelStr + '>';
-    },
-    toString: function() {
-      return 'OpticsInspector';
-    }
-  });
-var g_optics_inspect_handler = new OpticsInspector();
-OpticsInspector.WATCH_EVENT = 'glide:ui_notification.optics_debug';
-OpticsInspector.WATCH_EVENT_UI = 'glide:ui_notification.optics_debug_ui';
-OpticsInspector.WATCH_FIELD = 'glide_optics_inspect_watchfield';
-OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_watchfield';
-OpticsInspector.UPDATE_WATCH_FIELD = 'glide_optics_inspect_update_watchfield';
-OpticsInspector.CLEAR_WATCH_FIELD = 'glide_optics_inspect_clear_watchfield';
-OpticsInspector.SHOW_WATCH_FIELD = 'glide_optics_inspect_show_watchfield';
-OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
-OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
-OpticsInspector.PUT_CS_CONTEXT = 'glide_optics_inspect_put_cs_context';
-OpticsInspector.POP_CS_CONTEXT = 'glide_optics_inspect_pop_cs_context';
-OpticsInspector.PUT_CONTEXT = 'glide_optics_inspect_put_context';
-OpticsInspector.POP_CONTEXT = 'glide_optics_inspect_pop_context';
-OpticsInspector.LOG_MESSAGE = 'glide_optics_inspect_log_message';
-OpticsInspector.WINDOW_OPEN = 'glide_optics_inspect_window_open';
-
-function getClientScriptContextName(name, type) {
-  var csname = null;
-  if (type === "submit")
-    csname = g_event_handlers_onSubmit[name];
-  else if (type === "load")
-    csname = g_event_handlers_onLoad[name];
-  else if (type === "change")
-    csname = g_event_handlers_onChange[name];
-  return csname;
-}
-CustomEvent.observe(OpticsInspector.PUT_CONTEXT, function(category, name, sys_id, sourceTable) {
-  g_optics_inspect_handler.pushOpticsContext(category, name, sys_id, sourceTable);
-});
-CustomEvent.observe(OpticsInspector.POP_CONTEXT, function() {
-  g_optics_inspect_handler.popOpticsContext();
-});
-CustomEvent.observe(OpticsInspector.PUT_CS_CONTEXT, function(name, type) {
-  var csname = getClientScriptContextName(name, type);
-  if (csname)
-    g_optics_inspect_handler.pushOpticsContext("sys_script_client", csname,
-      g_event_handler_ids[name]);
-});
-CustomEvent.observe(OpticsInspector.POP_CS_CONTEXT, function(name, type) {
-  var csname = getClientScriptContextName(name, type);
-  if (csname)
-    g_optics_inspect_handler.popOpticsContext();
-});
-CustomEvent.observe(OpticsInspector.LOG_MESSAGE, function(notification) {
-  if (g_optics_inspect_handler.isInspecting(notification["table"],
-      notification["field"])) {
-    g_optics_inspect_handler.processClientMessage(notification);
-  }
-});
-CustomEvent.observe(OpticsInspector.WATCH_EVENT_UI, function(notification) {
-  g_optics_inspect_handler.process(notification);
-});
-CustomEvent.observe(OpticsInspector.WATCH_EVENT, function(notification) {
-  g_optics_inspect_handler.processServerMessage(notification);
-});
-CustomEvent.observe(OpticsInspector.WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.setWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.SHOW_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.showWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.CLEAR_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.clearWatchField(watchfield);
-});
-CustomEvent.observe(OpticsInspector.UPDATE_WATCH_FIELD, function(watchfield) {
-  g_optics_inspect_handler.setWatchField(watchfield);
-  if (window.name !== "jsdebugger") {
-    g_optics_inspect_handler.addLine();
-    g_optics_inspect_handler.processServerMessages();
-  }
-});;
-/*! RESOURCE: scripts/CloudApiSCClient.js */
-var CloudApiSCClient = {
-  _fieldsInfo: {},
-  validateCatItemParameterVariables: function(ajaxProcessor, variableSysId, oldValue, newValue, isLoading, g_form) {
-    if (isLoading || oldValue == newValue)
-      return;
-    var parameters = {};
-    parameters.variableSysId = variableSysId;
-    parameters.parameterValue = newValue.trim();
-    this.callAjax(ajaxProcessor, "validateVariableValue", parameters, function(answer) {
-      var result = JSON.parse(answer);
-      result.variableSysId = "IO:" + variableSysId;
-      CloudApiSCClient._fieldsInfo[result["name"]] = result;
-      CloudApiSCClient.showAllFieldMessages(g_form);
-    });
-  },
-  callAjax: function(ajaxName, methodName, parameters, callback) {
-    var glideAjax = new GlideAjax(ajaxName);
-    glideAjax.addParam("sysparm_name", methodName);
-    if (parameters) {
-      for (var name in parameters) {
-        glideAjax.addParam(name, parameters[name]);
-      }
-    }
-    if (callback) {
-      glideAjax.getXMLAnswer(callback);
-    } else {
-      glideAjax.getXMLWait();
-      return glideAjax.getAnswer();
-    }
-  },
-  beforeSubmitCloudRsrcTemplate: function(g_form) {
-    if (this.isFormValid())
-      return true;
-    var msg = "Please correct errors to submit order";
-    g_form.addErrorMessage(msg);
-    this.showAllFieldMessages(g_form);
-    return false;
-  },
-  isFormValid: function() {
-    if (!this._fieldsInfo)
-      return true;
-    for (var name in this._fieldsInfo) {
-      if (!this._fieldsInfo[name].isValid)
-        return false;
-    }
-    return true;
-  },
-  showAllFieldMessages: function(g_form) {
-    g_form.hideAllFieldMsgs("error");
-    g_form.hideAllFieldMsgs("error");
-    g_form.clearMessages();
-    for (var name in this._fieldsInfo) {
-      var fieldInfo = this._fieldsInfo[name];
-      if (fieldInfo.message.length > 0) {
-        for (var i = 0; i < fieldInfo.message.length; i++) {
-          g_form.showFieldMsg(fieldInfo.variableSysId, fieldInfo.message[i], fieldInfo.msgtype);
-        }
-      }
-    }
-  }
-};;
 /*! RESOURCE: /scripts/doctype/html_class_setter.js */
 (function() {
   if (window.NOW.htmlClassSetterInitialized)

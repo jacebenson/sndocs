@@ -1709,6 +1709,20 @@
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0727920",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14/scripts/",
         "date": "2019-03-14"
+      },{
+        "number": "14a",
+        "name": "Kingston Patch 14a",
+        "url": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746951",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14a/scripts/",
+        "date": "2019-04-22"
+      },{
+        "number": "14b",
+        "name": "Kingston Patch 14b",
+        "url": "https://web.archive.org/web/20190318012140/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-14.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748331",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14b/scripts/",
+        "date": "2019-05-15"
       }
     ],
     "features": [
@@ -1780,10 +1794,45 @@
       },{
         "number": "6",
         "name": "London Patch 6",
-        "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
+        "url": "https://web.archive.org/web/20190312142351/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6.html",
         "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723018",
         "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6/scripts/",
         "date": "2019-03-12"
+      },{
+        "number": "6a",
+        "name": "London Patch 6a",
+        "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6a-hf-1.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746952",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6a/scripts/",
+        "date": "2019-05-03"
+      },{
+        "number": "6b",
+        "name": "London Patch 6b",
+        "url": "",
+        "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=5f7e51ffdb95bbccfff8a345ca961941",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6b/scripts/",
+        "date": "2019-05-31"
+      },{
+        "number": "7",
+        "name": "London Patch 7",
+        "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-7.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723019",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/7/scripts/",
+        "date": "2019-04-08"
+      },{
+        "number": "8",
+        "name": "London Patch 8",
+        "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-8.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723498",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/8/scripts/",
+        "date": "2019-05-02"
+      },{
+        "number": "9",
+        "name": "London Patch 9",
+        "url": "https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html",
+        "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
+        "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/9/scripts/",
+        "date": "2019-07-03"
       }
     ],
       "features": [
@@ -1825,6 +1874,48 @@
           "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0726513",
           "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/1/scripts/",
           "date": "2018-03-12"
+        },{
+          "number": "2",
+          "name": "Madrid Patch 2",
+          "url": "https://web.archive.org/web/20190415133229/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-2.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0744548",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/2/scripts/",
+          "date": "2018-03-12"
+        },{
+          "number": "3",
+          "name": "Madrid Patch 3",
+          "url": "https://web.archive.org/web/20190531193255/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-3.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0745362",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/3/scripts/",
+          "date": "2018-05-09"
+        },{
+          "number": "4",
+          "name": "Madrid Patch 4",
+          "url": "https://web.archive.org/web/20190624180731/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-4.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746737",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4/scripts/",
+          "date": "2018-06-13"
+        },{
+          "number": "4a",
+          "name": "Madrid Patch 4a",
+          "url": "",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0753617",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4a/scripts/",
+          "date": "2018-07-09"
+        },{
+          "number": "5",
+          "name": "Madrid Patch 5",
+          "url": "https://web.archive.org/web/20190724040541/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-5.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/5/scripts/",
+          "date": "2018-07-11"
+        },{
+          "number": "6",
+          "name": "Madrid Patch 6",
+          "url": "https://web.archive.org/web/20190812175435/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-6.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0755809",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/6/scripts/",
+          "date": "2018-08-08"
         }
       ],
         "features": [
@@ -1845,5 +1936,44 @@
           "Service Portal: 2FA",
           "Admins can roll back a clone for up to seven days"
         ]
-      }
+      },{
+        "name": "New York",
+        "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
+        "date": "2019-07-26",
+        "patches": [
+        {
+          "number": "0",
+          "name": "New York Patch 0",
+          "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748891",
+          "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
+          "date": "2019-07-26"
+        }
+        ],
+        "features": [
+                "Agent Workspace: Landing Pages, List Updates,Response templates",
+                "Agile Dev 2.0: Agile Board Config. columns",
+                "Auth: API for JSON Web Token generation",
+                "ATF: Attachment test steps",
+                "ATF: Parallell testing",
+                "ATF: Mutually exclusive tests",
+                "CSM: Service-aware install base",
+                "Dashboards: Multiple breakdown",
+                "Delegated Dev: Manage Update Sets",
+                "Disco; File-based Discovery",
+                "Event Mgmt: SAP Connector",
+                "Flow Designer: Actions 'Add worknote line', 'Assoc. Rec. to Email', 'Create or Update Record'",
+                "Flow Designer: Dynamic Inputs",
+                "Flow Designer: Export flow as single update set",
+                "Flow Designer: Run in foreground",
+                "ITSM Roles",
+                "Remote Tables",
+                "Business Stakeholder role",
+                "Catalog MVRS: Max # of roles",
+                "System Clone: Scheduled recurring clones",
+                "Time card records by day",
+                "VTB: Swimlanes",
+                "Processors are \"deprocated\"" 
+        ]
+    }
 ]

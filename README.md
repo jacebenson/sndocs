@@ -1,28 +1,27 @@
-[![pipeline status](https://gitlab.com/jacebenson/sndocs/badges/master/pipeline.svg)](https://gitlab.com/jacebenson/sndocs/commits/master)
-
 # SNDocs
+![](screenshot.png)
 
 Downloads scripts and make HTML pages for them.
 
 ## Install
 
 ```bash
-npm install #local packages
+yarn install #local packages
 ```
 
 ## Usage
 
 ```bash
-npm run download #tries to download all the files from an instance meeting the family and patch
-# does a bunch of stuff... takes a while, 300+ files per family/version, as of 10/12/2017 its 14 versions
-npm run build #builds a updated html file based on data.json
-# data.json requires manual update for new families, and patches
+yarn download # runs node buildversions.js > output.txt && node download.js > outputdownload.txt && node buildhtml.js
+# buildversions makes requests to instances to update versions.json which is used to get js files
+# download.js makes requests and saves responses to the /sources/family/patch folder
+# buildhtml.js makes the files in /public/ so a page and rss file are generated
 ```
 
 ## Testing
 
 ```bash
-npm run test # loads up /public to localhost:8000
+yarn start # runs light-server on /public by default to port 4000
 ```
 
 ## License

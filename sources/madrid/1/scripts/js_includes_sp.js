@@ -66642,4 +66642,114 @@ angular.module('sn.$sp').provider('defaultJSAutocomplete', function defaultJSAut
                   "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/sort",
                   "!doc": "Sorts the elements of an array in place and returns the array."
                 },
-                "indexOf
+                "indexOf": {
+                  "!type": "fn(elt: ?, from?: number) -> number",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf",
+                  "!doc": "Returns the first index at which a given element can be found in the array, or -1 if it is not present."
+                },
+                "lastIndexOf": {
+                  "!type": "fn(elt: ?, from?: number) -> number",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/lastIndexOf",
+                  "!doc": "Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex."
+                },
+                "every": {
+                  "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> bool",
+                  "!effects": [
+                    "call !0 this=!1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/every",
+                  "!doc": "Tests whether all elements in the array pass the test implemented by the provided function."
+                },
+                "some": {
+                  "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> bool",
+                  "!effects": [
+                    "call !0 this=!1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/some",
+                  "!doc": "Tests whether some element in the array passes the test implemented by the provided function."
+                },
+                "filter": {
+                  "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> !this",
+                  "!effects": [
+                    "call !0 this=!1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/filter",
+                  "!doc": "Creates a new array with all elements that pass the test implemented by the provided function."
+                },
+                "forEach": {
+                  "!type": "fn(f: fn(elt: ?, i: number, array: +Array), context?: ?)",
+                  "!effects": [
+                    "call !0 this=!1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach",
+                  "!doc": "Executes a provided function once per array element."
+                },
+                "map": {
+                  "!type": "fn(f: fn(elt: ?, i: number, array: +Array) -> ?, context?: ?) -> [!0.!ret]",
+                  "!effects": [
+                    "call !0 this=!1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/map",
+                  "!doc": "Creates a new array with the results of calling a provided function on every element in this array."
+                },
+                "reduce": {
+                  "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: +Array) -> ?, init?: ?) -> !0.!ret",
+                  "!effects": [
+                    "call !0 !1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/Reduce",
+                  "!doc": "Apply a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value."
+                },
+                "reduceRight": {
+                  "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: +Array) -> ?, init?: ?) -> !0.!ret",
+                  "!effects": [
+                    "call !0 !1 !this.<i> number !this"
+                  ],
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/ReduceRight",
+                  "!doc": "Apply a function simultaneously against two values of the array (from right-to-left) as to reduce it to a single value."
+                }
+              },
+              "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array",
+              "!doc": "The JavaScript Array global object is a constructor for arrays, which are high-level, list-like objects."
+            },
+            "String": {
+              "!type": "fn(value: ?) -> string",
+              "fromCharCode": {
+                "!type": "fn(code: number) -> string",
+                "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/fromCharCode",
+                "!doc": "Returns a string created by using the specified sequence of Unicode values."
+              },
+              "prototype": {
+                "!stdProto": "String",
+                "length": {
+                  "!type": "number",
+                  "!url": "https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/length",
+                  "!doc": "Represents the length of a string."
+                },
+                "<i>": "string",
+                "charAt": {
+                  "!type": "fn(i: number) -> string",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/charAt",
+                  "!doc": "Returns the specified character from a string."
+                },
+                "charCodeAt": {
+                  "!type": "fn(i: number) -> number",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/charCodeAt",
+                  "!doc": "Returns the numeric Unicode value of the character at the given index (except for unicode codepoints > 0x10000)."
+                },
+                "indexOf": {
+                  "!type": "fn(char: string, from?: number) -> number",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/indexOf",
+                  "!doc": "Returns the index within the calling String object of the first occurrence of the specified value, starting the search at fromIndex,\nreturns -1 if the value is not found."
+                },
+                "lastIndexOf": {
+                  "!type": "fn(char: string, from?: number) -> number",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/lastIndexOf",
+                  "!doc": "Returns the index within the calling String object of the last occurrence of the specified value, or -1 if not found. The calling string is searched backward, starting at fromIndex."
+                },
+                "substring": {
+                  "!type": "fn(from: number, to?: number) -> string",
+                  "!url": "https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/String/substring",
+                  "!doc": "Returns a subset of a string between one index and another, or through the end of the string."
+                },
+                "su
