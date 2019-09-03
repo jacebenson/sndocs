@@ -471,8 +471,14 @@
     "date": "2011-06-17",
     "patches": [
       {
+        "number": "0",
+        "name": "June 11",
+        "url": "https://www.slideshare.net/jonssparks/platform-enhancements?qid=1af6f62c-6c73-4164-bda7-7599dda50cd0&v=&b=&from_search=32",
+        "date": ""
+      },
+      {
         "number": "1",
-        "name": "June 11 Update",
+        "name": "June 11 Update 1",
         "url": "https://web.archive.org/web/20170513212832/http://wiki.servicenow.com:80/index.php?title=Release:June11_Update",
         "date": "2011-06-17"
       },
