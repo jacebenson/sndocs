@@ -1829,7 +1829,8 @@
             "ITBM updates",
             "Instance Security Dashboard (PA)",
             "Assessments and Surveys updates",
-            "List v3 not recommended"
+            "List v3 not recommended",
+            "Major Incident Management"
         ]
     },
     {
@@ -1904,7 +1905,7 @@
             "name": "Madrid Patch 7",
             "url": "https://web.archive.org/web/20190912152305/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-7.html",
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0760440",
-            "git": "",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7/scripts/",
             "date": "2018-09-12"
         }],
         "features": [

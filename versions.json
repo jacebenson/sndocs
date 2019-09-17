@@ -74,10 +74,10 @@
     "11": "https://saicito.service-now.com",
     "12": "https://concertocloud.service-now.com",
     "13": "https://ucmerced.service-now.com",
-    "14": "https://partnershealthcare.service-now.com",
+    "14": "https://hosting.service-now.com",
     "3a": "https://bournemouth.service-now.com",
     "3b": "https://watts.service-now.com",
-    "14b": "https://thewhitecompany.service-now.com",
+    "14b": "https://aigprod.service-now.com",
     "14a": "https://ellucian.service-now.com"
   },
   "london": {
@@ -86,24 +86,25 @@
     "2": "https://lonestar.service-now.com",
     "3": "https://baystatehealth.service-now.com",
     "4": "https://rmit.service-now.com",
-    "5": "https://pearsontest.service-now.com",
+    "5": "https://pearson.service-now.com",
     "6": "https://wdpr.service-now.com",
     "7": "https://qlddet.service-now.com",
     "8": "https://cbs.service-now.com",
     "9": "https://hallmarkcardsprod.service-now.com",
-    "6a": "https://veritas.service-now.com",
+    "6a": "https://tu.service-now.com",
     "6b": "https://ucasprod.service-now.com"
   },
   "madrid": {
     "0": "https://signon.service-now.com",
-    "1": "https://turner.service-now.com",
-    "2": "https://tateandlyle.service-now.com",
-    "3": "https://vector.service-now.com",
-    "4": "https://wsi.service-now.com",
+    "1": "https://acciona.service-now.com",
+    "2": "https://jti.service-now.com",
+    "3": "https://ldc.service-now.com",
+    "4": "https://neustar.service-now.com",
     "5": "https://siriusxm.service-now.com",
-    "6": "https://wgu.service-now.com",
-    "4a": "https://wnyricprod.service-now.com",
-    "4b": "https://warwick.service-now.com"
+    "6": "https://bioclinica.service-now.com",
+    "7": "https://maersk.service-now.com",
+    "4a": "https://apcfss.service-now.com",
+    "4b": "https://johnson.service-now.com"
   },
   "newyork": {
     "0": "https://dev74974.service-now.com"
