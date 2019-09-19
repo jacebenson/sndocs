@@ -49,7 +49,7 @@
     "7": "https://spartan.service-now.com",
     "8": "https://hearstet.service-now.com",
     "9": "https://didatasydprod.service-now.com",
-    "10": "https://uwstest.service-now.com",
+    "10": "https://deloitte.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
@@ -86,25 +86,25 @@
     "2": "https://lonestar.service-now.com",
     "3": "https://baystatehealth.service-now.com",
     "4": "https://rmit.service-now.com",
-    "5": "https://pearson.service-now.com",
+    "5": "https://pearsontest.service-now.com",
     "6": "https://wdpr.service-now.com",
-    "7": "https://qlddet.service-now.com",
+    "7": "https://csc.service-now.com",
     "8": "https://cbs.service-now.com",
     "9": "https://hallmarkcardsprod.service-now.com",
-    "6a": "https://tu.service-now.com",
+    "6a": "https://veritas.service-now.com",
     "6b": "https://ucasprod.service-now.com"
   },
   "madrid": {
-    "0": "https://signon.service-now.com",
+    "0": "https://wgu.service-now.com",
     "1": "https://acciona.service-now.com",
-    "2": "https://jti.service-now.com",
+    "2": "https://mobile.service-now.com",
     "3": "https://ldc.service-now.com",
     "4": "https://neustar.service-now.com",
     "5": "https://siriusxm.service-now.com",
     "6": "https://bioclinica.service-now.com",
-    "7": "https://maersk.service-now.com",
-    "4a": "https://apcfss.service-now.com",
-    "4b": "https://johnson.service-now.com"
+    "7": "https://cablecomnetworkingdev.service-now.com",
+    "4a": "https://wnyricprod.service-now.com",
+    "4b": "https://santanderbank.service-now.com"
   },
   "newyork": {
     "0": "https://dev74974.service-now.com"
