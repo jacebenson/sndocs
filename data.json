@@ -1811,6 +1811,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/9/scripts/",
             "date": "2019-07-03"
+        }, {
+            "number": "10",
+            "name": "London Patch 10",
+            "url": "https://web.archive.org/web/20190926180653/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-10.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0777754",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/10/scripts/",
+            "date": "2019-09-26"
         }],
         "features": [
             "Chat Bots: Virtual Agents",
