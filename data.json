@@ -1944,6 +1944,20 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748891",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
             "date": "2019-07-26"
+        },{
+            "number": "1",
+            "name": "New York Patch 1",
+            "url": "https://web.archive.org/web/20191007170855/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-1.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0759084",
+            "git": "",
+            "date": "2019-08-14"
+        },{
+            "number": "2",
+            "name": "New York Patch 2",
+            "url": "https://web.archive.org/web/20191007170908/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-2.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0780117",
+            "git": "",
+            "date": "2019-09-24"
         }],
         "features": [
             "Agent Workspace: Landing Pages, List Updates,Response templates",

@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 26 Sep 2019 18:08:22 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 07 Oct 2019 17:11:36 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Thu, 26 Sep 2019 18:08:22 GMT</pubDate>
+        <pubDate>Mon, 07 Oct 2019 17:11:36 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -35,6 +35,18 @@
             <link>https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html</link>
             <guid isPermaLink="false">New York Patch 0</guid>
             <pubDate>Fri, 26 Jul 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[New York Patch 1]]></title>
+            <link>https://web.archive.org/web/20191007170855/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-1.html</link>
+            <guid isPermaLink="false">New York Patch 1</guid>
+            <pubDate>Wed, 14 Aug 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[New York Patch 2]]></title>
+            <link>https://web.archive.org/web/20191007170908/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-2.html</link>
+            <guid isPermaLink="false">New York Patch 2</guid>
+            <pubDate>Tue, 24 Sep 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Madrid]]></title>
