@@ -1914,6 +1914,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0760440",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7/scripts/",
             "date": "2018-09-12"
+        }, {
+            "number": "8",
+            "name": "Madrid Patch 8",
+            "url": "https://web.archive.org/web/20191016211638/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-8.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/8/scripts/",
+            "date": "2018-10-16"
         }],
         "features": [
             "Antivirus Scanning",

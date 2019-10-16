@@ -49,7 +49,7 @@
     "7": "https://spartan.service-now.com",
     "8": "https://hearstet.service-now.com",
     "9": "https://didatasydprod.service-now.com",
-    "10": "https://uwstest.service-now.com",
+    "10": "https://deloitte.service-now.com",
     "3a": "https://oakhilladvisors.service-now.com/",
     "6a": "https://link2ict.service-now.com",
     "3b": "https://ge.service-now.com",
@@ -90,22 +90,23 @@
     "6": "https://wdpr.service-now.com",
     "7": "https://csc.service-now.com",
     "8": "https://cbs.service-now.com",
-    "9": "https://hallmarkcardsprod.service-now.com",
-    "10": "https://westcongrouptest.service-now.com",
+    "9": "https://hallmarkcardstest.service-now.com",
+    "10": "https://mq.service-now.com",
     "6a": "https://veritas.service-now.com",
-    "6b": "https://ucasprod.service-now.com"
+    "6b": "https://svb.service-now.com"
   },
   "madrid": {
     "0": "https://wgu.service-now.com",
-    "1": "https://turner.service-now.com",
-    "2": "https://tateandlyle.service-now.com",
-    "3": "https://vector.service-now.com",
-    "4": "https://thehartford.service-now.com",
+    "1": "https://acciona.service-now.com",
+    "2": "https://jti.service-now.com",
+    "3": "https://ldc.service-now.com",
+    "4": "https://berkeley.service-now.com",
     "5": "https://siriusxm.service-now.com",
-    "6": "https://uts.service-now.com",
-    "7": "https://uoatest.service-now.com",
-    "4a": "https://wsi.service-now.com",
-    "4b": "https://wnyricprod.service-now.com"
+    "6": "https://bioclinica.service-now.com",
+    "7": "https://pentanasolutions.service-now.com",
+    "8": "https://wgu.service-now.com",
+    "4a": "https://raymondjames.service-now.com",
+    "4b": "https://colorado.service-now.com"
   },
   "newyork": {
     "0": "https://dev74974.service-now.com"
