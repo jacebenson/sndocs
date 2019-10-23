@@ -1914,6 +1914,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0760440",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7/scripts/",
             "date": "2018-09-12"
+    },  {
+            "number": "7a",
+            "name": "Madrid Patch 7a",
+            "url": "",
+            "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e7450e5fdbe800dc2be0a851ca961968",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7a/scripts/",
+            "date": "2019-10-23"
         }, {
             "number": "8",
             "name": "Madrid Patch 8",
