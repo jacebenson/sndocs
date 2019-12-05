@@ -86,10 +86,10 @@
     "2": "https://lonestar.service-now.com",
     "3": "https://baystatehealth.service-now.com",
     "4": "https://rmit.service-now.com",
-    "5": "https://pearson.service-now.com",
+    "5": "https://pearsontest.service-now.com",
     "6": "https://wdpr.service-now.com",
     "7": "https://csc.service-now.com",
-    "8": "https://yale.service-now.com",
+    "8": "https://ssmportal.service-now.com",
     "9": "https://hallmarkcardstest.service-now.com",
     "10": "https://cbs.service-now.com",
     "6a": "https://veritas.service-now.com",
@@ -101,13 +101,13 @@
     "2": "https://tateandlyle.service-now.com",
     "3": "https://watts.service-now.com",
     "4": "https://berkeley.service-now.com",
-    "5": "https://comcast.service-now.com",
-    "6": "https://wipros.service-now.com",
-    "7": "https://siriusxm.service-now.com",
-    "8": "https://wgu.service-now.com",
+    "5": "https://suffolk.service-now.com",
+    "6": "https://tieto.service-now.com",
+    "7": "https://tnt.service-now.com",
+    "8": "https://ustglobal.service-now.com",
     "4a": "https://wsi.service-now.com",
-    "4b": "https://unimelb.service-now.com",
-    "7a": "https://johnson.service-now.com"
+    "4b": "https://thermofisherit.service-now.com",
+    "7a": "https://siriusxm.service-now.com"
   },
   "newyork": {
     "0": "https://dev74974.service-now.com"
