@@ -104,13 +104,15 @@
     "5": "https://suffolk.service-now.com",
     "6": "https://tieto.service-now.com",
     "7": "https://tnt.service-now.com",
-    "8": "https://unts.service-now.com",
+    "8": "https://zillow.service-now.com",
+    "9": "https://batman.service-now.com",
     "4a": "https://wsi.service-now.com",
     "4b": "https://thermofisherit.service-now.com",
     "7a": "https://siriusxm.service-now.com"
   },
   "newyork": {
-    "0": "https://dev74974.service-now.com"
+    "0": "https://dev74974.service-now.com",
+    "3": "https://optumstage.service-now.com"
   },
   "orlando": {},
   "paris": {},

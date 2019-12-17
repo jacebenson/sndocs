@@ -1928,6 +1928,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/8/scripts/",
             "date": "2018-10-16"
+        }, {
+            "number": "9",
+            "name": "Madrid Patch 9",
+            "url": "https://web.archive.org/web/20191217170259/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-9.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0788886",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/9/scripts/",
+            "date": "2019-12-17"
         }],
         "features": [
             "Antivirus Scanning",
@@ -1972,6 +1979,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0780117",
             "git": "",
             "date": "2019-09-24"
+        },{
+            "number": "3",
+            "name": "New York Patch 3",
+            "url": "https://web.archive.org/web/20191217170902/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-3.html",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0784250",
+            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/3/scripts/",
+            "date": "2019-12-17"
         }],
         "features": [
             "Agent Workspace: Landing Pages, List Updates,Response templates",

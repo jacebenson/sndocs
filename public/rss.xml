@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 09 Dec 2019 22:41:26 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 17 Dec 2019 17:12:06 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 09 Dec 2019 22:41:26 GMT</pubDate>
+        <pubDate>Tue, 17 Dec 2019 17:12:06 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -47,6 +47,12 @@
             <link>https://web.archive.org/web/20191007170908/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-2.html</link>
             <guid isPermaLink="false">New York Patch 2</guid>
             <pubDate>Tue, 24 Sep 2019 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[New York Patch 3]]></title>
+            <link>https://web.archive.org/web/20191217170902/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-3.html</link>
+            <guid isPermaLink="false">New York Patch 3</guid>
+            <pubDate>Tue, 17 Dec 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Madrid]]></title>
@@ -122,6 +128,12 @@
             <link>https://web.archive.org/web/20191016211638/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-8.html</link>
             <guid isPermaLink="false">Madrid Patch 8</guid>
             <pubDate>Tue, 16 Oct 2018 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Madrid Patch 9]]></title>
+            <link>https://web.archive.org/web/20191217170259/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-9.html</link>
+            <guid isPermaLink="false">Madrid Patch 9</guid>
+            <pubDate>Tue, 17 Dec 2019 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[London]]></title>
