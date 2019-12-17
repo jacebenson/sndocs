@@ -1986,6 +1986,13 @@
             "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0784250",
             "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/3/scripts/",
             "date": "2019-12-17"
+        },{
+            "number": "4",
+            "name": "New York Patch 4",
+            "url": "",
+            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0787370",
+            "git": "",
+            "date": "2019-12-17"
         }],
         "features": [
             "Agent Workspace: Landing Pages, List Updates,Response templates",
