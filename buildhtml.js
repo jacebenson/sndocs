@@ -195,7 +195,7 @@ htmlArr.push('    <div class="container-fluid">');
 htmlArr.push('        <div class="row">');
 htmlArr.push('            <div class="col-sm-4" >Unofficial SN Release List</div>');
 htmlArr.push('            <div class="col-sm-4">Last Updated:' + new Date().toISOString() + '</div>');
-htmlArr.push('            <div class="col-sm-1">';
+htmlArr.push('            <div class="col-sm-1">');
 htmlArr.push('              <a href="/rss.xml">RSS <i class="fa fa-rss-square" aria-hidden="true"></i></a>');
 htmlArr.push('              <a href="/chart.html">CHART <i class="fa fa-rss-square" aria-hidden="true"></i></a>');
 htmlArr.push('            </div>');
