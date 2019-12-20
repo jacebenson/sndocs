@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 17 Dec 2019 17:22:03 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 20 Dec 2019 22:43:00 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Tue, 17 Dec 2019 17:22:03 GMT</pubDate>
+        <pubDate>Fri, 20 Dec 2019 22:43:00 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -1189,12 +1189,31 @@
             <title><![CDATA[June 2011]]></title>
             <link>https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes</link>
             <guid isPermaLink="false">June 2011</guid>
-            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
+            <pubDate>Fri, 04 Mar 2011 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[June 2011 Preview 1]]></title>
+            <link>https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</link>
+            <guid isPermaLink="false">June 2011 Preview 1</guid>
+            <pubDate>Fri, 04 Mar 2011 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[June 2011 Preview 2]]></title>
+            <link>https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</link>
+            <guid isPermaLink="false">June 2011 Preview 2</guid>
+            <pubDate>Fri, 08 Apr 2011 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[June 2011 Preview 3]]></title>
+            <link>https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</link>
+            <guid isPermaLink="false">June 2011 Preview 3</guid>
+            <pubDate>Fri, 06 May 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[June 11]]></title>
             <link>https://www.slideshare.net/jonssparks/platform-enhancements?qid=1af6f62c-6c73-4164-bda7-7599dda50cd0&amp;v=&amp;b=&amp;from_search=32</link>
             <guid isPermaLink="false">June 11</guid>
+            <pubDate>Fri, 17 Jun 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[June 11 Update 1]]></title>
@@ -1227,24 +1246,6 @@
             <pubDate>Sat, 07 Jul 2012 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[June 2011 Preview 3]]></title>
-            <link>https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes</link>
-            <guid isPermaLink="false">June 2011 Preview 3</guid>
-            <pubDate>Fri, 06 May 2011 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[June 2011 Preview 2]]></title>
-            <link>https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes</link>
-            <guid isPermaLink="false">June 2011 Preview 2</guid>
-            <pubDate>Fri, 08 Apr 2011 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[June 2011 Preview 1]]></title>
-            <link>https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes</link>
-            <guid isPermaLink="false">June 2011 Preview 1</guid>
-            <pubDate>Fri, 04 Mar 2011 00:00:00 GMT</pubDate>
-        </item>
-        <item>
             <title><![CDATA[Winter 2011]]></title>
             <link>https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes</link>
             <guid isPermaLink="false">Winter 2011</guid>
@@ -1255,36 +1256,6 @@
             <link>https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update</link>
             <guid isPermaLink="false">Winter 2011 Update</guid>
             <pubDate>Thu, 10 Mar 2011 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fall 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="false">Fall 2010 Stable 3</guid>
-            <pubDate>Fri, 07 Jan 2011 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fall 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="false">Fall 2010 Stable 2</guid>
-            <pubDate>Fri, 03 Dec 2010 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fall 2010 Stable 2 Update]]></title>
-            <link>https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</link>
-            <guid isPermaLink="false">Fall 2010 Stable 2 Update</guid>
-            <pubDate>Wed, 08 Dec 2010 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fall 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="false">Fall 2010 Stable 1</guid>
-            <pubDate>Fri, 29 Oct 2010 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Fall 2010 Stable 1 Update]]></title>
-            <link>https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</link>
-            <guid isPermaLink="false">Fall 2010 Stable 1 Update</guid>
-            <pubDate>Fri, 12 Nov 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Fall 2010]]></title>
@@ -1299,22 +1270,34 @@
             <pubDate>Fri, 08 Oct 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="false">Spring 2010 Stable 3</guid>
-            <pubDate>Fri, 03 Sep 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="false">Fall 2010 Stable 1</guid>
+            <pubDate>Fri, 29 Oct 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="false">Spring 2010 Stable 2</guid>
-            <pubDate>Fri, 06 Aug 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 1 Update]]></title>
+            <link>https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update</link>
+            <guid isPermaLink="false">Fall 2010 Stable 1 Update</guid>
+            <pubDate>Fri, 12 Nov 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="false">Spring 2010 Stable 1</guid>
-            <pubDate>Fri, 09 Jul 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="false">Fall 2010 Stable 2</guid>
+            <pubDate>Fri, 03 Dec 2010 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fall 2010 Stable 2 Update]]></title>
+            <link>https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update</link>
+            <guid isPermaLink="false">Fall 2010 Stable 2 Update</guid>
+            <pubDate>Wed, 08 Dec 2010 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fall 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="false">Fall 2010 Stable 3</guid>
+            <pubDate>Fri, 07 Jan 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Spring 2010]]></title>
@@ -1323,22 +1306,22 @@
             <pubDate>Sun, 04 Jul 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</link>
-            <guid isPermaLink="false">Winter 2010 Stable 3</guid>
-            <pubDate>Fri, 16 Apr 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="false">Spring 2010 Stable 1</guid>
+            <pubDate>Fri, 09 Jul 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</link>
-            <guid isPermaLink="false">Winter 2010 Stable 2</guid>
-            <pubDate>Fri, 19 Mar 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="false">Spring 2010 Stable 2</guid>
+            <pubDate>Fri, 06 Aug 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2010 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</link>
-            <guid isPermaLink="false">Winter 2010 Stable 1</guid>
-            <pubDate>Fri, 19 Feb 2010 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="false">Spring 2010 Stable 3</guid>
+            <pubDate>Fri, 03 Sep 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Winter 2010]]></title>
@@ -1347,22 +1330,22 @@
             <pubDate>Fri, 22 Jan 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</link>
-            <guid isPermaLink="false">Fall 2009 Stable 3</guid>
-            <pubDate>Fri, 18 Dec 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes</link>
+            <guid isPermaLink="false">Winter 2010 Stable 1</guid>
+            <pubDate>Fri, 19 Feb 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</link>
-            <guid isPermaLink="false">Fall 2009 Stable 2</guid>
-            <pubDate>Fri, 20 Nov 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes</link>
+            <guid isPermaLink="false">Winter 2010 Stable 2</guid>
+            <pubDate>Fri, 19 Mar 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Fall 2009 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</link>
-            <guid isPermaLink="false">Fall 2009 Stable 1</guid>
-            <pubDate>Fri, 23 Oct 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2010 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes</link>
+            <guid isPermaLink="false">Winter 2010 Stable 3</guid>
+            <pubDate>Fri, 16 Apr 2010 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Fall 2009]]></title>
@@ -1377,15 +1360,27 @@
             <pubDate>Sat, 26 Sep 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</link>
-            <guid isPermaLink="false">Spring 2009 Stable 3</guid>
-            <pubDate>Fri, 28 Aug 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Fall 2009 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1</link>
+            <guid isPermaLink="false">Fall 2009 Stable 1</guid>
+            <pubDate>Fri, 23 Oct 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</link>
-            <guid isPermaLink="false">Spring 2009 Stable 2</guid>
+            <title><![CDATA[Fall 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2</link>
+            <guid isPermaLink="false">Fall 2009 Stable 2</guid>
+            <pubDate>Fri, 20 Nov 2009 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Fall 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3</link>
+            <guid isPermaLink="false">Fall 2009 Stable 3</guid>
+            <pubDate>Fri, 18 Dec 2009 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Spring 2009]]></title>
+            <link>https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</link>
+            <guid isPermaLink="false">Spring 2009</guid>
             <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
@@ -1395,34 +1390,16 @@
             <pubDate>Fri, 26 Jun 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Spring 2009]]></title>
-            <link>https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes</link>
-            <guid isPermaLink="false">Spring 2009</guid>
+            <title><![CDATA[Spring 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2</link>
+            <guid isPermaLink="false">Spring 2009 Stable 2</guid>
             <pubDate>Fri, 29 May 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Winter 2009 Stable 4]]></title>
-            <link>https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</link>
-            <guid isPermaLink="false">Winter 2009 Stable 4</guid>
-            <pubDate>Fri, 01 May 2009 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Winter 2009 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</link>
-            <guid isPermaLink="false">Winter 2009 Stable 3</guid>
-            <pubDate>Fri, 10 Apr 2009 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Winter 2009 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</link>
-            <guid isPermaLink="false">Winter 2009 Stable 2</guid>
-            <pubDate>Fri, 13 Mar 2009 00:00:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[Winter 2009 Stable 1]]></title>
-            <link>https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</link>
-            <guid isPermaLink="false">Winter 2009 Stable 1</guid>
-            <pubDate>Fri, 13 Feb 2009 00:00:00 GMT</pubDate>
+            <title><![CDATA[Spring 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3</link>
+            <guid isPermaLink="false">Spring 2009 Stable 3</guid>
+            <pubDate>Fri, 28 Aug 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Winter 2009]]></title>
@@ -1431,16 +1408,34 @@
             <pubDate>Fri, 09 Jan 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008 Stable 3]]></title>
-            <link>https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</link>
-            <guid isPermaLink="false">Summer 2008 Stable 3</guid>
-            <pubDate>Fri, 05 Dec 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 1]]></title>
+            <link>https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1</link>
+            <guid isPermaLink="false">Winter 2009 Stable 1</guid>
+            <pubDate>Fri, 13 Feb 2009 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008 Stable 2]]></title>
-            <link>https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</link>
-            <guid isPermaLink="false">Summer 2008 Stable 2</guid>
-            <pubDate>Fri, 31 Oct 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Winter 2009 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2</link>
+            <guid isPermaLink="false">Winter 2009 Stable 2</guid>
+            <pubDate>Fri, 13 Mar 2009 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Winter 2009 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3</link>
+            <guid isPermaLink="false">Winter 2009 Stable 3</guid>
+            <pubDate>Fri, 10 Apr 2009 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Winter 2009 Stable 4]]></title>
+            <link>https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4</link>
+            <guid isPermaLink="false">Winter 2009 Stable 4</guid>
+            <pubDate>Fri, 01 May 2009 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Summer 2008]]></title>
+            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
+            <guid isPermaLink="false">Summer 2008</guid>
+            <pubDate>Fri, 22 Aug 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Summer 2008 Stable 1]]></title>
@@ -1449,10 +1444,16 @@
             <pubDate>Wed, 17 Sep 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2008]]></title>
-            <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="false">Summer 2008</guid>
-            <pubDate>Fri, 22 Aug 2008 00:00:00 GMT</pubDate>
+            <title><![CDATA[Summer 2008 Stable 2]]></title>
+            <link>https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2</link>
+            <guid isPermaLink="false">Summer 2008 Stable 2</guid>
+            <pubDate>Fri, 31 Oct 2008 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Summer 2008 Stable 3]]></title>
+            <link>https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3</link>
+            <guid isPermaLink="false">Summer 2008 Stable 3</guid>
+            <pubDate>Fri, 05 Dec 2008 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Fall 2007]]></title>

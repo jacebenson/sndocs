@@ -1,4 +1,5 @@
-[{
+[
+    {
         "name": "Glidesoft 2004",
         "url": "https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm",
         "date": "2004-12-04",
@@ -100,12 +101,14 @@
         "name": "Summer 2007 aka July 2007",
         "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
         "date": "2007-07-05",
-        "patches": [{
-            "number": "1",
-            "name": "Summer 2007 Enhancement Patch",
-            "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
-            "date": "2007-07-29"
-        }],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Summer 2007 Enhancement Patch",
+                "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
+                "date": "2007-07-29"
+            }
+        ],
         "features": [
             "Asset Management",
             "Update Sets",
@@ -118,12 +121,14 @@
         "name": "Fall 2007",
         "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
         "date": "2007-11-23",
-        "patches": [{
-            "number": "1",
-            "name": "Fall 2007 Enhancement Patch",
-            "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
-            "date": "2007-11-30"
-        }],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Fall 2007 Enhancement Patch",
+                "url": "https://web.archive.org/web/20170513191146/http://wiki.servicenow.com:80/index.php?title=Summer_2007_Enhancement_Patch",
+                "date": "2007-11-30"
+            }
+        ],
         "features": [
             "Variable Sets",
             "UI Policies for Forms"
@@ -133,28 +138,31 @@
         "name": "Summer 2008",
         "url": "https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades",
         "date": "2008-08-22",
-        "patches": [],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Summer 2008 Stable 1",
+                "url": "https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1",
+                "date": "2008-09-17"
+            },
+            {
+                "number": "2",
+                "name": "Summer 2008 Stable 2",
+                "url": "https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2",
+                "date": "2008-10-31"
+            },
+            {
+                "number": "3",
+                "name": "Summer 2008 Stable 3",
+                "url": "https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3",
+                "date": "2008-12-05"
+            }
+        ],
         "features": [
             "Graphical Workflow",
             "Facilities Management",
-            "View Management"
-        ]
-    },
-    {
-        "name": "Summer 2008 Stable 1",
-        "url": "https://web.archive.org/web/20170513203556/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_1",
-        "date": "2008-09-17",
-        "patches": [],
-        "features": [
-            "Javascript Debug Window"
-        ]
-    },
-    {
-        "name": "Summer 2008 Stable 2",
-        "url": "https://web.archive.org/web/20170513201554/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_2",
-        "date": "2008-10-31",
-        "patches": [],
-        "features": [
+            "View Management",
+            "Javascript Debug Window",
             "Global UI Scripts",
             "Homepage Layouts",
             "Global Text Search",
@@ -162,50 +170,38 @@
         ]
     },
     {
-        "name": "Summer 2008 Stable 3",
-        "url": "https://web.archive.org/web/20170513190855/http://wiki.servicenow.com:80/index.php?title=Summer_2008_Stable_3",
-        "date": "2008-12-05",
-        "patches": [],
-        "features": []
-    },
-    {
         "name": "Winter 2009",
         "url": "https://web.archive.org/web/20170330204255/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes",
         "date": "2009-01-09",
-        "patches": [],
+        "patches": [
+            {
+                "name": "Winter 2009 Stable 1",
+                "number": "1",
+                "url": "https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1",
+                "date": "2009-02-13"
+            },
+            {
+                "name": "Winter 2009 Stable 2",
+                "number": "2",
+                "url": "https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2",
+                "date": "2009-03-13"
+            },
+            {
+                "name": "Winter 2009 Stable 3",
+                "number": "3",
+                "url": "https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3",
+                "date": "2009-04-10"
+            },
+            {
+                "name": "Winter 2009 Stable 4",
+                "number": "4",
+                "url": "https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4",
+                "date": "2009-05-01"
+            }
+        ],
         "features": [
-            "Project Management"
-        ]
-    },
-    {
-        "name": "Winter 2009 Stable 1",
-        "url": "https://web.archive.org/web/20170513220839/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_1",
-        "date": "2009-02-13",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "Winter 2009 Stable 2",
-        "url": "https://web.archive.org/web/20170513201738/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_2",
-        "date": "2009-03-13",
-        "patches": [],
-        "features": [
-            "Security Jump Start"
-        ]
-    },
-    {
-        "name": "Winter 2009 Stable 3",
-        "url": "https://web.archive.org/web/20170513194649/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_3",
-        "date": "2009-04-10",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "Winter 2009 Stable 4",
-        "url": "https://web.archive.org/web/20170513201743/http://wiki.servicenow.com:80/index.php?title=Winter_2009_Stable_4",
-        "date": "2009-05-01",
-        "patches": [],
-        "features": [
+            "Project Management",
+            "Security Jump Start",
             "Change Risk Calculator"
         ]
     },
@@ -213,7 +209,26 @@
         "name": "Spring 2009",
         "url": "https://web.archive.org/web/20121102072601/http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes",
         "date": "2009-05-29",
-        "patches": [],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Spring 2009 Stable 1",
+                "url": "https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1",
+                "date": "2009-06-26"
+            },
+            {
+                "number": "2",
+                "name": "Spring 2009 Stable 2",
+                "url": "https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2",
+                "date": "2009-05-29"
+            },
+            {
+                "number": "3",
+                "name": "Spring 2009 Stable 3",
+                "url": "https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3",
+                "date": "2009-08-28"
+            }
+        ],
         "features": [
             "Content Management System",
             "Metric Definition",
@@ -221,64 +236,39 @@
         ]
     },
     {
-        "name": "Spring 2009 Stable 1",
-        "url": "https://web.archive.org/web/20121102071848/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_1",
-        "date": "2009-06-26",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "Spring 2009 Stable 2",
-        "url": "https://web.archive.org/web/20121102071207/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_2",
-        "date": "2009-05-29",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "Spring 2009 Stable 3",
-        "url": "https://web.archive.org/web/20121102072715/http://wiki.servicenow.com/index.php?title=Spring_2009_Stable_3",
-        "date": "2009-08-28",
-        "patches": [],
-        "features": []
-    },
-    {
         "name": "Fall 2009",
         "url": "https://web.archive.org/web/20170331164444/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes",
         "date": "2009-09-25",
-        "patches": [{
-            "number": "1",
-            "name": "Fall 2009 Update",
-            "url": "https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update",
-            "date": "2009-09-26"
-        }],
+        "patches": [
+            {
+                "number": "0",
+                "name": "Fall 2009 Update",
+                "url": "https://web.archive.org/web/20170513212547/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Update",
+                "date": "2009-09-26"
+            },
+            {
+                "number": "1",
+                "name": "Fall 2009 Stable 1",
+                "url": "https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1",
+                "date": "2009-10-23"
+            },
+            {
+                "number": "2",
+                "name": "Fall 2009 Stable 2",
+                "url": "https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2",
+                "date": "2009-11-20"
+            },
+            {
+                "number": "3",
+                "name": "Fall 2009 Stable 3",
+                "url": "https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3",
+                "date": "2009-12-18"
+            }
+        ],
         "features": [
-            "Maintenance Schedules"
-        ]
-    },
-    {
-        "name": "Fall 2009 Stable 1",
-        "url": "https://web.archive.org/web/20170513213507/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_1",
-        "date": "2009-10-23",
-        "patches": [],
-        "features": [
-            "Performance Metrics"
-        ]
-    },
-    {
-        "name": "Fall 2009 Stable 2",
-        "url": "https://web.archive.org/web/20121102071935/http://wiki.servicenow.com/index.php?title=Fall_2009_Stable_2",
-        "date": "2009-11-20",
-        "patches": [],
-        "features": [
-            "Self Service Password Reset"
-        ]
-    },
-    {
-        "name": "Fall 2009 Stable 3",
-        "url": "https://web.archive.org/web/20170513192459/http://wiki.servicenow.com:80/index.php?title=Fall_2009_Stable_3",
-        "date": "2009-12-18",
-        "patches": [],
-        "features": [
+            "Maintenance Schedules",
+            "Performance Metrics",
+            "Self Service Password Reset",
             "Cancel Transactions"
         ]
     },
@@ -286,35 +276,31 @@
         "name": "Winter 2010",
         "url": "https://web.archive.org/web/20170331164551/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes",
         "date": "2010-01-22",
-        "patches": [],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Winter 2010 Stable 1",
+                "url": "https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes",
+                "date": "2010-02-19"
+            },
+            {
+                "number": "2",
+                "name": "Winter 2010 Stable 2",
+                "url": "https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes",
+                "date": "2010-03-19"
+            },
+            {
+                "number": "3",
+                "name": "Winter 2010 Stable 3",
+                "url": "https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes",
+                "date": "2010-04-16"
+            }
+        ],
         "features": [
             "Client Transaction Timings",
             "Update Set Preview",
-            "Save Updates as XML"
-        ]
-    },
-    {
-        "name": "Winter 2010 Stable 1",
-        "url": "https://web.archive.org/web/20170513212658/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_1_Release_Notes",
-        "date": "2010-02-19",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "Winter 2010 Stable 2",
-        "url": "https://web.archive.org/web/20170513194654/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_2_Release_Notes",
-        "date": "2010-03-19",
-        "patches": [],
-        "features": [
-            "Upgrade History"
-        ]
-    },
-    {
-        "name": "Winter 2010 Stable 3",
-        "url": "https://web.archive.org/web/20170513215042/http://wiki.servicenow.com:80/index.php?title=Winter_2010_Stable_3_Release_Notes",
-        "date": "2010-04-16",
-        "patches": [],
-        "features": [
+            "Save Updates as XML",
+            "Upgrade History",
             "UI Policies for Catalog"
         ]
     },
@@ -322,39 +308,34 @@
         "name": "Spring 2010",
         "url": "https://web.archive.org/web/20170330203949/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes",
         "date": "2010-07-04",
-        "patches": [],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Spring 2010 Stable 1",
+                "url": "https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes",
+                "date": "2010-07-09"
+            },
+            {
+                "number": "2",
+                "name": "Spring 2010 Stable 2",
+                "url": "https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes",
+                "date": "2010-08-06"
+            },
+            {
+                "number": "3",
+                "name": "Spring 2010 Stable 3",
+                "url": "https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes",
+                "date": "2010-09-03"
+            }
+        ],
         "features": [
             "SAML 2.0 SSO Plugin",
             "Portfolio Management",
             "Field Service Management",
             "Project Management v2",
-            "Cost Management"
-        ]
-    },
-    {
-        "name": "Spring 2010 Stable 1",
-        "url": "https://web.archive.org/web/20170513200247/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_1_Release_Notes",
-        "date": "2010-07-09",
-        "patches": [],
-        "features": [
-            "List v2"
-        ]
-    },
-    {
-        "name": "Spring 2010 Stable 2",
-        "url": "https://web.archive.org/web/20170331210005/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_2_Release_Notes",
-        "date": "2010-08-06",
-        "patches": [],
-        "features": [
-            "Tiny URL Support"
-        ]
-    },
-    {
-        "name": "Spring 2010 Stable 3",
-        "url": "https://web.archive.org/web/20170513212838/http://wiki.servicenow.com:80/index.php?title=Spring_2010_Stable_3_Release_Notes",
-        "date": "2010-09-03",
-        "patches": [],
-        "features": [
+            "Cost Management",
+            "List v2",
+            "Tiny URL Support",
             "Employee Self Service"
         ]
     },
@@ -362,50 +343,49 @@
         "name": "Fall 2010",
         "url": "https://web.archive.org/web/20170331210938/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes",
         "date": "2010-10-01",
-        "patches": [{
-            "number": "1",
-            "name": "Fall 2010 Update",
-            "url": "https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update",
-            "date": "2010-10-08"
-        }],
+        "patches": [
+            {
+                "number": "0",
+                "name": "Fall 2010 Update",
+                "url": "https://web.archive.org/web/20170513214651/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Update",
+                "date": "2010-10-08"
+            },
+            {
+                "number": "1",
+                "name": "Fall 2010 Stable 1",
+                "url": "https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes",
+                "date": "2010-10-29"
+            },
+            {
+                "number": "1.5",
+                "name": "Fall 2010 Stable 1 Update",
+                "url": "https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update",
+                "date": "2010-11-12"
+            },
+            {
+                "number": "2",
+                "name": "Fall 2010 Stable 2",
+                "url": "https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes",
+                "date": "2010-12-03"
+            },
+            {
+                "number": "2.5",
+                "name": "Fall 2010 Stable 2 Update",
+                "url": "https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update",
+                "date": "2010-12-08"
+            },
+            {
+                "number":"3",
+                "name": "Fall 2010 Stable 3",
+                "url": "https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes",
+                "date": "2011-01-07"
+            }
+        ],
         "features": [
             "Orchestration",
             "Sales Force Automation",
-            "SDLC"
-        ]
-    },
-    {
-        "name": "Fall 2010 Stable 1",
-        "url": "https://web.archive.org/web/20170513190740/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_1_Release_Notes",
-        "date": "2010-10-29",
-        "patches": [{
-            "number": "1",
-            "name": "Fall 2010 Stable 1 Update",
-            "url": "https://web.archive.org/web/20170513212047/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_1_Update",
-            "date": "2010-11-12"
-        }],
-        "features": [
-            "Upgrade Monitor"
-        ]
-    },
-    {
-        "name": "Fall 2010 Stable 2",
-        "url": "https://web.archive.org/web/20170331210712/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_2_Release_Notes",
-        "date": "2010-12-03",
-        "patches": [{
-            "number": "1",
-            "name": "Fall 2010 Stable 2 Update",
-            "url": "https://web.archive.org/web/20170513193945/http://wiki.servicenow.com:80/index.php?title=Release:Fall_2010_Stable_2_Update",
-            "date": "2010-12-08"
-        }],
-        "features": []
-    },
-    {
-        "name": "Fall 2010 Stable 3",
-        "url": "https://web.archive.org/web/20170513190746/http://wiki.servicenow.com:80/index.php?title=Fall_2010_Stable_3_Release_Notes",
-        "date": "2011-01-07",
-        "patches": [],
-        "features": [
+            "SDLC",
+            "Upgrade Monitor",
             "Service Level Management - SLA Commitments"
         ]
     },
@@ -413,52 +393,49 @@
         "name": "Winter 2011",
         "url": "https://web.archive.org/web/20121102071631/http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes",
         "date": "2011-02-04",
-        "patches": [{
-            "number": "1",
-            "name": "Winter 2011 Update",
-            "url": "https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update",
-            "date": "2011-03-10"
-        }],
+        "patches": [
+            {
+                "number": "1",
+                "name": "Winter 2011 Update",
+                "url": "https://web.archive.org/web/20170513193058/http://wiki.servicenow.com:80/index.php?title=Release:Winter_2011_Update",
+                "date": "2011-03-10"
+            }
+        ],
         "features": [
             "Chat",
             "Live Feed",
             "GRC"
         ]
     },
-    {
-        "name": "June 2011 Preview 1",
-        "url": "https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes",
-        "date": "2011-03-04",
-        "patches": [],
-        "features": []
-    },
-    {
-        "name": "June 2011 Preview 2",
-        "url": "https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes",
-        "date": "2011-04-08",
-        "patches": [],
-        "features": [
-            "Data Certification"
-        ]
-    },
-    {
-        "name": "June 2011 Preview 3",
-        "url": "https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes",
-        "date": "2011-05-06",
-        "patches": [],
-        "features": [
-            "Change Risk Assessment"
-        ]
-    },
+    
     {
         "name": "June 2011",
         "url": "https://web.archive.org/web/20170513214932/http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes",
-        "date": "2011-06-17",
-        "patches": [{
+        "date": "2011-03-04",
+        "patches": [
+            {
+                "number":"P1",
+                "name": "June 2011 Preview 1",
+                "url": "https://web.archive.org/web/20170513203307/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_1_Release_Notes",
+                "date": "2011-03-04"
+            },
+            {
+                "number":"P2",
+                "name": "June 2011 Preview 2",
+                "url": "https://web.archive.org/web/20170513193818/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_2_Release_Notes",
+                "date": "2011-04-08"
+            },
+            {
+                "number":"P3",
+                "name": "June 2011 Preview 3",
+                "url": "https://web.archive.org/web/20170513213329/http://wiki.servicenow.com:80/index.php?title=June_2011_Preview_3_Release_Notes",
+                "date": "2011-05-06"
+            },
+            {
                 "number": "0",
                 "name": "June 11",
                 "url": "https://www.slideshare.net/jonssparks/platform-enhancements?qid=1af6f62c-6c73-4164-bda7-7599dda50cd0&v=&b=&from_search=32",
-                "date": ""
+                "date": "2011-06-17"
             },
             {
                 "number": "1",
@@ -493,14 +470,17 @@
         ],
         "features": [
             "UI11",
-            "Document Management"
+            "Document Management",
+            "Data Certification",
+            "Change Risk Assessment"
         ]
     },
     {
         "name": "Aspen aka October 2011",
         "url": "https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes",
         "date": "2011-12-01",
-        "patches": [{
+        "patches": [
+            {
                 "number": "0",
                 "name": "Aspen Patch 0",
                 "url": "https://www.slideshare.net/SunshineLaLady/aspencustomerwebinar-slideshare120111174354phpapp01?qid=1af6f62c-6c73-4164-bda7-7599dda50cd0&v=&b=&from_search=12",
@@ -581,7 +561,8 @@
         "name": "Berlin",
         "url": "https://web.archive.org/web/20171126031424/http://wiki.servicenow.com/index.php?title=Berlin_Release_Notes",
         "date": "2012-07-02",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Berlin Patch 1",
                 "url": "https://web.archive.org/web/20170513192932/http://wiki.servicenow.com:80/index.php?title=Release:Berlin_Patch_1",
@@ -682,7 +663,8 @@
         "name": "Calgary",
         "url": "https://web.archive.org/web/20171126031755/http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes",
         "date": "2013-02-28",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Calgary Patch 1",
                 "url": "https://web.archive.org/web/20170513194721/http://wiki.servicenow.com:80/index.php?title=Release:Calgary_Patch_1",
@@ -736,7 +718,8 @@
         "name": "Dublin",
         "url": "https://web.archive.org/web/20151018161349/http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes",
         "date": "2013-10-22",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Dublin Patch 1",
                 "url": "https://web.archive.org/web/20170513213358/http://wiki.servicenow.com:80/index.php?title=Release:Dublin_Patch_1",
@@ -805,7 +788,8 @@
         "name": "Eureka",
         "url": "https://web.archive.org/web/20151019051822/http://wiki.servicenow.com/index.php?title=Eureka_Release_Notes",
         "date": "2014-05-06",
-        "patches": [{
+        "patches": [
+            {
                 "name": "Eureka Patch 0",
                 "number": "0",
                 "url": "",
@@ -902,7 +886,8 @@
         "name": "Fuji",
         "url": "https://web.archive.org/web/20170118064821/http://wiki.servicenow.com:80/index.php?title=Fuji_Release_Notes",
         "date": "2015-01-23",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Fuji Patch 1",
                 "url": "https://web.archive.org/web/20170513212818/http://wiki.servicenow.com:80/index.php?title=Release:Fuji_Patch_1",
@@ -1003,7 +988,8 @@
         "name": "Geneva",
         "url": "https://web.archive.org/web/20181120162500/https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/geneva-release-notes.html",
         "date": "2015-11-03",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Geneva Patch 1",
                 "url": "https://web.archive.org/web/20181120162104/https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-1.html",
@@ -1092,7 +1078,8 @@
         "name": "Helsinki",
         "url": "https://web.archive.org/web/20181120162544/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/helsinki-release-notes.html",
         "date": "2016-04-28",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Helsinki Patch 1",
                 "url": "https://web.archive.org/web/20181120155757/https://docs.servicenow.com/bundle/helsinki-release-notes/page/release-notes/r_Helsinki-Patch-1.html",
@@ -1217,7 +1204,8 @@
         "name": "Istanbul",
         "url": "https://web.archive.org/web/20170606172605/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/istanbul-release-notes.html",
         "date": "2016-11-28",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Istanbul Patch 1",
                 "url": "https://web.archive.org/web/20170706084639/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-1.html",
@@ -1394,7 +1382,8 @@
         "name": "Jakarta",
         "url": "https://web.archive.org/web/20171101000000*/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/jakarta-release-notes.html",
         "date": "2017-06-15",
-        "patches": [{
+        "patches": [
+            {
                 "number": "1",
                 "name": "Jakarta Patch 1",
                 "url": "https://web.archive.org/web/20181120154131/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-1.html",
@@ -1561,7 +1550,8 @@
         "name": "Kingston",
         "url": "https://web.archive.org/web/20180527202058/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
         "date": "2017-11-16",
-        "patches": [{
+        "patches": [
+            {
                 "number": "0",
                 "name": "Kingston Patch 0",
                 "url": "https://web.archive.org/web/20180527202058/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/family-release-notes.html",
@@ -1632,70 +1622,80 @@
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0687472",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/6/scripts/",
                 "date": "2018-05-30"
-            }, {
+            },
+            {
                 "number": "7",
                 "name": "Kingston Patch 7",
                 "url": "https://web.archive.org/web/20181120153842/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-7.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690216",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/7/scripts/",
                 "date": "2018-06-21"
-            }, {
+            },
+            {
                 "number": "8",
                 "name": "Kingston Patch 8",
                 "url": "https://web.archive.org/web/20181120153914/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-8.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692610",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/8/scripts/",
                 "date": "2018-06-21"
-            }, {
+            },
+            {
                 "number": "9",
                 "name": "Kingston Patch 9",
                 "url": "https://web.archive.org/web/20181120153848/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713018",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/9/scripts/",
                 "date": "2018-09-28"
-            }, {
+            },
+            {
                 "number": "10",
                 "name": "Kingston Patch 10",
                 "url": "https://web.archive.org/web/20181120153911/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-10.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715314",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/10/scripts/",
                 "date": "2018-10-23"
-            }, {
+            },
+            {
                 "number": "11",
                 "name": "Kingston Patch 11",
                 "url": "https://web.archive.org/web/20181120152528/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-11.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715314",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/11/scripts/",
                 "date": "2018-10-23"
-            }, {
+            },
+            {
                 "number": "12",
                 "name": "Kingston Patch 12",
                 "url": "https://web.archive.org/web/20181220154200/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-12.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0720478",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/12/scripts/",
                 "date": "2018-12-20"
-            }, {
+            },
+            {
                 "number": "13",
                 "name": "Kingston Patch 13",
                 "url": "https://web.archive.org/web/20190221135942/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-13.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723544",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/13/scripts/",
                 "date": "2018-12-20"
-            }, {
+            },
+            {
                 "number": "14",
                 "name": "Kingston Patch 14",
                 "url": "https://web.archive.org/web/20190318012140/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-14.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0727920",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14/scripts/",
                 "date": "2019-03-14"
-            }, {
+            },
+            {
                 "number": "14a",
                 "name": "Kingston Patch 14a",
                 "url": "",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746951",
                 "git": "https://github.com/jacebenson/sndocs/tree/master/sources/kingston/14a/scripts/",
                 "date": "2019-04-22"
-            }, {
+            },
+            {
                 "number": "14b",
                 "name": "Kingston Patch 14b",
                 "url": "https://web.archive.org/web/20190318012140/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-14.html",
@@ -1727,98 +1727,112 @@
         "name": "London",
         "url": "https://web.archive.org/web/20181120153316/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
         "date": "2018-07-27",
-        "patches": [{
-            "number": "0",
-            "name": "London Patch 0",
-            "url": "https://web.archive.org/web/20181120153316/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
-            "date": "2018-07-27"
-        }, {
-            "number": "1",
-            "name": "London Patch 1",
-            "url": "https://web.archive.org/web/20181120153319/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/1/scripts/",
-            "date": "2018-09-05"
-        }, {
-            "number": "2",
-            "name": "London Patch 2",
-            "url": "https://web.archive.org/web/20181120153322/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-2.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713186",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/2/scripts/",
-            "date": "2018-10-08"
-        }, {
-            "number": "3",
-            "name": "London Patch 3",
-            "url": "https://web.archive.org/web/20181120153325/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-3.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715680",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
-            "date": "2018-11-14"
-        }, {
-            "number": "4",
-            "name": "London Patch 4",
-            "url": "https://web.archive.org/web/20181220153957/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-4.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0717900",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/4/scripts/",
-            "date": "2018-12-20"
-        }, {
-            "number": "5",
-            "name": "London Patch 5",
-            "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723003",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/5/scripts/",
-            "date": "2019-02-21"
-        }, {
-            "number": "6",
-            "name": "London Patch 6",
-            "url": "https://web.archive.org/web/20190312142351/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723018",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6/scripts/",
-            "date": "2019-03-12"
-        }, {
-            "number": "6a",
-            "name": "London Patch 6a",
-            "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6a-hf-1.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746952",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6a/scripts/",
-            "date": "2019-05-03"
-        }, {
-            "number": "6b",
-            "name": "London Patch 6b",
-            "url": "",
-            "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=5f7e51ffdb95bbccfff8a345ca961941",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6b/scripts/",
-            "date": "2019-05-31"
-        }, {
-            "number": "7",
-            "name": "London Patch 7",
-            "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-7.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723019",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/7/scripts/",
-            "date": "2019-04-08"
-        }, {
-            "number": "8",
-            "name": "London Patch 8",
-            "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-8.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723498",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/8/scripts/",
-            "date": "2019-05-02"
-        }, {
-            "number": "9",
-            "name": "London Patch 9",
-            "url": "https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/9/scripts/",
-            "date": "2019-07-03"
-        }, {
-            "number": "10",
-            "name": "London Patch 10",
-            "url": "https://web.archive.org/web/20190926180653/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-10.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0777754",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/10/scripts/",
-            "date": "2019-09-26"
-        }],
+        "patches": [
+            {
+                "number": "0",
+                "name": "London Patch 0",
+                "url": "https://web.archive.org/web/20181120153316/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/0/scripts/",
+                "date": "2018-07-27"
+            },
+            {
+                "number": "1",
+                "name": "London Patch 1",
+                "url": "https://web.archive.org/web/20181120153319/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/1/scripts/",
+                "date": "2018-09-05"
+            },
+            {
+                "number": "2",
+                "name": "London Patch 2",
+                "url": "https://web.archive.org/web/20181120153322/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-2.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713186",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/2/scripts/",
+                "date": "2018-10-08"
+            },
+            {
+                "number": "3",
+                "name": "London Patch 3",
+                "url": "https://web.archive.org/web/20181120153325/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-3.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0715680",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/3/scripts/",
+                "date": "2018-11-14"
+            },
+            {
+                "number": "4",
+                "name": "London Patch 4",
+                "url": "https://web.archive.org/web/20181220153957/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-4.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0717900",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/4/scripts/",
+                "date": "2018-12-20"
+            },
+            {
+                "number": "5",
+                "name": "London Patch 5",
+                "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723003",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/5/scripts/",
+                "date": "2019-02-21"
+            },
+            {
+                "number": "6",
+                "name": "London Patch 6",
+                "url": "https://web.archive.org/web/20190312142351/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723018",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6/scripts/",
+                "date": "2019-03-12"
+            },
+            {
+                "number": "6a",
+                "name": "London Patch 6a",
+                "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-6a-hf-1.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746952",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6a/scripts/",
+                "date": "2019-05-03"
+            },
+            {
+                "number": "6b",
+                "name": "London Patch 6b",
+                "url": "",
+                "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=5f7e51ffdb95bbccfff8a345ca961941",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/6b/scripts/",
+                "date": "2019-05-31"
+            },
+            {
+                "number": "7",
+                "name": "London Patch 7",
+                "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-7.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723019",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/7/scripts/",
+                "date": "2019-04-08"
+            },
+            {
+                "number": "8",
+                "name": "London Patch 8",
+                "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-8.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723498",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/8/scripts/",
+                "date": "2019-05-02"
+            },
+            {
+                "number": "9",
+                "name": "London Patch 9",
+                "url": "https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/9/scripts/",
+                "date": "2019-07-03"
+            },
+            {
+                "number": "10",
+                "name": "London Patch 10",
+                "url": "https://web.archive.org/web/20190926180653/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-10.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0777754",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/london/10/scripts/",
+                "date": "2019-09-26"
+            }
+        ],
         "features": [
             "Chat Bots: Virtual Agents",
             "Enhanced Flow Designer",
@@ -1844,98 +1858,112 @@
         "name": "Madrid",
         "url": "https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
         "date": "2019-01-31",
-        "patches": [{
-            "number": "0",
-            "name": "Madrid Patch 0",
-            "url": "https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713586",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/0/scripts/",
-            "date": "2018-02-21"
-        }, {
-            "number": "1",
-            "name": "Madrid Patch 1",
-            "url": "https://web.archive.org/web/20190312142201/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-1.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0726513",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/1/scripts/",
-            "date": "2018-03-12"
-        }, {
-            "number": "2",
-            "name": "Madrid Patch 2",
-            "url": "https://web.archive.org/web/20190415133229/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-2.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0744548",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/2/scripts/",
-            "date": "2018-03-12"
-        }, {
-            "number": "3",
-            "name": "Madrid Patch 3",
-            "url": "https://web.archive.org/web/20190531193255/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-3.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0745362",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/3/scripts/",
-            "date": "2018-05-09"
-        }, {
-            "number": "4",
-            "name": "Madrid Patch 4",
-            "url": "https://web.archive.org/web/20190624180731/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-4.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746737",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4/scripts/",
-            "date": "2018-06-13"
-        }, {
-            "number": "4a",
-            "name": "Madrid Patch 4a",
-            "url": "",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0753617",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4a/scripts/",
-            "date": "2018-07-09"
-        }, {
-            "number": "4b",
-            "name": "Madrid Patch 4b",
-            "url": "",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0758081",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4b/scripts/",
-            "date": "2018-08-12"
-        }, {
-            "number": "5",
-            "name": "Madrid Patch 5",
-            "url": "https://web.archive.org/web/20190724040541/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-5.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/5/scripts/",
-            "date": "2018-07-11"
-        }, {
-            "number": "6",
-            "name": "Madrid Patch 6",
-            "url": "https://web.archive.org/web/20190812175435/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-6.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0755809",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/6/scripts/",
-            "date": "2018-08-08"
-        }, {
-            "number": "7",
-            "name": "Madrid Patch 7",
-            "url": "https://web.archive.org/web/20190912152305/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-7.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0760440",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7/scripts/",
-            "date": "2018-09-12"
-    },  {
-            "number": "7a",
-            "name": "Madrid Patch 7a",
-            "url": "",
-            "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e7450e5fdbe800dc2be0a851ca961968",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7a/scripts/",
-            "date": "2019-10-23"
-        }, {
-            "number": "8",
-            "name": "Madrid Patch 8",
-            "url": "https://web.archive.org/web/20191016211638/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-8.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/8/scripts/",
-            "date": "2018-10-16"
-        }, {
-            "number": "9",
-            "name": "Madrid Patch 9",
-            "url": "https://web.archive.org/web/20191217170259/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-9.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0788886",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/9/scripts/",
-            "date": "2019-12-17"
-        }],
+        "patches": [
+            {
+                "number": "0",
+                "name": "Madrid Patch 0",
+                "url": "https://web.archive.org/web/20190221140059/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713586",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/0/scripts/",
+                "date": "2018-02-21"
+            },
+            {
+                "number": "1",
+                "name": "Madrid Patch 1",
+                "url": "https://web.archive.org/web/20190312142201/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-1.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0726513",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/1/scripts/",
+                "date": "2018-03-12"
+            },
+            {
+                "number": "2",
+                "name": "Madrid Patch 2",
+                "url": "https://web.archive.org/web/20190415133229/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-2.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0744548",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/2/scripts/",
+                "date": "2018-03-12"
+            },
+            {
+                "number": "3",
+                "name": "Madrid Patch 3",
+                "url": "https://web.archive.org/web/20190531193255/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-3.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0745362",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/3/scripts/",
+                "date": "2018-05-09"
+            },
+            {
+                "number": "4",
+                "name": "Madrid Patch 4",
+                "url": "https://web.archive.org/web/20190624180731/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-4.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0746737",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4/scripts/",
+                "date": "2018-06-13"
+            },
+            {
+                "number": "4a",
+                "name": "Madrid Patch 4a",
+                "url": "",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0753617",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4a/scripts/",
+                "date": "2018-07-09"
+            },
+            {
+                "number": "4b",
+                "name": "Madrid Patch 4b",
+                "url": "",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0758081",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/4b/scripts/",
+                "date": "2018-08-12"
+            },
+            {
+                "number": "5",
+                "name": "Madrid Patch 5",
+                "url": "https://web.archive.org/web/20190724040541/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-5.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/5/scripts/",
+                "date": "2018-07-11"
+            },
+            {
+                "number": "6",
+                "name": "Madrid Patch 6",
+                "url": "https://web.archive.org/web/20190812175435/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-6.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0755809",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/6/scripts/",
+                "date": "2018-08-08"
+            },
+            {
+                "number": "7",
+                "name": "Madrid Patch 7",
+                "url": "https://web.archive.org/web/20190912152305/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-7.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0760440",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7/scripts/",
+                "date": "2018-09-12"
+            },
+            {
+                "number": "7a",
+                "name": "Madrid Patch 7a",
+                "url": "",
+                "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e7450e5fdbe800dc2be0a851ca961968",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/7a/scripts/",
+                "date": "2019-10-23"
+            },
+            {
+                "number": "8",
+                "name": "Madrid Patch 8",
+                "url": "https://web.archive.org/web/20191016211638/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-8.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0721455",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/8/scripts/",
+                "date": "2018-10-16"
+            },
+            {
+                "number": "9",
+                "name": "Madrid Patch 9",
+                "url": "https://web.archive.org/web/20191217170259/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-9.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0788886",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/madrid/9/scripts/",
+                "date": "2019-12-17"
+            }
+        ],
         "features": [
             "Antivirus Scanning",
             "Instance Security Center",
@@ -1954,46 +1982,53 @@
             "Service Portal: 2FA",
             "Admins can roll back a clone for up to seven days"
         ]
-    }, {
+    },
+    {
         "name": "New York",
         "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
         "date": "2019-07-26",
-        "patches": [{
-            "number": "0",
-            "name": "New York Patch 0",
-            "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748891",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
-            "date": "2019-07-26"
-        },{
-            "number": "1",
-            "name": "New York Patch 1",
-            "url": "https://web.archive.org/web/20191007170855/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-1.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0759084",
-            "git": "",
-            "date": "2019-08-14"
-        },{
-            "number": "2",
-            "name": "New York Patch 2",
-            "url": "https://web.archive.org/web/20191007170908/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-2.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0780117",
-            "git": "",
-            "date": "2019-09-24"
-        },{
-            "number": "3",
-            "name": "New York Patch 3",
-            "url": "https://web.archive.org/web/20191217170902/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-3.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0784250",
-            "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/3/scripts/",
-            "date": "2019-12-17"
-        },{
-            "number": "4",
-            "name": "New York Patch 4",
-            "url": "https://web.archive.org/web/20191217172032/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-4.html",
-            "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0787370",
-            "git": "",
-            "date": "2019-12-17"
-        }],
+        "patches": [
+            {
+                "number": "0",
+                "name": "New York Patch 0",
+                "url": "https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0748891",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/0/scripts/",
+                "date": "2019-07-26"
+            },
+            {
+                "number": "1",
+                "name": "New York Patch 1",
+                "url": "https://web.archive.org/web/20191007170855/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-1.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0759084",
+                "git": "",
+                "date": "2019-08-14"
+            },
+            {
+                "number": "2",
+                "name": "New York Patch 2",
+                "url": "https://web.archive.org/web/20191007170908/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-2.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0780117",
+                "git": "",
+                "date": "2019-09-24"
+            },
+            {
+                "number": "3",
+                "name": "New York Patch 3",
+                "url": "https://web.archive.org/web/20191217170902/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-3.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0784250",
+                "git": "https://github.com/jacebenson/sndocs/tree/master/sources/newyork/3/scripts/",
+                "date": "2019-12-17"
+            },
+            {
+                "number": "4",
+                "name": "New York Patch 4",
+                "url": "https://web.archive.org/web/20191217172032/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-4.html",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0787370",
+                "git": "",
+                "date": "2019-12-17"
+            }
+        ],
         "features": [
             "Agent Workspace: Landing Pages, List Updates,Response templates",
             "Agile Dev 2.0: Agile Board Config. columns",
