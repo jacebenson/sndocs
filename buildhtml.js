@@ -76,6 +76,12 @@ fs.writeFile('./public/rss.xml', feed.xml({ indent: true }), function (err) {
   console.log('created ./rss.xml');
 });
 
+// destination.txt will be created or overwritten by default.
+fs.copyFile('data.json', './public/data.json', (err) => {
+  if (err) throw err;
+  console.log('data.json was copied to destination.txt');
+});
+
 /**
  * Build HTML
  */

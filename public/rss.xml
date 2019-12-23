@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 20 Dec 2019 22:57:31 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 23 Dec 2019 23:08:54 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Fri, 20 Dec 2019 22:57:31 GMT</pubDate>
+        <pubDate>Mon, 23 Dec 2019 23:08:54 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -1109,9 +1109,9 @@
             <pubDate>Tue, 17 Dec 2013 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Aspen aka October 2011]]></title>
+            <title><![CDATA[Aspen]]></title>
             <link>https://web.archive.org/web/20170417150818/http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes</link>
-            <guid isPermaLink="false">Aspen aka October 2011</guid>
+            <guid isPermaLink="false">Aspen</guid>
             <pubDate>Thu, 01 Dec 2011 00:00:00 GMT</pubDate>
         </item>
         <item>
@@ -1468,9 +1468,9 @@
             <pubDate>Fri, 30 Nov 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Summer 2007 aka July 2007]]></title>
+            <title><![CDATA[Summer 2007]]></title>
             <link>https://web.archive.org/web/20081216011434/http://wiki.service-now.com:80/index.php?title=Upgrades</link>
-            <guid isPermaLink="false">Summer 2007 aka July 2007</guid>
+            <guid isPermaLink="false">Summer 2007</guid>
             <pubDate>Thu, 05 Jul 2007 00:00:00 GMT</pubDate>
         </item>
         <item>
@@ -1534,9 +1534,9 @@
             <pubDate>Fri, 27 Jan 2006 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[Glidesoft 2004]]></title>
+            <title><![CDATA[GlideSoft 2004]]></title>
             <link>https://web.archive.org/web/20041204070253/http://www.hosteditil.com:80/hosted_itil_features.htm</link>
-            <guid isPermaLink="false">Glidesoft 2004</guid>
+            <guid isPermaLink="false">GlideSoft 2004</guid>
             <pubDate>Sat, 04 Dec 2004 00:00:00 GMT</pubDate>
         </item>
     </channel>
