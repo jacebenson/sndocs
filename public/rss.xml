@@ -9,9 +9,9 @@
             <link>https://sndocs.jacebenson.com</link>
         </image>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 06 Jan 2020 17:08:29 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 06 Jan 2020 18:38:52 GMT</lastBuildDate>
         <atom:link href="https://sndocs.jacebenson.com/rss.xml" rel="self" type="application/rss+xml"/>
-        <pubDate>Mon, 06 Jan 2020 17:08:29 GMT</pubDate>
+        <pubDate>Mon, 06 Jan 2020 18:38:52 GMT</pubDate>
         <language><![CDATA[en]]></language>
         <ttl>60</ttl>
         <itunes:subtitle>Unofficial Servicenow release list</itunes:subtitle>
@@ -26,7 +26,7 @@
         </itunes:category>
         <item>
             <title><![CDATA[Orlando]]></title>
-            <link>https://web.archive.org/web/20190726153531/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html</link>
+            <link>https://docs.servicenow.com/bundle/orlando-rtp-release-notes/page/rtp-rn/summary/rn-summary-changes.html</link>
             <guid isPermaLink="false">Orlando</guid>
             <pubDate>Mon, 06 Jan 2020 00:00:00 GMT</pubDate>
         </item>
