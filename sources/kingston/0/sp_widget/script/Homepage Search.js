@@ -1,1 +1,0 @@
-data.typeAheadSearch = $sp.getWidget('typeahead-search', options.typeahead_search);

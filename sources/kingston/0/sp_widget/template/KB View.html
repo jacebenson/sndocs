@@ -1,9 +1,0 @@
-<sp-panel ng-attr-title="data.title">
-   <input ng-model="kb_view_filter" placeholder="{{data.filterMsg}}"/>
-   <div ng-show="filtered.length > 0" ng-repeat="cat in data.categories" ng-if="cat.documents.length">
-      <h4>{{cat.label}}</h4>
-      <div ng-repeat="doc in filtered = (cat.documents | filter : kb_view_filter)">
-         <a ng-href="?id=kb_article&sys_id={{doc.sys_id}}">{{doc.short_description}}</a>
-      </div>
-   </div>
-</sp-panel>

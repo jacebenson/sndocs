@@ -120,13 +120,6 @@ var tableHTML = (new Table({ 'class': 'table table-responsive table-hover' }))
       }
       returnHTML += '  </div>';
       returnHTML += '  <div class="col-12">';
-      if (patch.git) {
-        returnHTML += '    <a title="' + patch.name + ' Code" href="' + patch.git + '">';
-      }
-      returnHTML += '      <i class="fa fa-code-fork"></i>';
-      if (patch.git) {
-        returnHTML += '    </a>';
-      }
       returnHTML += '  </div>';
       returnHTML += '</div>';
       returnHTML += '</td>';

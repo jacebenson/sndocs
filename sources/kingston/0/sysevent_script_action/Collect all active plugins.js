@@ -1,2 +1,0 @@
-SNC.UsageAnalyticsScriptUtils.addAllActivePluginsAnalytic();
-SNC.UsageAnalyticsScriptUtils.addUpgradeDetailsAnalytic();

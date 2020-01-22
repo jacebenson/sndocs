@@ -1,1 +1,0 @@
-angular.module("sn.change_management.cab.agenda", ['ng.amb', 'sn.app_common', 'sn.change_management.cab.core', 'sn.change_management.cab.runtime_state']);

@@ -1,1 +1,0 @@
-angular.module("sn.change_management.cab.approval", ['ng.amb', 'ui.bootstrap.modal', 'sn.app_common', 'sn.change_management.cab.core', 'sn.change_management.cab.runtime_state']);

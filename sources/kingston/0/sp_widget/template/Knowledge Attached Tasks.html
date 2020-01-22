@@ -1,7 +1,0 @@
-<sp-panel ng-if="$root.properties.showAttachedTasks === 'true' || $root.properties.showAttachedTasks === true">
-  <div class="list-group-item row" ng-repeat="incident in $root.attachedIncidents">		
-    <a  href="{{incident.URL}}&sysparm_stack={{$root.stackUrl}}"><span><img src="images/icons/kb_task.gifx" alt="{{incident.text}}"/></span><span>{{incident.text}}</span></a>        
-  </div>
-
-  <div class="list-group-item" ng-if="!$root.attachedIncidents.length > 0">{{$root.messages.NO_INCIDENTS}}</div>
-</sp-panel>

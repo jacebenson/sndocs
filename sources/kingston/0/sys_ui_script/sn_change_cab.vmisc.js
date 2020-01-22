@@ -1,1 +1,0 @@
-angular.module('sn.itsm.vcab.misc', ['sn.common', 'ui.bootstrap.modal', 'sn.itsm.vcab.common']);

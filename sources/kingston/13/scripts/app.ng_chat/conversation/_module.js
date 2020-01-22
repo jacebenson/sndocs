@@ -1,2 +1,0 @@
-/*! RESOURCE: /scripts/app.ng_chat/conversation/_module.js */
-angular.module("sn.connect.conversation", ["ng.common", "sn.connect.util", "sn.connect.profile", "sn.connect.message", "sn.connect.resource", 'sn.connect.presence', 'sn.common.ui.popover']);;

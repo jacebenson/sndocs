@@ -1,9 +1,0 @@
-<div class="modal-body" style="padding: 0">
-	<div ng-repeat="m in c.$$uiNotification" class="alert"
-			 ng-class="{'alert-danger' : m.type == 'error', 'alert-success' : m.type != 'error', 'visible' : m.visible}"
-			 ng-init="c.revealNotification(m)">
-		<span ng-bind-html="m.message"></span>
-		<a class="fa fa-close dismiss-notifications" ng-click="c.dismissNotifications()" ng-show="$first"></a>
-	</div>
-	<sp-widget widget="instance"></sp-widget>
-</div>

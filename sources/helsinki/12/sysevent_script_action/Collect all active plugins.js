@@ -1,1 +1,0 @@
-SNC.UsageAnalyticsScriptUtils.addAllActivePluginsAnalytic();

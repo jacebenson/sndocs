@@ -1,1 +1,0 @@
-new CloneAPI().restartClone(current);

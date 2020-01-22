@@ -1,1 +1,0 @@
-new hr_Utils().cleanupChildRecordsForCase(current);

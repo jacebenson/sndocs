@@ -1,1 +1,0 @@
-SNC.DelegatedDevelopmentUtil.updateAllMetaDataPermissions();

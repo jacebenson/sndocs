@@ -1,1 +1,0 @@
-new BenchmarkScoreDownloader().getScores(true);

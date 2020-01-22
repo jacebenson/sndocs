@@ -1,1 +1,0 @@
-gs.setRedirect("cmdb_m2m_model_compatibility.do?sys_id=-1&sysparm_query=model_1=" + current.sys_id);

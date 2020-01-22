@@ -1,1 +1,0 @@
-data.buttonMsg = gs.getMessage(options.button_text || "Click Here");

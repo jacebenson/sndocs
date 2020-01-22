@@ -1,1 +1,0 @@
-SNC.MegaphoneBroadcast.addMegaphoneMessagesToSessionsForUserOnAllNodes(event.parm1);
