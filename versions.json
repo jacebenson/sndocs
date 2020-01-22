@@ -90,7 +90,7 @@
     "6": "https://wdpr.service-now.com",
     "7": "https://csc.service-now.com",
     "8": "https://ssmportal.service-now.com",
-    "9": "https://hallmarkcardsprod.service-now.com",
+    "9": "https://rmit.service-now.com",
     "10": "https://hallmarkcardstest.service-now.com",
     "6a": "https://veritas.service-now.com",
     "6b": "https://svb.service-now.com"
@@ -103,12 +103,13 @@
     "4": "https://berkeley.service-now.com",
     "5": "https://suffolk.service-now.com",
     "6": "https://tieto.service-now.com",
-    "7": "https://tnt.service-now.com",
-    "8": "https://zillow.service-now.com",
-    "9": "https://warwick.service-now.com",
+    "7": "https://pacific.service-now.com",
+    "8": "https://unts.service-now.com",
+    "9": "https://wnyricprod.service-now.com",
     "4a": "https://wsi.service-now.com",
     "4b": "https://thermofisherit.service-now.com",
-    "7a": "https://siriusxm.service-now.com"
+    "7a": "https://siriusxm.service-now.com",
+    "9a": "https://spartan.service-now.com"
   },
   "newyork": {
     "0": "https://dev74974.service-now.com",

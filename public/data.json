@@ -2136,6 +2136,13 @@
                 "url": "https://web.archive.org/web/20191217170259/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-9.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0788886",
                 "date": "2019-12-17"
+            },
+            {
+                "number": "9a",
+                "name": "Madrid Patch 9a",
+                "url": "",
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0792566",
+                "date": "2020-01-09"
             }
         ],
         "features": [
