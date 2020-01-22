@@ -1269,7 +1269,10 @@
                 "name": "Geneva Patch 4",
                 "url": "https://web.archive.org/web/20181120162246/https://docs.servicenow.com/bundle/geneva-release-notes/page/release-notes/r_Geneva-Patch-4.html",
                 "date": "2016-02-16",
-                "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e2bde5034f29da40f347524e0210c781"
+                "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=e2bde5034f29da40f347524e0210c781",
+                "hotFixes": [
+                    "Hotfix 10"
+                ]
             },
             {
                 "number": "5",
@@ -1495,7 +1498,10 @@
                 "name": "Istanbul Patch 5",
                 "url": "https://web.archive.org/web/20170706041858/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-5.html",
                 "date": "2017-04-20",
-                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622081"
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0622081",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "6",
@@ -1530,7 +1536,10 @@
                 "name": "Istanbul Patch 8",
                 "url": "https://web.archive.org/web/20181120154755/https://docs.servicenow.com/bundle/istanbul-release-notes/page/release-notes/r_Istanbul-Patch-8.html",
                 "date": "2017-07-28",
-                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623642"
+                "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623642",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "9",
@@ -1657,35 +1666,50 @@
                 "name": "Jakarta Patch 4",
                 "url": "https://web.archive.org/web/20181120154311/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-4.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623601",
-                "date": "2017-10-06"
+                "date": "2017-10-06",
+                "hotFixes": [
+                    "Hotfix 1"
+                ]
             },
             {
                 "number": "5",
                 "name": "Jakarta Patch 5",
                 "url": "https://web.archive.org/web/20181120154315/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-5.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-                "date": "2017-11-02"
+                "date": "2017-11-02",
+                "hotFixes": [
+                    "Hotfix 1"
+                ]
             },
             {
                 "number": "6",
                 "name": "Jakarta Patch 6",
                 "url": "https://web.archive.org/web/20181120154319/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-6.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-                "date": "2017-11-30"
+                "date": "2017-11-30",
+                "hotFixes": [
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "6a",
                 "name": "Jakarta Patch 6a",
                 "url": "",
                 "hi": "https://hi.service-now.com/kb_view.do?sys_kb_id=6e50210edbd7c7444837f3231f96191d",
-                "date": "2018-01-02"
+                "date": "2018-01-02",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "7",
                 "name": "Jakarta Patch 7",
                 "url": "https://web.archive.org/web/20181120154320/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-7.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0623655",
-                "date": "2018-01-05"
+                "date": "2018-01-05",
+                "hotFixes": [
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "8",
@@ -1699,7 +1723,10 @@
                 "name": "Jakarta Patch 8a",
                 "url": "",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0682388",
-                "date": "2018-02-26"
+                "date": "2018-02-26",
+                "hotFixes": [
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "8b",
@@ -1713,7 +1740,10 @@
                 "name": "Jakarta Patch 9",
                 "url": "https://web.archive.org/web/20181120154326/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-9.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0685869",
-                "date": "2018-05-17"
+                "date": "2018-05-17",
+                "hotFixes": [
+                    "Hotfix 7"
+                ]
             },
             {
                 "number": "9a",
@@ -1734,14 +1764,20 @@
                 "name": "Jakarta Patch 9c",
                 "url": "",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0694713",
-                "date": "2018-09-11"
+                "date": "2018-09-11",
+                "hotFixes": [
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "10",
                 "name": "Jakarta Patch 10",
                 "url": "https://web.archive.org/web/20181120154329/https://docs.servicenow.com/bundle/jakarta-release-notes/page/release-notes/quality/jakarta-patch-10.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692612",
-                "date": "2018-09-13"
+                "date": "2018-09-13",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             }
         ],
         "features": [
@@ -1815,7 +1851,10 @@
                 "name": "Kingston Patch 4",
                 "url": "https://web.archive.org/web/20181120153721/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-4.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0683279",
-                "date": "2018-04-13"
+                "date": "2018-04-13",
+                "hotFixes": [
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "5",
@@ -1836,7 +1875,10 @@
                 "name": "Kingston Patch 7",
                 "url": "https://web.archive.org/web/20181120153842/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-7.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0690216",
-                "date": "2018-06-21"
+                "date": "2018-06-21",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "8",
@@ -1850,7 +1892,11 @@
                 "name": "Kingston Patch 9",
                 "url": "https://web.archive.org/web/20181120153848/https://docs.servicenow.com/bundle/kingston-release-notes/page/release-notes/quality/kingston-patch-9.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0713018",
-                "date": "2018-09-28"
+                "date": "2018-09-28",
+                "hotFixes": [
+                    "Hotfix 1",
+                    "Hotfix 3"
+                ]
             },
             {
                 "number": "10",
@@ -1939,7 +1985,12 @@
                 "name": "London Patch 1",
                 "url": "https://web.archive.org/web/20181120153319/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-1.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0696837",
-                "date": "2018-09-05"
+                "date": "2018-09-05",
+                "hotFixes": [
+                    "Hotfix 1",
+                    "Hotfix 2a",
+                    "Hotfix 4"
+                ]
             },
             {
                 "number": "2",
@@ -1967,7 +2018,10 @@
                 "name": "London Patch 5",
                 "url": "https://web.archive.org/web/20190221135747/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-5.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723003",
-                "date": "2019-02-21"
+                "date": "2019-02-21",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "6",
@@ -2002,14 +2056,23 @@
                 "name": "London Patch 8",
                 "url": "https://web.archive.org/web/20190408135833/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-8.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0723498",
-                "date": "2019-05-02"
+                "date": "2019-05-02",
+                "hotFixes": [
+                    "Hotfix 1",
+                    "Hotfix 2",
+                    "Hotfix 2a",
+                    "Hotfix 2b"
+                ]
             },
             {
                 "number": "9",
                 "name": "London Patch 9",
                 "url": "https://web.archive.org/web/20190724040953/https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/quality/london-patch-9.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0692695",
-                "date": "2019-07-03"
+                "date": "2019-07-03",
+                "hotFixes": [
+                    "Hotfix 2"
+                ]
             },
             {
                 "number": "10",
@@ -2058,7 +2121,10 @@
                 "name": "Madrid Patch 1",
                 "url": "https://web.archive.org/web/20190312142201/https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/quality/madrid-patch-1.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0726513",
-                "date": "2018-03-12"
+                "date": "2018-03-12",
+                "hotFixes": [
+                    "Hotfix 2a"
+                ]
             },
             {
                 "number": "2",
@@ -2182,7 +2248,10 @@
                 "name": "New York Patch 1",
                 "url": "https://web.archive.org/web/20191007170855/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-1.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0759084",
-                "date": "2019-08-14"
+                "date": "2019-08-14",
+                "hotFixes": [
+                    "Hotfix 1a"
+                ]
             },
             {
                 "number": "2",
@@ -2203,7 +2272,10 @@
                 "name": "New York Patch 4",
                 "url": "https://web.archive.org/web/20191217172032/https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-4.html",
                 "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0787370",
-                "date": "2019-12-17"
+                "date": "2019-12-17",
+                "hotFixes": [
+                    "Hotfix 1a"
+                ]
             }
         ],
         "features": [
