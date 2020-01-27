@@ -2,7 +2,7 @@
 // ======
 // SNDocs is the unofficial documentation for Servicenow
 var config = require('./config.json'); /* Load the config.instances, and config.endpoints */
-//var data = require('./data.json');//load the good data... for new records.
+var data = require('./data.json');//load the good data... for new records.
 var request = require('request');
 var fs = require('fs');
 var https = require('https');
@@ -61,15 +61,15 @@ config.instances.map(function (instance, index) {
           url = 'https://' + instance + '.service-now.com';
         }
         console.log('BuildTag:  ' + buildTag);
-     //   addToVersions({
-     //     url: url,
-     //     buildTag: buildTag
-     //   });
+        addToVersions({
+          url: url,
+          buildTag: buildTag
+        });
       } else {
         console.log(instance + ' does not have a build tag');
       }
     }
-    if (l === config.instances.length) {
+    if (l === config.instances.length-20) {
       //console.log('writing to versions....', versions)
       fs.writeFileSync('./versions.json', JSON.stringify(versions, '', '  '), function (err) {
         if (err) {
@@ -108,24 +108,52 @@ function addToVersions(obj) {
       versions[family][patch] === 'done'
     ) {
     } else {
-      //console.log('Family: ' + family + '  Patch:' + patch);
+      console.log('Family: ' + family + '  Patch:' + patch);
       if (versions && versions[family]) {
         // family exists...
-        // console.log('family exists: ' + family);
+        console.log('family exists: ' + family);
         if (versions[family] && versions[family][patch]) {
-          // console.log('Found ' + family + ' patch ' + patch + ' @ ' + url)
+          console.log('Found ' + family + ' patch ' + patch + ' @ ' + url)
           versions[family][patch] = url;
         } else {
           versions[family][patch] = url;
+          data.map(function(dataFamily){
+            if(family == dataFamily.name || family == dataFamily.systemName){
+              dataFamily.patches.push({
+                "number": patch,
+                "name": family + " Patch " + patch,
+                "url": "https://docs.servicenow.com/bundle/"+family+"-release-notes/page/release-notes/quality/"+family+"-patch-"+patch+".html",
+                "hi": "",
+                "date": new Date().toISOString().split('T')[0],
+            });
+            console.log('added patch');
+            console.log(JSON.stringify(data,'','  '));
+            }
+          })
         }
       } else {
-        // console.log('creating family: ' + family + ' for ' + url);
+        console.log('creating family: ' + family + ' for ' + url);
         // family doesn't exist, create it
         versions[family] = {};
         if (typeof patch === 'undefined') {
           patch = 0;
         }
         versions[family][patch] = url;
+        data.push({
+          "systemName": family,
+          "name": family.charAt(0).toUpperCase() + family.substring(1,family.length),
+          "url": "https://docs.servicenow.com/bundle/"+family+"-release-notes/page/release-notes/family-release-notes.html",
+            "date": new Date().toISOString().split('T')[0],
+            "endDate": "",
+            "patches": [],
+            "features": []
+        });
+        data.sort(function(a,b){
+          // Turn your strings into dates, and then subtract them
+          // to get a value that is either negative, positive, or zero.
+          return new Date(b.date) - new Date(a.date);
+        });
+        console.log(JSON.stringify(data));
       }
     }
   } catch (err) {

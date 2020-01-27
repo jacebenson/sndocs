@@ -91,7 +91,7 @@
     "7": "https://csc.service-now.com",
     "8": "https://ssmportal.service-now.com",
     "9": "https://rmit.service-now.com",
-    "10": "https://hallmarkcardstest.service-now.com",
+    "10": "https://cbs.service-now.com",
     "6a": "https://veritas.service-now.com",
     "6b": "https://svb.service-now.com"
   },
@@ -103,21 +103,27 @@
     "4": "https://berkeley.service-now.com",
     "5": "https://suffolk.service-now.com",
     "6": "https://tieto.service-now.com",
-    "7": "https://pacific.service-now.com",
-    "8": "https://unts.service-now.com",
-    "9": "https://wnyricprod.service-now.com",
+    "7": "https://niketech.service-now.com",
+    "8": "https://didataservices.service-now.com",
+    "9": "https://bioclinica.service-now.com",
     "4a": "https://wsi.service-now.com",
     "4b": "https://thermofisherit.service-now.com",
-    "7a": "https://siriusxm.service-now.com",
-    "9a": "https://spartan.service-now.com"
+    "7a": "https://unimelb.service-now.com",
+    "9a": "https://netcloud.service-now.com"
   },
-  "newyork": {
-    "0": "https://dev74974.service-now.com",
-    "3": "https://optumstage.service-now.com"
+  "orlando": {
+    "0": "https://princetontest.service-now.com"
   },
-  "orlando": {},
   "paris": {},
   "trackgiraffe": {
     "0": "https://mobile.service-now.com"
+  },
+  "newyork": {
+    "0": "https://utsinsearchprod.service-now.com",
+    "1": "https://cushwake.service-now.com",
+    "2": "https://wpcoprod.service-now.com",
+    "3": "https://strykercorp.service-now.com",
+    "4": "https://zumtobelprod.service-now.com",
+    "5": "https://unts.service-now.com"
   }
 }
