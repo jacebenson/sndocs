@@ -48,14 +48,6 @@ title = "ServiceNow Docs"
  label = '<a class="nav-link " href="/#contribute" data-target="#contribute"><span>Contribute</span></a>'
 +++
 
-**Showing features in their state of decay**
+**Showing the families and patches on one page**
 
-<span style="text-shadow: none;"><a class="github-button" href="https://github.com/jacebenson/snkilled" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star this on GitHub">Star</a><script async defer src="https://buttons.github.io/buttons.js"></script></span>
-
-## What are these states?
-
-State    | Descriptipn
--------- | -----------
-Current  | It's the current offering and should still be used
-Replaced | It's still available, but you **should** use the newer option
-Dead     | It's been listed as Depreciated
+<span style="text-shadow: none;"><a class="github-button" href="https://github.com/jacebenson/sndocs" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star this on GitHub">Star</a><script async defer src="https://buttons.github.io/buttons.js"></script></span>
