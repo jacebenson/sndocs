@@ -1,0 +1,146 @@
+{{ $items := site.Data.versions }}
+
+{{ $ := .root }}
+{{ $page := .page }}
+{{ $bg := $page.Params.design.background }}
+
+    <h1 class="hero-title">
+      {{ with $page.Title }}{{ . | markdownify }}{{ end }}
+    </h1>
+
+    {{/* Call-to-action link */}}
+    {{ if $page.Params.cta.url }}
+      {{ $pack := or $page.Params.cta.icon_pack "fas" }}
+      {{ $pack_prefix := $pack }}
+      {{ if in (slice "fab" "fas" "far" "fal") $pack }}
+        {{ $pack_prefix = "fa" }}
+      {{ end }}
+      {{ $link := $page.Params.cta.url }}
+      {{ $scheme := (urls.Parse $link).Scheme }}
+      {{ $target := "" }}
+      {{ if not $scheme }}
+        {{ $link = $link | relLangURL }}
+      {{ else if in (slice "http" "https") $scheme }}
+        {{ $target = "target=\"_blank\" rel=\"noopener\"" }}
+      {{ end }}
+    <p class="cta-btns">
+      <a href="{{ $link | safeURL }}" {{ $target | safeHTMLAttr }} class="btn {{if $bg.text_color_light}}btn-light{{else}}btn-primary{{end}} btn-lg">{{ if $page.Params.cta.icon }}<i class="{{ $pack }} {{ $pack_prefix }}-{{ $page.Params.cta.icon }} pr-1" aria-hidden="true"></i>{{end}}{{ $page.Params.cta.label | markdownify | emojify | safeHTML }}</a>
+
+      {{/* Alternative Call-to-action link */}}
+      {{ if $page.Params.cta_alt.url }}
+        {{ $link := $page.Params.cta_alt.url }}
+        {{ $scheme := (urls.Parse $link).Scheme }}
+        {{ $target := "" }}
+        {{ if not $scheme }}
+          {{ $link = $link | relLangURL }}
+        {{ else if in (slice "http" "https") $scheme }}
+          {{ $target = "target=\"_blank\" rel=\"noopener\"" }}
+        {{ end }}
+      <a href="{{ $link | safeURL }}" {{ $target | safeHTMLAttr }} class="hero-cta-alt pl-4">{{ $page.Params.cta_alt.label | markdownify | emojify | safeHTML }} <i class="fas fa-angle-right"></i></a>
+      {{ end }}
+    </p>
+    {{ end }}
+
+    {{/* Call-to-action note */}}
+    {{ with $page.Params.cta_note }}
+    <p class="hero-note text-muted mb-0">
+      {{ .label | markdownify | emojify | safeHTML }}
+    </p>
+    {{ end }}
+
+  {{/* Hero image */}}
+  <table>
+    <thead>
+        <td>Family</td>
+        <td>Dates</td>
+        <td>
+          <a 
+            class="btn btn-primary" 
+            data-toggle="collapse" 
+            href="#collapsePatches" 
+            role="button" 
+            aria-expanded="true" 
+            aria-controls="collapsePatches">
+            Patches
+          </a>
+
+          <a 
+            class="btn btn-primary" 
+            data-toggle="collapse" 
+            href="#collapseFeatures" 
+            role="button" 
+            aria-expanded="false" 
+            aria-controls="collapseFeatures">
+            Features
+          </a>
+        </td>
+    </thead>
+    {{ range sort $items "date" "desc" }}
+    <tr>
+      <td>
+        {{ if .url }}
+        <a class="text-light" href=" {{ .url }} ">
+          <u>{{ .name }}</u>
+        </a>
+        {{ else }}
+          {{ .name }}
+        {{ end }}
+      </td>
+      {{ if .endDate }}
+      <td>{{ .date }} - {{ .endDate}}</td>
+      {{ else }}
+      <td>{{ .date }} - Current</td>
+      {{ end }}
+      <!--Patches-->
+      <td>
+      <!--<td class="collapse" id="collapsePatches">-->
+      <div class="collapse show" id="collapsePatches" aria-expanded="true" >
+        
+        <table>
+          <thead>
+            
+          {{ range .patches }}
+          <td>
+            {{ if .url }}
+            <a href="{{ .url }}">
+              {{ .number }} 
+            </a>
+            {{ else }}
+            <p>{{ .number }}</p>
+            {{ end }}
+          </td>
+          {{ end }}
+          </thead>
+          <tr>
+          {{ range .patches }}
+            {{ if .hi }}
+              <td><a href="{{ .hi }}"><i class="fa fa-power-off"></i></a></td>
+            {{ else }}
+              <td></td>
+            {{ end }}
+          {{ end }}
+          </tr>
+        </table>
+      </div>
+      <!--</td>-->
+      <!--End Patches-->
+      <!--Features-->
+      <!--<td class="collapse" id="collapseFeatures">-->
+      <div class="collapse" id="collapseFeatures">
+        {{ if .features }}
+        <ul>
+        {{ range .features }}
+          <li>{{ . }} </li>
+        {{ end }}
+        </ul>
+        {{ end }}
+      </div>
+      <!--End Features-->
+      </td>
+    </tr>
+    {{ end }}
+  </table>
+  {{ if $page.Params.hero_media }}
+  </div>
+</div>
+{{ end }}
