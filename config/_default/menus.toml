@@ -17,6 +17,11 @@
   name = "About"
   url = "#learn-more"
   weight = 30
+  
+[[main]]
+  name = "Versions"
+  url = "#_versions"
+  weight = 40
 
 [[main]]
   name = "People"
