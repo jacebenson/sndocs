@@ -2318,7 +2318,17 @@
       "url": "https://docs.servicenow.com/bundle/orlando-release-notes/page/release-notes/family-release-notes.html",
       "date": "2020-01-06",
       "endDate": null,
-      "patches": [],
+      "patches": [
+
+        {
+          "number": "0",
+          "name": "Orlando Patch 0",
+          "url": "https://web.archive.org/web/20200213181030/https://docs.servicenow.com/bundle/orlando-release-notes/page/release-notes/quality/orlando-patch-0-hf-1.html",
+          "hi": "https://hi.service-now.com/kb_view.do?sysparm_article=KB0793252",
+          "date": "2020-01-29",
+          "hotFixes": ["Hot Fix 1"]
+        }
+      ],
       "features": [
         "Now Components available for development see NDS",
         "Studio: Edit source control files outside of ServiceNow",
