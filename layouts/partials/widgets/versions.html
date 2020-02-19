@@ -134,8 +134,8 @@
     {{ $patchScratch.Add "currentKB" 0 }}
     {{ range $patches }}
       {{ $patchScratch.Add "currentKB" 1 }}
+    <td {{ if eq ($patchScratch.Get "currentKB")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
     {{ if .hi }}
-      <td {{ if eq ($patchScratch.Get "currentKB")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
         <a href="https://hi.service-now.com/kb_view.do?sysparm_article={{ .hi }}">
         <i class="fa fa-power-off"
             data-toggle="tooltip" 
@@ -143,10 +143,9 @@
             title="{{ .hi }}"
         ></i>
         </a>
-      </td>
-    {{ else }}
-      <td class="collapse show" id="collapsePatches" aria-expanded="true"></td>
+      
     {{ end }}
+  </td>
   {{ end }}
   </tr>
   <tr class="collapse show" id="collapseFeatures" aria-expanded="true">
