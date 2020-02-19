@@ -150,7 +150,7 @@
       "name": "Summer 2008",
       "url": "http://wiki.service-now.com:80/index.php?title=Upgrades",
       "date": "2008-08-22",
-      "endDate": "2015-07-01",
+      "endDate": "2009-05-29",
       "patches": [
         {
           "number": "1",
@@ -186,7 +186,7 @@
       "name": "Winter 2009",
       "url": "http://wiki.servicenow.com:80/index.php?title=Winter_2009_Release_Notes",
       "date": "2009-01-09",
-      "endDate": "2015-07-01",
+      "endDate": "2009-09-25",
       "patches": [
         {
           "name": "Winter 2009 Stable 1",
@@ -223,7 +223,7 @@
       "name": "Spring 2009",
       "url": "http://wiki.servicenow.com/index.php?title=Spring_2009_Release_Notes",
       "date": "2009-05-29",
-      "endDate": "2015-07-01",
+      "endDate": "2010-01-22",
       "patches": [
         {
           "number": "1",
@@ -254,7 +254,7 @@
       "name": "Fall 2009",
       "url": "http://wiki.servicenow.com:80/index.php?title=Fall_2009_Release_Notes",
       "date": "2009-09-25",
-      "endDate": "2015-07-01",
+      "endDate": "2010-07-04",
       "patches": [
         {
           "number": "0",
@@ -292,7 +292,7 @@
       "name": "Winter 2010",
       "url": "http://wiki.servicenow.com:80/index.php?title=Winter_2010_Release_Notes",
       "date": "2010-01-22",
-      "endDate": "2015-07-01",
+      "endDate": "2010-10-01",
       "patches": [
         {
           "number": "1",
@@ -325,7 +325,7 @@
       "name": "Spring 2010",
       "url": "http://wiki.servicenow.com:80/index.php?title=Spring_2010_Release_Notes",
       "date": "2010-07-04",
-      "endDate": "2015-07-01",
+      "endDate": "2011-02-04",
       "patches": [
         {
           "number": "1",
@@ -361,7 +361,7 @@
       "name": "Fall 2010",
       "url": "http://wiki.servicenow.com:80/index.php?title=Fall_2010_Release_Notes",
       "date": "2010-10-01",
-      "endDate": "2015-07-01",
+      "endDate": "2011-03-04",
       "patches": [
         {
           "number": "0",
@@ -412,7 +412,7 @@
       "name": "Winter 2011",
       "url": "http://wiki.servicenow.com/index.php?title=Winter_2011_Release_Notes",
       "date": "2011-02-04",
-      "endDate": "2015-07-01",
+      "endDate": "2011-12-01",
       "patches": [
         {
           "number": "1",
@@ -431,7 +431,7 @@
       "name": "June 2011",
       "url": "http://wiki.servicenow.com:80/index.php?title=June11_Release_Notes",
       "date": "2011-03-04",
-      "endDate": "2015-07-01",
+      "endDate": "2012-07-02",
       "patches": [
         {
           "number": "P1",
@@ -499,7 +499,7 @@
       "name": "Aspen",
       "url": "http://wiki.servicenow.com/index.php?title=Aspen_Release_Notes",
       "date": "2011-12-01",
-      "endDate": "2015-07-01",
+      "endDate": "2013-02-28",
       "patches": [
         {
           "number": "0",
@@ -582,7 +582,7 @@
       "name": "Berlin",
       "url": "http://wiki.servicenow.com/index.php?title=Berlin_Release_Notes",
       "date": "2012-07-02",
-      "endDate": "2015-07-01",
+      "endDate": "2013-10-22",
       "patches": [
         {
           "number": "1",
@@ -685,7 +685,7 @@
       "name": "Calgary",
       "url": "http://wiki.servicenow.com/index.php?title=Calgary_Release_Notes",
       "date": "2013-02-28",
-      "endDate": "2015-07-01",
+      "endDate": "2014-05-06",
       "patches": [
         {
           "number": "1",
@@ -783,7 +783,7 @@
       "name": "Dublin",
       "url": "http://wiki.servicenow.com/index.php?title=Dublin_Release_Notes",
       "date": "2013-10-22",
-      "endDate": "2015-07-01",
+      "endDate": "2015-01-23",
       "patches": [
         {
           "number": "1",
