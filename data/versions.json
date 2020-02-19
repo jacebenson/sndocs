@@ -2227,7 +2227,8 @@
         "Service Portal: Multiple catalog support",
         "Service Portal: Multiple knowledge support",
         "Service Portal: 2FA",
-        "Admins can roll back a clone for up to seven days"
+        "Admins can roll back a clone for up to seven days",
+        "Service Catalog: Variable Regular Expression (regex) validation"
       ]
     },
     {
