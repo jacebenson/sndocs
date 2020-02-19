@@ -80,7 +80,7 @@
   {{ end }}
 
   <tr>
-    <td rowspan="1">
+    <td colspan="1">
       {{ if .url }}
         {{ $url := urls.Parse .url }}
         {{ if ne $url.Host "docs.servicenow.com" }}
@@ -97,7 +97,7 @@
         {{ .name }}
       {{ end }}
     </td>
-    <td rowspan="42">
+    <td colspan="42">
       {{ if .endDate }}
         {{ .date }} - {{ .endDate}}
       {{ else }}
