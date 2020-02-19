@@ -80,7 +80,7 @@
   {{ end }}
 
   <tr>
-    <td rowspan="3">
+    <td rowspan="1">
       {{ if .url }}
         {{ $url := urls.Parse .url }}
         {{ if ne $url.Host "docs.servicenow.com" }}
@@ -97,18 +97,23 @@
         {{ .name }}
       {{ end }}
     </td>
-    <td rowspan="3">
+    <td rowspan="1">
       {{ if .endDate }}
         {{ .date }} - {{ .endDate}}
       {{ else }}
         {{ .date }} - Current
     {{ end }}
     </td>
+    <td colspan="42"></td>
+  </tr>
+  <tr class="collapse show" id="collapsePatches" aria-expanded="true" >
+    <td></td>
+    <td>Patches</td>
     {{ $patches := (.patches) }}
     {{ $patchScratch.Add "currentDoc" 0 }}
     {{ range $patches }}
       {{ $patchScratch.Add "currentDoc" 1 }}
-    <td class="collapse show" id="collapsePatches" aria-expanded="true" {{ if eq ($patchScratch.Get "currentDoc")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
+    <td {{ if eq ($patchScratch.Get "currentDoc")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
       <div >
       {{ if .url }}
         {{ $url := urls.Parse .url }}
@@ -124,12 +129,14 @@
     </td>
     {{ end }}
   </tr>
-  <tr>
+  <tr class="collapse show" id="collapsePatches" aria-expanded="true" >
+    <td></td>
+    <td>Security Fixes</td>
     {{ $patchScratch.Add "currentKB" 0 }}
     {{ range $patches }}
       {{ $patchScratch.Add "currentKB" 1 }}
     {{ if .hi }}
-      <td class="collapse show" id="collapsePatches" aria-expanded="true" {{ if eq ($patchScratch.Get "currentKB")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
+      <td {{ if eq ($patchScratch.Get "currentKB")  ($patchScratch.Get "total") }} colspan="42" {{else}} colspan="1" {{end}}>
         <a href="https://hi.service-now.com/kb_view.do?sysparm_article={{ .hi }}">
         <i class="fa fa-power-off"
             data-toggle="tooltip" 
@@ -143,8 +150,11 @@
     {{ end }}
   {{ end }}
   </tr>
-  <tr>
-    <td colspan="42" class="collapse show" id="collapseFeatures" aria-expanded="true">
+  <tr class="collapse show" id="collapseFeatures" aria-expanded="true">
+    <td></td>
+    <td>Features</td>
+    
+    <td colspan="42">
         {{ if .features }}
         <ul>
           {{ range .features }}
