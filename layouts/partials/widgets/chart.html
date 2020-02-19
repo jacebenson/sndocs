@@ -1,0 +1,132 @@
+{{ $items := site.Data.versions }}
+
+{{ $ := .root }}
+{{ $page := .page }}
+{{ $bg := $page.Params.design.background }}
+
+<h1 class="hero-title">
+  {{ with $page.Title }}{{ . | markdownify }}{{ end }}
+</h1>
+{{/* Call-to-action link */}}
+{{ if $page.Params.cta.url }}
+{{ $pack := or $page.Params.cta.icon_pack "fas" }}
+{{ $pack_prefix := $pack }}
+{{ if in (slice "fab" "fas" "far" "fal") $pack }}
+{{ $pack_prefix = "fa" }}
+{{ end }}
+{{ $link := $page.Params.cta.url }}
+{{ $scheme := (urls.Parse $link).Scheme }}
+{{ $target := "" }}
+{{ if not $scheme }}
+{{ $link = $link | relLangURL }}
+{{ else if in (slice "http" "https") $scheme }}
+{{ $target = "target=\"_blank\" rel=\"noopener\"" }}
+{{ end }}
+<p class="cta-btns">
+  <a href="{{ $link | safeURL }}" {{ $target | safeHTMLAttr }}
+    class="btn {{if $bg.text_color_light}}btn-light{{else}}btn-primary{{end}} btn-lg">{{ if $page.Params.cta.icon }}<i
+      class="{{ $pack }} {{ $pack_prefix }}-{{ $page.Params.cta.icon }} pr-1"
+      aria-hidden="true"></i>{{end}}{{ $page.Params.cta.label | markdownify | emojify | safeHTML }}</a>
+
+  {{/* Alternative Call-to-action link */}}
+  {{ if $page.Params.cta_alt.url }}
+  {{ $link := $page.Params.cta_alt.url }}
+  {{ $scheme := (urls.Parse $link).Scheme }}
+  {{ $target := "" }}
+  {{ if not $scheme }}
+  {{ $link = $link | relLangURL }}
+  {{ else if in (slice "http" "https") $scheme }}
+  {{ $target = "target=\"_blank\" rel=\"noopener\"" }}
+  {{ end }}
+  <a href="{{ $link | safeURL }}" {{ $target | safeHTMLAttr }}
+    class="hero-cta-alt pl-4">{{ $page.Params.cta_alt.label | markdownify | emojify | safeHTML }} <i
+      class="fas fa-angle-right"></i></a>
+  {{ end }}
+</p>
+{{ end }}
+
+{{/* Call-to-action note */}}
+{{ with $page.Params.cta_note }}
+<p class="hero-note text-muted mb-0">
+  {{ .label | markdownify | emojify | safeHTML }}
+</p>
+{{ end }}
+
+{{/* Hero image */}}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+console.log('in script');
+  var xHttp = new XMLHttpRequest();
+  xHttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      // Typical action to be performed when the document is ready:
+      //       document.getElementById("demo").innerHTML = xHttp.responseText;
+      console.log(xHttp.responseText);
+      try { var versions = JSON.parse(xHttp.responseText); } catch (e) { console.log(e); }
+      versions = versions.reverse();
+      versions.length = 5;
+      //       var versions = (xHttp.responseText);
+      var dtArray = versions.map(function (version, index) {
+        var endDate = function () {
+          console.log('index', index, 'versions.length', versions.length);
+          if(version.endDate === null){
+            return new Date();
+          } else {
+            return new Date(version.endDate)
+          }
+        }
+      if (new Date(version.date) > endDate()) {
+        console.log(version.name, "Error");
+      } else {
+        console.log(new Date(version.date), '<', endDate())
+      }
+      var family = version.name;
+      var patch = version.name;
+      var startDate = new Date(version.date);
+      var endDateStr = endDate();
+      return [
+        //"Version",
+        family,
+        family,//parse patches later
+        startDate,
+        endDateStr
+      ]
+    });
+    google.charts.load("current", { packages: ["timeline"] });
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var container = document.getElementById('example4.2');
+      var chart = new google.visualization.Timeline(container);
+      var dataTable = new google.visualization.DataTable();
+      console.log(dtArray);
+      dataTable.addColumn({ type: 'string', id: 'Role' });
+      dataTable.addColumn({ type: 'string', id: 'Name' });
+      dataTable.addColumn({ type: 'date', id: 'Start' });
+      dataTable.addColumn({ type: 'date', id: 'End' });
+      dataTable.addRows(
+        /*[
+          [ 'New York', 'Early Availability', new Date(1789, 3, 30), new Date(1797, 2, 4) ],
+          [ 'New York', 'Patch 1', new Date(1797, 2, 4), new Date(1801, 2, 4) ],
+          [ 'New York', 'Patch 2', new Date(1801, 2, 4), new Date(1809, 2, 4) ]]
+          /*/
+        dtArray
+      );
+      var options = {
+        timeline: { groupByRowLabel: false }
+      };
+      chart.draw(dataTable, options);
+    }
+  }
+};
+  xHttp.open("GET", "https://raw.githubusercontent.com/jacebenson/sndocs/master/data/versions.json", true);
+  //xHttp.open("GET", "/data.json", true);
+  xHttp.send();
+
+
+</script>
+<div id="example4.2" style="height: 1000px;"></div>
+
+{{ if $page.Params.hero_media }}
+</div>
+</div>
+{{ end }}
