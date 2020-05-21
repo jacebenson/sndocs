@@ -12,7 +12,7 @@ var counter = 0;
 var l = 0;
 config.instances = config.instances.sort();
 config.instances.map(function (instance, index) {
-
+  
   var url = '';
   if (instance.indexOf('.') >= 0) {
     url = 'https://' + instance;
@@ -78,7 +78,10 @@ config.instances.map(function (instance, index) {
       });
     }
   });
-
+  if(config.instances.length === index){
+    //last record
+    // lets create the data/versions....
+  }
 });
 
 /**

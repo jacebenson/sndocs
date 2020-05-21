@@ -64,7 +64,7 @@ console.log('in script');
       console.log(xHttp.responseText);
       try { var versions = JSON.parse(xHttp.responseText); } catch (e) { console.log(e); }
       versions = versions.reverse();
-      versions.length = 5;
+      // versions.length = 5;
       //       var versions = (xHttp.responseText);
       var dtArray = versions.map(function (version, index) {
         var endDate = function () {

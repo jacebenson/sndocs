@@ -77,7 +77,7 @@
     "14": "https://hosting.service-now.com",
     "3a": "https://bournemouth.service-now.com",
     "3b": "https://watts.service-now.com",
-    "14b": "https://pcmsd.service-now.com",
+    "14b": "https://onetakeda.service-now.com",
     "14a": "https://ellucian.service-now.com"
   },
   "london": {
@@ -91,7 +91,7 @@
     "7": "https://csc.service-now.com",
     "8": "https://ssmportal.service-now.com",
     "9": "https://rmit.service-now.com",
-    "10": "https://cbs.service-now.com",
+    "10": "https://nsdesk.service-now.com",
     "6a": "https://veritas.service-now.com",
     "6b": "https://svb.service-now.com"
   },
@@ -105,14 +105,20 @@
     "6": "https://tieto.service-now.com",
     "7": "https://niketech.service-now.com",
     "8": "https://didataservices.service-now.com",
-    "9": "https://bioclinica.service-now.com",
+    "9": "https://jnjprod.service-now.com",
+    "10": "https://ucsf.service-now.com",
     "4a": "https://wsi.service-now.com",
     "4b": "https://thermofisherit.service-now.com",
-    "7a": "https://unimelb.service-now.com",
-    "9a": "https://netcloud.service-now.com"
+    "7a": "https://qualcomm.service-now.com",
+    "9a": "https://newmont.service-now.com",
+    "9b": "https://lbl.service-now.com"
   },
   "orlando": {
-    "0": "https://princetontest.service-now.com"
+    "0": "https://princetontest.service-now.com",
+    "1": "https://vector.service-now.com",
+    "2": "https://zetupprod.service-now.com",
+    "3": "https://batman.service-now.com",
+    "1a": "https://uwstest.service-now.com"
   },
   "paris": {},
   "trackgiraffe": {
@@ -123,7 +129,11 @@
     "1": "https://cushwake.service-now.com",
     "2": "https://wpcoprod.service-now.com",
     "3": "https://strykercorp.service-now.com",
-    "4": "https://zumtobelprod.service-now.com",
-    "5": "https://unts.service-now.com"
+    "4": "https://wnyricprod.service-now.com",
+    "5": "https://nasa.service-now.com",
+    "6": "https://saicito.service-now.com",
+    "7": "https://zumtobelprod.service-now.com",
+    "8": "https://wayfair.service-now.com",
+    "7a": "https://westcongrouptest.service-now.com"
   }
 }
