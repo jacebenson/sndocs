@@ -2224,7 +2224,8 @@
         "hotFixes":[
           "Hot Fix 2",
           "Hotfix 1a",
-          "Hotfix 1b"
+          "Hotfix 1b",
+          "Hotfix 2b"
         ]
       }
     ],
@@ -2329,9 +2330,7 @@
         "url": "https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-7a-hf-1-PO.html",
         "hi": "KB0820699",
         "date": "2020-04-09",
-        "hotFixes": [
-          "Hot Fix 1"
-        ]
+        "hotFixes": ["Hot Fix 1"]
       },
       
       {
@@ -2340,9 +2339,7 @@
         "url": "https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-7b-hf-1-PO.html",
         "hi": "KB0823794",
         "date": "2020-06-26",
-        "hotFixes": [
-          "Hot Fix 1"
-        ]
+        "hotFixes": ["Hot Fix 1"]
       },
       {
         "number": "8",
@@ -2350,7 +2347,7 @@
         "url": "https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-8.html",
         "hi": "KB0789001",
         "date": "2020-04-10",
-        "hotFixes": []
+        "hotFixes": ["Hot Fix 4"]
       },
       {
         "number": "9",
@@ -2358,7 +2355,7 @@
         "url": "https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/quality/newyork-patch-9.html",
         "hi": "KB0789002",
         "date": "2020-06-05",
-        "hotFixes": []
+        "hotFixes": ["Hot Fix 1"]
       }
     ],
     "features": [
@@ -2434,6 +2431,14 @@
         "url": "https://docs.servicenow.com/bundle/orlando-release-notes/page/release-notes/quality/orlando-patch-4.html",
         "hi": "KB0826586",
         "date": "2020-06-01",
+        "hotFixes": ["Hot Fix 1","Hot Fix 2"]
+      },
+      {
+        "number": "5",
+        "name": "Orlando Patch 5",
+        "url": "https://docs.servicenow.com/bundle/orlando-release-notes/page/release-notes/quality/orlando-patch-5.html",
+        "hi": "KB0829816",
+        "date": "2020-07-01",
         "hotFixes": []
       }
     ],
@@ -2479,6 +2484,73 @@
       "Discovery - Help the help desk plugin no longer available",
       "Enterprise Release Management plugin no longer available",
       "Facilities Service Management plugin no longer available"
+    ]
+  },
+  {
+    "name": "Paris",
+    "url": "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/family-release-notes.html",
+    "date": "2020-07-23",
+    "endDate": null,
+    "patches": [],
+    "features": [
+      "ATF: UI Versioning",
+      "ATF: Page Inspector enhancements",
+      "OpenID Connect SSO",
+      "Service Portal: External user registration",
+      "Flow Designer: Connections tab",
+      "Scheduled Jobs: Business Offset",
+      "Performance dashboard - instance view",
+      "Robust Transform Engine: Nested structures",
+      "Domain Separation: Scheduled Jobs: Domain Iterator",
+      "Domain Separation: Application properties",
+      "Flow Designer: Action instance order renaming",
+      "Flow Designer: Duplicate actions instance",
+      "Flow Designer: FlowAPI enhancements",
+      "Flow Designer: FlowScriptAPI",
+      "Flow Designer: Ghost actions",
+      "Flow Designer: Decision flow - Turn off branches",
+      "Flow Designer: Multi-row Variable Set (MVRS) support",
+      "Flow Designer: Run with roles",
+      "Flow Designer: Send SMS action",
+      "Flow Designer: Submit catalog item request action",
+      "Flow Designer: Support multiple active connections",
+      "Flow Designer: Update and delete multiple step",
+      "Flow Designer: User access control criteria Only show actions they can use",
+      "IntregrationHub: Data sources - data stream",
+      "IntregrationHub: Dynamic object support",
+      "IntregrationHub: Data stream Support",
+      "IntregrationHub: JSON Parser Flow Designer/IntegrationHub step",
+      "IntregrationHub: JSON Payload Builder",
+      "IntregrationHub: XML Payload Builder",
+      "Outbound IP Access Controls",
+      "GraphQL",
+      "Archiving: Destroy related records",
+      "Archiving: Restore related records",
+      "MetricBase: Non sys_id based subjects for MetricBase",
+      "Instance data replication: bidirectional",
+      "Instance data replication: discrete sets",
+      "Notifications: Inbound / Outbound email address filters",
+      "Roles: Explicit Roles",
+      "Roles: Mutual exclusive Roles",
+      "Process Automation Designer",
+      "Process Automation Designer: Playbook experience",
+      "Service Portal: Portal Analyzer",
+      "Studio: Source Control Global Support",
+      "Studio: Delta loading",
+      "Script Debugger: Console Debugger",
+      "Agent Workspace: Agent email client",
+      "Agent Workspace: Activity stream enhancements",
+      "Agent Workspace: TinyMCE control",
+      "Agent Workspace: Lists resizing",
+      "Agent Workspace: Lists live badge",
+      "ITSM Workforce Optimzation",
+      "Service Portal: Standard Ticket Page",
+      "Service Catalog: Delegated Request expierence",
+      "Service Catalog: Rich Text Labels"
+      "Natural Language Query (NLQ)",
+      "Agent Client Collector (replacement for Help the Help Desk)",
+      "Upgrade Monitor v2",
+      "Virtual Agent Lite"
     ]
   }
 ]
