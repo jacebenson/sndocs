@@ -1971,7 +1971,7 @@
     "name": "London",
     "url": "https://docs.servicenow.com/bundle/london-release-notes/page/release-notes/family-release-notes.html",
     "date": "2018-07-27",
-    "endDate": null,
+    "endDate": "2019-07-26",
     "patches": [
       {
         "number": "0",
@@ -2107,7 +2107,7 @@
     "name": "Madrid",
     "url": "https://docs.servicenow.com/bundle/madrid-release-notes/page/release-notes/family-release-notes.html",
     "date": "2019-01-31",
-    "endDate": null,
+    "endDate": "2020-01-06",
     "patches": [
       {
         "number": "0",
@@ -2253,7 +2253,7 @@
     "name": "New York",
     "url": "https://docs.servicenow.com/bundle/newyork-release-notes/page/release-notes/family-release-notes.html",
     "date": "2019-07-26",
-    "endDate": null,
+    "endDate": "2020-08-31",
     "patches": [
       {
         "number": "0",
