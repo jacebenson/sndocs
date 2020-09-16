@@ -2498,6 +2498,13 @@
       "hi": "KB0828997",
       "date": "2020-07-23",
       "hotFixes": ["Hot Fix 1"]
+    },{
+      "number": "1",
+      "name": "Paris Patch 1",
+      "url": "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-1.html",
+      "hi": "KB0856286",
+      "date": "2020-08-31",
+      "hotFixes": []
     }],
     "features": [
       "ATF: UI Versioning",
