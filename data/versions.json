@@ -2494,7 +2494,7 @@
     "patches": [{
       "number": "0",
       "name": "Paris Patch 0",
-      "url": "https://docs.servicenow.com/bundle/orlando-release-notes/page/release-notes/quality/orlando-patch-0-hf-1.html",
+      "url": "",
       "hi": "KB0828997",
       "date": "2020-07-23",
       "hotFixes": ["Hot Fix 1"]
