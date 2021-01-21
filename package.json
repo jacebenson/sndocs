@@ -1,24 +1,30 @@
 {
-  "name": "snkilled",
+  "name": "jace-11ty",
   "version": "1.0.0",
-  "description": "USAGE: common-readme [-r|--repo REPO-NAME] [-l|--license LICENSE]",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx @11ty/eleventy",
+    "serve": "npx @11ty/eleventy --serve",
+    "debug": "DEBUG=Eleventy* npx @11ty/eleventy",
+    "test": "lighthouse-ci http://localhost:8081 --report=./_site/lh/ --view",
+    "g": "npx ./generators/generic.js",
+    "generate": "npx ./generators/generic.js",
+    "buildImages": "npx ./generators/buildImages.js",
+    "downloadImage": "npx ./generators/downloadImage.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jacebenson/snkilled.git"
-  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/jacebenson/snkilled/issues"
+  "devDependencies": {
+    "@11ty/eleventy": "^0.10.0",
+    "@11ty/eleventy-plugin-rss": "^1.0.7",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.1",
+    "clean-css": "^4.2.3",
+    "dotenv": "^8.2.0",
+    "lighthouse-ci": "^1.11.0"
   },
-  "homepage": "https://github.com/jacebenson/snkilled#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "@11ty/eleventy-img": "^0.3.0"
   }
 }

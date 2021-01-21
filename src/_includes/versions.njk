@@ -1,0 +1,154 @@
+{% extends 'base.njk' %}
+{% block content %}
+<script>
+var elems = document.getElementsByTagName("details");
+
+function openAll() {
+  for (var i = 0; i <= 100; i++){
+    elems[i].setAttribute("open", "true");
+  }
+  document.getElementById("expand").setAttribute( "onClick", "javascript: closeAll();" );
+  document.getElementById("expand").innerHTML = "Collapse All -";
+}
+
+function closeAll() {
+  for (var i = 0; i <= 100; i++){
+    elems[i].removeAttribute("open");
+  }
+  document.getElementById("expand").setAttribute( "onClick", "javascript: openAll();" );
+  document.getElementById("expand").innerHTML = "Expand All +";
+}
+</script>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+.cell{
+display: inline-block;
+width: 2em;
+}
+div.comicGreen {
+  font-family: Tahoma, Geneva, sans-serif;
+  border: 2px solid #4F7849;
+  background-color: #EEEEEE;
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse;
+}
+.divTable.comicGreen .divTableCell, .divTable.comicGreen .divTableHead {
+  border: 1px solid #4F7849;
+  padding: 3px 2px;
+}
+.divTable.comicGreen .divTableBody .divTableCell {
+  font-size: 19px;
+  font-weight: bold;
+  color: #4F7849;
+}
+.divTable.comicGreen .divTableRow:nth-child(even) {
+  background: #CEE0CC;
+}
+.comicGreen .tableFootStyle {
+  font-size: 21px;
+  font-weight: bold;
+  color: #FFFFFF;
+  background: #4F7849;
+  background: -moz-linear-gradient(top, #7b9a76 0%, #60855b 66%, #4F7849 100%);
+  background: -webkit-linear-gradient(top, #7b9a76 0%, #60855b 66%, #4F7849 100%);
+  background: linear-gradient(to bottom, #7b9a76 0%, #60855b 66%, #4F7849 100%);
+  border-top: 1px solid #444444;
+}
+.comicGreen .tableFootStyle {
+  font-size: 21px;
+}
+/* DivTable.com */
+.divTable{ display: table; }
+.divTableRow { display: table-row; }
+.divTableHeading { display: table-header-group;}
+.divTableCell, .divTableHead { display: table-cell;}
+.divTableHeading { display: table-header-group;}
+.divTableFoot { display: table-footer-group;}
+.divTableBody { display: table-row-group;}
+.left {text-align: left; padding-left:2em !important;}
+</style>
+<div class="divTable comicGreen">
+<div class="divTableHeading">
+<div class="divTableRow">
+<div class="divTableHead">Family</div>
+<div class="divTableHead">Dates</div>
+<div class="divTableHead">Patches</div>
+<div class="divTableHead">Features 
+    <button id="expand" onclick="openAll()">Expand All</button>
+    <button id="close" onclick="closeAll()">Close All</button>
+</div>
+</div>
+</div>
+<div class="divTableBody">
+{% for family in versions %}
+  <div class="divTableRow">
+  <div class="divTableCell"><a href="{{family.url}}">{{family.name}}</a></div>
+  <div class="divTableCell">{{family.date}} - {{family.endDate}}</div>
+  <div class="divTableCell left">
+    <div>
+    {% for patch in family.patches %}
+      <span class="cell">
+      {% if patch.url !="" %}
+      <a href="{{patch.url}}" date="{{patch.date}}">{{patch.number}}</a>
+      {% else %}
+      <span>{{patch.number}}</span>
+      {% endif %}
+      </span>
+    {% endfor %}
+    </div><!---end patches line-->
+    <div>
+    {% for patch in family.patches %}
+      <span class="cell">
+      {% if patch.url !="" %}
+      <a href="https://hi.service-now.com/kb_view.do?sysparm_article={{patch.hi}}">🔑</a>
+      {% else %}
+      <span>{{patch.number}}</span>
+      {% endif %}
+      </span>
+    {% endfor %}
+    </div><!--end security links line-->
+    </div>
+    <div class="divTableCell left">
+    {% if family.features !="" %}
+    <details>
+    {% if family.featuresSummary %}
+    <summary>Features<br/>{{family.featuresSummary | replace(",", "<br/>") | safe }}</summary>
+    {% else %}
+    <summary>Features</summary>
+    {% endif %}
+    {% for feature in family.features %}
+    <div>{{feature}}</div>
+    {% endfor %}
+    </details>
+    {% endif %}
+    </div>
+  </div>
+{% endfor %}
+</div>
+<div class="divTableFoot tableFootStyle">
+<div class="divTableRow">
+<div class="divTableCell">Family</div>
+<div class="divTableCell">Dates</div>
+<div class="divTableCell">Patches</div>
+<div class="divTableCell">Features</div>
+</div>
+</div>
+</div>
+
+{% endblock %}
+

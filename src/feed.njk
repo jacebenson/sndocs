@@ -1,0 +1,36 @@
+---json
+{
+  "permalink": "index.xml",
+  "eleventyExcludeFromCollections": true
+}
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ site.title }}</title>
+  <subtitle>{{ site.subtitle }}</subtitle>
+  <link href="{{ site.baseURL }}/index.xml" rel="self" />
+  <link href="{{ site.baseURL }}/" />
+  <updated>{{ site.lastBuildDate | formatRSSDate }}</updated>
+  <id>{{ site.baseURL }}</id>
+  <author>
+    <name>{{ site.author }}</name>
+    <email>{{ site.email }}</email>
+  </author>
+  {%- for family in versions %}
+  
+  {%- for patch in family.patches %}
+  
+  {% set absolutePostUrl %}{{ patch.url | url | absoluteUrl(site.baseURL) }}{% endset %}
+  <entry>
+    <title>{{ patch.name }}</title>
+    <link href="{{ absolutePostUrl }}" />
+    <updated>{{ patch.date }}</updated>
+    <id>{{ absolutePostUrl }}</id>
+    <content>
+      Security KB:{{ patch.hi }}
+      Patch Docs: {{ patch.url }}
+    </content>
+  </entry>
+  {%- endfor %}
+  {%- endfor %}
+</feed>
