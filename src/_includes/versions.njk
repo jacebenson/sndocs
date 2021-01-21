@@ -114,7 +114,7 @@ div.comicGreen {
     <div>
     {% for patch in family.patches %}
       <span class="cell">
-      {% if patch.url !="" %}
+      {% if patch.hi  %}
       <a href="https://hi.service-now.com/kb_view.do?sysparm_article={{patch.hi}}">🔑</a>
       {% else %}
       <span>{{patch.number}}</span>
