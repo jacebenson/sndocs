@@ -2568,13 +2568,13 @@ var versionsArr = [
         ]
     }, {
         name: "Quebec",
-        url: "https://docs.servicenow.com/bundle/quebec-rtp-release-notes/page/rtp-rn/summary/rn-summary-highlights.html",
+        url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/summary/rn-summary-highlights.html",
         date: "2021-01-07",
         endDate: null,
         patches: [{
             number: "0",
             name: "Quebec RTP",
-            url: "https://docs.servicenow.com/bundle/quebec-rtp-release-notes/page/rtp-rn/summary/rn-summary-highlights.html",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/summary/rn-summary-highlights.html",
             hi: "KB0828997",
             date: "2020-01-07",
             hotFixes: []

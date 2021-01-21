@@ -25,11 +25,11 @@ module.exports = {
         active: true
     },
     search: false,
-    description: "An 11ty Starter for your site featuring RSS, Search, and Comments",
-    subtitle: "This is a subtitle about your amazing 11ty site.",
+    description: "An Unofficial ServiceNow Version Tracker",
+    subtitle: "I try to make sense of all the versions of things ServiceNow has.",
     author: "Jace Benson",//used all over
     email: "jace.benson@gmail.com",//used specificly for rss feed
-    utterancesRepo: "jacebenson/jace-ty",//used for comments//if commented, doesnt load
+    utterancesRepo: "jacebenson/sndocs",//used for comments//if commented, doesnt load
     lastBuildDate: now.toLocaleString('en-CA',{hour12:false, timeZone: 'America/Chicago'}).replace(',',''),
     lastBuildYear: now.getFullYear(),
 }
