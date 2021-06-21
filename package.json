@@ -17,14 +17,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@11ty/eleventy": "^0.11.1",
-    "@11ty/eleventy-plugin-rss": "^1.1.0",
-    "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.6",
+    "@11ty/eleventy": "^0.12.1",
+    "@11ty/eleventy-img": "^0.7.8",
+    "@11ty/eleventy-plugin-rss": "^1.1.1",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^3.1.1",
     "clean-css": "^4.2.3",
-    "dotenv": "^8.2.0",
+    "dotenv": "^8.6.0",
     "lighthouse-ci": "^1.11.0"
   },
-  "dependencies": {
-    "@11ty/eleventy-img": "^0.7.4"
-  }
+  "dependencies": {}
 }
