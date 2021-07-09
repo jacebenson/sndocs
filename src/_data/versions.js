@@ -2505,6 +2505,62 @@ var versionsArr = [
             hi: "KB0856286",
             date: "2020-08-31",
             hotFixes: []
+        }, {
+            number: "2",
+            name: "Paris Patch 2",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-2.html",
+            hi: "KB0861082",
+            date: "2020-10-23",
+            hotFixes: []
+        }, {
+            number: "3",
+            name: "Paris Patch 3",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-3.html",
+            hi: "KB0863785",
+            date: "2020-11-12",
+            hotFixes: []
+        }, {
+            number: "4",
+            name: "Paris Patch 4",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-4.html",
+            hi: "KB0867119",
+            date: "2020-12-11",
+            hotFixes: []
+        }, {
+            number: "5",
+            name: "Paris Patch 5",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-5.html",
+            hi: "KB0869880",
+            date: "2021-01-15",
+            hotFixes: []
+        }, {
+            number: "6",
+            name: "Paris Patch 6",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-6.html",
+            hi: "KB0951857",
+            date: "2021-02-04",
+            hotFixes: []
+        }, {
+            number: "7",
+            name: "Paris Patch 7",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-7.html",
+            hi: "KB0955128",
+            date: "2021-03-11",
+            hotFixes: []
+        }, {
+            number: "8",
+            name: "Paris Patch 8",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-8.html",
+            hi: "KB0958861",
+            date: "2021-04-15",
+            hotFixes: []
+        }, {
+            number: "9",
+            name: "Paris Patch 9",
+            url: "https://docs.servicenow.com/bundle/paris-release-notes/page/release-notes/quality/paris-patch-9.html",
+            hi: "KB0963593",
+            date: "2021-06-11",
+            hotFixes: []
         }],
         features: [
             "ATF: UI Versioning",
@@ -2578,7 +2634,37 @@ var versionsArr = [
             hi: "KB0828997",
             date: "2020-01-07",
             hotFixes: []
-        }],
+        },
+        {
+            number: "1",
+            name: "Quebec Patch 1",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-1.html",
+            hi: "KB0954366",
+            date: "2020-03-11",
+            hotFixes: []
+        },
+        {
+            number: "2",
+            name: "Quebec Patch 2",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-2.html",
+            hi: "KB0957391",
+            date: "2020-04-01",
+            hotFixes: []},
+        {
+            number: "3",
+            name: "Quebec Patch 3",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-3.html",
+            hi: "KB0960299",
+            date: "2020-05-04",
+            hotFixes: []},
+        {
+            number: "4",
+            name: "Quebec Patch 4",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-4.html",
+            hi: "KB0962342",
+            date: "2020-06-03",
+            hotFixes: []}
+    ],
         featuresSummary: "AI Search from Attivio acquisition, Tons of Now Experience Components, Key Management Framework, Service Catalog: Catalog Builder, Now Experience UI Builder improvements",
         features: [
             "AI Search [from Attivio] is intregated",
