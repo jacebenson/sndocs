@@ -5,7 +5,7 @@ var versionsArr = [
         date: "2004-12-04",
         endDate: "2006-01-27",
         patches: [],
-        features: [           
+        features: [
             "Incident",
             "Problem",
             "Change",
@@ -2649,22 +2649,73 @@ var versionsArr = [
             url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-2.html",
             hi: "KB0957391",
             date: "2020-04-01",
-            hotFixes: []},
+            hotFixes: []
+        },
         {
             number: "3",
             name: "Quebec Patch 3",
             url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-3.html",
             hi: "KB0960299",
             date: "2020-05-04",
-            hotFixes: []},
+            hotFixes: []
+        },
         {
             number: "4",
             name: "Quebec Patch 4",
             url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-4.html",
             hi: "KB0962342",
             date: "2020-06-03",
-            hotFixes: []}
-    ],
+            hotFixes: []
+        },
+        {
+            number: "5",
+            name: "Quebec Patch 5",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-5.html",
+            hi: "",
+            date: "2021-07-01",
+            hotFixes: []
+        },
+        {
+            number: "6",
+            name: "Quebec Patch 6",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-6.html",
+            hi: "",
+            date: "2021-07-22",
+            hotFixes: []
+        },
+        {
+            number: "7",
+            name: "Quebec Patch 7",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-7.html",
+            hi: "",
+            date: "2021-08-19",
+            hotFixes: []
+        },
+        {
+            number: "8",
+            name: "Quebec Patch 8",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-8.html",
+            hi: "",
+            date: "2021-09-16",
+            hotFixes: []
+        },
+        {
+            number: "9",
+            name: "Quebec Patch 9",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-9.html",
+            hi: "",
+            date: "2021-11-11",
+            hotFixes: []
+        },
+        {
+            number: "10",
+            name: "Quebec Patch 10",
+            url: "https://docs.servicenow.com/bundle/quebec-release-notes/page/release-notes/quality/quebec-patch-10.html",
+            hi: "",
+            date: "2022-01-13",
+            hotFixes: []
+        }
+        ],
         featuresSummary: "AI Search from Attivio acquisition, Tons of Now Experience Components, Key Management Framework, Service Catalog: Catalog Builder, Now Experience UI Builder improvements",
         features: [
             "AI Search [from Attivio] is intregated",
@@ -2748,10 +2799,82 @@ var versionsArr = [
         endDate: null,
         patches: [{
             number: "0",
-            name: "Quebec RTP",
+            name: "Rome RTP",
             url: "https://docs.servicenow.com/bundle/rtp-rtp-release-notes/page/rtp-rn/new-features-changes.html",
             hi: "",
-            date: "2020-07-22",
+            date: "2021-07-22",
+            hotFixes: []
+        },
+        {
+            number: "1",
+            name: "Rome Patch 1",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-1.html",
+            hi: "",
+            date: "2021-09-16",
+            hotFixes: []
+        },
+        {
+            number: "2",
+            name: "Rome Patch 2",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-2.html",
+            hi: "",
+            date: "2021-10-16",
+            hotFixes: []
+        },
+        {
+            number: "3",
+            name: "Rome Patch 3",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-3.html",
+            hi: "",
+            date: "2021-11-04",
+            hotFixes: []
+        },
+        {
+            number: "4",
+            name: "Rome Patch 4",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-4.html",
+            hi: "",
+            date: "2021-12-10",
+            hotFixes: []
+        },
+        {
+            number: "5",
+            name: "Rome Patch 5",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-5.html",
+            hi: "",
+            date: "2021-12-10",
+            hotFixes: []
+        },
+        {
+            number: "6",
+            name: "Rome Patch 6",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-6.html",
+            hi: "",
+            date: "2022-01-27",
+            hotFixes: []
+        },
+        {
+            number: "7",
+            name: "Rome Patch 7",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-7.html",
+            hi: "",
+            date: "2022-02-24",
+            hotFixes: []
+        },
+        {
+            number: "8",
+            name: "Rome Patch 8",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-8.html",
+            hi: "",
+            date: "2022-03-24",
+            hotFixes: []
+        },
+        {
+            number: "9",
+            name: "Rome Patch 9",
+            url: "https://docs.servicenow.com/bundle/rome-release-notes/page/release-notes/quality/rome-patch-9.html",
+            hi: "",
+            date: "2022-05-26",
             hotFixes: []
         }],
         features: [
@@ -2888,9 +3011,59 @@ var versionsArr = [
             "Workspace - Playbook record generator",
             "Workspace - Playbook lifecycle container and component",
             "Workspace - Configure UXF client actions for playbook",
-            
+
         ]
+    },
+    {
+        name: "San Diego",
+        url: "https://docs.servicenow.com/bundle/sandiego-release-notes/page/release-notes/family-release-notes.html",
+        date: "2022-02-03",
+        endDate: null,
+        patches: [{
+            number: "0",
+            name: "San Diego RTP",
+            url: "",
+            hi: "",
+            date: "2022-02-03",
+            hotFixes: []
+        },{
+            number: "1",
+            name: "San Diego Patch 1",
+            url: "",
+            hi: "",
+            date: "2022-03-23",
+            hotFixes: []
+        },{
+            number: "2",
+            name: "San Diego Patch 2",
+            url: "",
+            hi: "",
+            date: "2022-04-14",
+            hotFixes: []
+        },{
+            number: "3",
+            name: "San Diego Patch 3",
+            url: "",
+            hi: "",
+            date: "2022-05-12",
+            hotFixes: []
+        },{
+            number: "4",
+            name: "San Diego Patch 4",
+            url: "",
+            hi: "",
+            date: "2022-06-10",
+            hotFixes: []
+        }]
+    },
+    {
+        name: "Tokyo",
+        url: "https://servicenow.com#thisIsAGuess",
+        date: "2022-07-15",
+        endDate: null,
+        patches: []
     }
+
 ];
 //sort z-a date
 versionsArr.sort((a, b) => {
@@ -2911,7 +3084,7 @@ versionsArr = versionsArr.map((family) => {
                 patch.url = archiveURL + patch.url;
             }
         }
-        patch.date = (()=>{
+        patch.date = (() => {
             var dateObj = new Date(patch.date);
             console.log(patch, dateObj);
             return dateObj.toISOString()
