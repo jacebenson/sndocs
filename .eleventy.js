@@ -45,6 +45,14 @@ module.exports = function (eleventyConfig) {
         returnJSON = returnJSON.replace(/&quot;/g,'"')
         return returnJSON
     })
+
+    // Add read-only WebMCP tools to every generated page.
+    // Browsers without the early-preview API ignore the script.
+    eleventyConfig.addTransform("webmcp-tools", function (content) {
+        var outputPath = this.outputPath || (this.page && this.page.outputPath) || "";
+        if (!outputPath.endsWith(".html") || content.indexOf("</body>") === -1) return content;
+        return content.replace("</body>", '  <script src="/assets/js/webmcp.js" defer></script>\n</body>');
+    });
     return {
         addPassthroughCopy: true,
         markdownTemplateEngine: "njk",
